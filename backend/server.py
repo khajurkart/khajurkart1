@@ -343,6 +343,10 @@ async def get_categories():
     categories = await db.categories.find({}, {"_id": 0}).to_list(100)
     return categories
 
+@api_router.post("/admin/categories")
+async def create_category(category: Category, admin: dict = Depends(get_admin_user)):
+    await db.categories.insert_one(category.dict())
+    return category
 # ============ PRODUCT ROUTES ============
 
 @api_router.get("/products", response_model=List[Product])
