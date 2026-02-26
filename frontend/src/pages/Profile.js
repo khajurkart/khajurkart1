@@ -7,6 +7,8 @@ import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+console.log("Backend URL:", BACKEND_URL);
+
 
 const Profile = () => {
   const { user, token } = useAuth();
