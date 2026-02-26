@@ -32,7 +32,6 @@ razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.enviro
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
-product_router = APIRouter()
 @app.get("/")
 async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
@@ -741,7 +740,6 @@ async def update_return_status(return_id: str, status: str, admin_notes: Optiona
 
 # Include router
 app.include_router(api_router)
-app.include_router(product_router)
 
 app.add_middleware(
     CORSMiddleware,
