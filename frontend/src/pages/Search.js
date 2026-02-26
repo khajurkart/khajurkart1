@@ -18,6 +18,7 @@ const Search = () => {
   useEffect(() => {
     if (query) {
       searchProducts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     } else {
       setProducts([]);
       setLoading(false);
