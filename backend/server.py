@@ -19,7 +19,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "KhajurKart Backend is Running 🚀"}
+    return {"message": "KhajurKart Backend Running 🚀"}
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
