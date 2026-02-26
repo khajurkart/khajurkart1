@@ -13,6 +13,14 @@ import jwt
 import bcrypt
 import razorpay
 
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "KhajurKart Backend is Running 🚀"}
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
