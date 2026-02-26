@@ -32,6 +32,7 @@ razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.enviro
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
+product_router = APIRouter()
 @app.get("/")
 async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
