@@ -746,7 +746,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_origins=[
         "http://localhost:3000",
-        "https://khajur-returns.preview.emergentagent.com",
+        "https://fanciful-florentine-8c3546.netlify.app",
         "https://khajurkart1.onrender.com"
     ],
     allow_methods=["*"],
