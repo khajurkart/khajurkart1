@@ -21,6 +21,12 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   
 
+const logout = useCallback(() => {
+  localStorage.removeItem('token');
+  setToken(null);
+  setUser(null);
+}, []);
+
 const fetchUser = useCallback(async () => {
   try {
     const response = await axios.get(`${API}/auth/me`, {
@@ -33,7 +39,7 @@ const fetchUser = useCallback(async () => {
   } finally {
     setLoading(false);
   }
-}, [token]);
+}, [token, logout]);
 
   useEffect(() => {
     if (token) {
