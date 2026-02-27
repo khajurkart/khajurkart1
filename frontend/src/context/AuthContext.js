@@ -21,12 +21,12 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
+  if (token) {
+    fetchUser();
+  } else {
+    setLoading(false);
+  }
+}, [token, fetchUser]);;
 
 const fetchUser = useCallback(async () => {
   try {
