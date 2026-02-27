@@ -750,7 +750,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_origins=[
         "http://localhost:3000",
-        "https://khajurkart1.vercel.app/",
+        "https://khajurkart1-ho0847ugh-khajurkart.vercel.app",
+       # "https://khajurkart1.vercel.app",
         "https://khajurkart1.onrender.com"
     ],
     allow_methods=["*"],
