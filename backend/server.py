@@ -752,6 +752,7 @@ app.add_middleware(
         "http://localhost:3000",
         "https://khajurkart1-ho0847ugh-khajurkart.vercel.app",
         "https://khajurkart1.vercel.app",
+        "https://khajurkart.com",
         "https://khajurkart1.onrender.com"
     ],
     allow_methods=["*"],
