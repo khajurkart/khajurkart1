@@ -68,11 +68,11 @@ const fetchUser = useCallback(async () => {
     return userData;
   };
 
- # const logout = () => {
-  #  localStorage.removeItem('token');
-  #  setToken(null);
-   # setUser(null);
- # };
+ //const logout = () => {
+//   localStorage.removeItem('token');
+  // setToken(null);
+    //setUser(null);
+ // };
 
   return (
     <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
