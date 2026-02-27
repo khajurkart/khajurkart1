@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+console.log("Backend URL:", BACKEND_URL);
 const API = `${BACKEND_URL}/api`;
 
 const AuthContext = createContext();
