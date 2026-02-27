@@ -13,10 +13,6 @@ console.log("Backend URL:", BACKEND_URL);
 const AdminDashboard = () => {
   const { user, token } = useAuth();
   const { user } = useAuth();
-  if (!user || user.role !== "admin") 
-  {
-    return <Navigate to="/" />;
-  }
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalProducts: 0,
