@@ -23,12 +23,6 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const { user, token } = useAuth();
 
-  useEffect(() => {
-    if (user && token) {
-      fetchCart();
-    }
-  }, [user, token, fetchCart]);
-
 const fetchCart = useCallback(async () => {
   try {
     setLoading(true);
@@ -41,7 +35,13 @@ const fetchCart = useCallback(async () => {
   } finally {
     setLoading(false);
   }
-}, [token]);
+}, [token]); 
+  
+useEffect(() => {
+  if (user && token) {
+    fetchCart();
+  } 
+}, [user, token, fetchCart]);
 
   const addToCart = async (productId, quantity = 1) => {
     if (!user) {
