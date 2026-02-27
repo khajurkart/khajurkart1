@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
@@ -27,21 +27,21 @@ export const CartProvider = ({ children }) => {
     if (user && token) {
       fetchCart();
     }
-  }, [user, token]);
+  }, [user, token, fatchCart]);
 
-  const fetchCart = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API}/cart`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setCart(response.data);
-    } catch (error) {
-      console.error('Failed to fetch cart', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchCart = useCallback(async () => {
+  try {
+    setLoading(true);
+    const response = await axios.get(`${API}/cart`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setCart(response.data);
+  } catch (error) {
+    console.error('Failed to fetch cart', error);
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
 
   const addToCart = async (productId, quantity = 1) => {
     if (!user) {
