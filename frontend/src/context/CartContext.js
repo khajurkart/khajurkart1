@@ -27,7 +27,7 @@ export const CartProvider = ({ children }) => {
     if (user && token) {
       fetchCart();
     }
-  }, [user, token, fatchCart]);
+  }, [user, token, fetchCart]);
 
 const fetchCart = useCallback(async () => {
   try {
