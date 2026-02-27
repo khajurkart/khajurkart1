@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -28,19 +28,19 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get(`${API}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUser(response.data);
-    } catch (error) {
-      console.error('Failed to fetch user', error);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchUser = useCallback(async () => {
+  try {
+    const response = await axios.get(`${API}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setUser(response.data);
+  } catch (error) {
+    console.error('Failed to fetch user', error);
+    logout();
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password });
