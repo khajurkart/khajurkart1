@@ -11,6 +11,7 @@ import FloatingButtons from './components/FloatingButtons';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import OrderDetails from './pages/OrderDetails';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import About from './pages/About';
@@ -40,6 +41,8 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/order/:id" element={<OrderDetails />} />
+                <Route path="/order/:id" element={<OrderDetails />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/about" element={<About />} />
