@@ -45,14 +45,15 @@ const fetchUser = useCallback(async () => {
   }
 }, [token, logout]);
 
-  useEffect(() => {
-    if (token) {
-      fetchUser();
-    } 
-    else {
-      setLoading(false);
-    }
-  }, [token, fetchUser]);;
+  
+useEffect(() => {
+  if (token) {
+    fetchUser();
+  } 
+  else {
+    setLoading(false);
+  }
+}, [token, fetchUser]);;
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password });
