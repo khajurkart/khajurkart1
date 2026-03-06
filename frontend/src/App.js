@@ -28,6 +28,7 @@ import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
 import AdminReturns from './pages/AdminReturns';
 import Returns from './pages/Returns';
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
             </main>
             <Footer />
             <FloatingButtons />
+            <ScrollToTop />
             <Toaster position="top-right" richColors />
           </div>
         </BrowserRouter>
