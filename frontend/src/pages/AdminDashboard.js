@@ -12,7 +12,6 @@ console.log("Backend URL:", BACKEND_URL);
 
 const AdminDashboard = () => {
   const { user, token } = useAuth();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -23,7 +22,7 @@ const AdminDashboard = () => {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     checkAdmin();
   }, []);
