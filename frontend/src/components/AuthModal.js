@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { X } from 'lucide-react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
@@ -126,7 +125,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                 <span
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary">
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
                 </span>
               </div>
             </div>
