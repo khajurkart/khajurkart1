@@ -11,7 +11,7 @@ const AdminLogin = () => {
     e.preventDefault();
 
     // Example admin login
-    if (email === "admin@khajurkart.com" && password === "admin123") {
+    if (email === "admin@khajurkart.com" && password === "ZAAIMPEX") {
       localStorage.setItem("admin", "true");
       navigate("/admin/dashboard");
     } else {
