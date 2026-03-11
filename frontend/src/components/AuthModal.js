@@ -129,7 +129,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </span>
               </div>
-            )}
+            </div>
+          )}
 
             {!isLogin && !isForgotPassword && (
               <div>
