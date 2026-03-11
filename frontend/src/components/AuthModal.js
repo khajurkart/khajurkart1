@@ -142,23 +142,25 @@ const AuthModal = ({ isOpen, onClose }) => {
                 </span>
                     {formData.password && (
                       <p className={`text-sm mt-1 ${
-                      getPasswordStrength(formData.password) === "Strong"
-                      ? "text-green-600"
-                      : getPasswordStrength(formData.password) === "Medium"
-                      ? "text-yellow-600"
-                      : "text-red-600"
-                    }`}>
+                        getPasswordStrength(formData.password) === "Strong"
+                        ? "text-green-600"
+                        : getPasswordStrength(formData.password) === "Medium"
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                      }`}
+                    >
                       Password Strength: {getPasswordStrength(formData.password)}
                     </p>
+                  )}
               </div>
             </div>
           )}
 
             {!isLogin && !isForgotPassword && (
               <div>
-                <label className="block text-sm font-medium text-khajur-primary mb-2">Phone (Optional)</label>
-                Confirm Password *
-                  </label>
+                <label className="block text-sm font-medium text-khajur-primary mb-2"> //Phone (Optional)</label>
+                  Confirm Password *
+                </label>
             <input
                   type="password"
                     required
@@ -173,7 +175,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                     <p className="text-red-500 text-sm mt-1">
                     Passwords do not match
                     </p>
-                )}
+                  )}
               </div>
             )}
 
