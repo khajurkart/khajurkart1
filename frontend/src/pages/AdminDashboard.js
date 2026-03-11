@@ -30,20 +30,22 @@ const AdminDashboard = () => {
     checkAdmin();
   }, []);
 
-  const checkAdmin = async () => {
-    try {
-      await axios.get(`${API}/admin/check`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setIsAdmin(true);
-      fetchStats();
-    } catch (error) {
-      toast.error('Admin access required');
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
+ const checkAdmin = async () => {
+  try {
+    const res = await axios.get(`${API}/admin/check`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    console.log("Admin check success:", res.data);
+    setIsAdmin(true);
+    fetchStats();
+  } catch (error) {
+    console.log("Admin check failed:", error);
+    toast.error('Admin access required');
+    navigate('/');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchStats = async () => {
     try {
