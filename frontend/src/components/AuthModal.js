@@ -56,7 +56,7 @@ const AuthModal = ({ isOpen, onClose }) => {
         await register(formData.name, formData.email, formData.password, formData.phone);
         toast.success('Registration successful');
         onClose();
-        setFormData({ name: '', email: '', password: '', phone: '' });
+        setFormData({ name: '', email: '', password: '', confirmPassword: '', phone: '' });
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -158,7 +158,7 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             {!isLogin && !isForgotPassword && (
               <div>
-                <label className="block text-sm font-medium text-khajur-primary mb-2"> //Phone (Optional)</label>
+                <label className="block text-sm font-medium text-khajur-primary mb-2"> 
                   Confirm Password *
                 </label>
             <input
@@ -176,8 +176,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                     Passwords do not match
                     </p>
                   )}
-              </div>
-            )}
+                </div>
+              )}
 
             {isLogin && !isForgotPassword && (
               <div className="text-right">
