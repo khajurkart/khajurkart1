@@ -23,6 +23,7 @@ import Profile from './pages/Profile';
 import Addresses from './pages/Addresses';
 import TrackOrder from './pages/TrackOrder';
 import ResetPassword from './pages/ResetPassword';
+import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/addresses" element={<Addresses />} />
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/products" element={<AdminProducts />} />
                 <Route path="/admin/orders" element={<AdminOrders />} />
