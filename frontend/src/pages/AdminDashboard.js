@@ -13,6 +13,9 @@ console.log("Backend URL:", BACKEND_URL);
 const AdminDashboard = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
+  console.log("Token:", token);
+  console.log("User:", user);
+  console.log("API:", API);
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalOrders: 0,
@@ -75,7 +78,11 @@ const AdminDashboard = () => {
   }
 
   if (!isAdmin) {
-    return null;
+    return (
+      <div style={{padding:"100px",textAlign:"center"}}>
+        <h1>Admin Access Required</h1>
+      </div>
+    );
   }
 
   return (
