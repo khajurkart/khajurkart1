@@ -11,9 +11,11 @@ const AuthModal = ({ isOpen, onClose }) => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: ''
   });
   const [loading, setLoading] = useState(false);
+  
   const { login, register } = useAuth();
 
   if (!isOpen) return null;
@@ -46,6 +48,11 @@ const AuthModal = ({ isOpen, onClose }) => {
         onClose();
         setFormData({ name: '', email: '', password: '', phone: '' });
       } else {
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Passwords do not match");
+          setLoading(false);
+          return;
+        }
         await register(formData.name, formData.email, formData.password, formData.phone);
         toast.success('Registration successful');
         onClose();
@@ -63,6 +70,12 @@ const AuthModal = ({ isOpen, onClose }) => {
     setIsForgotPassword(false);
     setIsLogin(true);
   };
+
+  const getPasswordStrength = (password) => {
+  if (password.length < 6) return "Weak";
+  if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/)) return "Strong";
+  return "Medium";
+};
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="auth-modal">
@@ -127,6 +140,16 @@ const AuthModal = ({ isOpen, onClose }) => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary">
                   {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
                 </span>
+                    {formData.password && (
+                      <p className={`text-sm mt-1 ${
+                      getPasswordStrength(formData.password) === "Strong"
+                      ? "text-green-600"
+                      : getPasswordStrength(formData.password) === "Medium"
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                    }`}>
+                      Password Strength: {getPasswordStrength(formData.password)}
+                    </p>
               </div>
             </div>
           )}
@@ -134,13 +157,23 @@ const AuthModal = ({ isOpen, onClose }) => {
             {!isLogin && !isForgotPassword && (
               <div>
                 <label className="block text-sm font-medium text-khajur-primary mb-2">Phone (Optional)</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
-                  data-testid="register-phone-input"
+                Confirm Password *
+                  </label>
+            <input
+                  type="password"
+                    required
+                  value={formData.confirmPassword || ""}
+                  onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                  }
+                  className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
                 />
+                  {formData.confirmPassword &&
+                    formData.password !== formData.confirmPassword && (
+                    <p className="text-red-500 text-sm mt-1">
+                    Passwords do not match
+                    </p>
+                )}
               </div>
             )}
 
