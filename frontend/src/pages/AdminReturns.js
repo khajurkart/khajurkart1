@@ -131,7 +131,7 @@ const AdminReturns = () => {
         {/* Header */}
         <div className="flex items-center mb-8">
           <Link
-            to="/admin"
+            to="/admin/dashboard"
             className="mr-4 text-khajur-primary hover:text-khajur-gold transition-colors"
             data-testid="back-to-admin"
           >
