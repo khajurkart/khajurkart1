@@ -88,7 +88,7 @@ const AdminOrders = () => {
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="flex items-center mb-8">
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/dashboard')}
             className="mr-4 text-khajur-primary hover:text-khajur-gold"
             data-testid="back-to-dashboard"
           >
