@@ -9,10 +9,10 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    phone: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    phone: ''
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
   
@@ -56,7 +56,7 @@ const AuthModal = ({ isOpen, onClose }) => {
         await register(formData.name, formData.email, formData.password, formData.phone);
         toast.success('Registration successful');
         onClose();
-        setFormData({ name: '', email: '', password: '', confirmPassword: '', phone: '' });
+        setFormData({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -155,6 +155,23 @@ const AuthModal = ({ isOpen, onClose }) => {
               </div>
             </div>
           )}
+
+          {!isLogin && !isForgotPassword && (
+            <div>
+              <label className="block text-sm font-medium text-khajur-primary mb-2">
+                Phone Number *
+              </label>
+          <input
+                type="tel"
+                  required
+                value={formData.phone}
+                onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+                }
+                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
+              />
+          </div>
+        )}
 
             {!isLogin && !isForgotPassword && (
               <div>
