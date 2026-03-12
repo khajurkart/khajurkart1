@@ -111,6 +111,23 @@ const AuthModal = ({ isOpen, onClose }) => {
               </div>
             )}
 
+           {!isLogin && !isForgotPassword && (
+            <div>
+              <label className="block text-sm font-medium text-khajur-primary mb-2">
+                Phone Number *
+              </label>
+          <input
+                type="tel"
+                  required
+                value={formData.phone}
+                onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+                }
+                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
+              />
+          </div>
+        )}
+
             <div>
               <label className="block text-sm font-medium text-khajur-primary mb-2">Email Address *</label>
               <input
@@ -155,23 +172,6 @@ const AuthModal = ({ isOpen, onClose }) => {
               </div>
             </div>
           )}
-
-          {!isLogin && !isForgotPassword && (
-            <div>
-              <label className="block text-sm font-medium text-khajur-primary mb-2">
-                Phone Number *
-              </label>
-          <input
-                type="tel"
-                  required
-                value={formData.phone}
-                onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
-              />
-          </div>
-        )}
 
             {!isLogin && !isForgotPassword && (
               <div>
