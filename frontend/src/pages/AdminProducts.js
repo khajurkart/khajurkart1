@@ -161,7 +161,7 @@ const AdminProducts = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
             <button
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate('/admin/dashboard')}
               className="mr-4 text-khajur-primary hover:text-khajur-gold"
               data-testid="back-to-dashboard"
             >
