@@ -173,28 +173,39 @@ const AuthModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
-            {!isLogin && !isForgotPassword && (
-              <div>
-                <label className="block text-sm font-medium text-khajur-primary mb-2"> 
-                  Confirm Password *
-                </label>
-            <input
-                  type="password"
-                    required
-                  value={formData.confirmPassword || ""}
-                  onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                  }
-                  className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
-                />
-                  {formData.confirmPassword &&
-                    formData.password !== formData.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">
-                    Passwords do not match
-                    </p>
-                  )}
-                </div>
-              )}
+{!isLogin && !isForgotPassword && (
+  <div>
+    <label className="block text-sm font-medium text-khajur-primary mb-2">
+      Confirm Password *
+    </label>
+
+    <div className="relative">
+      <input
+        type={showPassword ? "text" : "password"}
+        required
+        value={formData.confirmPassword || ""}
+        onChange={(e) =>
+          setFormData({ ...formData, confirmPassword: e.target.value })
+        }
+        className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm"
+      />
+
+      <span
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
+      >
+        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+      </span>
+    </div>
+
+    {formData.confirmPassword &&
+      formData.password !== formData.confirmPassword && (
+        <p className="text-red-500 text-sm mt-1">
+          Passwords do not match
+        </p>
+      )}
+  </div>
+)}
 
             {isLogin && !isForgotPassword && (
               <div className="text-right">
