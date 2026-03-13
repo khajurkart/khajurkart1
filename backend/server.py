@@ -232,6 +232,7 @@ async def register(user_data: UserRegister):
     user_id = f"user_{datetime.now(timezone.utc).timestamp()}"
     hashed_pwd = hash_password(user_data.password)
     
+    role = "admin" if user_data.email in ADMIN_EMAILS else "user"
     user_doc = {
         "id": user_id,
         "name": user_data.name,
@@ -606,35 +607,40 @@ async def add_product(
     price: float,
     images: List[UploadFile] = File(...)
 ):
-    image_urls = []
+    try:
+        image_urls = []
 
-    for image in images:
-        file_location = f"./uploads/{image.filename}"
-        
-        with open(file_location, "wb") as f:
-            content = await image.read()
-            f.write(content)
+        for image in images:
+            file_location = os.path.join("uploads", image.filename)
 
-        image_urls.append(f"/uploads/{image.filename}")
+            with open(file_location, "wb") as f:
+                content = await image.read()
+                f.write(content)
 
-    product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
+            image_urls.append(f"/uploads/{image.filename}")
 
-    product = {
-        "id": product_id,
-        "name": name,
-        "description": description,
-        "category": category,
-        "weight": weight,
-        "stock": stock,
-        "price": price,
-        "images": image_urls,
-        "featured": False,
-        "delivery_charge": 0
-    }
+        product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
 
-    await db.products.insert_one(product)
+        product = {
+            "id": product_id,
+            "name": name,
+            "description": description,
+            "category": category,
+            "weight": weight,
+            "stock": stock,
+            "price": price,
+            "images": image_urls,
+            "featured": False,
+            "delivery_charge": 0
+        }
 
-    return {"message": "Product added", "product": product}
+        await db.products.insert_one(product)
+
+        return {"message": "Product added", "product": product}
+
+    except Exception as e:
+        print("UPLOAD ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin: dict = Depends(get_admin_user)):
