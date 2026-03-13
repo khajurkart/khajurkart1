@@ -109,7 +109,7 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = None
     category: Optional[str] = None
-    image: Optional[str] = None
+    image: Optional[List[str]] = None
     weight: Optional[str] = None
     stock: Optional[int] = None
     featured: Optional[bool] = None
