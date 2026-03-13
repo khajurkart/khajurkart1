@@ -14,7 +14,7 @@ import jwt
 import bcrypt
 import razorpay
 
-file_location = f"./uploads/{image.filename}"
+os.makedirs("uploads", exist_ok=True)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -609,8 +609,8 @@ async def add_product(
     image_urls = []
 
     for image in images:
-        file_location = f"uploads/{image.filename}"
-
+        file_location = f"./uploads/{image.filename}"
+        
         with open(file_location, "wb") as f:
             content = await image.read()
             f.write(content)
