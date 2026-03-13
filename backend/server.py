@@ -13,9 +13,6 @@ import logging
 import jwt
 import bcrypt
 import razorpay
-import os
-#os.makedirs("uploads", exist_ok=True)
-
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
