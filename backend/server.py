@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
@@ -29,6 +30,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 # Razorpay client
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app = FastAPI()
 origins = [
@@ -604,6 +607,33 @@ async def verify_razorpay_payment(payment_data: RazorpayVerify, current_user: di
 @api_router.get("/admin/check")
 async def check_admin(admin: dict = Depends(get_admin_user)):
     return {"is_admin": True, "email": admin["email"]}
+
+@api_router.post("/admin/add-product")
+async def add_product(
+    name: str,
+    price: float,
+    images: List[UploadFile] = File(...)
+):
+    image_urls = []
+
+    for image in images:
+        contents = await image.read()
+        file_path = f"uploads/{image.filename}"
+
+        with open(file_path, "wb") as f:
+            f.write(contents)
+
+        image_urls.append(file_path)
+
+    product = {
+        "name": name,
+        "price": price,
+        "images": image_urls
+    }
+
+    await db.products.insert_one(product)
+
+    return {"message": "Product added", "images": image_urls}
 
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin: dict = Depends(get_admin_user)):
