@@ -48,7 +48,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 api_router = APIRouter(prefix="/api")
-api_router = APIRouter(prefix="/api")
 @app.get("/")
 async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
@@ -111,7 +110,7 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = None
     category: Optional[str] = None
-    image: Optional[List[str]] = None
+    images: Optional[List[str]] = None
     weight: Optional[str] = None
     stock: Optional[int] = None
     featured: Optional[bool] = None
@@ -612,6 +611,10 @@ async def check_admin(admin: dict = Depends(get_admin_user)):
 @api_router.post("/admin/add-product")
 async def add_product(
     name: str,
+    description: str,
+    category: str,
+    weight: str,
+    stock: int,
     price: float,
     images: List[UploadFile] = File(...)
 ):
@@ -626,15 +629,24 @@ async def add_product(
 
         image_urls.append(f"/uploads/{image.filename}")
 
+    product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
+
     product = {
+        "id": product_id,
         "name": name,
+        "description": description,
+        "category": category,
+        "weight": weight,
+        "stock": stock,
         "price": price,
-        "images": image_urls
+        "images": image_urls,
+        "featured": False,
+        "delivery_charge": 0
     }
 
     await db.products.insert_one(product)
 
-    return {"message": "Product added", "images": image_urls}
+    return {"message": "Product added", "product": product}
 
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin: dict = Depends(get_admin_user)):
