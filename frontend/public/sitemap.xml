@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
@@ -8,7 +9,7 @@
 
 <url>
 <loc>https://khajurkart.com/products</loc>
-<priority>0.80</priority>
+<priority>0.90</priority>
 </url>
 
 <url>
@@ -19,6 +20,16 @@
 <url>
 <loc>https://khajurkart.com/contact</loc>
 <priority>0.70</priority>
+</url>
+
+<url>
+<loc>https://khajurkart.com/login</loc>
+<priority>0.50</priority>
+</url>
+
+<url>
+<loc>https://khajurkart.com/register</loc>
+<priority>0.50</priority>
 </url>
 
 </urlset>
