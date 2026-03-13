@@ -31,6 +31,19 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
 
 app = FastAPI()
+origins = [
+    "https://khajurkart.com",
+    "https://www.khajurkart.com",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+api_router = APIRouter(prefix="/api")
 api_router = APIRouter(prefix="/api")
 @app.get("/")
 async def root():
