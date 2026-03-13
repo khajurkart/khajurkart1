@@ -14,7 +14,7 @@ import jwt
 import bcrypt
 import razorpay
 
-os.makedirs("uploads", exist_ok=True)
+file_location = f"./uploads/{image.filename}"
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -35,18 +35,6 @@ razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.enviro
 app = FastAPI()
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-origins = [
-    "https://khajurkart.com",
-    "https://www.khajurkart.com",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 api_router = APIRouter(prefix="/api")
 @app.get("/")
 async def root():
