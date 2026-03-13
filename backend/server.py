@@ -98,7 +98,7 @@ class ProductCreate(BaseModel):
     description: str
     price: float
     category: str
-    image: str
+    images: List[str]
     weight: str
     stock: int
     featured: bool = False
