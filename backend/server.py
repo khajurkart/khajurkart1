@@ -13,6 +13,8 @@ import logging
 import jwt
 import bcrypt
 import razorpay
+import os
+#os.makedirs("uploads", exist_ok=True)
 
 
 ROOT_DIR = Path(__file__).parent
@@ -31,9 +33,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Razorpay client
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
 app = FastAPI()
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 origins = [
     "https://khajurkart.com",
     "https://www.khajurkart.com",
