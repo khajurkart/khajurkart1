@@ -14,6 +14,8 @@ import jwt
 import bcrypt
 import razorpay
 
+os.makedirs("uploads", exist_ok=True)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -31,7 +33,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
 
 app = FastAPI()
-os.makedirs("uploads", exist_ok=True)
+
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 origins = [
     "https://khajurkart.com",
@@ -616,13 +618,13 @@ async def add_product(
     image_urls = []
 
     for image in images:
-        contents = await image.read()
-        file_path = f"uploads/{image.filename}"
+        file_location = f"uploads/{image.filename}"
 
-        with open(file_path, "wb") as f:
-            f.write(contents)
+        with open(file_location, "wb") as f:
+            content = await image.read()
+            f.write(content)
 
-        image_urls.append(file_path)
+        image_urls.append(f"/uploads/{image.filename}")
 
     product = {
         "name": name,
