@@ -605,7 +605,8 @@ async def add_product(
     weight: str,
     stock: int,
     price: float,
-    images: List[UploadFile] = File(...)
+    images: List[UploadFile] = File(...),
+    admin: dict = Depends(get_admin_user)
 ):
     try:
         image_urls = []
