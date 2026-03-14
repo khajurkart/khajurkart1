@@ -85,14 +85,16 @@ class Category(BaseModel):
 
 class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
+
     id: str
+    slug: Optional[str] = None
     name: str
     description: str
     price: float
     category: str
-    images: List[str]
+    images: List[str] = []
     weight: str
-    stock: int
+    stock: int = 0
     featured: bool = False
     delivery_charge: float = 0.0
 
