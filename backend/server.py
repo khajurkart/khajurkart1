@@ -682,34 +682,53 @@ async def add_product(
 
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin: dict = Depends(get_admin_user)):
-    product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
     
+    product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
+
+    # Create slug from name
+    slug = product_data.name.lower().replace(" ", "-")
+
     product_doc = {
         "id": product_id,
+        "slug": slug,
         **product_data.model_dump()
     }
-    
+
     await db.products.insert_one(product_doc)
+
     return Product(**product_doc)
 
-@api_router.put("/admin/products/{product_id}", response_model=Product)
-async def update_product(product_id: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)):
-    # Get existing product
-    existing = await db.products.find_one({"id": product_id}, {"_id": 0})
-    if not existing:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    # Update only provided fields
-    update_data = {k: v for k, v in product_data.model_dump().items() if v is not None}
-    
-    if update_data:
-        await db.products.update_one(
-            {"id": product_id},
-            {"$set": update_data}
+@api_router.put("/admin/products/{identifier}")
+async def update_product(identifier: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)):
+
+    try:
+        existing = await db.products.find_one(
+            {
+                "$or": [
+                    {"id": identifier},
+                    {"slug": identifier}
+                ]
+            }
         )
-    
-    updated_product = await db.products.find_one({"id": product_id}, {"_id": 0})
-    return Product(**updated_product)
+
+        if not existing:
+            raise HTTPException(status_code=404, detail="Product not found")
+
+        update_data = {k: v for k, v in product_data.model_dump().items() if v is not None}
+
+        if update_data:
+            await db.products.update_one(
+                {"id": existing["id"]},
+                {"$set": update_data}
+            )
+
+        updated = await db.products.find_one({"id": existing["id"]}, {"_id": 0})
+
+        return updated
+
+    except Exception as e:
+        print("UPDATE PRODUCT ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.delete("/admin/products/{product_id}")
 async def delete_product(product_id: str, admin: dict = Depends(get_admin_user)):
