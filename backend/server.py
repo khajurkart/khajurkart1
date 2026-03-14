@@ -368,7 +368,7 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
     return category
 # ============ PRODUCT ROUTES ============
 
-@api_router.get("/products")
+@api_router.get("/products", response_model=List[Product])
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
     query = {}
     if category:
