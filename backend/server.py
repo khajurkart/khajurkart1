@@ -387,10 +387,18 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
         print("PRODUCT FETCH ERROR:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/products/{product_id}")
-async def get_product(product_id: str):
+@api_router.get("/products/{product_identifier}")
+async def get_product(product_identifier: str):
     try:
-        product = await db.products.find_one({"id": product_id}, {"_id": 0})
+        product = await db.products.find_one(
+            {
+                "$or": [
+                    {"id": product_identifier},
+                    {"slug": product_identifier}
+                ]
+            },
+            {"_id": 0}
+        )
 
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
