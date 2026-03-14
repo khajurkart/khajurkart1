@@ -368,16 +368,24 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
     return category
 # ============ PRODUCT ROUTES ============
 
-@api_router.get("/products", response_model=List[Product])
+@api_router.get("/products")
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
-    query = {}
-    if category:
-        query["category"] = category
-    if featured is not None:
-        query["featured"] = featured
-    
-    products = await db.products.find(query, {"_id": 0}).to_list(1000)
-    return products
+    try:
+        query = {}
+
+        if category:
+            query["category"] = category
+
+        if featured is not None:
+            query["featured"] = featured
+
+        products = await db.products.find(query, {"_id": 0}).to_list(1000)
+
+        return products
+
+    except Exception as e:
+        print("PRODUCT FETCH ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str):
