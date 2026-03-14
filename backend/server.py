@@ -732,6 +732,24 @@ async def update_product(identifier: str, product_data: ProductUpdate, admin: di
         print("UPDATE PRODUCT ERROR:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/admin/upload-images")
+async def upload_images(images: List[UploadFile] = File(...), admin: dict = Depends(get_admin_user)):
+
+    image_urls = []
+
+    os.makedirs("uploads", exist_ok=True)
+
+    for image in images:
+        file_location = f"uploads/{image.filename}"
+
+        with open(file_location, "wb") as buffer:
+            buffer.write(await image.read())
+
+        image_url = f"https://khajurkart1.onrender.com/uploads/{image.filename}"
+        image_urls.append(image_url)
+
+    return {"images": image_urls}
+
 @api_router.delete("/admin/products/{product_id}")
 async def delete_product(product_id: str, admin: dict = Depends(get_admin_user)):
     result = await db.products.delete_one({"id": product_id})
