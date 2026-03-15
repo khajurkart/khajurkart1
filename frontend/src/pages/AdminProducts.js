@@ -293,16 +293,14 @@ const [imageFiles, setImageFiles] = useState([]);
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                     <label className="block text-sm font-medium text-khajur-dark mb-2">
-                        Product Images
-                      </label>
-
-                    <input
-                       type="file"
-                         multiple
-                       accept="image/*"
-                       onChange={(e) => setImageFiles(e.target.files)}
-                       className="w-full border border-khajur-primary/20 p-2"
+                      <label className="block text-sm font-medium text-khajur-dark mb-2">Product Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                        data-testid="product-name-input"
                       />
                     </div>
 
@@ -389,14 +387,16 @@ const [imageFiles, setImageFiles] = useState([]);
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-khajur-dark mb-2">Image URL *</label>
+                    <label className="block text-sm font-medium text-khajur-dark mb-2">
+                      Product Images
+                    </label>
+
                     <input
-                      type="url"
-                      required
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
-                      data-testid="product-image-input"
+                     type="file"
+                     multiple
+                     accept="image/*"
+                     onChange={(e) => setImageFiles(e.target.files)}
+                     className="w-full border border-khajur-primary/20 p-2"
                     />
                   </div>
 
