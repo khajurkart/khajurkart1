@@ -59,7 +59,7 @@ const [imageFiles, setImageFiles] = useState([]);
       description: '',
       price: '',
       category: '',
-      image: '',
+      images: [],
       weight: '',
       stock: '',
       featured: false,
@@ -226,11 +226,11 @@ const [imageFiles, setImageFiles] = useState([]);
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-khajur-cream/50">
                   <td className="px-6 py-4">
-                    <img
-                     src={product.images?.[0]}
-                     alt={product.name}
-                     className="w-16 h-16 object-cover"
-                    />
+                  <img
+                   src={`${BACKEND_URL}${product.images?.[0]}`}
+                   alt={product.name}
+                   className="w-16 h-16 object-cover"
+                  />
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-khajur-primary">{product.name}</div>
@@ -387,10 +387,8 @@ const [imageFiles, setImageFiles] = useState([]);
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-khajur-dark mb-2">
-                      Product Images
-                    </label>
-
+                    <label className="block text-sm font-medium text-khajur-dark mb-2">Product Images</label>
+                        
                     <input
                      type="file"
                      multiple
@@ -398,6 +396,19 @@ const [imageFiles, setImageFiles] = useState([]);
                      onChange={(e) => setImageFiles(e.target.files)}
                      className="w-full border border-khajur-primary/20 p-2"
                     />
+                       {/* Image Preview */}
+                       {formData.images?.length > 0 && (
+                         <div className="flex gap-2 mt-3 flex-wrap">
+                           {formData.images.map((img, i) => (
+                             <img
+                              key={i}
+                              src={`${BACKEND_URL}${img}`}
+                              alt="preview"
+                              className="w-16 h-16 object-cover border"
+                            />
+                          ))}
+                        </div>
+                      )}
                   </div>
 
                   <div>
