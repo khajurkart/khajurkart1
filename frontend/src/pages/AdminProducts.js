@@ -406,7 +406,7 @@ const [imageFiles, setImageFiles] = useState([]);
                      type="file"
                      multiple
                      accept="image/*"
-                     onChange={handleImageChange)}
+                     onChange={handleImageChange}
                      className="w-full border border-khajur-primary/20 p-2"
                     />
                        {/* Image Preview */}
