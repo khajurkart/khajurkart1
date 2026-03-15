@@ -18,17 +18,19 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    image: '',
-    weight: '',
-    stock: '',
-    featured: false,
-    delivery_charge: ''
-  });
+const [formData, setFormData] = useState({
+ name: '',
+ description: '',
+ price: '',
+ category: '',
+ images: [],
+ weight: '',
+ stock: '',
+ featured: false,
+ delivery_charge: ''
+});
+
+const [imageFiles, setImageFiles] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -73,7 +75,7 @@ const AdminProducts = () => {
       description: product.description,
       price: product.price,
       category: product.category,
-      image: product.image,
+      images: product.images || [],
       weight: product.weight,
       stock: product.stock,
       featured: product.featured,
@@ -85,11 +87,35 @@ const AdminProducts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const productData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
-        delivery_charge: parseFloat(formData.delivery_charge || 0)
+      let imageUrls = formData.images || [];
+
+      if (imageFiles.length > 0) {
+       const formDataUpload = new FormData();
+
+       for (let i = 0; i < imageFiles.length; i++) {
+         formDataUpload.append("images", imageFiles[i]);
+        }
+
+        const uploadRes = await axios.post(
+          `${API}/admin/upload-images`,
+          formDataUpload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data"
+             }
+           }
+        );
+
+        imageUrls = uploadRes.data.images;
+       }
+
+       const productData = {
+       ...formData,
+       images: imageUrls,
+       price: parseFloat(formData.price),
+       stock: parseInt(formData.stock),
+       delivery_charge: parseFloat(formData.delivery_charge || 0)
       };
 
       if (editingProduct) {
@@ -200,7 +226,11 @@ const AdminProducts = () => {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-khajur-cream/50">
                   <td className="px-6 py-4">
-                    <img src={product.image} alt={product.name} className="w-16 h-16 object-cover" />
+                    <img
+                     src={product.images?.[0]}
+                     alt={product.name}
+                     className="w-16 h-16 object-cover"
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-khajur-primary">{product.name}</div>
@@ -263,14 +293,16 @@ const AdminProducts = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-khajur-dark mb-2">Product Name *</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
-                        data-testid="product-name-input"
+                     <label className="block text-sm font-medium text-khajur-dark mb-2">
+                        Product Images
+                      </label>
+
+                    <input
+                       type="file"
+                         multiple
+                       accept="image/*"
+                       onChange={(e) => setImageFiles(e.target.files)}
+                       className="w-full border border-khajur-primary/20 p-2"
                       />
                     </div>
 
