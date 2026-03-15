@@ -91,7 +91,7 @@ const ProductDetail = () => {
               {product.images?.map((img, i) => (
                 <img
                   key={i}
-                  src={`${BACKEND_URL}${img}`}
+                  src={img}
                   onClick={() => setSelectedImage(img)}
                   className="w-16 h-16 border cursor-pointer object-cover"
                 />
@@ -101,7 +101,7 @@ const ProductDetail = () => {
               {/* Main Image */}
               <div className="flex-1">
                 <img
-                  src={`${BACKEND_URL}${selectedImage}`}
+                  src={selectedImage}
                   alt={product.name}
                   className="w-full object-contain"
                 />
