@@ -143,17 +143,12 @@ const [imageFiles, setImageFiles] = useState([]);
     }
   };
 
- const handleImageChange = (e) => {
+const handleImageChange = (e) => {
   const files = Array.from(e.target.files);
 
   setImageFiles(files);
 
-  const previews = files.map(file => URL.createObjectURL(file));
-  setPreviewImages(previews);
-};
-
-  // preview
-  const previews = files.map(file => URL.createObjectURL(file));
+  const previews = files.map((file) => URL.createObjectURL(file));
   setPreviewImages(previews);
 };
 
