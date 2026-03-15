@@ -25,6 +25,8 @@ const ProductDetail = () => {
   useEffect(() => {
   if (product?.images?.length > 0) {
     setSelectedImage(product.images[0]);
+  } else if (product?.image) {
+    setSelectedImage(product.image);
   }
 }, [product]);
   
@@ -88,10 +90,10 @@ const ProductDetail = () => {
 
             {/* Thumbnails */}
             <div className="flex flex-col gap-2">
-              {product.images?.map((img, i) => (
+              {product.images && product.images.length > 0 && product.images.map((img, i) => (
                 <img
                   key={i}
-                  src={img}
+                  src={img?.startsWith("http") ? img : `${BACKEND_URL}${img}`}
                   onClick={() => setSelectedImage(img)}
                   className="w-16 h-16 border cursor-pointer object-cover"
                 />
@@ -101,7 +103,11 @@ const ProductDetail = () => {
               {/* Main Image */}
               <div className="flex-1">
                 <img
-                  src={selectedImage}
+                    src={
+                      selectedImage?.startsWith("http")
+                        ? selectedImage
+                        : `${BACKEND_URL}${selectedImage}`
+                    }
                   alt={product.name}
                   className="w-full object-contain"
                 />
