@@ -13,6 +13,7 @@ import logging
 import jwt
 import bcrypt
 import razorpay
+import shutil
 
 os.makedirs("uploads", exist_ok=True)
 
@@ -651,13 +652,12 @@ async def add_product(
         image_urls = []
 
         for image in images:
-            file_location = os.path.join("uploads", image.filename)
+            file_location = f"uploads/{image.filename}"
 
-            with open(file_location, "wb") as f:
-                content = await image.read()
-                f.write(content)
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
 
-            image_urls.append(f"/uploads/{image.filename}")
+            image_urls.append(f"https://khajurkart1.onrender.com/uploads/{image.filename}")
 
         product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
 
@@ -716,7 +716,7 @@ async def update_product(identifier: str, product_data: ProductUpdate, admin: di
         if not existing:
             raise HTTPException(status_code=404, detail="Product not found")
 
-        update_data = {k: v for k, v in product_data.model_dump().items() if v is not None}
+        update_data = {k: v for k, v in product_data.model_dump(exclude_none=True).items()}
 
         if update_data:
             await db.products.update_one(
@@ -737,16 +737,13 @@ async def upload_images(images: List[UploadFile] = File(...), admin: dict = Depe
 
     image_urls = []
 
-    os.makedirs("uploads", exist_ok=True)
-
     for image in images:
         file_location = f"uploads/{image.filename}"
 
         with open(file_location, "wb") as buffer:
-            buffer.write(await image.read())
+            shutil.copyfileobj(image.file, buffer)
 
-        image_url = f"https://khajurkart1.onrender.com/uploads/{image.filename}"
-        image_urls.append(image_url)
+        image_urls.append(f"https://khajurkart1.onrender.com/uploads/{image.filename}")
 
     return {"images": image_urls}
 
