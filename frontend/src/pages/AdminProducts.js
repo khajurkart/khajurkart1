@@ -142,6 +142,19 @@ const [imageFiles, setImageFiles] = useState([]);
     }
   };
 
+  const handleImageChange = (e) => {
+  const files = Array.from(e.target.files);
+
+  setFormData({
+    ...formData,
+    images: files
+  });
+
+  // preview
+  const previews = files.map(file => URL.createObjectURL(file));
+  setPreviewImages(previews);
+};
+
   const handleDelete = async (productId) => {
     if (!window.confirm('Are you sure you want to delete this product?')) {
       return;
@@ -393,7 +406,7 @@ const [imageFiles, setImageFiles] = useState([]);
                      type="file"
                      multiple
                      accept="image/*"
-                     onChange={(e) => setImageFiles(e.target.files)}
+                     onChange={handleImageChange)}
                      className="w-full border border-khajur-primary/20 p-2"
                     />
                        {/* Image Preview */}
@@ -409,6 +422,17 @@ const [imageFiles, setImageFiles] = useState([]);
                           ))}
                         </div>
                       )}
+                        {previewImages?.length > 0 && (
+                          <div className="flex gap-2 mt-3 flex-wrap">
+                            {previewImages.map((img, i) => (
+                              <img
+                                key={i}
+                                src={img}
+                                className="w-20 h-20 object-cover border"
+                              />
+                            ))}
+                          </div>
+                        )}
                   </div>
 
                   <div>
