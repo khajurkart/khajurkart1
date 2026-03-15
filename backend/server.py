@@ -651,7 +651,8 @@ async def add_product(
         image_urls = []
 
         for image in images:
-            file_location = f"uploads/{image.filename}"
+            filename = image.filename.replace("..", "").replace(" ", "_")
+            file_location = f"./uploads/{filename}"
 
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
@@ -711,7 +712,8 @@ async def update_product(
         os.makedirs("uploads", exist_ok=True)
 
         for image in images:
-            file_location = f"./uploads/{image.filename}"
+            filename = image.filename.replace("..", "").replace(" ", "_")
+            file_location = f"./uploads/{filename}"
 
             with open(file_location, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
@@ -731,7 +733,8 @@ async def upload_images(images: List[UploadFile] = File(...), admin: dict = Depe
     image_urls = []
 
     for image in images:
-        file_location = f"uploads/{image.filename}"
+        filename = image.filename.replace("..", "").replace(" ", "_")
+        file_location = f"./uploads/{filename}"
 
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
