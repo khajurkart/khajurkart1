@@ -8,12 +8,12 @@ from typing import List, Optional
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
+import shutil
 import os
 import logging
 import jwt
 import bcrypt
 import razorpay
-import shutil
 
 os.makedirs("uploads", exist_ok=True)
 
@@ -700,37 +700,31 @@ async def create_product(product_data: ProductCreate, admin: dict = Depends(get_
 
     return Product(**product_doc)
 
-@api_router.put("/admin/products/{identifier}")
-async def update_product(identifier: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)):
+@api_router.put("/admin/products/{product_id}")
+async def update_product(
+    product_id: str,
+    images: List[UploadFile] = File(None),
+):
+    
+    image_urls = []
 
-    try:
-        existing = await db.products.find_one(
-            {
-                "$or": [
-                    {"id": identifier},
-                    {"slug": identifier}
-                ]
-            }
+    if images:
+        os.makedirs("uploads", exist_ok=True)
+
+        for image in images:
+            file_location = f"./uploads/{image.filename}"
+
+            with open(file_location, "wb") as buffer:
+                shutil.copyfileobj(image.file, buffer)
+
+            image_urls.append(f"/uploads/{image.filename}")
+
+        await db.products.update_one(
+            {"id": product_id},
+            {"$set": {"images": image_urls}}
         )
 
-        if not existing:
-            raise HTTPException(status_code=404, detail="Product not found")
-
-        update_data = {k: v for k, v in product_data.model_dump(exclude_none=True).items()}
-
-        if update_data:
-            await db.products.update_one(
-                {"id": existing["id"]},
-                {"$set": update_data}
-            )
-
-        updated = await db.products.find_one({"id": existing["id"]}, {"_id": 0})
-
-        return updated
-
-    except Exception as e:
-        print("UPDATE PRODUCT ERROR:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"message": "Product updated"}
 
 @api_router.post("/admin/upload-images")
 async def upload_images(images: List[UploadFile] = File(...), admin: dict = Depends(get_admin_user)):
