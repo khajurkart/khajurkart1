@@ -35,8 +35,6 @@ razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.enviro
 
 app = FastAPI()
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
 origins = [
     "https://khajurkart.com",
     "https://www.khajurkart.com",
@@ -50,6 +48,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 api_router = APIRouter(prefix="/api")
 @app.get("/")
 async def root():
