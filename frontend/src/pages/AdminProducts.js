@@ -143,13 +143,14 @@ const [imageFiles, setImageFiles] = useState([]);
     }
   };
 
-  const handleImageChange = (e) => {
+ const handleImageChange = (e) => {
   const files = Array.from(e.target.files);
 
-  setFormData({
-    ...formData,
-    images: files
-  });
+  setImageFiles(files);
+
+  const previews = files.map(file => URL.createObjectURL(file));
+  setPreviewImages(previews);
+};
 
   // preview
   const previews = files.map(file => URL.createObjectURL(file));
@@ -241,10 +242,14 @@ const [imageFiles, setImageFiles] = useState([]);
                 <tr key={product.id} className="hover:bg-khajur-cream/50">
                   <td className="px-6 py-4">
                   <img
-                   src={`${BACKEND_URL}${product.images?.[0]}`}
-                   alt={product.name}
-                   className="w-16 h-16 object-cover"
-                  />
+                   src={
+                      product.images?.[0]?.startsWith("http")
+                       ? product.images[0]
+                       : `${BACKEND_URL}${product.images?.[0]}`
+                     }
+                     alt={product.name}
+                     className="w-16 h-16 object-cover"
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-khajur-primary">{product.name}</div>
@@ -411,18 +416,6 @@ const [imageFiles, setImageFiles] = useState([]);
                      className="w-full border border-khajur-primary/20 p-2"
                     />
                        {/* Image Preview */}
-                       {formData.images?.length > 0 && (
-                         <div className="flex gap-2 mt-3 flex-wrap">
-                           {formData.images.map((img, i) => (
-                             <img
-                              key={i}
-                              src={`${BACKEND_URL}${img}`}
-                              alt="preview"
-                              className="w-16 h-16 object-cover border"
-                            />
-                          ))}
-                        </div>
-                      )}
                         {previewImages?.length > 0 && (
                           <div className="flex gap-2 mt-3 flex-wrap">
                             {previewImages.map((img, i) => (
