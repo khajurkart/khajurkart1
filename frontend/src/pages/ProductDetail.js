@@ -15,13 +15,19 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
     fetchProduct();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  useEffect(() => {
+  if (product?.images?.length > 0) {
+    setSelectedImage(product.images[0]);
+  }
+}, [product]);
+  
   const fetchProduct = async () => {
     try {
       const response = await axios.get(`${API}/products/${id}`);
@@ -76,15 +82,33 @@ const ProductDetail = () => {
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Product Image */}
+         {/* Product Images */}
           <div className="bg-white p-8">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-auto object-contain"
-              data-testid="product-detail-image"
-            />
-          </div>
+            <div className="flex gap-4">
+
+            {/* Thumbnails */}
+            <div className="flex flex-col gap-2">
+              {product.images?.map((img, i) => (
+                <img
+                  key={i}
+                  src={`${BACKEND_URL}${img}`}
+                  onClick={() => setSelectedImage(img)}
+                  className="w-16 h-16 border cursor-pointer object-cover"
+                />
+              ))}
+            </div>
+
+              {/* Main Image */}
+              <div className="flex-1">
+                <img
+                  src={`${BACKEND_URL}${selectedImage}`}
+                  alt={product.name}
+                  className="w-full object-contain"
+                />
+              </div>
+
+           </div>
+         </div>
 
           {/* Product Info */}
           <div>
