@@ -95,16 +95,17 @@ const ProductDetail = () => {
             {/* Thumbnails */}
             <div className="flex flex-col gap-2">
                {product.images?.map((img, i) => {
-                  const imageUrl = img.startsWith("http") ? img : `${BACKEND_URL}${img}`;
-                  return (
+                 const imageUrl = img.startsWith("http") ? img : `${BACKEND_URL}${img}`;
+                 return (
                 <img
                   key={i}
                   src={imageUrl}
                   onClick={() => setSelectedImage(imageUrl)}
                   className="w-16 h-16 border cursor-pointer object-cover"
                 />
-              ))}
-            </div>
+              );
+             })}
+          </div>
 
               {/* Main Image */}
               <div className="flex-1">
