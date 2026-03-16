@@ -56,10 +56,13 @@ const AdminOrders = () => {
     }
   };
 
-  const deleteOrder = async (id) => {
+const deleteOrder = async (id) => {
+  if (!window.confirm("Delete this order?")) return;
+
   await axios.delete(`${API}/admin/orders/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
+
   fetchOrders();
 };
 
@@ -171,7 +174,7 @@ const AdminOrders = () => {
 
                     <button
                       onClick={() => deleteOrder(order.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      className="ml-3 text-red-600 hover:text-red-800 text-sm font-medium"
                     >
                       Delete
                     </button>
