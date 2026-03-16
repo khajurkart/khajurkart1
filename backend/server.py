@@ -681,7 +681,7 @@ async def track_order(tracking_id: str):
 
 @app.delete("/api/admin/orders/{order_id}")
 async def delete_order(order_id: str):
-    await db.orders.delete_one({"order_id": order_id})
+    await db.orders.delete_one({"id": order_id})
     return {"message": "Order deleted"}
 
 # ============ RETURN/EXCHANGE ROUTES ============
