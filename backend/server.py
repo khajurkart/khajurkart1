@@ -679,6 +679,11 @@ async def track_order(tracking_id: str):
         raise HTTPException(status_code=404, detail="Order not found with this tracking ID")
     return order
 
+@app.delete("/api/admin/orders/{order_id}")
+async def delete_order(order_id: str):
+    await db.orders.delete_one({"order_id": order_id})
+    return {"message": "Order deleted"}
+
 # ============ RETURN/EXCHANGE ROUTES ============
 
 @api_router.post("/returns")
