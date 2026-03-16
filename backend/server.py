@@ -1,6 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
@@ -8,14 +7,12 @@ from typing import List, Optional
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
-import shutil
 import os
 import logging
 import jwt
 import bcrypt
 import razorpay
 
-os.makedirs("uploads", exist_ok=True)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -48,7 +45,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 api_router = APIRouter(prefix="/api")
 @app.get("/")
 async def root():
@@ -85,16 +81,14 @@ class Category(BaseModel):
 
 class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
-
     id: str
-    slug: Optional[str] = None
     name: str
     description: str
     price: float
     category: str
-    images: List[str] = []
+    image: str
     weight: str
-    stock: int = 0
+    stock: int
     featured: bool = False
     delivery_charge: float = 0.0
 
@@ -103,7 +97,7 @@ class ProductCreate(BaseModel):
     description: str
     price: float
     category: str
-    images: List[str]
+    image: str
     weight: str
     stock: int
     featured: bool = False
@@ -114,7 +108,7 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = None
     category: Optional[str] = None
-    images: Optional[List[str]] = None
+    image: Optional[str] = None
     weight: Optional[str] = None
     stock: Optional[int] = None
     featured: Optional[bool] = None
@@ -231,7 +225,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise HTTPException(status_code=401, detail="Invalid token")
 
 async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict:
-    if current_user.get("role") != "admin":
+    if current_user.get("email") not in ADMIN_EMAILS:
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
 
@@ -248,7 +242,6 @@ async def register(user_data: UserRegister):
     user_id = f"user_{datetime.now(timezone.utc).timestamp()}"
     hashed_pwd = hash_password(user_data.password)
     
-    role = "admin" if user_data.email in ADMIN_EMAILS else "user"
     user_doc = {
         "id": user_id,
         "name": user_data.name,
@@ -370,46 +363,23 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
     return category
 # ============ PRODUCT ROUTES ============
 
-@api_router.get("/products")
+@api_router.get("/products", response_model=List[Product])
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
-    try:
-        query = {}
+    query = {}
+    if category:
+        query["category"] = category
+    if featured is not None:
+        query["featured"] = featured
+    
+    products = await db.products.find(query, {"_id": 0}).to_list(1000)
+    return products
 
-        if category:
-            query["category"] = category
-
-        if featured is not None:
-            query["featured"] = featured
-
-        products = await db.products.find(query, {"_id": 0}).to_list(1000)
-
-        return products
-
-    except Exception as e:
-        print("PRODUCT FETCH ERROR:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/products/{product_identifier}")
-async def get_product(product_identifier: str):
-    try:
-        product = await db.products.find_one(
-            {
-                "$or": [
-                    {"id": product_identifier},
-                    {"slug": product_identifier}
-                ]
-            },
-            {"_id": 0}
-        )
-
-        if not product:
-            raise HTTPException(status_code=404, detail="Product not found")
-
-        return product
-
-    except Exception as e:
-        print("PRODUCT DETAIL ERROR:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+@api_router.get("/products/{product_id}", response_model=Product)
+async def get_product(product_id: str):
+    product = await db.products.find_one({"id": product_id}, {"_id": 0})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
 
 @api_router.get("/search")
 async def search_products(q: str):
@@ -636,112 +606,36 @@ async def verify_razorpay_payment(payment_data: RazorpayVerify, current_user: di
 async def check_admin(admin: dict = Depends(get_admin_user)):
     return {"is_admin": True, "email": admin["email"]}
 
-@api_router.post("/admin/add-product")
-async def add_product(
-    name: str,
-    description: str,
-    category: str,
-    weight: str,
-    stock: int,
-    price: float,
-    images: List[UploadFile] = File(...),
-    admin: dict = Depends(get_admin_user)
-):
-    try:
-        image_urls = []
-
-        for image in images:
-            filename = image.filename.replace("..", "").replace(" ", "_")
-            file_location = f"./uploads/{filename}"
-
-        with open(file_location, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
-
-            image_urls.append(f"https://khajurkart1.onrender.com/uploads/{image.filename}")
-
-        product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
-
-        product = {
-            "id": product_id,
-            "name": name,
-            "description": description,
-            "category": category,
-            "weight": weight,
-            "stock": stock,
-            "price": price,
-            "images": image_urls,
-            "featured": False,
-            "delivery_charge": 0
-        }
-
-        await db.products.insert_one(product)
-
-        return {"message": "Product added", "product": product}
-
-    except Exception as e:
-        print("UPLOAD ERROR:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
-
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin: dict = Depends(get_admin_user)):
-    
     product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
-
-    # Create slug from name
-    slug = product_data.name.lower().replace(" ", "-")
-
+    
     product_doc = {
         "id": product_id,
-        "slug": slug,
         **product_data.model_dump()
     }
-
+    
     await db.products.insert_one(product_doc)
-
     return Product(**product_doc)
 
-@api_router.put("/admin/products/{product_id}")
-async def update_product(
-    product_id: str,
-    images: List[UploadFile] = File(None),
-):
+@api_router.put("/admin/products/{product_id}", response_model=Product)
+async def update_product(product_id: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)):
+    # Get existing product
+    existing = await db.products.find_one({"id": product_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Product not found")
     
-    image_urls = []
-
-    if images:
-        os.makedirs("uploads", exist_ok=True)
-
-        for image in images:
-            filename = image.filename.replace("..", "").replace(" ", "_")
-            file_location = f"./uploads/{filename}"
-
-            with open(file_location, "wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
-
-            image_urls.append(f"/uploads/{image.filename}")
-
+    # Update only provided fields
+    update_data = {k: v for k, v in product_data.model_dump().items() if v is not None}
+    
+    if update_data:
         await db.products.update_one(
             {"id": product_id},
-            {"$set": {"images": image_urls}}
+            {"$set": update_data}
         )
-
-    return {"message": "Product updated"}
-
-@api_router.post("/admin/upload-images")
-async def upload_images(images: List[UploadFile] = File(...), admin: dict = Depends(get_admin_user)):
-
-    image_urls = []
-
-    for image in images:
-        filename = image.filename.replace("..", "").replace(" ", "_")
-        file_location = f"./uploads/{filename}"
-
-        with open(file_location, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
-
-        image_urls.append(f"https://khajurkart1.onrender.com/uploads/{image.filename}")
-
-    return {"images": image_urls}
+    
+    updated_product = await db.products.find_one({"id": product_id}, {"_id": 0})
+    return Product(**updated_product)
 
 @api_router.delete("/admin/products/{product_id}")
 async def delete_product(product_id: str, admin: dict = Depends(get_admin_user)):
