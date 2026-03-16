@@ -18,20 +18,17 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [previewImages, setPreviewImages] = useState([]);
-const [formData, setFormData] = useState({
- name: '',
- description: '',
- price: '',
- category: '',
- images: [],
- weight: '',
- stock: '',
- featured: false,
- delivery_charge: ''
-});
-
-const [imageFiles, setImageFiles] = useState([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    image: '',
+    weight: '',
+    stock: '',
+    featured: false,
+    delivery_charge: ''
+  });
 
   useEffect(() => {
     fetchData();
@@ -60,7 +57,7 @@ const [imageFiles, setImageFiles] = useState([]);
       description: '',
       price: '',
       category: '',
-      images: [],
+      image: '',
       weight: '',
       stock: '',
       featured: false,
@@ -76,7 +73,7 @@ const [imageFiles, setImageFiles] = useState([]);
       description: product.description,
       price: product.price,
       category: product.category,
-      images: product.images || [],
+      image: product.image,
       weight: product.weight,
       stock: product.stock,
       featured: product.featured,
@@ -88,35 +85,11 @@ const [imageFiles, setImageFiles] = useState([]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let imageUrls = formData.images || [];
-
-      if (imageFiles.length > 0) {
-       const formDataUpload = new FormData();
-
-       for (let i = 0; i < imageFiles.length; i++) {
-         formDataUpload.append("images", imageFiles[i]);
-        }
-
-        const uploadRes = await axios.post(
-          `${API}/admin/upload-images`,
-          formDataUpload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data"
-             }
-           }
-        );
-
-        imageUrls = uploadRes.data.images;
-       }
-
-       const productData = {
-       ...formData,
-       images: imageUrls,
-       price: parseFloat(formData.price),
-       stock: parseInt(formData.stock),
-       delivery_charge: parseFloat(formData.delivery_charge || 0)
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
+        delivery_charge: parseFloat(formData.delivery_charge || 0)
       };
 
       if (editingProduct) {
@@ -142,15 +115,6 @@ const [imageFiles, setImageFiles] = useState([]);
       toast.error(error.response?.data?.detail || 'Failed to save product');
     }
   };
-
-const handleImageChange = (e) => {
-  const files = Array.from(e.target.files);
-
-  setImageFiles(files);
-
-  const previews = files.map((file) => URL.createObjectURL(file));
-  setPreviewImages(previews);
-};
 
   const handleDelete = async (productId) => {
     if (!window.confirm('Are you sure you want to delete this product?')) {
@@ -197,7 +161,7 @@ const handleImageChange = (e) => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
             <button
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={() => navigate('/admin')}
               className="mr-4 text-khajur-primary hover:text-khajur-gold"
               data-testid="back-to-dashboard"
             >
@@ -236,15 +200,7 @@ const handleImageChange = (e) => {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-khajur-cream/50">
                   <td className="px-6 py-4">
-                  <img
-                   src={
-                      product.images?.[0]?.startsWith("http")
-                       ? product.images[0]
-                       : `${BACKEND_URL}${product.images?.[0]}`
-                     }
-                     alt={product.name}
-                     className="w-16 h-16 object-cover"
-                    />
+                    <img src={product.image} alt={product.name} className="w-16 h-16 object-cover" />
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-khajur-primary">{product.name}</div>
@@ -401,27 +357,15 @@ const handleImageChange = (e) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-khajur-dark mb-2">Product Images</label>
-                        
+                    <label className="block text-sm font-medium text-khajur-dark mb-2">Image URL *</label>
                     <input
-                     type="file"
-                     multiple
-                     accept="image/*"
-                     onChange={handleImageChange}
-                     className="w-full border border-khajur-primary/20 p-2"
+                      type="url"
+                      required
+                      value={formData.image}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                      data-testid="product-image-input"
                     />
-                       {/* Image Preview */}
-                        {previewImages?.length > 0 && (
-                          <div className="flex gap-2 mt-3 flex-wrap">
-                            {previewImages.map((img, i) => (
-                              <img
-                                key={i}
-                                src={img}
-                                className="w-20 h-20 object-cover border"
-                              />
-                            ))}
-                          </div>
-                        )}
                   </div>
 
                   <div>
