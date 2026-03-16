@@ -56,6 +56,13 @@ const AdminOrders = () => {
     }
   };
 
+  const deleteOrder = async (id) => {
+  await axios.delete(`${API}/admin/orders/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  fetchOrders();
+};
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
@@ -160,6 +167,12 @@ const AdminOrders = () => {
                       data-testid={`view-order-${order.id}`}
                     >
                       View Details
+                    </button>
+                    <button
+                      onClick={() => deleteOrder(order.id)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
