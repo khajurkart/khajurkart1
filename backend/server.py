@@ -46,6 +46,14 @@ app.add_middleware(
 )
 
 api_router = APIRouter(prefix="/api")
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+    
+@app.head("/")
+async def root_head():
+    return {"status": "ok"}
+    
 @app.get("/")
 async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
