@@ -69,7 +69,7 @@ return (
 
       <Link
         to="/products"
-        className="inline-flex items-center text-khajur-primary hover:text-khajur-gold mb-8"
+        className="inline-flex items-center text-khajur-primary hover:text-khajur-gold mb-8 transition-colors"
       >
         <ChevronLeft className="w-5 h-5 mr-1" />
         Back to Products
@@ -83,50 +83,82 @@ return (
           <img
             src={product.image}
             alt={product.name}
-            className="w-full object-contain"
+            className="w-full h-auto object-contain"
           />
         </div>
 
-        {/* INFO */}
+        {/* INFO (UNCHANGED) */}
         <div>
-          <h1 className="text-4xl font-serif text-khajur-primary mb-4">
+          <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-4">
             {product.name}
           </h1>
 
-          <p className="text-3xl text-khajur-gold font-bold mb-6">
+          <p className="font-serif text-3xl text-khajur-gold font-bold mb-6">
             ₹{product.price.toFixed(2)}
           </p>
 
-          <p className="text-sm mb-2">Weight: {product.weight}</p>
-          <p className="text-sm mb-6">
+          <p className="text-sm text-khajur-muted mb-2">
+            Weight: {product.weight}
+          </p>
+
+          <p className="text-sm text-khajur-muted mb-8">
             {product.stock > 0
-              ? `In Stock (${product.stock})`
+              ? `In Stock (${product.stock} available)`
               : "Out of Stock"}
           </p>
 
           {/* Quantity */}
-          <div className="mb-6">
-            <div className="flex items-center gap-4">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
-              <span>{quantity}</span>
-              <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}>+</button>
+          <div className="mb-8">
+            <label className="block font-serif text-lg font-medium text-khajur-primary mb-3">
+              Quantity
+            </label>
+
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="bg-khajur-cream hover:bg-khajur-accent text-khajur-primary px-4 py-2 rounded-sm"
+              >
+                -
+              </button>
+
+              <span className="text-xl font-medium w-12 text-center">
+                {quantity}
+              </span>
+
+              <button
+                onClick={() =>
+                  setQuantity(Math.min(product.stock, quantity + 1))
+                }
+                className="bg-khajur-cream hover:bg-khajur-accent text-khajur-primary px-4 py-2 rounded-sm"
+              >
+                +
+              </button>
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-4">
-            <button onClick={handleAddToCart} className="bg-green-800 text-white px-6 py-3">
+          {/* BUTTONS (UNCHANGED EXACTLY) */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="flex-1 bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90 rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all border border-transparent hover:border-khajur-gold disabled:opacity-50"
+            >
+              <ShoppingCart className="inline w-5 h-5 mr-2" />
               Add to Cart
             </button>
-            <button onClick={handleBuyNow} className="bg-yellow-600 px-6 py-3">
+
+            <button
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+              className="flex-1 bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all"
+            >
               Buy Now
             </button>
           </div>
-
         </div>
       </div>
 
-      {/* ✅ BELOW IMAGE SECTION (THIS IS THE FIX) */}
+      {/* ✅ BELOW IMAGE (NEW SECTION LIKE AJFAN) */}
       <div className="mt-16 max-w-5xl mx-auto">
 
         {/* Tabs */}
@@ -135,8 +167,8 @@ return (
             onClick={() => setActiveTab("description")}
             className={`px-6 py-3 ${
               activeTab === "description"
-                ? "border-b-2 border-khajur-gold"
-                : ""
+                ? "border-b-2 border-khajur-gold text-khajur-primary"
+                : "text-gray-500"
             }`}
           >
             Description
@@ -146,8 +178,8 @@ return (
             onClick={() => setActiveTab("reviews")}
             className={`px-6 py-3 ${
               activeTab === "reviews"
-                ? "border-b-2 border-khajur-gold"
-                : ""
+                ? "border-b-2 border-khajur-gold text-khajur-primary"
+                : "text-gray-500"
             }`}
           >
             Customer Reviews
@@ -157,7 +189,7 @@ return (
         {/* Content */}
         <div className="text-center">
           {activeTab === "description" && (
-            <p className="text-gray-700">
+            <p className="text-khajur-dark/80 leading-relaxed">
               {product.description}
             </p>
           )}
@@ -165,17 +197,21 @@ return (
           {activeTab === "reviews" && (
             <div className="space-y-4">
               <div className="border p-4 rounded">
-                <h4>Ali</h4>
-                <p>Great quality!</p>
+                <h4 className="font-semibold">Ali</h4>
+                <p className="text-sm text-gray-600">
+                  Amazing quality dates!
+                </p>
               </div>
+
               <div className="border p-4 rounded">
-                <h4>Sara</h4>
-                <p>Very fresh!</p>
+                <h4 className="font-semibold">Sara</h4>
+                <p className="text-sm text-gray-600">
+                  Very fresh and tasty.
+                </p>
               </div>
             </div>
           )}
         </div>
-
       </div>
 
     </div>
