@@ -181,3 +181,6 @@ return (
     </div>
   </div>
 );
+};
+
+export default ProductDetail;
