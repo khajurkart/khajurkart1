@@ -17,9 +17,14 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("description");
   const { addToCart } = useCart();
+  const [reviews, setReviews] = useState([]);
+  const [name, setName] = useState("");
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     fetchProduct();
+    fetchReviews();
   }, [id]);
 
   const fetchProduct = async () => {
@@ -32,6 +37,36 @@ const ProductDetail = () => {
       setLoading(false);
     }
   };
+
+  const fetchReviews = async () => {
+  try {
+    const res = await axios.get(`${API}/reviews/${id}`);
+    setReviews(res.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+  const submitReview = async () => {
+  try {
+    await axios.post(`${API}/reviews`, {
+      id: Date.now().toString(),
+      product_id: id,
+      user_name: name,
+      rating: Number(rating),
+      comment: comment,
+      created_at: new Date().toISOString()
+    });
+
+    setName("");
+    setRating(5);
+    setComment("");
+
+    fetchReviews();
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const handleAddToCart = () => {
     addToCart(product.id, quantity);
@@ -196,19 +231,53 @@ return (
 
           {activeTab === "reviews" && (
             <div className="space-y-4">
-              <div className="border p-4 rounded">
-                <h4 className="font-semibold">Ali</h4>
-                <p className="text-sm text-gray-600">
-                  Amazing quality dates!
-                </p>
+
+             {/* Show Reviews */}
+             {reviews.length === 0 ? (
+                <p>No reviews yet</p>
+             ) : (
+                reviews.map((rev, i) => (
+                  <div key={i} className="border p-4 rounded">
+                    <h4 className="font-semibold">{rev.user_name}</h4>
+                    <p className="text-yellow-600">⭐ {rev.rating}/5</p>
+                    <p className="text-sm text-gray-600">{rev.comment}</p>
+                  </div>
+                ))
+              )}
+
+              {/* Add Review Form */}
+              <div className="mt-6">
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="border p-2 w-full mb-2"
+                />
+
+                <input
+                  type="number"
+                  placeholder="Rating (1-5)"
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                  className="border p-2 w-full mb-2"
+                />
+
+                <textarea
+                  placeholder="Write review..."
+                   value={comment}
+                   onChange={(e) => setComment(e.target.value)}
+                   className="border p-2 w-full mb-2"
+                 />
+
+                <button
+                  onClick={submitReview}
+                  className="bg-khajur-primary text-white px-6 py-2"
+                >
+                  Submit Review
+                </button>
               </div>
 
-              <div className="border p-4 rounded">
-                <h4 className="font-semibold">Sara</h4>
-                <p className="text-sm text-gray-600">
-                  Very fresh and tasty.
-                </p>
-              </div>
             </div>
           )}
         </div>
