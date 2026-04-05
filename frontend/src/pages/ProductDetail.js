@@ -99,57 +99,58 @@ const ProductDetail = () => {
               {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
             </p>
 
-            <div className="mb-8">
+            {/* Tabs Section BELOW */}
+            <div className="mt-16 max-w-4xl mx-auto">
 
-              {/* Tabs */}
-              <div className="flex border-b mb-4">
-                <button
-                  onClick={() => setActiveTab("description")}
-                  className={`px-6 py-3 ${
-                    activeTab === "description"
-                       ? "border-b-2 border-khajur-gold text-khajur-primary"
-                       : "text-gray-500"
+            {/* Tabs */}
+            <div className="flex border-b mb-6 justify-center">
+              <button
+                onClick={() => setActiveTab("description")}
+                className={`px-6 py-3 ${
+                  activeTab === "description"
+                    ? "border-b-2 border-khajur-gold text-khajur-primary"
+                    : "text-gray-500"
                   }`}
-                 >
-                    Description
-                 </button>
-                 <button
-                   onClick={() => setActiveTab("reviews")}
-                   className={`px-6 py-3 ${
-                     activeTab === "reviews"
-                       ? "border-b-2 border-khajur-gold text-khajur-primary"
-                       : "text-gray-500"
+                >
+                  Description
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className={`px-6 py-3 ${
+                    activeTab === "reviews"
+                      ? "border-b-2 border-khajur-gold text-khajur-primary"
+                      : "text-gray-500"
                   }`}
                 >
                   Customer Reviews
                 </button>
-              </div>
-
-              {/* Content */}
-              <div>
-                {activeTab === "description" && (
-                   <p className="font-sans text-base text-khajur-dark/80 leading-relaxed">
-                     {product.description}
-                   </p>
-                )}
-
-                {activeTab === "reviews" && (
-                  <div className="space-y-4">
-                    <div className="border p-4 rounded">
-                       <h4 className="font-semibold">Ali</h4>
-                       <p className="text-sm text-gray-600">Amazing quality dates!</p>
-                    </div>
-
-                    <div className="border p-4 rounded">
-                      <h4 className="font-semibold">Sara</h4>
-                      <p className="text-sm text-gray-600">Very fresh and tasty.</p>
-                    </div>
-                  </div>
-                )}
              </div>
-               
+
+            {/* Content */}
+            <div className="text-center">
+              {activeTab === "description" && (
+                 <p className="text-khajur-dark/80 leading-relaxed">
+                   {product.description}
+                 </p>
+              )}
+
+              {activeTab === "reviews" && (
+                <div className="space-y-4">
+                  <div className="border p-4 rounded">
+                    <h4 className="font-semibold">Ali</h4>
+                    <p className="text-sm text-gray-600">Amazing quality dates!</p>
+                 </div>
+
+                <div className="border p-4 rounded">
+                  <h4 className="font-semibold">Sara</h4>
+                  <p className="text-sm text-gray-600">Very fresh and tasty.</p>
+                </div>
+              </div>
+            )}
           </div>
 
+        </div>
 
             {/* Quantity Selector */}
             <div className="mb-8">
