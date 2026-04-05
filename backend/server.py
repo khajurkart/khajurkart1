@@ -199,6 +199,14 @@ class RazorpayVerify(BaseModel):
     razorpay_signature: str
     order_id: str
 
+class Review(BaseModel):
+    id: str
+    product_id: str
+    user_name: str
+    rating: int
+    comment: str
+    created_at: str
+
 # ============ AUTH HELPERS ============
 
 ADMIN_EMAILS = ["admin@khajurkart.com", "khajurkart@gmail.com"]  # Admin email list
@@ -406,6 +414,19 @@ async def search_products(q: str):
     ).to_list(50)
     
     return products
+
+# ============ REVIEW ROUTES ============
+
+@api_router.get("/reviews/{product_id}")
+async def get_reviews(product_id: str):
+    reviews = await db.reviews.find({"product_id": product_id}, {"_id": 0}).to_list(100)
+    return reviews
+
+
+@api_router.post("/reviews")
+async def add_review(review: Review):
+    await db.reviews.insert_one(review.dict())
+    return {"message": "Review added"}
 
 # ============ CART ROUTES ============
 
