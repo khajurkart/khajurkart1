@@ -64,143 +64,120 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen py-20" data-testid="product-detail-page">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <Link
-          to="/products"
-          className="inline-flex items-center text-khajur-primary hover:text-khajur-gold mb-8 transition-colors"
-          data-testid="back-to-products"
-        >
-          <ChevronLeft className="w-5 h-5 mr-1" />
-          Back to Products
-        </Link>
+  <div className="min-h-screen py-20" data-testid="product-detail-page">
+    <div className="max-w-7xl mx-auto px-6 md:px-12">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Product Image */}
-          <div className="bg-white p-8">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-auto object-contain"
-              data-testid="product-detail-image"
-            />
-          </div>
+      <Link
+        to="/products"
+        className="inline-flex items-center text-khajur-primary hover:text-khajur-gold mb-8"
+      >
+        <ChevronLeft className="w-5 h-5 mr-1" />
+        Back to Products
+      </Link>
 
-          {/* Product Info */}
-          <div>
-            <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-4" data-testid="product-detail-name">
-              {product.name}
-            </h1>
-            <p className="font-serif text-3xl text-khajur-gold font-bold mb-6" data-testid="product-detail-price">
-              ₹{product.price.toFixed(2)}
-            </p>
-            <p className="text-sm text-khajur-muted mb-2">Weight: {product.weight}</p>
-            <p className="text-sm text-khajur-muted mb-8">
-              {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
-            </p>
+      {/* TOP SECTION */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
-            {/* Tabs Section BELOW */}
-            <div className="mt-16 max-w-4xl mx-auto">
-
-            {/* Tabs */}
-            <div className="flex border-b mb-6 justify-center">
-              <button
-                onClick={() => setActiveTab("description")}
-                className={`px-6 py-3 ${
-                  activeTab === "description"
-                    ? "border-b-2 border-khajur-gold text-khajur-primary"
-                    : "text-gray-500"
-                  }`}
-                >
-                  Description
-                </button>
-
-                <button
-                  onClick={() => setActiveTab("reviews")}
-                  className={`px-6 py-3 ${
-                    activeTab === "reviews"
-                      ? "border-b-2 border-khajur-gold text-khajur-primary"
-                      : "text-gray-500"
-                  }`}
-                >
-                  Customer Reviews
-                </button>
-             </div>
-
-            {/* Content */}
-            <div className="text-center">
-              {activeTab === "description" && (
-                 <p className="text-khajur-dark/80 leading-relaxed">
-                   {product.description}
-                 </p>
-              )}
-
-              {activeTab === "reviews" && (
-                <div className="space-y-4">
-                  <div className="border p-4 rounded">
-                    <h4 className="font-semibold">Ali</h4>
-                    <p className="text-sm text-gray-600">Amazing quality dates!</p>
-                 </div>
-
-                <div className="border p-4 rounded">
-                  <h4 className="font-semibold">Sara</h4>
-                  <p className="text-sm text-gray-600">Very fresh and tasty.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
+        {/* IMAGE */}
+        <div className="bg-white p-8">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full object-contain"
+          />
         </div>
 
-            {/* Quantity Selector */}
-            <div className="mb-8">
-              <label className="block font-serif text-lg font-medium text-khajur-primary mb-3">
-                Quantity
-              </label>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="bg-khajur-cream hover:bg-khajur-accent text-khajur-primary px-4 py-2 rounded-sm transition-colors"
-                  data-testid="decrease-quantity"
-                >
-                  -
-                </button>
-                <span className="text-xl font-medium w-12 text-center" data-testid="product-quantity">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                  className="bg-khajur-cream hover:bg-khajur-accent text-khajur-primary px-4 py-2 rounded-sm transition-colors"
-                  data-testid="increase-quantity"
-                >
-                  +
-                </button>
-              </div>
-            </div>
+        {/* INFO */}
+        <div>
+          <h1 className="text-4xl font-serif text-khajur-primary mb-4">
+            {product.name}
+          </h1>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleAddToCart}
-                disabled={product.stock === 0}
-                className="flex-1 bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90 rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all border border-transparent hover:border-khajur-gold disabled:opacity-50 disabled:cursor-not-allowed"
-                data-testid="add-to-cart-detail"
-              >
-                <ShoppingCart className="inline w-5 h-5 mr-2" />
-                Add to Cart
-              </button>
-              <button
-                onClick={handleBuyNow}
-                disabled={product.stock === 0}
-                className="flex-1 bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                data-testid="buy-now-button"
-              >
-                Buy Now
-              </button>
+          <p className="text-3xl text-khajur-gold font-bold mb-6">
+            ₹{product.price.toFixed(2)}
+          </p>
+
+          <p className="text-sm mb-2">Weight: {product.weight}</p>
+          <p className="text-sm mb-6">
+            {product.stock > 0
+              ? `In Stock (${product.stock})`
+              : "Out of Stock"}
+          </p>
+
+          {/* Quantity */}
+          <div className="mb-6">
+            <div className="flex items-center gap-4">
+              <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
+              <span>{quantity}</span>
+              <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}>+</button>
             </div>
           </div>
+
+          {/* Buttons */}
+          <div className="flex gap-4">
+            <button onClick={handleAddToCart} className="bg-green-800 text-white px-6 py-3">
+              Add to Cart
+            </button>
+            <button onClick={handleBuyNow} className="bg-yellow-600 px-6 py-3">
+              Buy Now
+            </button>
+          </div>
+
         </div>
       </div>
-    </div>
-  );
-};
 
-export default ProductDetail;
+      {/* ✅ BELOW IMAGE SECTION (THIS IS THE FIX) */}
+      <div className="mt-16 max-w-5xl mx-auto">
+
+        {/* Tabs */}
+        <div className="flex justify-center border-b mb-6">
+          <button
+            onClick={() => setActiveTab("description")}
+            className={`px-6 py-3 ${
+              activeTab === "description"
+                ? "border-b-2 border-khajur-gold"
+                : ""
+            }`}
+          >
+            Description
+          </button>
+
+          <button
+            onClick={() => setActiveTab("reviews")}
+            className={`px-6 py-3 ${
+              activeTab === "reviews"
+                ? "border-b-2 border-khajur-gold"
+                : ""
+            }`}
+          >
+            Customer Reviews
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="text-center">
+          {activeTab === "description" && (
+            <p className="text-gray-700">
+              {product.description}
+            </p>
+          )}
+
+          {activeTab === "reviews" && (
+            <div className="space-y-4">
+              <div className="border p-4 rounded">
+                <h4>Ali</h4>
+                <p>Great quality!</p>
+              </div>
+              <div className="border p-4 rounded">
+                <h4>Sara</h4>
+                <p>Very fresh!</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+);
