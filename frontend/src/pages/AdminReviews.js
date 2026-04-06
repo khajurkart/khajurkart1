@@ -27,15 +27,6 @@ const fetchReviews = async () => {
   }
 };
 
-  const deleteReview = async (id) => {
-    try {
-      await axios.delete(`${API}/admin/reviews/${id}`);
-      fetchReviews();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const handleDelete = async (id) => {
   try {
     const token = localStorage.getItem("token");
@@ -58,20 +49,20 @@ const fetchReviews = async () => {
     <div className="p-10">
       <h1 className="text-2xl font-bold mb-6">Customer Reviews</h1>
 
-      {reviews.map((r) => (
-        <div key={r.id} className="border p-4 mb-4 rounded">
-          <p><strong>Product ID:</strong> {r.product_id}</p>
-          <p><strong>User:</strong> {r.user_name}</p>
-          <p><strong>Comment:</strong> {r.comment}</p>
+       {reviews.map((r) => (
+         <div key={r.id} className="border p-4 mb-4 rounded">
+           <p><strong>Product ID:</strong> {r.product_id}</p>
+           <p><strong>User:</strong> {r.user_name}</p>
+           <p><strong>Comment:</strong> {r.comment}</p>
 
-          <button
-            onClick={() => handleDelete(review.id)}
-            className="bg-red-500 text-white px-4 py-2"
-           >
-             Delete
-          </button>
-        </div>
-      ))}
+           <button
+             onClick={() => handleDelete(r.id)}
+             className="bg-khajur-primary hover:bg-khajur-primary/90 text-khajur-cream px-6 py-2 rounded-sm uppercase text-xs tracking-widest"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
     </div>
   );
 };
