@@ -36,6 +36,24 @@ const fetchReviews = async () => {
     }
   };
 
+  const handleDelete = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.delete(`${API}/admin/reviews/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // remove from UI
+    setReviews(reviews.filter(r => r.id !== id));
+
+  } catch (err) {
+    console.error("Delete error:", err.response?.data || err.message);
+  }
+};
+
   return (
     <div className="p-10">
       <h1 className="text-2xl font-bold mb-6">Customer Reviews</h1>
