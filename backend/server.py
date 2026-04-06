@@ -422,7 +422,6 @@ async def get_reviews(product_id: str):
     reviews = await db.reviews.find({"product_id": product_id}, {"_id": 0}).to_list(100)
     return reviews
 
-
 @api_router.post("/reviews")
 async def add_review(review: Review):
     await db.reviews.insert_one(review.dict())
@@ -712,6 +711,16 @@ async def track_order(tracking_id: str):
 async def delete_order(order_id: str):
     await db.orders.delete_one({"id": order_id})
     return {"message": "Order deleted"}
+    
+
+@api_router.delete("/admin/reviews/{review_id}")
+async def delete_review(review_id: str, admin: dict = Depends(get_admin_user)):
+    result = await db.reviews.delete_one({"id": review_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    return {"message": "Review deleted"}
 
 # ============ RETURN/EXCHANGE ROUTES ============
 
