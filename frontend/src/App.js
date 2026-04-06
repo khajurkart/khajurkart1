@@ -28,6 +28,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
 import AdminReturns from './pages/AdminReturns';
+import AdminReviews from "./pages/AdminReviews";
 import Returns from './pages/Returns';
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -60,6 +61,7 @@ function App() {
                 <Route path="/admin/products" element={<AdminProducts />} />
                 <Route path="/admin/orders" element={<AdminOrders />} />
                 <Route path="/admin/returns" element={<AdminReturns />} />
+                <Route path="/admin/reviews" element={<AdminReviews />} />
                 <Route path="/returns" element={<Returns />} />
               </Routes>
             </main>
