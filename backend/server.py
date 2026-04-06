@@ -711,7 +711,11 @@ async def track_order(tracking_id: str):
 async def delete_order(order_id: str):
     await db.orders.delete_one({"id": order_id})
     return {"message": "Order deleted"}
-    
+
+@api_router.get("/admin/reviews")
+async def get_all_reviews(admin: dict = Depends(get_admin_user)):
+    reviews = await db.reviews.find({}, {"_id": 0}).to_list(1000)
+    return reviews
 
 @api_router.delete("/admin/reviews/{review_id}")
 async def delete_review(review_id: str, admin: dict = Depends(get_admin_user)):
