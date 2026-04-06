@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 import { Filter } from 'lucide-react';
@@ -11,6 +13,8 @@ console.log("Backend URL:", BACKEND_URL);
 
 const Products = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
@@ -23,6 +27,12 @@ const Products = () => {
   useEffect(() => {
     fetchProducts();
   }, [selectedCategory]);
+
+  useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const cat = params.get("category") || "all";
+  setSelectedCategory(cat);
+}, [location.search]);
 
   const fetchCategories = async () => {
     try {
@@ -47,6 +57,11 @@ const Products = () => {
       setLoading(false);
     }
   };
+
+  const handleCategoryClick = (cat) => {
+  navigate(`/products?category=${cat}`);
+};
+
 
   return (
     <div className="min-h-screen py-20" data-testid="products-page">
