@@ -65,10 +65,10 @@ const fetchReviews = async () => {
           <p><strong>Comment:</strong> {r.comment}</p>
 
           <button
-            onClick={() => deleteReview(r.id)}
-            className="bg-red-500 text-white px-4 py-2 mt-2"
-          >
-            Delete
+            onClick={() => handleDelete(review.id)}
+            className="bg-red-500 text-white px-4 py-2"
+           >
+             Delete
           </button>
         </div>
       ))}
