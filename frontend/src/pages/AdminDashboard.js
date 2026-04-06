@@ -162,6 +162,14 @@ const AdminDashboard = () => {
             <h2 className="font-serif text-2xl font-medium mb-2">Returns & Exchanges</h2>
             <p className="opacity-80">Review and process return/exchange requests</p>
           </Link>
+          <Link to="/admin/reviews">
+            <div className="bg-white border p-6 rounded hover:shadow-lg transition">
+              <h2 className="text-xl font-semibold mb-2">Manage Reviews</h2>
+              <p className="text-sm text-gray-600">
+                View and delete customer reviews
+              </p>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
