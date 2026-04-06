@@ -11,14 +11,21 @@ const AdminReviews = () => {
     fetchReviews();
   }, []);
 
-  const fetchReviews = async () => {
-    try {
-      const res = await axios.get(`${API}/admin/reviews`);
-      setReviews(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+const fetchReviews = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(`${API}/admin/reviews`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setReviews(res.data);
+  } catch (err) {
+    console.error("ERROR:", err.response?.data || err.message);
+  }
+};
 
   const deleteReview = async (id) => {
     try {
