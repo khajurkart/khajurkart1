@@ -720,11 +720,11 @@ async def get_all_reviews(admin: dict = Depends(get_admin_user)):
 @api_router.delete("/admin/reviews/{review_id}")
 async def delete_review(review_id: str, admin: dict = Depends(get_admin_user)):
     result = await db.reviews.delete_one({"id": review_id})
-    
+
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Review not found")
-    
-    return {"message": "Review deleted"}
+
+    return {"message": "Review deleted successfully"}
 
 # ============ RETURN/EXCHANGE ROUTES ============
 
