@@ -30,7 +30,7 @@ const Products = () => {
 
   useEffect(() => {
   const params = new URLSearchParams(location.search);
-  const cat = params.get("category") || "all";
+  const cat = params.get("category") || "";
   setSelectedCategory(cat);
 }, [location.search]);
 
@@ -58,10 +58,9 @@ const Products = () => {
     }
   };
 
-  const handleCategoryClick = (cat) => {
+const handleCategoryClick = (cat) => {
   navigate(`/products?category=${cat}`);
 };
-
 
   return (
     <div className="min-h-screen py-20" data-testid="products-page">
@@ -83,7 +82,7 @@ const Products = () => {
           </div>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => setSelectedCategory('')}
+              onClick={() => handleCategoryClick("")}
               className={`px-6 py-2 rounded-sm uppercase tracking-widest text-xs font-bold transition-all ${
                 selectedCategory === ''
                   ? 'bg-khajur-primary text-khajur-cream'
@@ -96,7 +95,7 @@ const Products = () => {
             {categories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => setSelectedCategory(category.slug)}
+                onClick={() => handleCategoryClick(category.slug)}
                 className={`px-6 py-2 rounded-sm uppercase tracking-widest text-xs font-bold transition-all ${
                   selectedCategory === category.slug
                     ? 'bg-khajur-primary text-khajur-cream'
