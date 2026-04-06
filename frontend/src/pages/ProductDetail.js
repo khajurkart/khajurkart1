@@ -38,7 +38,7 @@ const ProductDetail = () => {
     }
   };
 
-  const fetchReviews = async () => {
+const fetchReviews = async () => {
   try {
     const res = await axios.get(`${API}/reviews/${id}`);
     setReviews(res.data);
@@ -47,7 +47,7 @@ const ProductDetail = () => {
   }
 };
 
-  const submitReview = async () => {
+const submitReview = async () => {
   try {
     await axios.post(`${API}/reviews`, {
       id: Date.now().toString(),
@@ -61,7 +61,6 @@ const ProductDetail = () => {
     setName("");
     setRating(5);
     setComment("");
-
     fetchReviews();
   } catch (err) {
     console.log(err);
