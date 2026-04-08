@@ -28,17 +28,32 @@ const ProductCard = ({ product }) => {
         <p className="text-xs text-khajur-muted mb-4">{product.weight}</p>
         
         <div className="flex items-center justify-between">
-          <span className="font-serif text-2xl text-khajur-gold font-bold" data-testid={`product-price-${product.id}`}>
-            ₹{product.price.toFixed(2)}
-          </span>
-          <button
-            onClick={() => addToCart(product.id)}
-            className="bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary p-3 rounded-sm transition-all duration-300"
-            data-testid={`add-to-cart-${product.id}`}
-          >
-            <ShoppingCart className="w-5 h-5" />
-          </button>
-        </div>
+          <div className="flex items-center gap-2">
+            <span className="font-serif text-2xl text-khajur-gold font-bold">
+              ₹{product.price}
+            </span>
+
+            {product.original_price && (
+              <>
+                <span className="line-through text-gray-400 text-sm">
+                  ₹{product.original_price}
+                </span>
+                <span className="text-green-600 text-sm font-bold">
+                  {Math.round(
+                    ((product.original_price - product.price) / product.original_price) * 100
+                  )}% OFF
+                </span>
+              </>
+             )}
+           </div>
+
+           <button
+             onClick={() => addToCart(product.id)}
+             className="bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary p-3 rounded-sm transition-all duration-300"
+            >
+             <ShoppingCart className="w-5 h-5" />
+           </button>
+         </div>
       </div>
     </div>
   );
