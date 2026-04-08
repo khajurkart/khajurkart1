@@ -126,10 +126,25 @@ return (
           <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-4">
             {product.name}
           </h1>
-
-          <p className="font-serif text-3xl text-khajur-gold font-bold mb-6">
-            ₹{product.price.toFixed(2)}
-          </p>
+          
+          <div className="mb-6">
+            <span className="text-3xl text-khajur-gold font-bold">
+              ₹{product.price}
+            </span>
+            
+            {product.original_price && (
+              <div className="flex items-center gap-3 mt-2">
+                <span className="line-through text-gray-400 text-lg">
+                  ₹{product.original_price}
+                </span>
+                <span className="text-green-600 font-bold">
+                  {Math.round(
+                    ((product.original_price - product.price) / product.original_price) * 100
+                  )}% OFF
+                </span>
+              </div>
+            )}
+          </div>
 
           <p className="text-sm text-khajur-muted mb-2">
             Weight: {product.weight}
