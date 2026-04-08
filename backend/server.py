@@ -93,6 +93,7 @@ class Product(BaseModel):
     name: str
     description: str
     price: float
+    original_price: Optional[float] = None
     category: str
     image: str
     weight: str
@@ -104,6 +105,7 @@ class ProductCreate(BaseModel):
     name: str
     description: str
     price: float
+    original_price: Optional[float] = None
     category: str
     image: str
     weight: str
@@ -115,6 +117,7 @@ class ProductUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     price: Optional[float] = None
+    original_price: Optional[float] = None
     category: Optional[str] = None
     image: Optional[str] = None
     weight: Optional[str] = None
