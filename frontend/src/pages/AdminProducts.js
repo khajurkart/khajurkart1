@@ -22,6 +22,7 @@ const AdminProducts = () => {
     name: '',
     description: '',
     price: '',
+    original_price: '',
     category: '',
     image: '',
     weight: '',
@@ -88,9 +89,12 @@ const AdminProducts = () => {
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
+        original_price: formData.original_price
+          ? parseFloat(formData.original_price)
+          : null,   // ✅ ADD THIS
         stock: parseInt(formData.stock),
         delivery_charge: parseFloat(formData.delivery_charge || 0)
-      };
+     };
 
       if (editingProduct) {
         await axios.put(
@@ -303,7 +307,7 @@ const AdminProducts = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-khajur-dark mb-2">Price (₹) *</label>
                       <input
@@ -316,6 +320,18 @@ const AdminProducts = () => {
                         data-testid="product-price-input"
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-khajur-dark mb-2">Original Price (₹)</label>
+                      <input
+                        type="number"
+                        value={formData.original_price}
+                        onChange={(e) =>
+                          setFormData({ ...formData, original_price: e.target.value })
+                       }
+                       className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none"
+                      />
+                   </div>
 
                     <div>
                       <label className="block text-sm font-medium text-khajur-dark mb-2">Delivery (₹) *</label>
