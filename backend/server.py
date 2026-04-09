@@ -413,7 +413,11 @@ async def contact_form(data: dict = Body(...)):
         "message": message,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
-    await send_email(name, email, phone, message)
+    
+    try:
+         await send_email(name, email, phone, message)
+    except Exception as e:
+        print("EMAIL FAILED:", e)
 
     return {"message": "Message received successfully"}
 
