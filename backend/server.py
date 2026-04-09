@@ -420,7 +420,7 @@ async def send_email(name, email, phone, message):
 
     # ✅ User confirmation email
     resend.Emails.send({
-        "from": "KhajurKart <onboarding@resend.dev>",
+        "from": "KhajurKart <contact@khajurkart.com>",
         "to": [email],
         "subject": "We received your message ✅",
         "html": f"""
