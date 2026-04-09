@@ -401,7 +401,6 @@ Message:
 
 @api_router.post("/contact")   
 async def contact_form(data: dict = Body(...)):
-    print("CONTACT API HIT")
     name = data.get("name")
     email = data.get("email")
     phone = data.get("phone")
