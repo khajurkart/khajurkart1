@@ -406,7 +406,7 @@ async def send_email(name, email, phone, message):
 
     # Admin email
     resend.Emails.send({
-        "from": "KhajurKart <contact@khajurkart.com>",
+        "from": "KhajurKart <onboarding@resend.dev>",
         "to": ["khajurkart@gmail.com"],
         "subject": f"New Contact Form - {name}",
         "html": f"""
@@ -420,7 +420,7 @@ async def send_email(name, email, phone, message):
 
     # ✅ User confirmation email
     resend.Emails.send({
-        "from": "KhajurKart <contact@khajurkart.com>",
+        "from": "KhajurKart <onboarding@resend.dev>",
         "to": [email],
         "subject": "We received your message ✅",
         "html": f"""
@@ -450,8 +450,11 @@ async def contact_form(data: dict = Body(...)):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
 
-    # ✅ Send email (no crash)
-    await send_email(name, email, phone, message)
+    try:
+        await send_email(name, email, phone, message)
+        print("EMAIL SENT ✅")
+    except Exception as e:
+        print("EMAIL ERROR ❌", e)
 
     return {"message": "Message received successfully"}
 
