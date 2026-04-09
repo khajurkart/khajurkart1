@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,11 +11,20 @@ const Contact = () => {
     message: ''
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    toast.success('Thank you for contacting us! We will get back to you soon.');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/contact`, formData);
+
+    toast.success('Message sent successfully!');
     setFormData({ name: '', email: '', phone: '', message: '' });
-  };
+
+  } catch (error) {
+    toast.error('Failed to send message');
+    console.log(error);
+  }
+};
 
   const contactInfo = [
     {
