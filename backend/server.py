@@ -394,6 +394,7 @@ Message:
         start_tls=True,
         username=os.environ["EMAIL_USER"],
         password=os.environ["EMAIL_PASS"],
+         timeout=10
     )
 
 # ============ CONTACT ROUTES ============
