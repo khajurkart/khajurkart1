@@ -32,7 +32,6 @@ const ProductCard = ({ product }) => {
             <span className="font-serif text-2xl text-khajur-gold font-bold">
               ₹{product.price}
             </span>
-
             {product.original_price && (
               <>
                 <span className="line-through text-gray-400 text-sm">
@@ -46,7 +45,6 @@ const ProductCard = ({ product }) => {
               </>
              )}
            </div>
-
            <button
              onClick={() => addToCart(product.id)}
              className="bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary p-3 rounded-sm transition-all duration-300"
