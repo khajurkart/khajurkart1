@@ -451,7 +451,7 @@ async def contact_form(data: dict = Body(...)):
     })
 
     # ✅ Send email (no crash)
-    send_email(name, email, phone, message)
+    await send_email(name, email, phone, message)
 
     return {"message": "Message received successfully"}
 
