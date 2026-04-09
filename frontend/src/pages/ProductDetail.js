@@ -131,7 +131,6 @@ return (
             <span className="text-3xl text-khajur-gold font-bold">
               ₹{product.price}
             </span>
-            
             {product.original_price && (
               <div className="flex items-center gap-3 mt-2">
                 <span className="line-through text-gray-400 text-lg">
@@ -143,8 +142,8 @@ return (
                   )}% OFF
                 </span>
               </div>
-            )}
-          </div>
+             )}
+           </div>
 
           <p className="text-sm text-khajur-muted mb-2">
             Weight: {product.weight}
