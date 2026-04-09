@@ -10,19 +10,26 @@ const Contact = () => {
     phone: '',
     message: ''
   });
-
+  
 const handleSubmit = async (e) => {
   e.preventDefault();
-
   try {
-    await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/contact`, formData);
+    const res = await fetch("https://khajurkart1.onrender.com/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
 
-    toast.success('Message sent successfully!');
-    setFormData({ name: '', email: '', phone: '', message: '' });
-
+    if (res.ok) {
+      toast.success("Message sent successfully ✅");
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } else {
+      toast.error("Failed to send message ❌");
+    }
   } catch (error) {
-    toast.error('Failed to send message');
-    console.log(error);
+    toast.error("Server error ❌");
   }
 };
 
