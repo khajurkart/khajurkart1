@@ -369,6 +369,25 @@ async def reset_password(reset_token: str, new_password: str):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=400, detail="Invalid reset token")
 
+# ============ CONTACT ROUTES ============
+
+@api_router.post("/contact")   
+async def contact_form(data: dict = Body(...)):
+    name = data.get("name")
+    email = data.get("email")
+    phone = data.get("phone")
+    message = data.get("message")
+
+    await db.contacts.insert_one({
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "message": message,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+
+    return {"message": "Message received successfully"}
+
 # ============ CATEGORY ROUTES ============
 
 @api_router.get("/categories", response_model=List[Category])
