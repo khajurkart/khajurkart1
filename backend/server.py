@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
+import requests
 import aiosmtplib
 import os
 import logging
@@ -396,6 +397,31 @@ Message:
         password=os.environ["EMAIL_PASS"],
          timeout=10
     )
+    
+
+def send_email(name, email, phone, message):
+    try:
+        requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {os.environ['RESEND_API_KEY']}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": "onboarding@resend.dev",
+                "to": ["khajurkart@gmail.com"],
+                "subject": f"New Contact - {name}",
+                "html": f"""
+                    <h3>New Contact Form</h3>
+                    <p><b>Name:</b> {name}</p>
+                    <p><b>Email:</b> {email}</p>
+                    <p><b>Phone:</b> {phone}</p>
+                    <p><b>Message:</b> {message}</p>
+                """
+            }
+        )
+    except Exception as e:
+        print("RESEND ERROR:", e)
 
 # ============ CONTACT ROUTES ============
 
@@ -413,11 +439,9 @@ async def contact_form(data: dict = Body(...)):
         "message": message,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
-    
-    try:
-         await send_email(name, email, phone, message)
-    except Exception as e:
-        print("EMAIL FAILED:", e)
+
+    # ✅ Send email (no crash)
+    send_email(name, email, phone, message)
 
     return {"message": "Message received successfully"}
 
