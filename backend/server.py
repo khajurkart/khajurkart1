@@ -7,6 +7,8 @@ from typing import List, Optional
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
+from email.message import EmailMessage
+import aiosmtplib
 import os
 import logging
 import jwt
@@ -369,6 +371,31 @@ async def reset_password(reset_token: str, new_password: str):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=400, detail="Invalid reset token")
 
+# ============ EMAIL HELPER ============
+async def send_email(name, email, phone, message):
+    msg = EmailMessage()
+    msg["From"] = os.environ["EMAIL_USER"]
+    msg["To"] = "khajurkart@gmail.com"
+    msg["Subject"] = f"New Contact Form - {name}"
+
+    msg.set_content(f"""
+Name: {name}
+Email: {email}
+Phone: {phone}
+
+Message:
+{message}
+""")
+
+    await aiosmtplib.send(
+        msg,
+        hostname="smtp.gmail.com",
+        port=587,
+        start_tls=True,
+        username=os.environ["EMAIL_USER"],
+        password=os.environ["EMAIL_PASS"],
+    )
+
 # ============ CONTACT ROUTES ============
 
 @api_router.post("/contact")   
@@ -385,6 +412,7 @@ async def contact_form(data: dict = Body(...)):
         "message": message,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
+    await send_email(name, email, phone, message)
 
     return {"message": "Message received successfully"}
 
