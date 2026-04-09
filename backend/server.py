@@ -406,7 +406,7 @@ async def send_email(name, email, phone, message):
 
     # Admin email
     resend.Emails.send({
-        "from": "KhajurKart <contact@khajurkart.com>"
+        "from": "KhajurKart <contact@khajurkart.com>",
         "to": ["khajurkart@gmail.com"],
         "subject": f"New Contact Form - {name}",
         "html": f"""
