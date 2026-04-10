@@ -373,52 +373,68 @@ async def reset_password(reset_token: str, new_password: str):
         raise HTTPException(status_code=400, detail="Invalid reset token")
 
 # ============ EMAIL HELPER ============
-async def send_email(name, email, phone, message):
-    msg = EmailMessage()
-    msg["From"] = os.environ["EMAIL_USER"]
-    msg["To"] = "khajurkart@gmail.com"
-    msg["Subject"] = f"New Contact Form - {name}"
-
-    msg.set_content(f"""
-Name: {name}
-Email: {email}
-Phone: {phone}
-
-Message:
-{message}
-""")
-
-    await aiosmtplib.send(
-        msg,
-        hostname="smtp.gmail.com",
-        port=587,
-        start_tls=True,
-        username=os.environ["EMAIL_USER"],
-        password=os.environ["EMAIL_PASS"],
-         timeout=10
-    )
-    
 
 import resend
+
 resend.api_key = os.environ["RESEND_API_KEY"]
 
 async def send_email(name, email, phone, message):
     try:
+        html = f"""
+        <div style="font-family: Arial; padding: 20px;">
+          <h2>📩 New Contact Message</h2>
+          <p><strong>Name:</strong> {name}</p>
+          <p><strong>Email:</strong> {email}</p>
+          <p><strong>Phone:</strong> {phone}</p>
+          <hr/>
+          <p><strong>Message:</strong></p>
+          <p>{message}</p>
+        </div>
+        """
+
         resend.Emails.send({
             "from": "KhajurKart <contact@khajurkart.com>",
             "to": ["khajurkart@gmail.com"],
-            "subject": f"New Contact - {name}",
-            "html": f"""
-            <h2>New Contact</h2>
-            <p>Name: {name}</p>
-            <p>Email: {email}</p>
-            <p>Phone: {phone}</p>
-            <p>Message: {message}</p>
-            """
+            "subject": f"📩 New Contact - {name}",
+            "html": html,
+            "reply_to": email
         })
-        print("EMAIL SENT ✅")
+
+        print("ADMIN EMAIL SENT ✅")
+
     except Exception as e:
-        print("EMAIL ERROR ❌", e)
+        print("ADMIN EMAIL ERROR ❌", e)
+
+async def send_auto_reply(name, email):
+    try:
+        html = f"""
+        <div style="font-family: Arial; padding: 20px;">
+          <h2>🙏 Thank You for Contacting KhajurKart</h2>
+          
+          <p>Hi {name},</p>
+          
+          <p>We have received your message successfully.</p>
+          <p>Our team will get back to you within 24 hours.</p>
+          
+          <br/>
+          
+          <p>Best Regards,<br/>
+          <strong>KhajurKart Team</strong></p>
+        </div>
+        """
+
+        resend.Emails.send({
+            "from": "KhajurKart <contact@khajurkart.com>",
+            "to": [email],   # 👈 USER EMAIL
+            "subject": "✅ We received your message",
+            "html": html
+        })
+
+        print("AUTO REPLY SENT ✅")
+
+    except Exception as e:
+        print("AUTO REPLY ERROR ❌", e)
+
 
 # ============ CONTACT ROUTES ============
 
@@ -429,6 +445,7 @@ async def contact_form(data: dict = Body(...)):
     phone = data.get("phone")
     message = data.get("message")
 
+    # ✅ Save to DB
     await db.contacts.insert_one({
         "name": name,
         "email": email,
@@ -437,7 +454,11 @@ async def contact_form(data: dict = Body(...)):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
 
-    await send_email(name, email, phone, message)  # ✅ MUST HAVE await
+    # ✅ Send admin email
+    await send_email(name, email, phone, message)
+
+    # ✅ Send auto reply to user
+    await send_auto_reply(name, email)
 
     return {"message": "Message received successfully"}
 
