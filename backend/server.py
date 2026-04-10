@@ -90,6 +90,7 @@ class User(BaseModel):
     id: str
     name: str
     email: str
+    role: Optional[str] = "user"
     phone: Optional[str] = None
     created_at: str
     addresses: Optional[List[dict]] = []
@@ -311,26 +312,29 @@ async def register(user_data: UserRegister):
         "user": {
             "id": user_id,
             "name": user_data.name,
-            "email": user_data.email,
+            "email": user_data.email.lower(),
             "phone": user_data.phone
         }
     }
 
 @api_router.post("/login")
 @limiter.limit("5/minute")
-async def login(request: Request, data: dict):
-    # Find user
-    user = await db.users.find_one({"email": credentials.email})
+async def login(request: Request, data: UserLogin):  # ✅ use model
+
+    user = await db.users.find_one({"email": data.email.lower()})  # ✅ FIX
+
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    
-    # Verify password
-    if not verify_password(credentials.password, user["password"]):
+
+    if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    
-    # Create access token
-    access_token = create_access_token({"sub": user["id"]})
-    
+
+    # ✅ INCLUDE ROLE IN TOKEN (VERY IMPORTANT)
+    access_token = create_access_token({
+        "sub": user["id"],
+        "role": user.get("role", "user")
+    })
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -338,7 +342,8 @@ async def login(request: Request, data: dict):
             "id": user["id"],
             "name": user["name"],
             "email": user["email"],
-            "phone": user.get("phone")
+            "phone": user.get("phone"),
+            "role": user.get("role", "user")  # ✅ send role to frontend
         }
     }
 
