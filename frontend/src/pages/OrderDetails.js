@@ -96,9 +96,15 @@ const OrderDetails = () => {
         <div className="bg-white shadow-md rounded p-6 mb-6">
           <p><strong>Order ID:</strong> {order.id}</p>
           <p><strong>Status:</strong> {order.status}</p>
-          <p><strong>Total Amount:</strong> ₹{order.totalAmount}</p>
-          <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
-          <p><strong>Created At:</strong> {new Date(order.createdAt).toLocaleString()}</p>
+          <p><strong>Total Amount:</strong> ₹{order.total_amount}</p>
+          <p><strong>Payment Method:</strong> {order.payment_method}</p>
+          <p>
+            <strong>Created At:</strong>{" "}
+            {order.created_at
+              ? new Date(order.created_at).toLocaleString()
+              : "N/A"}
+            </p>
+         
           {/* ✅ CANCEL BUTTON */}
           {(order.status === "pending" || order.status === "confirmed") && (
             <button
@@ -121,7 +127,7 @@ const OrderDetails = () => {
                 className="flex justify-between border-b py-3"
               >
                 <div>
-                  <p className="font-medium">{item.productName}</p>
+                  <p className="font-medium">{item.product_name}</p>
                   <p className="text-sm text-gray-500">
                     Quantity: {item.quantity}
                   </p>
