@@ -316,9 +316,9 @@ async def register(user_data: UserRegister):
         }
     }
 
-@api_router.post("/auth/login")
+@api_router.post("/login")
 @limiter.limit("5/minute")
-async def login(credentials: UserLogin):
+async def login(request: Request, data: dict):
     # Find user
     user = await db.users.find_one({"email": credentials.email})
     if not user:
