@@ -7,48 +7,47 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  consconst handleLogin = async (e) => {
+  e.preventDefault();
 
-    // Example admin login
-    if (email === "admin@khajurkart.com" && password === "ZAAIMPEX") {
-      localStorage.setItem("admin", "true");
-      navigate("/admin/dashboard");
+  try {
+    const res = await fetch("https://khajurkart1.onrender.com/api/login", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // ✅ Save token
+      localStorage.setItem("token", data.access_token);
+
+      // ✅ Check admin
+      if (
+        data.user.email === "admin@khajurkart.com" ||
+        data.user.email === "khajurkart@gmail.com"
+      ) {
+        localStorage.setItem("admin", "true");
+        navigate("/admin/dashboard");
+      } else {
+        alert("Not an admin user");
+      }
+
     } else {
-      alert("Invalid admin credentials");
+      alert(data.detail || "Login failed");
     }
-  };
 
-  return (
-    <div style={{padding:"50px", textAlign:"center"}}>
-      <h2>Admin Login</h2>
-
-      <form onSubmit={handleLogin}>
-
-        <input
-          type="email"
-          placeholder="Admin Email"
-          value={email}
-          onChange={(e)=>setEmail(e.target.value)}
-        />
-
-        <br /><br />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e)=>setPassword(e.target.value)}
-        />
-
-        <br /><br />
-
-        <button type="submit">Login</button>
-
-      </form>
-
-    </div>
-  );
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
 };
 
 export default AdminLogin;
