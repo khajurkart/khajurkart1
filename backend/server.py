@@ -366,7 +366,7 @@ async def forgot_password(email: str):
     )
 
     # send email here with raw token (IMPORTANT)
-    reset_url = f"https://yourfrontend.com/reset-password?token={token}"
+    reset_url = f"https://khajurkart.com/reset-password?token={token}"
 
     return {"message": "Reset link sent"}
 
@@ -466,7 +466,7 @@ async def send_order_email(user_email, user_name, order_id, items, total):
     try:
         items_html = ""
         for item in items:
-            items_html += f"<li>{item['name']} - ₹{item['price']}</li>"
+            items_html += f"<li>{item['product_name']} x {item['quantity']} - ₹{item['price']}</li>"
 
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
@@ -856,6 +856,16 @@ async def verify_razorpay_payment(payment_data: RazorpayVerify, current_user: di
                     "status": "confirmed"
                 }
             }
+        )
+
+        order = await db.orders.find_one({"id": payment_data.order_id})
+
+        await send_order_email(
+            order["customer_email"],
+            order["customer_name"],
+            order["id"],
+            order["items"],
+            order["total_amount"]
         )
         
         return {"message": "Payment verified successfully"}
