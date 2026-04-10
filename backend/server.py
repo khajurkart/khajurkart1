@@ -706,23 +706,6 @@ async def clear_cart(current_user: dict = Depends(get_current_user)):
 
 # ============ ORDER ROUTES ============
 
-@api_router.post("/order")
-async def place_order(data: dict = Body(...)):
-    user_email = data.get("email")
-    user_name = data.get("name")
-    items = data.get("items")
-    total = data.get("total")
-
-    order_id = f"ORD{int(datetime.now().timestamp())}"  # generate dynamically later
-
-    # Save order to DB (your existing code)
-
-    # ✅ SEND ORDER EMAIL
-    await send_order_email(user_email, user_name, order_id, items, total)
-
-    return {"message": "Order placed successfully"}
-    
-
 @api_router.post("/orders")
 async def create_order(order_data: CreateOrder, current_user: dict = Depends(get_current_user)):
     order_id = f"KK-{uuid.uuid4().hex[:10].upper()}"
@@ -767,6 +750,14 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
     }
     
     await db.orders.insert_one(order_doc)
+
+    await send_order_email(
+        current_user["email"],
+        current_user["name"],
+        order_id,
+        order_data.items,
+        order_data.total_amount
+    )
     
     # Clear cart
     await db.carts.update_one(
