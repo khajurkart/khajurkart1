@@ -1,5 +1,8 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Body
+from fastapi import Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
@@ -8,6 +11,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
+import json
+import resend
 import requests
 import aiosmtplib
 import os
@@ -15,6 +20,9 @@ import logging
 import jwt
 import bcrypt
 import razorpay
+import secrets
+import hashlib
+import uuid
 
 
 ROOT_DIR = Path(__file__).parent
@@ -34,6 +42,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
 
 app = FastAPI()
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
 
 origins = [
     "https://khajurkart.com",
@@ -81,6 +92,7 @@ class User(BaseModel):
     email: str
     phone: Optional[str] = None
     created_at: str
+    addresses: Optional[List[dict]] = []
 
 class Category(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -213,6 +225,12 @@ class Review(BaseModel):
     comment: str
     created_at: str
 
+class ContactForm(BaseModel):
+    name: str = Field(min_length=2)
+    email: EmailStr
+    phone: Optional[str]
+    message: str = Field(min_length=5)
+
 # ============ AUTH HELPERS ============
 
 ADMIN_EMAILS = ["admin@khajurkart.com", "khajurkart@gmail.com"]  # Admin email list
@@ -228,6 +246,11 @@ def create_access_token(data: dict) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def generate_reset_token():
+    token = secrets.token_urlsafe(32)
+    hashed = hashlib.sha256(token.encode()).hexdigest()
+    return token, hashed
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     try:
@@ -270,13 +293,17 @@ async def register(user_data: UserRegister):
         "email": user_data.email,
         "password": hashed_pwd,
         "phone": user_data.phone,
+        "role": "user",
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.users.insert_one(user_doc)
     
     # Create access token
-    access_token = create_access_token({"sub": user_id})
+    access_token = create_access_token({
+        "sub": user_id,
+        "role": user["role"]
+    })
     
     return {
         "access_token": access_token,
@@ -290,6 +317,7 @@ async def register(user_data: UserRegister):
     }
 
 @api_router.post("/auth/login")
+@limiter.limit("5/minute")
 async def login(credentials: UserLogin):
     # Find user
     user = await db.users.find_one({"email": credentials.email})
@@ -320,61 +348,54 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(email: str):
-    # Check if user exists
     user = await db.users.find_one({"email": email})
+    
     if not user:
-        # Return success even if user doesn't exist (security best practice)
         return {"message": "If the email exists, a reset link has been sent"}
-    
-    # Generate reset token (valid for 1 hour)
-    reset_token = create_access_token({"sub": user["id"], "type": "reset"})
-    
-    # In production, you would send an email here
-    # For now, we'll just store the token in the database
+
+    token, hashed = generate_reset_token()
+
     await db.users.update_one(
-        {"id": user["id"]},
-        {"$set": {"reset_token": reset_token, "reset_token_created": datetime.now(timezone.utc).isoformat()}}
+        {"email": email},
+        {
+            "$set": {
+                "reset_token": hashed,
+                "reset_expiry": datetime.now(timezone.utc) + timedelta(hours=1)
+            }
+        }
     )
-    
-    # Return the token (in production, this would be sent via email)
-    return {
-        "message": "Password reset token generated",
-        "reset_token": reset_token,
-        "reset_url": f"/reset-password?token={reset_token}"
-    }
+
+    # send email here with raw token (IMPORTANT)
+    reset_url = f"https://yourfrontend.com/reset-password?token={token}"
+
+    return {"message": "Reset link sent"}
 
 @api_router.post("/auth/reset-password")
 async def reset_password(reset_token: str, new_password: str):
-    try:
-        # Verify token
-        payload = jwt.decode(reset_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get("sub")
-        token_type = payload.get("type")
-        
-        if token_type != "reset":
-            raise HTTPException(status_code=400, detail="Invalid reset token")
-        
-        # Find user with this token
-        user = await db.users.find_one({"id": user_id, "reset_token": reset_token})
-        if not user:
-            raise HTTPException(status_code=400, detail="Invalid or expired reset token")
-        
-        # Update password
-        hashed_pwd = hash_password(new_password)
-        await db.users.update_one(
-            {"id": user_id},
-            {"$set": {"password": hashed_pwd}, "$unset": {"reset_token": "", "reset_token_created": ""}}
-        )
-        
-        return {"message": "Password reset successfully"}
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=400, detail="Reset token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=400, detail="Invalid reset token")
 
-# ============ EMAIL HELPER ============
+    hashed = hashlib.sha256(reset_token.encode()).hexdigest()
 
-import resend
+    user = await db.users.find_one({
+        "reset_token": hashed,
+        "reset_expiry": {"$gt": datetime.now(timezone.utc)}
+    })
+
+    if not user:
+        raise HTTPException(400, "Invalid or expired token")
+
+    hashed_pwd = hash_password(new_password)
+
+    await db.users.update_one(
+        {"id": user["id"]},
+        {
+            "$set": {"password": hashed_pwd},
+            "$unset": {"reset_token": "", "reset_expiry": ""}
+        }
+    )
+
+    return {"message": "Password reset successful"}
+
+# ============ EMAIL RECEIVER ============
 
 resend.api_key = os.environ["RESEND_API_KEY"]
 
@@ -382,6 +403,7 @@ async def send_email(name, email, phone, message):
     try:
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
+          <img src="https://khajurkart.com/https://res-console.cloudinary.com/dwpqa8pgl/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/TE9HT19qMXU3enU=/template_primary" width="120" />
           <h2>📩 New Contact Message</h2>
           <p><strong>Name:</strong> {name}</p>
           <p><strong>Email:</strong> {email}</p>
@@ -400,15 +422,18 @@ async def send_email(name, email, phone, message):
             "reply_to": email
         })
 
-        print("ADMIN EMAIL SENT ✅")
+        logging.info("ADMIN EMAIL SENT ✅")
 
     except Exception as e:
-        print("ADMIN EMAIL ERROR ❌", e)
+        logging.error("ADMIN EMAIL ERROR", exc_info=True)
+
+# ======== SENDER EMAIL ===========
 
 async def send_auto_reply(name, email):
     try:
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
+          <img src="https://khajurkart.com/https://res-console.cloudinary.com/dwpqa8pgl/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/TE9HT19qMXU3enU=/template_primary" width="120" />
           <h2>🙏 Thank You for Contacting KhajurKart</h2>
           
           <p>Hi {name},</p>
@@ -430,16 +455,66 @@ async def send_auto_reply(name, email):
             "html": html
         })
 
-        print("AUTO REPLY SENT ✅")
+        logging.info("AUTO REPLY SENT ✅")
 
     except Exception as e:
-        print("AUTO REPLY ERROR ❌", e)
+        logging.error("AUTO REPLY ERROR", exc_info=True)
+
+# =========== ORDER CONFIRMATION =========
+    
+async def send_order_email(user_email, user_name, order_id, items, total):
+    try:
+        items_html = ""
+        for item in items:
+            items_html += f"<li>{item['name']} - ₹{item['price']}</li>"
+
+        html = f"""
+        <div style="font-family: Arial; padding: 20px;">
+          
+          <img src="https://yourdomain.com/logo.png" width="120" />
+          
+          <h2>🛒 Order Confirmation</h2>
+          
+          <p>Hi {user_name},</p>
+          
+          <p>Your order has been placed successfully!</p>
+          
+          <p><strong>Order ID:</strong> {order_id}</p>
+          
+          <h3>Items:</h3>
+          <ul>
+            {items_html}
+          </ul>
+          
+          <h3>Total: ₹{total}</h3>
+          
+          <br/>
+          
+          <p>We will deliver your order soon 🚚</p>
+          
+          <p>Thank you for shopping with us!</p>
+          
+          <p><strong>KhajurKart Team</strong></p>
+        </div>
+        """
+
+        resend.Emails.send({
+            "from": "KhajurKart <contact@khajurkart.com>",
+            "to": [user_email],
+            "subject": f"🛒 Order Confirmed - {order_id}",
+            "html": html
+        })
+
+        logging.info("ORDER EMAIL SENT ✅")
+
+    except Exception as e:
+        logging.error("ORDER EMAIL ERROR", exc_info=True)
 
 
 # ============ CONTACT ROUTES ============
 
 @api_router.post("/contact")
-async def contact_form(data: dict = Body(...)):
+async def contact_form(data: ContactForm):   
     name = data.get("name")
     email = data.get("email")
     phone = data.get("phone")
@@ -462,6 +537,16 @@ async def contact_form(data: dict = Body(...)):
 
     return {"message": "Message received successfully"}
 
+# =========== MULTI-ADDRESS SUPPORT ROUTES ==== 
+
+@api_router.post("/user/address")
+async def add_address(address: dict, current_user: dict = Depends(get_current_user)):
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$push": {"addresses": address}}
+    )
+    return {"message": "Address added"}
+
 # ============ CATEGORY ROUTES ============
 
 @api_router.get("/categories", response_model=List[Category])
@@ -473,6 +558,7 @@ async def get_categories():
 async def create_category(category: Category, admin: dict = Depends(get_admin_user)):
     await db.categories.insert_one(category.dict())
     return category
+    
 # ============ PRODUCT ROUTES ============
 
 @api_router.get("/products", response_model=List[Product])
@@ -620,9 +706,41 @@ async def clear_cart(current_user: dict = Depends(get_current_user)):
 
 # ============ ORDER ROUTES ============
 
+@api_router.post("/order")
+async def place_order(data: dict = Body(...)):
+    user_email = data.get("email")
+    user_name = data.get("name")
+    items = data.get("items")
+    total = data.get("total")
+
+    order_id = f"ORD{int(datetime.now().timestamp())}"  # generate dynamically later
+
+    # Save order to DB (your existing code)
+
+    # ✅ SEND ORDER EMAIL
+    await send_order_email(user_email, user_name, order_id, items, total)
+
+    return {"message": "Order placed successfully"}
+    
+
 @api_router.post("/orders")
 async def create_order(order_data: CreateOrder, current_user: dict = Depends(get_current_user)):
-    order_id = f"order_{datetime.now(timezone.utc).timestamp()}"
+    order_id = f"KK-{uuid.uuid4().hex[:10].upper()}"
+
+    # 🔥 STOCK CHECK + DEDUCT
+    for item in order_data.items:
+        result = await db.products.update_one(
+            {
+                "id": item.product_id,
+                "stock": {"$gte": item.quantity}
+            },
+            {
+                "$inc": {"stock": -item.quantity}
+            }
+        )
+
+        if result.modified_count == 0:
+            raise HTTPException(400, f"Product {item.product_id} out of stock")
     
     # Calculate delivery charges from items
     delivery_charges = 0
@@ -669,6 +787,36 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
+
+@api_router.put("/orders/{order_id}/cancel")
+async def cancel_order(order_id: str, current_user: dict = Depends(get_current_user)):
+
+    order = await db.orders.find_one({
+        "id": order_id,
+        "user_id": current_user["id"]
+    })
+
+    if not order:
+        raise HTTPException(404, "Order not found")
+
+    if order["status"] not in ["pending", "confirmed"]:
+        raise HTTPException(400, "Order cannot be cancelled")
+
+    if order["status"] == "cancelled":
+    raise HTTPException(400, "Order already cancelled")
+
+    for item in order["items"]:
+    await db.products.update_one(
+        {"id": item["product_id"]},
+        {"$inc": {"stock": item["quantity"]}}
+    )
+
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"status": "cancelled"}}
+    )
+
+    return {"message": "Order cancelled"}
 
 # ============ RAZORPAY ROUTES ============
 
@@ -723,6 +871,33 @@ async def verify_razorpay_payment(payment_data: RazorpayVerify, current_user: di
         raise HTTPException(status_code=400, detail="Invalid payment signature")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/razorpay/webhook")
+async def razorpay_webhook(request: Request):
+    body = await request.body()
+    signature = request.headers.get("X-Razorpay-Signature")
+
+    try:
+        razorpay_client.utility.verify_webhook_signature(
+            body,
+            signature,
+            os.environ["RAZORPAY_WEBHOOK_SECRET"]
+        )
+    except:
+        raise HTTPException(400, "Invalid signature")
+
+    data = json.loads(body)
+
+    if data["event"] == "payment.captured":
+        order_id = data["payload"]["payment"]["entity"]["order_id"]
+
+        await db.orders.update_one(
+            {"razorpay_order_id": order_id},
+            {"$set": {"payment_status": "paid"}}
+        )
+
+    return {"status": "ok"}
+
 
 # ============ ADMIN ROUTES ============
 
