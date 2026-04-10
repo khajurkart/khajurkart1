@@ -399,43 +399,30 @@ Message:
     )
     
 
+import resend
+resend.api_key = os.environ["RESEND_API_KEY"]
+
 async def send_email(name, email, phone, message):
-    import resend
-
-    resend.api_key = os.environ["RESEND_API_KEY"]
-
-    # Admin email
-    resend.Emails.send({
-        "from": "KhajurKart <onboarding@resend.dev>",
-        "to": ["khajurkart@gmail.com"],
-        "subject": f"New Contact Form - {name}",
-        "html": f"""
-        <h2>New Contact Message</h2>
-        <p><b>Name:</b> {name}</p>
-        <p><b>Email:</b> {email}</p>
-        <p><b>Phone:</b> {phone}</p>
-        <p><b>Message:</b><br>{message}</p>
-        """
-    })
-
-    # ✅ User confirmation email
-    resend.Emails.send({
-        "from": "KhajurKart <onboarding@resend.dev>",
-        "to": [email],
-        "subject": "We received your message ✅",
-        "html": f"""
-        <h2>Thank you, {name} 🙌</h2>
-        <p>We have received your message.</p>
-        <p>Our team will contact you soon.</p>
-        <br>
-        <p><b>Your Message:</b></p>
-        <p>{message}</p>
-        """
-    })
+    try:
+        resend.Emails.send({
+            "from": "KhajurKart <onboarding@resend.dev>",
+            "to": ["khajurkart@gmail.com"],
+            "subject": f"New Contact - {name}",
+            "html": f"""
+            <h2>New Contact</h2>
+            <p>Name: {name}</p>
+            <p>Email: {email}</p>
+            <p>Phone: {phone}</p>
+            <p>Message: {message}</p>
+            """
+        })
+        print("EMAIL SENT ✅")
+    except Exception as e:
+        print("EMAIL ERROR ❌", e)
 
 # ============ CONTACT ROUTES ============
 
-@api_router.post("/contact")   
+@api_router.post("/contact")
 async def contact_form(data: dict = Body(...)):
     name = data.get("name")
     email = data.get("email")
@@ -450,11 +437,7 @@ async def contact_form(data: dict = Body(...)):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
 
-    try:
-        await send_email(name, email, phone, message)
-        print("EMAIL SENT ✅")
-    except Exception as e:
-        print("EMAIL ERROR ❌", e)
+    await send_email(name, email, phone, message)  # ✅ MUST HAVE await
 
     return {"message": "Message received successfully"}
 
