@@ -405,7 +405,7 @@ resend.api_key = os.environ["RESEND_API_KEY"]
 async def send_email(name, email, phone, message):
     try:
         resend.Emails.send({
-            "from": "KhajurKart <onboarding@resend.dev>",
+            "from": "KhajurKart <contact@khajurkart.com>",
             "to": ["khajurkart@gmail.com"],
             "subject": f"New Contact - {name}",
             "html": f"""
