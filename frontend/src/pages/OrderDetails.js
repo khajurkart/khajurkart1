@@ -18,6 +18,27 @@ const OrderDetails = () => {
     // eslint-disable-next-line
   }, [id]);
 
+  const cancelOrder = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.put(`${API}/orders/${id}/cancel`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    alert("Order cancelled successfully");
+
+    // refresh order data
+    fetchOrder();
+
+  } catch (err) {
+    console.error("Cancel failed", err);
+    alert("Failed to cancel order");
+  }
+};
+
   const fetchOrder = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -78,6 +99,15 @@ const OrderDetails = () => {
           <p><strong>Total Amount:</strong> ₹{order.totalAmount}</p>
           <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
           <p><strong>Created At:</strong> {new Date(order.createdAt).toLocaleString()}</p>
+          {/* ✅ CANCEL BUTTON */}
+          {(order.status === "pending" || order.status === "confirmed") && (
+            <button
+              onClick={cancelOrder}
+              className="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+             >
+              Cancel Order
+            </button>
+           )}
         </div>
 
         {/* Ordered Items */}
