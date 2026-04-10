@@ -302,7 +302,7 @@ async def register(user_data: UserRegister):
     # Create access token
     access_token = create_access_token({
         "sub": user_id,
-        "role": user["role"]
+        "role": "user"
     })
     
     return {
@@ -515,10 +515,10 @@ async def send_order_email(user_email, user_name, order_id, items, total):
 
 @api_router.post("/contact")
 async def contact_form(data: ContactForm):   
-    name = data.get("name")
-    email = data.get("email")
-    phone = data.get("phone")
-    message = data.get("message")
+    name = data.name
+    email = data.email
+    phone = data.phone
+    message = data.message
 
     # ✅ Save to DB
     await db.contacts.insert_one({
@@ -790,7 +790,6 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
 
 @api_router.put("/orders/{order_id}/cancel")
 async def cancel_order(order_id: str, current_user: dict = Depends(get_current_user)):
-
     order = await db.orders.find_one({
         "id": order_id,
         "user_id": current_user["id"]
@@ -803,14 +802,16 @@ async def cancel_order(order_id: str, current_user: dict = Depends(get_current_u
         raise HTTPException(400, "Order cannot be cancelled")
 
     if order["status"] == "cancelled":
-    raise HTTPException(400, "Order already cancelled")
+        raise HTTPException(400, "Order already cancelled")  # ✅ FIXED INDENT
 
+    # ✅ Restore stock
     for item in order["items"]:
-    await db.products.update_one(
-        {"id": item["product_id"]},
-        {"$inc": {"stock": item["quantity"]}}
-    )
+        await db.products.update_one(
+            {"id": item["product_id"]},
+            {"$inc": {"stock": item["quantity"]}}
+        )
 
+    # ✅ Update order
     await db.orders.update_one(
         {"id": order_id},
         {"$set": {"status": "cancelled"}}
