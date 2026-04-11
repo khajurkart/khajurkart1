@@ -46,6 +46,10 @@ const MyOrders = () => {
         return 'bg-indigo-100 text-indigo-800';
       case 'delivered':
         return 'bg-green-100 text-green-800';
+      case 'exchange':
+        return 'bg-orange-100 text-orange-800'; 
+      case 'return':
+        return 'bg-pink-100 text-pink-800'; 
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
