@@ -96,6 +96,10 @@ const OrderDetails = () => {
         <div className="bg-white shadow-md rounded p-6 mb-6">
           <p><strong>Order ID:</strong> {order.id}</p>
           <p><strong>Status:</strong> {order.status}</p>
+          {/* 👇 ADD HERE */}
+          <a href={`/api/invoice/${order.id}`} target="_blank">
+            Download Invoice
+          </a>
           <p><strong>Total Amount:</strong> ₹{order.total_amount}</p>
           <p><strong>Payment Method:</strong> {order.payment_method}</p>
           <p>
