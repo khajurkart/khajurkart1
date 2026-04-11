@@ -77,6 +77,11 @@ const OrderDetails = () => {
     );
   }
 
+  const getStatusStep = (status) => {
+  const steps = ["pending", "confirmed", "processing", "shipped", "delivered"];
+  return steps.indexOf(status);
+};
+
   return (
     <div className="min-h-screen py-20">
       <div className="max-w-5xl mx-auto px-6">
@@ -122,6 +127,20 @@ const OrderDetails = () => {
 
         {/* Ordered Items */}
         <div className="bg-white shadow-md rounded p-6">
+          {/* 🚚 ORDER TRACKING UI */}
+          <div className="bg-white shadow-md rounded p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Order Tracking</h2>
+
+            {["pending", "confirmed", "processing", "shipped", "delivered"].map((step, index) => (
+              <div key={step} className="flex items-center mb-2">
+                <span className="mr-2">
+                  {index <= getStatusStep(order.status) ? "✅" : "⭕"}
+                </span>
+                <span className="capitalize">{step}</span>
+              </div>
+            ))}
+          </div>
+            
           <h2 className="text-xl font-semibold mb-4">Items</h2>
 
           {order.items && order.items.length > 0 ? (
