@@ -79,9 +79,9 @@ const deleteOrder = async (id) => {
       case 'delivered':
         return 'bg-green-100 text-green-800';
       case 'exchange':
-        return 'bg-amber-100 text-amber-800'; 
+        return 'bg-orange-100 text-orange-800'; 
       case 'return':
-        return 'bg-sky-100 text-sky-800';     
+        return 'bg-pink-100 text-pink-800';     
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
