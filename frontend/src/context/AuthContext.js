@@ -57,7 +57,7 @@ useEffect(() => {
 }, [token, fetchUser]);;
 
   const login = async (email, password) => {
-    const response = await axios.post(`${API}/auth/login`, { email, password });
+    const response = await axios.post(`${API}/login`, { email, password });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
     setToken(access_token);
