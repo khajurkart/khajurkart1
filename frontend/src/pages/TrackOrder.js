@@ -52,6 +52,10 @@ const TrackOrder = () => {
         return 'bg-indigo-100 text-indigo-800 border border-indigo-300';
       case 'delivered':
         return 'bg-green-100 text-green-800 border border-green-300';
+      case 'exchange':
+        return 'bg-orange-100 text-orange-800 border border-orange-300';
+      case 'return':
+        return 'bg-pink-100 text-pink-800 border border-pink-300';
       case 'cancelled':
         return 'bg-red-100 text-red-800 border border-red-300';
       default:
