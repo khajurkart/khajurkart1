@@ -25,6 +25,8 @@ const AdminDashboard = () => {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [lowStock, setLowStock] = useState([]);
   
   useEffect(() => {
     checkAdmin();
@@ -49,23 +51,24 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [productsRes, ordersRes, returnsRes] = await Promise.all([
-        axios.get(`${API}/products`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${API}/admin/orders`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${API}/admin/returns`, { headers: { Authorization: `Bearer ${token}` } })
-      ]);
+      const res = await axios.get(`${API}/admin/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-      const products = productsRes.data;
-      const orders = ordersRes.data;
-      const returns = returnsRes.data;
+      const products = res.data.products;
+      const lowStock = products.filter(p => p.stock < 5);
+      setLowStock(lowStock);
+      const orders = res.data.orders;
+      const returns = res.data.returns;
 
       setStats({
         totalProducts: products.length,
         totalOrders: orders.length,
         pendingOrders: orders.filter(o => o.status === 'pending').length,
         pendingReturns: returns.filter(r => r.status === 'pending').length,
-        totalRevenue: orders.reduce((sum, o) => sum + o.total_amount, 0)
+        totalRevenue: orders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
       });
+      setRecentOrders(orders.slice(0, 5));
     } catch (error) {
       console.error('Failed to fetch stats', error);
     }
@@ -93,6 +96,21 @@ const AdminDashboard = () => {
         <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-8">
           Admin Dashboard
         </h1>
+        
+        <button
+          onClick={fetchStats}
+          className="mb-6 px-4 py-2 bg-khajur-primary text-white"
+        >
+          Refresh Stats
+        </button>
+
+        {lowStock.length > 0 && (
+           <div className="bg-red-100 p-4 mb-6">
+            ⚠️ {lowStock.length} products low in stock
+          </div>
+        )}
+
+        
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -133,6 +151,19 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+        {/* Recent Orders */}
+        <div className="mt-10">
+          <h2 className="text-2xl mb-4">Recent Orders</h2>
+
+          {recentOrders.map(order => (
+            <div key={order.id} className="border p-4 mb-2">
+              <p>ID: {order.id}</p>
+              <p>Status: {order.status}</p>
+              <p>₹{order.total_amount}</p>
+            </div>
+          ))}
+        </div>
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link
@@ -168,6 +199,12 @@ const AdminDashboard = () => {
               <p className="text-sm text-gray-600">
                 View and delete customer reviews
               </p>
+            </div>
+          </Link>
+          <Link to="/admin/orders?filter=pending">
+            <div className="bg-yellow-400 text-black p-8 hover:bg-yellow-300 transition">
+              <h2 className="text-xl font-semibold mb-2">Pending Orders</h2>
+              <p>Quickly view all pending orders</p>
             </div>
           </Link>
         </div>
