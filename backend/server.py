@@ -944,6 +944,17 @@ async def razorpay_webhook(request: Request):
 
 # ============ ADMIN ROUTES ============
 
+@api_router.get("/admin/dashboard")
+async def dashboard(admin: dict = Depends(get_admin_user)):
+    products = await db.products.find().to_list(1000)
+    orders = await db.orders.find().to_list(1000)
+    returns = await db.returns.find().to_list(1000)
+    return {
+        "products": products,
+        "orders": orders,
+        "returns": returns
+    }
+
 @api_router.get("/admin/check")
 async def check_admin(admin: dict = Depends(get_admin_user)):
     return {"is_admin": True, "email": admin["email"]}
