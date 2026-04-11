@@ -993,7 +993,7 @@ async def get_all_orders(admin: dict = Depends(get_admin_user)):
 
 @api_router.put("/admin/orders/{order_id}/status")
 async def update_order_status(order_id: str, status: str, admin: dict = Depends(get_admin_user)):
-    valid_statuses = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]
+    valid_statuses = ["pending", "confirmed", "processing", "shipped", "delivered", "exchange", "return", "cancelled"]
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
     
