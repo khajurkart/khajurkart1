@@ -78,7 +78,7 @@ const OrderDetails = () => {
   }
 
   const getStatusStep = (status) => {
-  const steps = ["pending", "confirmed", "processing", "shipped", "delivered"];
+  const steps = ["pending", "confirmed", "processing", "shipped", "delivered", "exchange", "return"];
   return steps.indexOf(status);
 };
 
