@@ -51,15 +51,17 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get(`${API}/admin/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const products = res.data.products;
+     const [productsRes, ordersRes, returnsRes] = await Promise.all([ 
+       axios.get(`${API}/products`, { headers: { Authorization: `Bearer ${token}` } }), 
+       axios.get(`${API}/admin/orders`, { headers: { Authorization: `Bearer ${token}` } }), 
+       axios.get(`${API}/admin/returns`, { headers: { Authorization: `Bearer ${token}` } }) 
+     ]);
+      
+      const products = productsRes.data; 
       const lowStock = products.filter(p => p.stock < 5);
       setLowStock(lowStock);
-      const orders = res.data.orders;
-      const returns = res.data.returns;
+      const orders = ordersRes.data; 
+      const returns = returnsRes.data;
 
       setStats({
         totalProducts: products.length,
