@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from fastapi.responses import FileResponse
 import json
 import resend
 import requests
@@ -552,6 +555,26 @@ async def add_address(address: dict, current_user: dict = Depends(get_current_us
     )
     return {"message": "Address added"}
 
+# =========== MINVOICE PDF DOWNLOAD ======
+
+def generate_invoice(order):
+    file_path = f"invoice_{order['id']}.pdf"
+    c = canvas.Canvas(file_path, pagesize=letter)
+
+    c.drawString(50, 750, f"Invoice - {order['id']}")
+    c.drawString(50, 720, f"Customer: {order['customer_name']}")
+    c.drawString(50, 700, f"Email: {order['customer_email']}")
+
+    y = 650
+    for item in order["items"]:
+        c.drawString(50, y, f"{item['product_name']} x {item['quantity']} - ₹{item['price']}")
+        y -= 20
+
+    c.drawString(50, y - 20, f"Total: ₹{order['total_amount']}")
+
+    c.save()
+    return file_path
+
 # ============ CATEGORY ROUTES ============
 
 @api_router.get("/categories", response_model=List[Category])
@@ -814,6 +837,19 @@ async def cancel_order(order_id: str, current_user: dict = Depends(get_current_u
     )
 
     return {"message": "Order cancelled"}
+
+# ============ ORDER ROUTES ============
+
+@api_router.get("/invoice/{order_id}")
+async def download_invoice(order_id: str, current_user: dict = Depends(get_current_user)):
+    order = await db.orders.find_one({"id": order_id, "user_id": current_user["id"]})
+
+    if not order:
+        raise HTTPException(404, "Order not found")
+
+    file_path = generate_invoice(order)
+
+    return FileResponse(file_path, filename=f"invoice_{order_id}.pdf")
 
 # ============ RAZORPAY ROUTES ============
 
