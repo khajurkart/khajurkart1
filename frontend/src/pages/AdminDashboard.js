@@ -96,13 +96,6 @@ const AdminDashboard = () => {
         <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-8">
           Admin Dashboard
         </h1>
-        
-        <button
-          onClick={fetchStats}
-          className="mb-6 px-4 py-2 bg-khajur-primary text-white"
-        >
-          Refresh Stats
-        </button>
 
         {lowStock.length > 0 && (
            <div className="bg-red-100 p-4 mb-6">
@@ -199,12 +192,6 @@ const AdminDashboard = () => {
               <p className="text-sm text-gray-600">
                 View and delete customer reviews
               </p>
-            </div>
-          </Link>
-          <Link to="/admin/orders?filter=pending">
-            <div className="bg-yellow-400 text-black p-8 hover:bg-yellow-300 transition">
-              <h2 className="text-xl font-semibold mb-2">Pending Orders</h2>
-              <p>Quickly view all pending orders</p>
             </div>
           </Link>
         </div>
