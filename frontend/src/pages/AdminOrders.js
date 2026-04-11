@@ -79,9 +79,9 @@ const deleteOrder = async (id) => {
       case 'delivered':
         return 'bg-green-100 text-green-800';
       case 'exchange':
-        return 'bg-green-100 text-green-800'; 
+        return 'bg-amber-100 text-amber-800'; 
       case 'return':
-        return 'bg-green-100 text-green-800';     
+        return 'bg-sky-100 text-sky-800';     
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
@@ -161,8 +161,8 @@ const deleteOrder = async (id) => {
                       <option value="processing">Processing</option>
                       <option value="shipped">Shipped</option>
                       <option value="delivered">Delivered</option>
-                      <option value="delivered">Exchange</option>
-                      <option value="delivered">Return</option>
+                      <option value="exchange">Exchange</option>
+                      <option value="return">Return</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
