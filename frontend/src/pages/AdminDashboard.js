@@ -146,19 +146,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Recent Orders */}
-        <div className="mt-10">
-          <h2 className="text-2xl mb-4">Recent Orders</h2>
-
-          {recentOrders.map(order => (
-            <div key={order.id} className="border p-4 mb-2">
-              <p>ID: {order.id}</p>
-              <p>Status: {order.status}</p>
-              <p>₹{order.total_amount}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link
