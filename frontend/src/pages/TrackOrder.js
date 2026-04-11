@@ -8,7 +8,6 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 console.log("Backend URL:", BACKEND_URL);
 
-
 const TrackOrder = () => {
   const navigate = useNavigate();
   const [trackingId, setTrackingId] = useState('');
@@ -33,6 +32,13 @@ const TrackOrder = () => {
       setLoading(false);
     }
   };
+
+    const fetchOrder = async () => {
+    const res = await fetch(`/api/orders/track/${tracking}`);
+    const data = await res.json();
+    setOrder(data);
+  };
+
 
   const getStatusColor = (status) => {
     switch (status) {
