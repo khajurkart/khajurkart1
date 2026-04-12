@@ -1023,8 +1023,20 @@ async def track_order(tracking_id: str):
 
 @app.delete("/api/admin/orders/{order_id}")
 async def delete_order(order_id: str):
-    await db.orders.delete_one({"id": order_id})
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"is_deleted": True}}
+    )
     return {"message": "Order deleted"}
+
+@api_router.get("/admin/orders")
+async def get_all_orders(admin: dict = Depends(get_admin_user)):
+    orders = await db.orders.find(
+        {"is_deleted": {"$ne": True}},  # ✅ hide deleted
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    return orders
 
 @api_router.get("/admin/reviews")
 async def get_all_reviews(admin: dict = Depends(get_admin_user)):
@@ -1042,12 +1054,19 @@ async def delete_review(review_id: str, admin: dict = Depends(get_admin_user)):
 
 @api_router.delete("/admin/returns/{return_id}")
 async def delete_return(return_id: str, admin: dict = Depends(get_admin_user)):
-    result = await db.returns.delete_one({"id": return_id})
-    
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Return request not found")
-    
+    await db.returns.update_one(
+        {"id": return_id},
+        {"$set": {"is_deleted": True}}
+    )
     return {"message": "Return deleted successfully"}
+
+@api_router.get("/admin/returns")
+async def get_all_returns(admin: dict = Depends(get_admin_user)):
+    returns = await db.returns.find(
+        {"is_deleted": {"$ne": True}},  # hide deleted
+        {"_id": 0}
+    ).to_list(1000)
+    return returns
 
 # ============ RETURN/EXCHANGE ROUTES ============
 
