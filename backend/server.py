@@ -654,9 +654,9 @@ def generate_invoice(order):
         c.drawString(45, y, str(i))
         c.drawString(80, y, item["product_name"])
         c.drawString(230, y, str(item["quantity"]))
-        c.drawString(270, y, f"₹{item['price']}")
+        c.drawString(270, y, f"Rs.{item['price']}")
         c.drawString(330, y, f"{discount}%")
-        c.drawString(410, y, f"₹{round(final_price, 2)}")
+        c.drawString(410, y, f"Rs.{round(final_price, 2)}")
 
         y -= 20
 
@@ -664,7 +664,7 @@ def generate_invoice(order):
     c.line(40, y, width - 40, y)
 
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(width - 40, y - 20, f"Total: ₹{order['total_amount']}")
+    c.drawRightString(width - 40, y - 20, f"Total: Rs.{order['total_amount']}")
 
     c.save()
     return file_path
