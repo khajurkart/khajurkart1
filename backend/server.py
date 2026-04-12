@@ -4,6 +4,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from starlette.middleware.cors import CORSMiddleware
+from flask import Flask
+from flask_cors import CORS
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
@@ -947,6 +949,22 @@ async def download_invoice(order_id: str, current_user: dict = Depends(get_curre
     file_path = generate_invoice(order)
 
     return FileResponse(file_path, filename=f"invoice_{order_id}.pdf")
+
+app = Flask(__name__)
+
+# ✅ ADD HERE
+CORS(app, resources={r"/api/*": {"origins": "https://khajurkart.com"}})
+
+@app.route("/api/invoice/<order_id>")
+def get_invoice(order_id):
+    try:
+        print("Order ID:", order_id)  # DEBUG
+
+        # your existing logic
+
+    except Exception as e:
+        print("ERROR:", str(e))  # 🔥 THIS WILL SHOW REAL ERROR
+        return {"error": str(e)}, 500
 
 # ============ RAZORPAY ROUTES ============
 
