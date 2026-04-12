@@ -838,6 +838,11 @@ async def cancel_order(order_id: str, current_user: dict = Depends(get_current_u
 
     return {"message": "Order cancelled"}
 
+@app.delete("/api/orders/{order_id}")
+async def delete_order(order_id: str):
+    await db.orders.delete_one({"id": order_id})
+    return {"message": "Order deleted"}
+
 # ============ ORDER ROUTES ============
 
 @api_router.get("/invoice/{order_id}")
