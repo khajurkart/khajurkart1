@@ -19,6 +19,11 @@ const OrderDetails = () => {
       }
     });
 
+    if (!res.ok) {
+      alert("Invoice failed to load");
+      return;
+    }
+
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
 
