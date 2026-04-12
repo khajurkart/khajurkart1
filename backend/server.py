@@ -636,7 +636,6 @@ def generate_invoice(order):
     c.drawString(80, y + 8, "Item Name")
     c.drawString(230, y + 8, "Qty")
     c.drawString(270, y + 8, "Price")
-    discount = item.get("discount", 0)
     c.drawString(330, y + 8, "Disc %")
     c.drawString(410, y + 8, "Final")
 
