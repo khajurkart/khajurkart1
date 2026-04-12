@@ -843,7 +843,7 @@ async def delete_order(order_id: str):
     await db.orders.delete_one({"id": order_id})
     return {"message": "Order deleted"}
 
-# ============ ORDER ROUTES ============
+# ============ INVOICE ROUTES ============
 
 @api_router.get("/invoice/{order_id}")
 async def download_invoice(order_id: str, current_user: dict = Depends(get_current_user)):
