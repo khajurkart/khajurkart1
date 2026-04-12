@@ -855,15 +855,19 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
     items_with_discount = []
 
     for item in order_data.items:
-        product = await db.products.find_one({"id": item.product_id})
+        product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
 
-        discount = product.get("discount", 0) if product else 0
+        if not product:
+            continue  # skip if product missing
+
+        discount = product.get("discount", 0)
+        price = product.get("price", 0)
 
         items_with_discount.append({
-            "product_name": product["name"] if product else "Item",
+            "product_name": product.get("name"),
             "quantity": item.quantity,
-            "price": item.price,
-            "discount": discount
+            "price": price,              # ✅ FIXED (from DB)
+            "discount": discount         # ✅ MUST COME FROM DB
         })
     
     order_doc = {
