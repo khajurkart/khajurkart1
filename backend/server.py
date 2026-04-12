@@ -858,16 +858,22 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
 
         if not product:
-            continue  # skip if product missing
+             continue
 
-        discount = product.get("discount", 0)
         price = product.get("price", 0)
+        original_price = product.get("original_price", price)
+
+         # ✅ CALCULATE DISCOUNT %
+        if original_price > price:
+            discount = round(((original_price - price) / original_price) * 100)
+        else:
+            discount = 0
 
         items_with_discount.append({
             "product_name": product.get("name"),
             "quantity": item.quantity,
-            "price": price,              # ✅ FIXED (from DB)
-            "discount": discount         # ✅ MUST COME FROM DB
+            "price": price,
+            "discount": discount
         })
     
     order_doc = {
