@@ -962,6 +962,19 @@ async def download_invoice(order_id: str, current_user: dict = Depends(get_curre
 
     return FileResponse(file_path, filename=f"invoice_{order_id}.pdf")
 
+@app.get("/api/invoice/{order_id}")
+async def get_invoice(order_id: str):
+    try:
+        order = await db.orders.find_one({"id": order_id})
+        print(order)  # 👈 DEBUG
+
+        file_path = generate_invoice(order)
+        return FileResponse(file_path, media_type='application/pdf')
+
+    except Exception as e:
+        print("ERROR:", e)
+        raise HTTPException(500, str(e))
+
 # ============ RAZORPAY ROUTES ============
 
 @api_router.post("/razorpay/create-order")
