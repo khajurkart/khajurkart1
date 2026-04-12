@@ -14,7 +14,6 @@ from email.message import EmailMessage
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 import json
@@ -46,15 +45,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 # Razorpay client
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-pdfmetrics.registerFont(
-    TTFont('Poppins', os.path.join(BASE_DIR, 'fonts/Poppins-Regular.ttf'))
-)
-pdfmetrics.registerFont(
-    TTFont('Poppins-Bold', os.path.join(BASE_DIR, 'fonts/Poppins-Bold.ttf'))
-)
 
 app = FastAPI()
 
@@ -573,70 +563,87 @@ def generate_invoice(order):
     file_path = f"/tmp/invoice_{order['id']}.pdf"
     c = canvas.Canvas(file_path, pagesize=letter)
 
-    # 🔵 HEADER BACKGROUND
-    c.setFillColorRGB(0.1, 0.2, 0.5)
-    c.rect(0, 720, 600, 80, fill=1)
+    width, height = letter
 
-    # 🖼️ LOGO (LEFT SIDE)
-    c.drawImage(
-        "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg",
-        50, 730,
-        width=50,
-        height=50,
-        mask='auto'
-    )
+    # 🎨 BRAND COLORS (match your website)
+    primary_color = colors.HexColor("#0F172A")  # dark navy
+    accent_color = colors.HexColor("#F59E0B")   # gold/orange
 
-    # 🏷️ BRAND NAME (RIGHT SIDE OF LOGO)
-    c.setFont("Poppins-Bold", 20)
-    c.setFillColorRGB(1, 1, 1)
-    c.drawString(110, 750, "KhajurKart")
+    # 🔷 HEADER BACKGROUND
+    c.setFillColor(primary_color)
+    c.rect(0, height - 100, width, 100, fill=1)
+
+    # 🖼️ LOGO (IMPORTANT: use direct image URL or local file)
+    try:
+        c.drawImage(
+            "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg",
+            40, height - 80, width=50, height=50, mask='auto'
+        )
+    except:
+        pass  # avoid crash if image fails
+
+    # 🏢 WEBSITE NAME (BIG + STYLISH)
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(100, height - 60, "KhajurKart")
 
     # 📄 INVOICE TITLE
-    c.setFillColorRGB(0, 0, 0)
-    c.setFont("Poppins-Bold", 18)
-    c.drawString(50, 690, "INVOICE")
+    c.setFont("Helvetica-Bold", 22)
+    c.setFillColor(primary_color)
+    c.drawString(40, height - 130, "INVOICE")
 
-    # 📌 ORDER INFO
-    c.setFont("Poppins", 11)
-    c.drawString(50, 670, f"Order ID: {order['id']}")
-    c.drawString(50, 655, f"Date: {order['created_at'][:10]}")
+    # 📌 ORDER INFO BOX
+    c.setFillColor(colors.lightgrey)
+    c.rect(350, height - 180, 200, 60, fill=1)
+
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(360, height - 140, f"Order ID: {order['id']}")
+    c.drawString(360, height - 155, f"Date: {order['created_at'][:10]}")
 
     # 👤 CUSTOMER DETAILS
-    c.setFont("Poppins-Bold", 12)
-    c.drawString(50, 630, "Bill To:")
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(40, height - 180, "Bill To:")
 
-    c.setFont("Poppins", 11)
-    c.drawString(50, 615, order['customer_name'])
-    c.drawString(50, 600, order['customer_email'])
+    c.setFont("Helvetica", 11)
+    c.drawString(40, height - 200, order['customer_name'])
+    c.drawString(40, height - 215, order['customer_email'])
 
     # 📦 TABLE HEADER
-    c.setFont("Poppins-Bold", 12)
-    c.drawString(50, 560, "Product")
-    c.drawString(300, 560, "Qty")
-    c.drawString(400, 560, "Price")
+    c.setFillColor(accent_color)
+    c.rect(40, height - 260, 520, 25, fill=1)
 
-    # LINE
-    c.setStrokeColorRGB(0.8, 0.8, 0.8)
-    c.line(50, 555, 550, 555)
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(50, height - 245, "Product")
+    c.drawString(300, height - 245, "Qty")
+    c.drawString(350, height - 245, "Price")
 
     # 📦 ITEMS
-    y = 530
-    c.setFont("Poppins", 11)
+    y = height - 280
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica", 11)
 
     for item in order["items"]:
         c.drawString(50, y, item["product_name"])
         c.drawString(300, y, str(item["quantity"]))
-        c.drawString(400, y, f"₹{item['price']}")
+        c.drawString(350, y, f"₹{item['price']}")
         y -= 20
 
-    # 💰 TOTAL
-    c.setFont("Poppins-Bold", 14)
-    c.drawString(50, y - 20, f"Total: ₹{order['total_amount']}")
+    # ➖ LINE
+    c.line(40, y, 560, y)
 
-    # ❤️ FOOTER
-    c.setFont("Poppins", 10)
-    c.setFillColorRGB(0.3, 0.3, 0.3)
-    c.drawString(50, 50, "Thank you for shopping with KhajurKart ❤️")
+    # 💰 TOTAL SECTION
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(350, y - 30, f"Total: ₹{order['total_amount']}")
+
+    # 🧾 FOOTER
+    c.setFillColor(primary_color)
+    c.rect(0, 0, width, 50, fill=1)
+
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica", 10)
+    c.drawCentredString(width / 2, 20, "Thank you for shopping with KhajurKart ❤️")
 
     c.save()
     return file_path
