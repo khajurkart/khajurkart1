@@ -1028,6 +1028,7 @@ async def track_order(tracking_id: str):
 
 @app.delete("/api/admin/orders/{order_id}")
 async def delete_order(order_id: str):
+    print("Deleting order:", order_id)  # 👈 check if this runs
     await db.orders.update_one(
         {"id": order_id},
         {"$set": {"is_deleted": True}}
