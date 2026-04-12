@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
 from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 import json
@@ -555,21 +556,43 @@ async def add_address(address: dict, current_user: dict = Depends(get_current_us
     )
     return {"message": "Address added"}
 
-# =========== MINVOICE PDF DOWNLOAD ======
+# =========== INVOICE PDF DOWNLOAD ======
 
 def generate_invoice(order):
-    file_path = f"invoice_{order['id']}.pdf"
+    file_path = f"/tmp/invoice_{order['id']}.pdf"
     c = canvas.Canvas(file_path, pagesize=letter)
 
-    c.drawString(50, 750, f"Invoice - {order['id']}")
-    c.drawString(50, 720, f"Customer: {order['customer_name']}")
-    c.drawString(50, 700, f"Email: {order['customer_email']}")
+    # 🔵 HEADER BACKGROUND
+    c.setFillColorRGB(0.2, 0.4, 0.7)
+    c.rect(0, 700, 600, 100, fill=1)
 
-    y = 650
+    # 🖼️ LOGO (PUT YOUR FILE PATH)
+    c.drawImage("https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg", 50, 720, width=60, height=60)
+
+    # 🏢 COMPANY NAME
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(120, 750, "KhajurKart")
+
+    # 📄 INVOICE TITLE
+    c.setFont("Helvetica-Bold", 20)
+    c.drawString(50, 680, "INVOICE")
+
+    # 👤 CUSTOMER
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica", 12)
+    c.drawString(50, 650, f"Name: {order['customer_name']}")
+    c.drawString(50, 630, f"Email: {order['customer_email']}")
+
+    # 📦 ITEMS
+    y = 580
     for item in order["items"]:
-        c.drawString(50, y, f"{item['product_name']} x {item['quantity']} - ₹{item['price']}")
+        c.drawString(50, y, f"{item['product_name']} x {item['quantity']}")
+        c.drawString(400, y, f"₹{item['price']}")
         y -= 20
 
+    # 💰 TOTAL
+    c.setFont("Helvetica-Bold", 14)
     c.drawString(50, y - 20, f"Total: ₹{order['total_amount']}")
 
     c.save()
