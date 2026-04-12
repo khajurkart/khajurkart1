@@ -615,9 +615,7 @@ def generate_invoice(order):
     c.setFont("Helvetica", 10)
     c.drawString(40, height - 205, order['customer_name'])
     c.drawString(40, height - 220, order['customer_email'])
-
-    # ✅ CUSTOMER ADDRESS
-    c.drawString(40, height - 235, order.get('customer_address', 'N/A'))
+    c.drawString(40, height - 215, order['customer_address'])
 
     # ================= ORDER INFO =================
     c.setFont("Helvetica-Bold", 11)
