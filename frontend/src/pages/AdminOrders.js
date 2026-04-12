@@ -59,7 +59,7 @@ const AdminOrders = () => {
 const deleteOrder = async (id) => {
   if (!window.confirm("Delete this order?")) return;
 
-  await axios.delete(`${BACKEND_URL}/api/admin/orders/${id}`), {
+  await axios.delete(`${API}/admin/orders/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
