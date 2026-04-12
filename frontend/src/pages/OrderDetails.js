@@ -120,18 +120,18 @@ const OrderDetails = () => {
           <p><strong>Status:</strong> {order.status}</p>
           <p><strong>Total Amount:</strong> ₹{order.total_amount}</p>
           <p><strong>Payment Method:</strong> {order.payment_method}</p>
-          <button
-            onClick={downloadInvoice}
-            className="mt-3 bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-800"
-          >
-            Download Invoice
-          </button>
           <p>
             <strong>Created At:</strong>{" "}
             {order.created_at
               ? new Date(order.created_at).toLocaleString()
               : "N/A"}
             </p>
+          <button
+            onClick={downloadInvoice}
+            className="mt-3 bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-800"
+          >
+            Download Invoice
+          </button>
          
           {/* ✅ CANCEL BUTTON */}
           {(order.status === "pending" || order.status === "confirmed") && (
