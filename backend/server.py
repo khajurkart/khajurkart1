@@ -847,7 +847,7 @@ async def delete_order(order_id: str):
 
 @api_router.get("/invoice/{order_id}")
 async def download_invoice(order_id: str, current_user: dict = Depends(get_current_user)):
-    order = await db.orders.find_one({"id": order_id, "user_id": current_user["id"]})
+    order = await db.orders.find_one({"id": order_id, "user_id": current_user["id"]},{"_id": 0})
 
     if not order:
         raise HTTPException(404, "Order not found")
