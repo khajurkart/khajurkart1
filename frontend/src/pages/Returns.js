@@ -125,6 +125,19 @@ const Returns = () => {
     );
   }
 
+  const handleDelete = async (id) => {
+  if (!confirm("Delete this return request?")) return;
+
+  await fetch(`${API}/admin/returns/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  fetchData(); // ✅ refresh list
+};
+
   return (
     <div className="min-h-screen bg-khajur-cream py-8" data-testid="returns-page">
       <div className="max-w-6xl mx-auto px-6">
@@ -163,6 +176,17 @@ const Returns = () => {
                 <div key={returnReq.id} className="bg-white border-2 border-khajur-primary/20 rounded-sm p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
+                      {/* existing content */}
+                    </div>
+
+                    {/* ✅ ADD DELETE BUTTON HERE */}
+                    <button
+                      onClick={() => handleDelete(returnReq.id)}
+                      className="text-red-600 hover:underline text-sm"
+                     >
+                        Delete
+                      </button>
+                    </div>
                       <div className="flex items-center space-x-3 mb-2">
                         <span className="text-sm font-medium text-khajur-dark/60">
                           Request #{returnReq.id.substring(0, 12)}...
