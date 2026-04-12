@@ -1026,7 +1026,7 @@ async def track_order(tracking_id: str):
         raise HTTPException(status_code=404, detail="Order not found with this tracking ID")
     return order
 
-@app.delete("/api/admin/orders/{order_id}")
+@app.delete("/admin/orders/{order_id}")
 async def delete_order(order_id: str):
     print("Deleting order:", order_id)  # 👈 check if this runs
     await db.orders.update_one(
