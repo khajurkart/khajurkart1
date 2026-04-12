@@ -59,17 +59,12 @@ const AdminOrders = () => {
 const deleteOrder = async (id) => {
   if (!window.confirm("Delete this order?")) return;
 
-  try {
-    const res = await axios.delete(`${API}/admin/orders/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+  await axios.delete(`${API}/admin/orders/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
 
-    console.log(res.data); // 👈 check response
-    fetchOrders();
-
-  } catch (err) {
-    console.error("DELETE ERROR:", err.response?.data || err.message);
-  }
+  // ✅ Remove from UI instantly
+  setOrders(prev => prev.filter(order => order.id !== id));
 };
 
   const getStatusColor = (status) => {
