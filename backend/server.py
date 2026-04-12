@@ -417,7 +417,7 @@ async def send_email(name, email, phone, message):
     try:
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
-          <img src="https://khajurkart.com/https://res-console.cloudinary.com/dwpqa8pgl/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/TE9HT19qMXU3enU=/template_primary" width="120" />
+          <img src="https://khajurkart.com/https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg" width="120" />
           <h2>📩 New Contact Message</h2>
           <p><strong>Name:</strong> {name}</p>
           <p><strong>Email:</strong> {email}</p>
@@ -447,7 +447,7 @@ async def send_auto_reply(name, email):
     try:
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
-          <img src="https://khajurkart.com/https://res-console.cloudinary.com/dwpqa8pgl/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/TE9HT19qMXU3enU=/template_primary" width="120" />
+          <img src="https://khajurkart.com/https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg" width="120" />
           <h2>🙏 Thank You for Contacting KhajurKart</h2>
           
           <p>Hi {name},</p>
