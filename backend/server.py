@@ -565,88 +565,114 @@ def generate_invoice(order):
 
     width, height = letter
 
-    # 🎨 BRAND COLORS (match your website)
-    primary_color = colors.HexColor("#0F172A")  # dark navy
-    accent_color = colors.HexColor("#F59E0B")   # gold/orange
+    # 🎨 YOUR BRAND COLOR (change if needed)
+    primary = colors.HexColor("#16A34A")  # green (KhajurKart style)
+    light = colors.HexColor("#F0FDF4")
 
-    # 🔷 HEADER BACKGROUND
-    c.setFillColor(primary_color)
-    c.rect(0, height - 100, width, 100, fill=1)
+    # 🔷 HEADER LINE
+    c.setStrokeColor(primary)
+    c.setLineWidth(2)
+    c.line(40, height - 110, width - 40, height - 110)
 
-    # 🖼️ LOGO (IMPORTANT: use direct image URL or local file)
+    # 🖼️ LOGO (LEFT)
     try:
         c.drawImage(
             "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg",
-            40, height - 80, width=50, height=50, mask='auto'
+            40, height - 90, width=50, height=50
         )
     except:
-        pass  # avoid crash if image fails
+        pass
 
-    # 🏢 WEBSITE NAME (BIG + STYLISH)
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(100, height - 60, "KhajurKart")
+    # 📄 INVOICE TEXT (BELOW LOGO)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(40, height - 110, "INVOICE")
 
-    # 📄 INVOICE TITLE
-    c.setFont("Helvetica-Bold", 22)
-    c.setFillColor(primary_color)
-    c.drawString(40, height - 130, "INVOICE")
+    # 🏢 WEBSITE DETAILS (RIGHT SIDE)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawRightString(width - 40, height - 50, "KhajurKart")
 
-    # 📌 ORDER INFO BOX
-    c.setFillColor(colors.lightgrey)
-    c.rect(350, height - 180, 200, 60, fill=1)
+    c.setFont("Helvetica", 10)
+    c.drawRightString(width - 40, height - 65, "Number: 7981002137")
+    c.drawRightString(width - 40, height - 80, "Gmail: khajurkart@gmail.com")
 
-    c.setFillColor(colors.black)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(360, height - 140, f"Order ID: {order['id']}")
-    c.drawString(360, height - 155, f"Date: {order['created_at'][:10]}")
+    c.drawRightString(width - 40, height - 95,
+        "10-3-313/a, AR Raheem Residency")
+    c.drawRightString(width - 40, height - 108,
+        "IASE College, Vijaya Nagar Colony")
+    c.drawRightString(width - 40, height - 121,
+        "Hyderabad, Telangana 500057")
 
-    # 👤 CUSTOMER DETAILS
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(40, height - 180, "Bill To:")
+    # 📌 ORDER INFO (LEFT)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(40, height - 150, f"Order ID: {order['id']}")
+    c.drawString(40, height - 165, f"Date: {order['created_at'][:10]}")
 
-    c.setFont("Helvetica", 11)
-    c.drawString(40, height - 200, order['customer_name'])
-    c.drawString(40, height - 215, order['customer_email'])
+    # 👤 BILL TO (RIGHT)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawRightString(width - 40, height - 150, "Bill To:")
+
+    c.setFont("Helvetica", 10)
+    c.drawRightString(width - 40, height - 165, order['customer_name'])
+    c.drawRightString(width - 40, height - 180, order['customer_email'])
+    c.drawRightString(width - 40, height - 195, order.get('address', ''))
+
+    # ➖ LIGHT LINE
+    c.setStrokeColor(colors.grey)
+    c.setLineWidth(1)
+    c.line(40, height - 210, width - 40, height - 210)
+
+    # 📦 TABLE HEADER BACKGROUND
+    c.setFillColor(light)
+    c.rect(40, height - 240, width - 80, 25, fill=1)
 
     # 📦 TABLE HEADER
-    c.setFillColor(accent_color)
-    c.rect(40, height - 260, 520, 25, fill=1)
+    c.setFillColor(primary)
+    c.setFont("Helvetica-Bold", 10)
 
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(50, height - 245, "Product")
-    c.drawString(300, height - 245, "Qty")
-    c.drawString(350, height - 245, "Price")
+    headers = ["S.No", "Item", "Qty", "Price", "Disc %", "Final"]
+    x_positions = [45, 80, 260, 310, 380, 460]
+
+    for i, h in enumerate(headers):
+        c.drawString(x_positions[i], height - 225, h)
 
     # 📦 ITEMS
-    y = height - 280
+    y = height - 260
+    c.setFont("Helvetica", 10)
     c.setFillColor(colors.black)
-    c.setFont("Helvetica", 11)
 
-    for item in order["items"]:
-        c.drawString(50, y, item["product_name"])
-        c.drawString(300, y, str(item["quantity"]))
-        c.drawString(350, y, f"₹{item['price']}")
+    for i, item in enumerate(order["items"], start=1):
+        discount = item.get("discount", 0)
+        final_price = item["price"] * (1 - discount / 100)
+
+        values = [
+            str(i),
+            item["product_name"],
+            str(item["quantity"]),
+            f"₹{item['price']}",
+            f"{discount}%",
+            f"₹{round(final_price, 2)}"
+        ]
+
+        for j, val in enumerate(values):
+            c.drawString(x_positions[j], y, val)
+
         y -= 20
 
-    # ➖ LINE
-    c.line(40, y, 560, y)
+    # ➖ LINE BEFORE TOTAL
+    c.line(40, y, width - 40, y)
 
-    # 💰 TOTAL SECTION
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(350, y - 30, f"Total: ₹{order['total_amount']}")
+    # 💰 TOTAL
+    c.setFont("Helvetica-Bold", 12)
+    c.drawRightString(width - 40, y - 25, f"Total: ₹{order['total_amount']}")
 
     # 🧾 FOOTER
-    c.setFillColor(primary_color)
-    c.rect(0, 0, width, 50, fill=1)
-
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica", 10)
-    c.drawCentredString(width / 2, 20, "Thank you for shopping with KhajurKart ❤️")
+    c.setFont("Helvetica", 9)
+    c.setFillColor(colors.grey)
+    c.drawCentredString(width / 2, 30, "Thank you for shopping with KhajurKart")
 
     c.save()
     return file_path
+
 
 # ============ CATEGORY ROUTES ============
 
