@@ -1031,7 +1031,8 @@ async def delete_order(order_id: str):
     print("Deleting order:", order_id)  # 👈 check if this runs
     await db.orders.update_one(
         {"id": order_id},
-        {"$set": {"is_deleted": True}}
+        {"$set": {"is_deleted": True}},
+        upsert=False
     )
     return {"message": "Order deleted"}
 
