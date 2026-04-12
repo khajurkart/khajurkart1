@@ -968,16 +968,16 @@ async def get_invoice(order_id: str):
         order = await db.orders.find_one({"id": order_id})
 
         if not order:
-            raise Exception("Order not found")
+            raise HTTPException(404, "Order not found")
 
-        print("ORDER DATA:", order)  # 👈 DEBUG
+        print("ORDER DATA:", order)  # ✅ DEBUG
 
         file_path = generate_invoice(order)
 
         return FileResponse(file_path, media_type='application/pdf')
 
     except Exception as e:
-        print("INVOICE ERROR:", str(e))  # 👈 THIS WILL SHOW REAL ISSUE
+        print("INVOICE ERROR:", str(e))  # ✅ SEE REAL ERROR
         raise HTTPException(500, str(e))
 
 # ============ RAZORPAY ROUTES ============
