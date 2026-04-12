@@ -13,6 +13,8 @@ from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 import json
@@ -46,6 +48,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
 
 app = FastAPI()
+
+pdfmetrics.registerFont(TTFont('Poppins', 'fonts/Poppins-Regular.ttf'))
+pdfmetrics.registerFont(TTFont('Poppins-Bold', 'fonts/Poppins-Bold.ttf'))
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -563,37 +568,69 @@ def generate_invoice(order):
     c = canvas.Canvas(file_path, pagesize=letter)
 
     # 🔵 HEADER BACKGROUND
-    c.setFillColorRGB(0.2, 0.4, 0.7)
-    c.rect(0, 700, 600, 100, fill=1)
+    c.setFillColorRGB(0.1, 0.2, 0.5)
+    c.rect(0, 720, 600, 80, fill=1)
 
-    # 🖼️ LOGO (PUT YOUR FILE PATH)
-    c.drawImage("https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg", 50, 720, width=60, height=60)
+    # 🖼️ LOGO (LEFT SIDE)
+    c.drawImage(
+        "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg",
+        50, 730,
+        width=50,
+        height=50,
+        mask='auto'
+    )
 
-    # 🏢 COMPANY NAME
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(120, 750, "KhajurKart")
+    # 🏷️ BRAND NAME (RIGHT SIDE OF LOGO)
+    c.setFont("Poppins-Bold", 20)
+    c.setFillColorRGB(1, 1, 1)
+    c.drawString(110, 750, "KhajurKart")
 
     # 📄 INVOICE TITLE
-    c.setFont("Helvetica-Bold", 20)
-    c.drawString(50, 680, "INVOICE")
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont("Poppins-Bold", 18)
+    c.drawString(50, 690, "INVOICE")
 
-    # 👤 CUSTOMER
-    c.setFillColor(colors.black)
-    c.setFont("Helvetica", 12)
-    c.drawString(50, 650, f"Name: {order['customer_name']}")
-    c.drawString(50, 630, f"Email: {order['customer_email']}")
+    # 📌 ORDER INFO
+    c.setFont("Poppins", 11)
+    c.drawString(50, 670, f"Order ID: {order['id']}")
+    c.drawString(50, 655, f"Date: {order['created_at'][:10]}")
+
+    # 👤 CUSTOMER DETAILS
+    c.setFont("Poppins-Bold", 12)
+    c.drawString(50, 630, "Bill To:")
+
+    c.setFont("Poppins", 11)
+    c.drawString(50, 615, order['customer_name'])
+    c.drawString(50, 600, order['customer_email'])
+
+    # 📦 TABLE HEADER
+    c.setFont("Poppins-Bold", 12)
+    c.drawString(50, 560, "Product")
+    c.drawString(300, 560, "Qty")
+    c.drawString(400, 560, "Price")
+
+    # LINE
+    c.setStrokeColorRGB(0.8, 0.8, 0.8)
+    c.line(50, 555, 550, 555)
 
     # 📦 ITEMS
-    y = 580
+    y = 530
+    c.setFont("Poppins", 11)
+
     for item in order["items"]:
-        c.drawString(50, y, f"{item['product_name']} x {item['quantity']}")
+        c.drawString(50, y, item["product_name"])
+        c.drawString(300, y, str(item["quantity"]))
         c.drawString(400, y, f"₹{item['price']}")
         y -= 20
 
     # 💰 TOTAL
-    c.setFont("Helvetica-Bold", 14)
+    c.setFont("Poppins-Bold", 14)
     c.drawString(50, y - 20, f"Total: ₹{order['total_amount']}")
+
+    # ❤️ FOOTER
+    c.setFont("Poppins", 10)
+    c.setFillColorRGB(0.3, 0.3, 0.3)
+    c.drawString(50, 50, "Thank you for shopping with KhajurKart ❤️")
 
     c.save()
     return file_path
