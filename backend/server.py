@@ -47,10 +47,16 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Razorpay client
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
 
-app = FastAPI()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-pdfmetrics.registerFont(TTFont('Poppins', 'fonts/Poppins-Regular.ttf'))
-pdfmetrics.registerFont(TTFont('Poppins-Bold', 'fonts/Poppins-Bold.ttf'))
+pdfmetrics.registerFont(
+    TTFont('Poppins', os.path.join(BASE_DIR, 'fonts/Poppins-Regular.ttf'))
+)
+pdfmetrics.registerFont(
+    TTFont('Poppins-Bold', os.path.join(BASE_DIR, 'fonts/Poppins-Bold.ttf'))
+)
+
+app = FastAPI()
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
