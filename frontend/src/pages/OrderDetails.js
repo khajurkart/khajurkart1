@@ -10,6 +10,21 @@ const OrderDetails = () => {
   const { id } = useParams();
 
   const [order, setOrder] = useState(null);
+  const downloadInvoice = async () => {
+    const res = await fetch(`/api/invoice/${order.id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoice_${order.id}.pdf`;
+    a.click();
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -101,12 +116,11 @@ const OrderDetails = () => {
         <div className="bg-white shadow-md rounded p-6 mb-6">
           <p><strong>Order ID:</strong> {order.id}</p>
           <p><strong>Status:</strong> {order.status}</p>
-          {/* 👇 ADD HERE */}
-          <a href={`/api/invoice/${order.id}`} target="_blank">
-            Download Invoice
-          </a>
           <p><strong>Total Amount:</strong> ₹{order.total_amount}</p>
           <p><strong>Payment Method:</strong> {order.payment_method}</p>
+          <button onClick={downloadInvoice}>
+            Download Invoice
+          </button>
           <p>
             <strong>Created At:</strong>{" "}
             {order.created_at
