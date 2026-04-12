@@ -966,13 +966,18 @@ async def download_invoice(order_id: str, current_user: dict = Depends(get_curre
 async def get_invoice(order_id: str):
     try:
         order = await db.orders.find_one({"id": order_id})
-        print(order)  # 👈 DEBUG
+
+        if not order:
+            raise Exception("Order not found")
+
+        print("ORDER DATA:", order)  # 👈 DEBUG
 
         file_path = generate_invoice(order)
+
         return FileResponse(file_path, media_type='application/pdf')
 
     except Exception as e:
-        print("ERROR:", e)
+        print("INVOICE ERROR:", str(e))  # 👈 THIS WILL SHOW REAL ISSUE
         raise HTTPException(500, str(e))
 
 # ============ RAZORPAY ROUTES ============
