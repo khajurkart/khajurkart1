@@ -34,6 +34,16 @@ const MyOrders = () => {
     }
   };
 
+const deleteOrder = async (id) => {
+  if (!window.confirm("Delete this order?")) return;
+
+  await axios.delete(`${API}/orders/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  fetchOrders(); // ✅ refresh list
+};
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
@@ -165,6 +175,13 @@ const MyOrders = () => {
                     View Details
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </Link>
+                  {/* ✅ DELETE BUTTON */}
+                  <button
+                    onClick={() => deleteOrder(order.id)}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                   >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
