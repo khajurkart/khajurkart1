@@ -128,7 +128,7 @@ const Returns = () => {
   const handleDelete = async (id) => {
   if (!confirm("Delete this return request?")) return;
 
-  await fetch(`${API}/admin/returns/${id}`, {
+  await fetch(`${API}/returns/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
