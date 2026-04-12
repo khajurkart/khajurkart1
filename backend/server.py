@@ -1036,15 +1036,10 @@ async def delete_order(order_id: str):
 
 @api_router.get("/admin/orders")
 async def get_all_orders(admin: dict = Depends(get_admin_user)):
-    orders = await db.orders.find(
-        {
-            "$or": [
-                {"is_deleted": {"$exists": False}},
-                {"is_deleted": False}
-            ]
-        },
+    return await db.orders.find(
+        {"is_deleted": {"$ne": True}},
         {"_id": 0}
-    ).sort("created_at", -1).to_list(1000)
+    ).to_list(1000)
 
     return orders
 
