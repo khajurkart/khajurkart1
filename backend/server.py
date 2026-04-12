@@ -1040,6 +1040,15 @@ async def delete_review(review_id: str, admin: dict = Depends(get_admin_user)):
 
     return {"message": "Review deleted successfully"}
 
+@api_router.delete("/admin/returns/{return_id}")
+async def delete_return(return_id: str, admin: dict = Depends(get_admin_user)):
+    result = await db.returns.delete_one({"id": return_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Return request not found")
+    
+    return {"message": "Return deleted successfully"}
+
 # ============ RETURN/EXCHANGE ROUTES ============
 
 @api_router.post("/returns")
