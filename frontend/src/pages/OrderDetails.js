@@ -11,7 +11,9 @@ const OrderDetails = () => {
 
   const [order, setOrder] = useState(null);
   const downloadInvoice = async () => {
-    const res = await fetch(`/api/invoice/${order.id}`, {
+    const token = localStorage.getItem("token"); // ✅ ADD THIS
+
+    const res = await fetch(`${API}/invoice/${order.id}`, { // ✅ use API
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -118,7 +120,10 @@ const OrderDetails = () => {
           <p><strong>Status:</strong> {order.status}</p>
           <p><strong>Total Amount:</strong> ₹{order.total_amount}</p>
           <p><strong>Payment Method:</strong> {order.payment_method}</p>
-          <button onClick={downloadInvoice}>
+          <button
+            onClick={downloadInvoice}
+            className="mt-3 bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-800"
+          >
             Download Invoice
           </button>
           <p>
