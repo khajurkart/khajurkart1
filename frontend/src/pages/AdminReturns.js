@@ -72,6 +72,20 @@ const AdminReturns = () => {
       toast.error(error.response?.data?.detail || 'Failed to update status');
     }
   };
+  
+const handleDelete = async (id) => {
+  if (!confirm("Delete this return request?")) return;
+
+  await fetch(`${API}/admin/returns/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  fetchData(); // ✅ refresh list
+};
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -124,7 +138,7 @@ const AdminReturns = () => {
   }
 
   if (!isAdmin) return null;
-
+  
   return (
     <div className="min-h-screen py-20 bg-white" data-testid="admin-returns-page">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -188,6 +202,18 @@ const AdminReturns = () => {
                 <div className="bg-khajur-cream p-6 border-b border-khajur-border">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
+                      <div className="flex items-center justify-between">
+                        <div>{/* existing content */}</div>
+                        
+                        {/* ✅ ADD DELETE BUTTON HERE */}
+                        <button
+                          onClick={() => handleDelete(returnReq.id)}
+                          className="text-red-600 hover:underline text-sm font-medium"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                            
                       <div className="flex items-center space-x-3 mb-2">
                         <span className="font-serif text-lg font-bold text-khajur-primary">
                           Request #{returnReq.id.substring(7, 19)}
