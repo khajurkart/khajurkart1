@@ -991,11 +991,6 @@ async def delete_product(product_id: str, admin: dict = Depends(get_admin_user))
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product deleted successfully"}
 
-@api_router.get("/admin/orders")
-async def get_all_orders(admin: dict = Depends(get_admin_user)):
-    orders = await db.orders.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    return orders
-
 @api_router.put("/admin/orders/{order_id}/status")
 async def update_order_status(order_id: str, status: str, admin: dict = Depends(get_admin_user)):
     valid_statuses = ["pending", "confirmed", "processing", "shipped", "delivered", "exchange", "return", "cancelled"]
@@ -1019,13 +1014,6 @@ async def update_order_status(order_id: str, status: str, admin: dict = Depends(
     
     return {"message": "Order status updated successfully"}
 
-@api_router.get("/orders/track/{tracking_id}")
-async def track_order(tracking_id: str):
-    order = await db.orders.find_one({"tracking_id": tracking_id}, {"_id": 0})
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found with this tracking ID")
-    return order
-
 @app.delete("/api/admin/orders/{order_id}")
 async def delete_order(order_id: str):
     await db.orders.update_one(
@@ -1042,6 +1030,13 @@ async def get_all_orders(admin: dict = Depends(get_admin_user)):
     ).to_list(1000)
 
     return orders
+    
+@api_router.get("/orders/track/{tracking_id}")
+async def track_order(tracking_id: str):
+    order = await db.orders.find_one({"tracking_id": tracking_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found with this tracking ID")
+    return order
 
 @api_router.get("/admin/reviews")
 async def get_all_reviews(admin: dict = Depends(get_admin_user)):
