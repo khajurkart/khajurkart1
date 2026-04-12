@@ -59,11 +59,17 @@ const AdminOrders = () => {
 const deleteOrder = async (id) => {
   if (!window.confirm("Delete this order?")) return;
 
-  await axios.delete(`${BACKEND_URL}/admin/orders/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  try {
+    const res = await axios.delete(`${API}/admin/orders/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-  fetchOrders();
+    console.log(res.data); // 👈 check response
+    fetchOrders();
+
+  } catch (err) {
+    console.error("DELETE ERROR:", err.response?.data || err.message);
+  }
 };
 
   const getStatusColor = (status) => {
