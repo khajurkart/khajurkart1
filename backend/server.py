@@ -565,15 +565,15 @@ def generate_invoice(order):
 
     width, height = letter
 
-    # 🎨 YOUR BRAND COLORS (edit if needed)
-    header_color = colors.HexColor("#5C2C06")   # deep khajur brown
-    light_line = colors.HexColor("#D6C2A1")     # soft beige line
+    # 🎨 DARK GREEN THEME
+    header_color = colors.HexColor("#064E3B")   # dark green
+    light_line = colors.HexColor("#A7F3D0")     # light green
 
     # ================= HEADER =================
     c.setFillColor(header_color)
-    c.rect(0, height - 140, width, 140, fill=1)  # FULL WIDTH HEADER
+    c.rect(0, height - 160, width, 160, fill=1)
 
-    # 🖼️ LOGO (LEFT)
+    # 🖼️ LOGO
     try:
         c.drawImage(
             "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg",
@@ -582,12 +582,12 @@ def generate_invoice(order):
     except:
         pass
 
-    # 📄 INVOICE BELOW LOGO
+    # 📄 INVOICE (moved below logo properly)
     c.setFillColor(colors.white)
     c.setFont("Helvetica-Bold", 14)
-    c.drawString(40, height - 120, "INVOICE")
+    c.drawString(40, height - 130, "INVOICE")
 
-    # 🏢 RIGHT SIDE DETAILS
+    # 🏢 COMPANY DETAILS (RIGHT)
     c.setFont("Helvetica-Bold", 16)
     c.drawRightString(width - 40, height - 50, "KhajurKart")
 
@@ -595,34 +595,40 @@ def generate_invoice(order):
     c.drawRightString(width - 40, height - 70, "Number: 7981002137")
     c.drawRightString(width - 40, height - 85, "Email: khajurkart@gmail.com")
 
+    # ✅ FULL ADDRESS (multi-line)
     c.setFont("Helvetica", 9)
-    c.drawRightString(width - 40, height - 100,
-        "Hyderabad, Telangana 500057"
-    )
-
-    # ================= LIGHT LINE =================
-    c.setStrokeColor(light_line)
-    c.line(40, height - 150, width - 40, height - 150)
-
-    # ================= BILL TO (LEFT) =================
-    c.setFillColor(colors.black)
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(40, height - 170, "Bill To:")
-
-    c.setFont("Helvetica", 10)
-    c.drawString(40, height - 185, order['customer_name'])
-    c.drawString(40, height - 200, order['customer_email'])
-
-    # ================= ORDER INFO (RIGHT) =================
-    c.setFont("Helvetica-Bold", 11)
-    c.drawRightString(width - 40, height - 170, f"Order ID: {order['id']}")
-    c.drawRightString(width - 40, height - 185, f"Date: {order['created_at'][:10]}")
+    c.drawRightString(width - 40, height - 100, "10-3-313/a, AR Raheem Residency")
+    c.drawRightString(width - 40, height - 112, "Beside Govt IASE College")
+    c.drawRightString(width - 40, height - 124, "Potti Sriramulu Nagar")
+    c.drawRightString(width - 40, height - 136, "Vijaya Nagar Colony")
+    c.drawRightString(width - 40, height - 148, "Hyderabad, Telangana 500057")
 
     # ================= LINE =================
-    c.line(40, height - 215, width - 40, height - 215)
+    c.setStrokeColor(light_line)
+    c.line(40, height - 170, width - 40, height - 170)
 
-    # ================= TABLE HEADER =================
-    y = height - 235
+    # ================= BILL TO =================
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(40, height - 190, "Bill To:")
+
+    c.setFont("Helvetica", 10)
+    c.drawString(40, height - 205, order['customer_name'])
+    c.drawString(40, height - 220, order['customer_email'])
+
+    # ✅ CUSTOMER ADDRESS
+    c.drawString(40, height - 235, order.get('customer_address', 'N/A'))
+
+    # ================= ORDER INFO =================
+    c.setFont("Helvetica-Bold", 11)
+    c.drawRightString(width - 40, height - 190, f"Order ID: {order['id']}")
+    c.drawRightString(width - 40, height - 205, f"Date: {order['created_at'][:10]}")
+
+    # ================= LINE =================
+    c.line(40, height - 255, width - 40, height - 255)
+
+    # ================= TABLE =================
+    y = height - 275
     c.setFillColor(header_color)
     c.rect(40, y, width - 80, 25, fill=1)
 
