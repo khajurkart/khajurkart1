@@ -1099,6 +1099,15 @@ async def get_return_detail(return_id: str, current_user: dict = Depends(get_cur
         raise HTTPException(status_code=404, detail="Return request not found")
     return return_req
 
+@api_router.delete("/returns/{return_id}")
+async def delete_return(return_id: str, admin: dict = Depends(get_admin_user)):
+    result = await db.returns.delete_one({"id": return_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Return request not found")
+    
+    return {"message": "Return deleted successfully"}
+
 # ============ ADMIN RETURN ROUTES ============
 
 @api_router.get("/admin/returns")
