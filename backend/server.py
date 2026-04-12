@@ -636,6 +636,7 @@ def generate_invoice(order):
     c.drawString(80, y + 8, "Item Name")
     c.drawString(230, y + 8, "Qty")
     c.drawString(270, y + 8, "Price")
+    discount = item.get("discount", 0)
     c.drawString(330, y + 8, "Disc %")
     c.drawString(410, y + 8, "Final")
 
@@ -851,13 +852,27 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
         if product:
             delivery_charges += product.get("delivery_charge", 0) * item.quantity
+
+    items_with_discount = []
+
+    for item in order_data.items:
+        product = await db.products.find_one({"id": item.product_id})
+
+        discount = product.get("discount", 0) if product else 0
+
+        items_with_discount.append({
+            "product_name": product["name"] if product else "Item",
+            "quantity": item.quantity,
+            "price": item.price,
+            "discount": discount
+        })
     
     order_doc = {
         "id": order_id,
         "user_id": current_user["id"],
         "customer_name": current_user.get("name", ""),
         "customer_email": current_user.get("email", ""),
-        "items": [item.model_dump() for item in order_data.items],
+        "items": items_with_discount,
         "total_amount": order_data.total_amount,
         "delivery_charges": delivery_charges,
         "payment_method": order_data.payment_method,
