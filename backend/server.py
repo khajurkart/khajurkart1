@@ -168,6 +168,8 @@ class OrderItem(BaseModel):
     original_price: Optional[float] = None   # ✅ ADD
     price: float
     discount: Optional[int] = 0              # ✅ ADD
+    
+    model_config = ConfigDict(extra="allow")  # 🔥 ADD THIS
 
 class Order(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -934,10 +936,21 @@ async def get_orders(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/orders/{order_id}", response_model=Order)
 async def get_order(order_id: str, current_user: dict = Depends(get_current_user)):
-    order = await db.orders.find_one({"id": order_id, "user_id": current_user["id"]}, {"_id": 0})
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return order
+    try:
+        order = await db.orders.find_one(
+            {"id": order_id, "user_id": current_user["id"]},
+            {"_id": 0}
+        )
+        print("ORDER DATA:", order)
+        
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        
+        return order
+
+    except Exception as e:
+        print("ERROR:", str(e))
+        raise HTTPException(500, str(e))
 
 @api_router.put("/orders/{order_id}/cancel")
 async def cancel_order(order_id: str, current_user: dict = Depends(get_current_user)):
