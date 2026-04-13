@@ -637,7 +637,7 @@ def generate_invoice(order):
     c.drawString(230, y + 8, "Qty")
     c.drawString(270, y + 8, "Price")
     c.drawString(330, y + 8, "Disc %")
-    c.drawString(410, y + 8, "Final")
+    c.drawString(410, y + 8, "Final Amount")
 
     # ================= ITEMS =================
     y -= 30
@@ -646,12 +646,15 @@ def generate_invoice(order):
 
     for i, item in enumerate(order["items"], start=1):
         discount = item.get("discount", 0)
-        final_price = item["price"] * (1 - discount/100)
+
+        # ✅ ADD HERE
+        original = item.get("original_price", item["price"])
+        final_price = item["price"]
 
         c.drawString(45, y, str(i))
         c.drawString(80, y, item["product_name"])
         c.drawString(230, y, str(item["quantity"]))
-        c.drawString(270, y, f"Rs.{item['price']}")
+        c.drawString(270, y, f"Rs.{original}") 
         c.drawString(330, y, f"{discount}%")
         c.drawString(410, y, f"Rs.{round(final_price, 2)}")
 
@@ -872,7 +875,8 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
         items_with_discount.append({
             "product_name": product.get("name"),
             "quantity": item.quantity,
-            "price": price,
+            "original_price": original_price, 
+            "price": price,  # discounted price
             "discount": discount
         })
     
