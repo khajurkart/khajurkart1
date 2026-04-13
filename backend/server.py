@@ -873,6 +873,7 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
             discount = 0
 
         items_with_discount.append({
+            "product_id": item.product_id,   # ✅ ADD THIS
             "product_name": product.get("name"),
             "quantity": item.quantity,
             "original_price": original_price, 
@@ -914,10 +915,20 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
     
     return {"order_id": order_id, "message": "Order created successfully"}
 
-@api_router.get("/orders", response_model=List[Order])
+@api_router.get("/orders")
 async def get_orders(current_user: dict = Depends(get_current_user)):
-    orders = await db.orders.find({"user_id": current_user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return orders
+    try:
+        orders = await db.orders.find(
+            {"user_id": current_user["id"]},
+            {"_id": 0}
+        ).to_list(100)
+
+        print("ORDERS:", orders)  # ✅ DEBUG
+
+        return orders
+    except Exception as e:
+        print("ERROR:", str(e))   # ✅ DEBUG
+        raise HTTPException(500, str(e))
 
 @api_router.get("/orders/{order_id}", response_model=Order)
 async def get_order(order_id: str, current_user: dict = Depends(get_current_user)):
