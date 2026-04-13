@@ -165,7 +165,9 @@ class OrderItem(BaseModel):
     product_id: str
     product_name: str
     quantity: int
+    original_price: Optional[float] = None   # ✅ ADD
     price: float
+    discount: Optional[int] = 0              # ✅ ADD
 
 class Order(BaseModel):
     model_config = ConfigDict(extra="ignore")
