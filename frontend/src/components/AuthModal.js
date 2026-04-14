@@ -271,7 +271,7 @@ const AuthModal = ({ isOpen, onClose }) => {
             >
               {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
             </button>
-          <>
+              
             </form>
 
             <div className="mt-6 text-center">
@@ -285,7 +285,6 @@ const AuthModal = ({ isOpen, onClose }) => {
               </button>
              )}
           </div>
-        </>
         </div>
       </div>
     </div>
