@@ -15,8 +15,8 @@ const AuthModal = ({ isOpen, onClose }) => {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
-  const [otp, setOtp] = useState("");
+  const [showverification_code, setShowverification_code] = useState(false);
+  const [verification_code, setverification_code] = useState("");
 
   const { login, register } = useAuth();
 
@@ -57,7 +57,7 @@ const AuthModal = ({ isOpen, onClose }) => {
         }
         await register(formData.name, formData.email, formData.password, formData.phone);
 
-        toast.success('OTP sent to your email');
+        toast.success('verification_code sent to your email');
         setShowOtp(true);   // ✅ SHOW OTP SCREEN
         setFormData({
           name: '',
@@ -75,7 +75,7 @@ const AuthModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const verifyOtp = async () => {
+  const verifyverification_code = async () => {
     try {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -86,16 +86,16 @@ const AuthModal = ({ isOpen, onClose }) => {
         },
         body: JSON.stringify({
           email: formData.email,
-          otp: otp
+          verification_code: verification_code
         })
       });
 
       toast.success("Verified successfully ✅");
-      setShowOtp(false);
+      setShowverification_code(false);
       onClose(); // ✅ close modal instead of forcing login screen
 
     } catch (err) {
-      toast.error("Invalid OTP ❌");
+      toast.error("Invalid verification_code ❌");
     }
   };
 
@@ -129,25 +129,25 @@ const AuthModal = ({ isOpen, onClose }) => {
             {isForgotPassword ? 'Enter your email to reset password' : isLogin ? 'Login to your account' : 'Join KhajurKart today'}
           </p>
 
-          {showOtp ? (
+          {showverification_code ? (
             <div className="space-y-5">
               <h2 className="text-center text-xl font-semibold text-khajur-primary">
-                Enter OTP
+                Enter verification_code
               </h2>
 
               <input
                 type="text"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter verification_code"
+                value={verification_code}
+                onChange={(e) => setverification_code(e.target.value)}
                 className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm outline-none"
               />
 
               <button
-                onClick={verifyOtp}
+                onClick={verifyverification_code}
                 className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all"
               >
-                Verify OTP
+                VERIFYED 
               </button>
             </div>
 
