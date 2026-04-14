@@ -311,7 +311,7 @@ async def register(user_data: UserRegister):
         "phone": user_data.phone,
         "role": "user",
         "otp": otp,                 # ✅ ADD
-        "is_verified": False,       # ✅ ADD
+        "is_verified": True,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
