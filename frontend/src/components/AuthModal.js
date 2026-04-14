@@ -17,7 +17,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otp, setOtp] = useState("");
-  
+
   const { login, register } = useAuth();
 
   if (!isOpen) return null;
@@ -35,7 +35,7 @@ const AuthModal = ({ isOpen, onClose }) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email })
         });
-        
+
         if (response.ok) {
           toast.success('Password reset instructions sent to your email');
           setIsForgotPassword(false);
@@ -99,10 +99,10 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   const getPasswordStrength = (password) => {
-  if (password.length < 6) return "Weak";
-  if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/)) return "Strong";
-  return "Medium";
-};
+    if (password.length < 6) return "Weak";
+    if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/)) return "Strong";
+    return "Medium";
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="auth-modal">
@@ -125,156 +125,160 @@ const AuthModal = ({ isOpen, onClose }) => {
 
           {showOtp ? (
             <div className="space-y-5">
-              <h2 className="text-center text-xl font-semibold">Enter OTP</h2>
+              <h2 className="text-center text-xl font-semibold text-khajur-primary">
+                Enter OTP
+              </h2>
+
               <input
                 type="text"
                 placeholder="Enter OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="w-full border px-4 py-3"
+                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm outline-none"
               />
+
               <button
                 onClick={verifyOtp}
-                className="w-full bg-green-500 text-white py-3"
+                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all"
               >
                 Verify OTP
               </button>
             </div>
+
           ) : (
             <>
-            <form onSubmit={handleSubmit} className="space-y-5">
-            {!isLogin && !isForgotPassword && (
-              <div>
-                <label className="block text-sm font-medium text-khajur-primary mb-2">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
-                  data-testid="register-name-input"
-                />
-              </div>
-            )}
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {!isLogin && !isForgotPassword && (
+                  <div>
+                    <label className="block text-sm font-medium text-khajur-primary mb-2">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
+                      data-testid="register-name-input"
+                    />
+                  </div>
+                )}
 
-           {!isLogin && !isForgotPassword && (
-            <div>
-              <label className="block text-sm font-medium text-khajur-primary mb-2">
-                Phone Number *
-              </label>
-          <input
-                type="tel"
-                  required
-                value={formData.phone}
-                onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
-              />
-          </div>
-        )}
+                {!isLogin && !isForgotPassword && (
+                  <div>
+                    <label className="block text-sm font-medium text-khajur-primary mb-2">
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
+                    />
+                  </div>
+                )}
 
-            <div>
-              <label className="block text-sm font-medium text-khajur-primary mb-2">Email Address *</label>
-              <input
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
-                data-testid="auth-email-input"
-              />
-            </div>
-
-            {!isForgotPassword && (
-              <div>
-                <label className="block text-sm font-medium text-khajur-primary mb-2">Password *</label>
-                <div className="relative">
-                 <input
-                   type={showPassword ? "text" : "password"}
-                   required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm focus:ring-0 outline-none transition-colors"
-                  data-testid="auth-password-input"
-                />
-                <span
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary">
-                  {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
-                </span>
-                    {formData.password && (
-                      <p className={`text-sm mt-1 ${
-                        getPasswordStrength(formData.password) === "Strong"
-                        ? "text-green-600"
-                        : getPasswordStrength(formData.password) === "Medium"
-                        ? "text-yellow-600"
-                        : "text-red-600"
-                      }`}
-                    >
-                      Password Strength: {getPasswordStrength(formData.password)}
-                    </p>
-                  )}
-              </div>
-            </div>
-          )}
-
-          {!isLogin && !isForgotPassword && (
-            <div>
-              <label className="block text-sm font-medium text-khajur-primary mb-2">Confirm Password *</label>
-
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.confirmPassword || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
-                  }
-                    className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm"
+                <div>
+                  <label className="block text-sm font-medium text-khajur-primary mb-2">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
+                    data-testid="auth-email-input"
                   />
-
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </span>
                 </div>
 
-                {formData.confirmPassword &&
-                  formData.password !== formData.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Passwords do not match
-                    </p>
-                  )}
-                </div>
-              )}
+                {!isForgotPassword && (
+                  <div>
+                    <label className="block text-sm font-medium text-khajur-primary mb-2">Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm focus:ring-0 outline-none transition-colors"
+                        data-testid="auth-password-input"
+                      />
+                      <span
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary">
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </span>
+                      {formData.password && (
+                        <p className={`text-sm mt-1 ${getPasswordStrength(formData.password) === "Strong"
+                            ? "text-green-600"
+                            : getPasswordStrength(formData.password) === "Medium"
+                              ? "text-yellow-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          Password Strength: {getPasswordStrength(formData.password)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-            {isLogin && !isForgotPassword && (
-              <div className="text-right">
+                {!isLogin && !isForgotPassword && (
+                  <div>
+                    <label className="block text-sm font-medium text-khajur-primary mb-2">Confirm Password *</label>
+
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={formData.confirmPassword || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, confirmPassword: e.target.value })
+                        }
+                        className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm"
+                      />
+
+                      <span
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </span>
+                    </div>
+
+                    {formData.confirmPassword &&
+                      formData.password !== formData.confirmPassword && (
+                        <p className="text-red-500 text-sm mt-1">
+                          Passwords do not match
+                        </p>
+                      )}
+                  </div>
+                )}
+
+                {isLogin && !isForgotPassword && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => setIsForgotPassword(true)}
+                      className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors font-medium"
+                      data-testid="forgot-password-link"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                )}
+
                 <button
-                  type="button"
-                  onClick={() => setIsForgotPassword(true)}
-                  className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors font-medium"
-                  data-testid="forgot-password-link"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all mt-6 disabled:opacity-50"
+                  data-testid="auth-submit-button"
                 >
-                  Forgot Password?
+                  {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
                 </button>
-              </div>
-            )}
+              </form>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all mt-6 disabled:opacity-50"
-              data-testid="auth-submit-button"
-            >
-              {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
-            </button>
-          </form>
-            
-           {/* ✅ FIX: this div must be INSIDE fragment */}
+              {/* ✅ FIX: this div must be INSIDE fragment */}
               <div className="mt-6 text-center">
                 {isForgotPassword ? (
                   <button onClick={handleBackToLogin}>
