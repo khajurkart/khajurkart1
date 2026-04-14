@@ -271,27 +271,21 @@ const AuthModal = ({ isOpen, onClose }) => {
             >
               {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
             </button>
-          </form>
+          <>
+            </form>
 
-          <div className="mt-6 text-center">
-            {isForgotPassword ? (
-              <button
-                onClick={handleBackToLogin}
-                className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors font-medium"
-                data-testid="back-to-login"
-              >
-                ← Back to Login
-              </button>
+            <div className="mt-6 text-center">
+              {isForgotPassword ? (
+                 <button onClick={handleBackToLogin}>
+                   ← Back to Login
+                 </button>
             ) : (
-              <button
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors font-medium"
-                data-testid="toggle-auth-mode"
-              >
+              <button onClick={() => setIsLogin(!isLogin)}>
                 {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
               </button>
-            )}
+             )}
           </div>
+        </>
         </div>
       </div>
     </div>
