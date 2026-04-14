@@ -282,13 +282,17 @@ const AuthModal = ({ isOpen, onClose }) => {
                 >
                   {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
                 </button>
-                <div className="mt-4 flex justify-center">
-                  <div className="w-full">
+                <div className="mt-4">
+                  <button
+                    onClick={() => document.querySelector('[role=button]').click()}
+                    className="w-full border-2 border-khajur-gold text-khajur-primary hover:bg-khajur-gold/10 rounded-sm px-8 py-3 flex items-center justify-center gap-2"
+                  >
+                    <img src="https://developers.google.com/identity/images/g-logo.png" className="w-5 h-5" />
+                    Sign in with Google
+                  </button>
+
+                  <div className="hidden">
                     <GoogleLogin
-                      theme="filled_blue"
-                      size="large"
-                      shape="rectangular"
-                      width="100%"
                       onSuccess={async (credentialResponse) => {
                         try {
                           const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -306,7 +310,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                           localStorage.setItem("token", data.access_token);
                           toast.success("Google login successful ✅");
                           onClose();
-                        } catch (err) {
+                        } catch {
                           toast.error("Google login failed ❌");
                         }
                       }}
