@@ -141,6 +141,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               </button>
             </div>
           ) : (
+            <>
             <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && !isForgotPassword && (
               <div>
@@ -282,10 +283,9 @@ const AuthModal = ({ isOpen, onClose }) => {
                  <button onClick={() => setIsLogin(!isLogin)}>
                    {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
                  </button>
-                )}
               </div>
             </>
-          )
+          )}
         </div>
       </div>
     </div>
