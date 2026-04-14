@@ -17,7 +17,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otp, setOtp] = useState("");
-  
+
   const { login, register } = useAuth();
 
   if (!isOpen) return null;
@@ -28,42 +28,41 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     try {
       if (isForgotPassword) {
-        // Handle forgot password
         const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
         const response = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email })
         });
-        
+
         if (response.ok) {
-          toast.success('Password reset instructions sent to your email');
+          toast.success('Password reset instructions sent');
           setIsForgotPassword(false);
           setIsLogin(true);
         } else {
           const error = await response.json();
-          toast.error(error.detail || 'Failed to send reset email');
+          toast.error(error.detail || 'Failed');
         }
+
       } else if (isLogin) {
         await login(formData.email, formData.password);
         toast.success('Login successful');
         onClose();
-        setFormData({ name: '', email: '', password: '', phone: '' });
+
       } else {
         if (formData.password !== formData.confirmPassword) {
           toast.error("Passwords do not match");
           setLoading(false);
           return;
         }
-        await register(formData.name, formData.email, formData.password, formData.phone);
 
-        toast.success('OTP sent to your email');
-        setShowOtp(true);   // ✅ SHOW OTP SCREEN
-        setFormData({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
+        await register(formData.name, formData.email, formData.password, formData.phone);
+        toast.success('OTP sent');
+        setShowOtp(true);
       }
+
     } catch (error) {
-      console.error('Auth error:', error);
-      toast.error(error.response?.data?.detail || error.message || 'Authentication failed');
+      toast.error('Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -75,20 +74,18 @@ const AuthModal = ({ isOpen, onClose }) => {
 
       await fetch(`${BACKEND_URL}/api/auth/verify`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: formData.email,
           otp: otp
         })
       });
 
-      toast.success("Verified successfully ✅");
+      toast.success("Verified ✅");
       setShowOtp(false);
       setIsLogin(true);
 
-    } catch (err) {
+    } catch {
       toast.error("Invalid OTP ❌");
     }
   };
@@ -99,33 +96,25 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   const getPasswordStrength = (password) => {
-  if (password.length < 6) return "Weak";
-  if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/)) return "Strong";
-  return "Medium";
-};
+    if (password.length < 6) return "Weak";
+    if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/)) return "Strong";
+    return "Medium";
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="auth-modal">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-khajur-cream max-w-md w-full rounded-sm shadow-2xl relative border-2 border-khajur-gold/30">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-khajur-primary hover:text-khajur-gold transition-colors"
-          data-testid="close-auth-modal"
-        >
+
+        <button onClick={onClose} className="absolute top-4 right-4">
           <X className="w-6 h-6" />
         </button>
 
         <div className="p-8">
-          <h2 className="font-serif text-4xl font-bold text-khajur-primary mb-2 text-center">
-            {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}
-          </h2>
-          <p className="text-center text-khajur-dark/60 mb-8 text-sm">
-            {isForgotPassword ? 'Enter your email to reset password' : isLogin ? 'Login to your account' : 'Join KhajurKart today'}
-          </p>
 
           {showOtp ? (
             <div className="space-y-5">
               <h2 className="text-center text-xl font-semibold">Enter OTP</h2>
+
               <input
                 type="text"
                 placeholder="Enter OTP"
@@ -133,6 +122,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                 onChange={(e) => setOtp(e.target.value)}
                 className="w-full border px-4 py-3"
               />
+
               <button
                 onClick={verifyOtp}
                 className="w-full bg-green-500 text-white py-3"
@@ -140,151 +130,87 @@ const AuthModal = ({ isOpen, onClose }) => {
                 Verify OTP
               </button>
             </div>
+
           ) : (
             <>
-            <form onSubmit={handleSubmit} className="space-y-5">
-            {!isLogin && !isForgotPassword && (
-              <div>
-                <label className="block text-sm font-medium text-khajur-primary mb-2">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
-                  data-testid="register-name-input"
-                />
-              </div>
-            )}
+              <h2 className="text-2xl text-center mb-4">
+                {isLogin ? 'Login' : 'Register'}
+              </h2>
 
-           {!isLogin && !isForgotPassword && (
-            <div>
-              <label className="block text-sm font-medium text-khajur-primary mb-2">
-                Phone Number *
-              </label>
-          <input
-                type="tel"
-                  required
-                value={formData.phone}
-                onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
-              />
-          </div>
-        )}
+              <form onSubmit={handleSubmit} className="space-y-5">
 
-            <div>
-              <label className="block text-sm font-medium text-khajur-primary mb-2">Email Address *</label>
-              <input
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
-                data-testid="auth-email-input"
-              />
-            </div>
-
-            {!isForgotPassword && (
-              <div>
-                <label className="block text-sm font-medium text-khajur-primary mb-2">Password *</label>
-                <div className="relative">
-                 <input
-                   type={showPassword ? "text" : "password"}
-                   required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm focus:ring-0 outline-none transition-colors"
-                  data-testid="auth-password-input"
-                />
-                <span
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary">
-                  {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
-                </span>
-                    {formData.password && (
-                      <p className={`text-sm mt-1 ${
-                        getPasswordStrength(formData.password) === "Strong"
-                        ? "text-green-600"
-                        : getPasswordStrength(formData.password) === "Medium"
-                        ? "text-yellow-600"
-                        : "text-red-600"
-                      }`}
-                    >
-                      Password Strength: {getPasswordStrength(formData.password)}
-                    </p>
-                  )}
-              </div>
-            </div>
-          )}
-
-          {!isLogin && !isForgotPassword && (
-            <div>
-              <label className="block text-sm font-medium text-khajur-primary mb-2">Confirm Password *</label>
-
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.confirmPassword || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
-                  }
-                    className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm"
+                {!isLogin && (
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full border px-4 py-3"
                   />
+                )}
 
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </span>
-                </div>
+                {!isLogin && (
+                  <input
+                    type="tel"
+                    placeholder="Phone"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="w-full border px-4 py-3"
+                  />
+                )}
 
-                {formData.confirmPassword &&
-                  formData.password !== formData.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Passwords do not match
-                    </p>
-                  )}
-                </div>
-              )}
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="w-full border px-4 py-3"
+                />
 
-            {isLogin && !isForgotPassword && (
-              <div className="text-right">
-                <button
-                  type="button"
-                  onClick={() => setIsForgotPassword(true)}
-                  className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors font-medium"
-                  data-testid="forgot-password-link"
-                >
-                  Forgot Password?
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full border px-4 py-3"
+                />
+
+                {!isLogin && (
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value
+                      })
+                    }
+                    className="w-full border px-4 py-3"
+                  />
+                )}
+
+                <button type="submit" className="w-full bg-khajur-gold py-3">
+                  {isLogin ? "Login" : "Register"}
+                </button>
+              </form>
+
+              <div className="text-center mt-4">
+                <button onClick={() => setIsLogin(!isLogin)}>
+                  {isLogin ? "Create account" : "Already have account?"}
                 </button>
               </div>
-            )}
+            </>
+          )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all mt-6 disabled:opacity-50"
-              data-testid="auth-submit-button"
-            >
-              {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
-            </button>
-            </form>
-            
-           <div className="mt-6 text-center">
-             {isForgotPassword ? (
-               <button onClick={handleBackToLogin}>
-                 ← Back to Login
-               </button>
-             ) : (
-               <button onClick={() => setIsLogin(!isLogin)}>
-                 {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
-               </button>
-             )}
-          </div>
         </div>
       </div>
     </div>
