@@ -79,7 +79,6 @@ const AuthModal = ({ isOpen, onClose }) => {
   const verifyverification_code = async () => {
     try {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
       await fetch(`${BACKEND_URL}/api/auth/verify`, {
         method: "POST",
         headers: {
