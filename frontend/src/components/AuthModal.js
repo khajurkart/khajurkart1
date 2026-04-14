@@ -274,18 +274,17 @@ const AuthModal = ({ isOpen, onClose }) => {
             </button>
             </form>
             
-            <div className="mt-6 text-center">
-              {isForgotPassword ? (
-                <button onClick={handleBackToLogin}>
-                  ← Back to Login
-                </button>
-               ) : (
-                 <button onClick={() => setIsLogin(!isLogin)}>
-                   {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
-                 </button>
-              </div>
-            </>
-          )}
+           <div className="mt-6 text-center">
+             {isForgotPassword ? (
+               <button onClick={handleBackToLogin}>
+                 ← Back to Login
+               </button>
+             ) : (
+               <button onClick={() => setIsLogin(!isLogin)}>
+                 {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
+               </button>
+             )}
+          </div>
         </div>
       </div>
     </div>
