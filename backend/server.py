@@ -301,7 +301,7 @@ async def register(user_data: UserRegister):
     hashed_pwd = hash_password(user_data.password)
 
     # ✅ GENERATE OTP (ADD HERE)
-    otp = str(random.randint(100000, 999999))
+    verification_code = str(random.randint(100000, 999999))
     
     user_doc = {
         "id": user_id,
@@ -310,7 +310,7 @@ async def register(user_data: UserRegister):
         "password": hashed_pwd,
         "phone": user_data.phone,
         "role": "user",
-        "otp": otp,                 # ✅ ADD
+        "verification_code": verification_code,                 # ✅ ADD
         "is_verified": True,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -323,7 +323,7 @@ async def register(user_data: UserRegister):
         "from": "KhajurKart <contact@khajurkart.com>",
         "to": [user_data.email],
         "subject": "Verify your email",
-        "html": f"<h3>Your OTP is: {otp}</h3>"
+        "html": f"<h3>Your verification_code is: {verification_code}</h3>"
     })
     
     # Create access token
@@ -344,17 +344,17 @@ async def register(user_data: UserRegister):
     }
 
 @api_router.post("/auth/verify")
-async def verify(email: str, otp: str):
+async def verify(email: str, verification_code: str):
     user = await db.users.find_one({"email": email})
 
-    if not user or user.get("otp") != otp:
-        raise HTTPException(status_code=400, detail="Invalid OTP")
+    if not user or user.get("verification_code") != verification_code:
+        raise HTTPException(status_code=400, detail="Invalid verification_code")
 
     await db.users.update_one(
         {"email": email},
         {
             "$set": {"is_verified": True},
-            "$unset": {"otp": ""}
+            "$unset": {"verification_code": ""}
         }
     )
 
