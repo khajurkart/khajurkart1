@@ -58,7 +58,7 @@ const AuthModal = ({ isOpen, onClose }) => {
         await register(formData.name, formData.email, formData.password, formData.phone);
 
         toast.success('verification_code sent to your email');
-        setShowOtp(true);   // ✅ SHOW OTP SCREEN
+        setShowverification_code(true);   // ✅ SHOW OTP SCREEN
         setFormData({
           name: '',
           phone: '',
