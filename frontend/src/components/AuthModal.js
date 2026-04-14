@@ -36,33 +36,33 @@ const AuthModal = ({ isOpen, onClose }) => {
         });
 
         if (response.ok) {
-          toast.success('Password reset instructions sent');
+          toast.success('Password reset instructions sent to your email');
           setIsForgotPassword(false);
           setIsLogin(true);
         } else {
           const error = await response.json();
-          toast.error(error.detail || 'Failed');
+          toast.error(error.detail || 'Failed to send reset email');
         }
-
       } else if (isLogin) {
         await login(formData.email, formData.password);
         toast.success('Login successful');
         onClose();
-
+        setFormData({ name: '', email: '', password: '', phone: '' });
       } else {
         if (formData.password !== formData.confirmPassword) {
           toast.error("Passwords do not match");
           setLoading(false);
           return;
         }
-
         await register(formData.name, formData.email, formData.password, formData.phone);
-        toast.success('OTP sent');
-        setShowOtp(true);
-      }
 
+        toast.success('OTP sent to your email');
+        setShowOtp(true);
+        setFormData({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
+      }
     } catch (error) {
-      toast.error('Authentication failed');
+      console.error('Auth error:', error);
+      toast.error(error.response?.data?.detail || error.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -74,18 +74,20 @@ const AuthModal = ({ isOpen, onClose }) => {
 
       await fetch(`${BACKEND_URL}/api/auth/verify`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           email: formData.email,
           otp: otp
         })
       });
 
-      toast.success("Verified ✅");
+      toast.success("Verified successfully ✅");
       setShowOtp(false);
       setIsLogin(true);
 
-    } catch {
+    } catch (err) {
       toast.error("Invalid OTP ❌");
     }
   };
@@ -102,111 +104,64 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-khajur-cream max-w-md w-full rounded-sm shadow-2xl relative border-2 border-khajur-gold/30">
 
-        <button onClick={onClose} className="absolute top-4 right-4">
+        <button onClick={onClose} className="absolute top-4 right-4 text-khajur-primary">
           <X className="w-6 h-6" />
         </button>
 
         <div className="p-8">
 
+          <h2 className="font-serif text-4xl font-bold text-khajur-primary mb-2 text-center">
+            {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}
+          </h2>
+
+          <p className="text-center text-khajur-dark/60 mb-8 text-sm">
+            {isForgotPassword ? 'Enter your email to reset password' : isLogin ? 'Login to your account' : 'Join KhajurKart today'}
+          </p>
+
           {showOtp ? (
             <div className="space-y-5">
               <h2 className="text-center text-xl font-semibold">Enter OTP</h2>
-
               <input
                 type="text"
-                placeholder="Enter OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 className="w-full border px-4 py-3"
               />
-
-              <button
-                onClick={verifyOtp}
-                className="w-full bg-green-500 text-white py-3"
-              >
+              <button onClick={verifyOtp} className="w-full bg-green-500 text-white py-3">
                 Verify OTP
               </button>
             </div>
-
           ) : (
             <>
-              <h2 className="text-2xl text-center mb-4">
-                {isLogin ? 'Login' : 'Register'}
-              </h2>
-
               <form onSubmit={handleSubmit} className="space-y-5">
 
-                {!isLogin && (
+                <div>
                   <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full border px-4 py-3"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-white border-2 px-4 py-3"
                   />
-                )}
-
-                {!isLogin && (
-                  <input
-                    type="tel"
-                    placeholder="Phone"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full border px-4 py-3"
-                  />
-                )}
-
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full border px-4 py-3"
-                />
-
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full border px-4 py-3"
-                />
-
-                {!isLogin && (
-                  <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirmPassword: e.target.value
-                      })
-                    }
-                    className="w-full border px-4 py-3"
-                  />
-                )}
+                </div>
 
                 <button type="submit" className="w-full bg-khajur-gold py-3">
-                  {isLogin ? "Login" : "Register"}
+                  {isLogin ? 'Login' : 'Register'}
                 </button>
+
               </form>
 
-              <div className="text-center mt-4">
-                <button onClick={() => setIsLogin(!isLogin)}>
-                  {isLogin ? "Create account" : "Already have account?"}
-                </button>
+              <div className="mt-6 text-center">
+                {isForgotPassword ? (
+                  <button onClick={handleBackToLogin}>← Back to Login</button>
+                ) : (
+                  <button onClick={() => setIsLogin(!isLogin)}>
+                    {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
+                  </button>
+                )}
               </div>
             </>
           )}
