@@ -283,26 +283,36 @@ const AuthModal = ({ isOpen, onClose }) => {
                 >
                   {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
                 </button>
-                <GoogleLogin
-                  onSuccess={async (credentialResponse) => {
-                    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+                <div className="mt-4">
+                  <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                       try {
+                         const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-                    const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json"
-                      },
-                      body: JSON.stringify({
-                        token: credentialResponse.credential
-                     })
-                   });
-                   
-                    const data = await res.json();
-                    localStorage.setItem("token", data.access_token);
-                    onClose();
-                  }}
-                  onError={() => console.log("Login Failed")}
-                />
+                         const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
+                           method: "POST",
+                           headers: {
+                             "Content-Type": "application/json"
+                           },
+                           body: JSON.stringify({
+                             token: credentialResponse.credential
+                           })
+                         });
+                         
+                         const data = await res.json();
+
+                         localStorage.setItem("token", data.access_token);
+                         toast.success("Google login successful ✅");
+                         onClose();
+                       } catch (err) {
+                         toast.error("Google login failed ❌");
+                       }
+                     }}
+                     onError={() => {
+                       toast.error("Google login failed ❌");
+                    }}
+                  />
+                </div>
               </form>
 
               {/* ✅ FIX: this div must be INSIDE fragment */}
