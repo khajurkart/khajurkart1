@@ -15,6 +15,8 @@ const AuthModal = ({ isOpen, onClose }) => {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otp, setOtp] = useState("");
   
   const { login, register } = useAuth();
 
@@ -54,8 +56,9 @@ const AuthModal = ({ isOpen, onClose }) => {
           return;
         }
         await register(formData.name, formData.email, formData.password, formData.phone);
-        toast.success('Registration successful');
-        onClose();
+
+        toast.success('OTP sent to your email');
+        setShowOtp(true);   // ✅ SHOW OTP SCREEN
         setFormData({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
       }
     } catch (error) {
@@ -63,6 +66,30 @@ const AuthModal = ({ isOpen, onClose }) => {
       toast.error(error.response?.data?.detail || error.message || 'Authentication failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+      await fetch(`${BACKEND_URL}/api/auth/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: otp
+        })
+      });
+
+      toast.success("Verified successfully ✅");
+      setShowOtp(false);
+      setIsLogin(true);
+
+    } catch (err) {
+      toast.error("Invalid OTP ❌");
     }
   };
 
@@ -96,7 +123,25 @@ const AuthModal = ({ isOpen, onClose }) => {
             {isForgotPassword ? 'Enter your email to reset password' : isLogin ? 'Login to your account' : 'Join KhajurKart today'}
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {showOtp ? (
+            <div className="space-y-5">
+              <h2 className="text-center text-xl font-semibold">Enter OTP</h2>
+              <input
+                type="text"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full border px-4 py-3"
+              />
+              <button
+                onClick={verifyOtp}
+                className="w-full bg-green-500 text-white py-3"
+              >
+                Verify OTP
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && !isForgotPassword && (
               <div>
                 <label className="block text-sm font-medium text-khajur-primary mb-2">Full Name *</label>
@@ -173,39 +218,37 @@ const AuthModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
-{!isLogin && !isForgotPassword && (
-  <div>
-    <label className="block text-sm font-medium text-khajur-primary mb-2">
-      Confirm Password *
-    </label>
+          {!isLogin && !isForgotPassword && (
+            <div>
+              <label className="block text-sm font-medium text-khajur-primary mb-2">Confirm Password *</label>
 
-    <div className="relative">
-      <input
-        type={showPassword ? "text" : "password"}
-        required
-        value={formData.confirmPassword || ""}
-        onChange={(e) =>
-          setFormData({ ...formData, confirmPassword: e.target.value })
-        }
-        className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm"
-      />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={formData.confirmPassword || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, confirmPassword: e.target.value })
+                  }
+                    className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm"
+                  />
 
-      <span
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
-      >
-        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-      </span>
-    </div>
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </span>
+                </div>
 
-    {formData.confirmPassword &&
-      formData.password !== formData.confirmPassword && (
-        <p className="text-red-500 text-sm mt-1">
-          Passwords do not match
-        </p>
-      )}
-  </div>
-)}
+                {formData.confirmPassword &&
+                  formData.password !== formData.confirmPassword && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Passwords do not match
+                    </p>
+                  )}
+                </div>
+              )}
 
             {isLogin && !isForgotPassword && (
               <div className="text-right">
@@ -253,6 +296,8 @@ const AuthModal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
+</form>
+)}
 };
 
 export default AuthModal;
