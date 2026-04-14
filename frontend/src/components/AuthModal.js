@@ -282,7 +282,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                 >
                   {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
                 </button>
-                <div className="mt-4">
+                <div className="mt-4 flex justify-center">
                   <GoogleLogin
                     onSuccess={async (credentialResponse) => {
                        try {
