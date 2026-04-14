@@ -147,7 +147,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                 onClick={verifyverification_code}
                 className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all"
               >
-                VERIFYED 
+                VERIFYED
               </button>
             </div>
 
@@ -216,10 +216,10 @@ const AuthModal = ({ isOpen, onClose }) => {
                       </span>
                       {formData.password && (
                         <p className={`text-sm mt-1 ${getPasswordStrength(formData.password) === "Strong"
-                            ? "text-green-600"
-                            : getPasswordStrength(formData.password) === "Medium"
-                              ? "text-yellow-600"
-                              : "text-red-600"
+                          ? "text-green-600"
+                          : getPasswordStrength(formData.password) === "Medium"
+                            ? "text-yellow-600"
+                            : "text-red-600"
                           }`}
                         >
                           Password Strength: {getPasswordStrength(formData.password)}
@@ -283,34 +283,36 @@ const AuthModal = ({ isOpen, onClose }) => {
                   {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
                 </button>
                 <div className="mt-4 flex justify-center">
-                  <GoogleLogin
-                    onSuccess={async (credentialResponse) => {
-                       try {
-                         const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+                  <div className="w-full">
+                    <GoogleLogin
+                      theme="filled_blue"
+                      size="large"
+                      shape="rectangular"
+                      width="100%"
+                      onSuccess={async (credentialResponse) => {
+                        try {
+                          const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+                          const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                              token: credentialResponse.credential
+                            })
+                          });
 
-                         const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
-                           method: "POST",
-                           headers: {
-                             "Content-Type": "application/json"
-                           },
-                           body: JSON.stringify({
-                             token: credentialResponse.credential
-                           })
-                         });
-                         
-                         const data = await res.json();
-
-                         localStorage.setItem("token", data.access_token);
-                         toast.success("Google login successful ✅");
-                         onClose();
-                       } catch (err) {
-                         toast.error("Google login failed ❌");
-                       }
-                     }}
-                     onError={() => {
-                       toast.error("Google login failed ❌");
-                    }}
-                  />
+                          const data = await res.json();
+                          localStorage.setItem("token", data.access_token);
+                          toast.success("Google login successful ✅");
+                          onClose();
+                        } catch (err) {
+                          toast.error("Google login failed ❌");
+                        }
+                      }}
+                      onError={() => toast.error("Google login failed ❌")}
+                    />
+                  </div>
                 </div>
               </form>
 
