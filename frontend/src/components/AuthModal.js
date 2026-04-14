@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, X } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
@@ -282,6 +283,26 @@ const AuthModal = ({ isOpen, onClose }) => {
                 >
                   {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
                 </button>
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+                    const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        token: credentialResponse.credential
+                     })
+                   });
+                   
+                    const data = await res.json();
+                    localStorage.setItem("token", data.access_token);
+                    onClose();
+                  }}
+                  onError={() => console.log("Login Failed")}
+                />
               </form>
 
               {/* ✅ FIX: this div must be INSIDE fragment */}
