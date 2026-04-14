@@ -91,7 +91,7 @@ const AuthModal = ({ isOpen, onClose }) => {
       });
 
       toast.success("Verified successfully ✅");
-      setShowOtp(false);
+      setShowOtp(true);
       onClose(); // ✅ close modal instead of forcing login screen
 
     } catch (err) {
