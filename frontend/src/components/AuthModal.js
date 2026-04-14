@@ -59,7 +59,13 @@ const AuthModal = ({ isOpen, onClose }) => {
 
         toast.success('OTP sent to your email');
         setShowOtp(true);   // ✅ SHOW OTP SCREEN
-        setFormData({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
+        setFormData({
+          name: '',
+          phone: '',
+          email: formData.email, // ✅ KEEP EMAIL
+          password: '',
+          confirmPassword: ''
+        });
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -86,7 +92,7 @@ const AuthModal = ({ isOpen, onClose }) => {
 
       toast.success("Verified successfully ✅");
       setShowOtp(false);
-      setIsLogin(true);
+      onClose(); // ✅ close modal instead of forcing login screen
 
     } catch (err) {
       toast.error("Invalid OTP ❌");
