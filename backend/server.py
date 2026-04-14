@@ -373,7 +373,7 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     if not user.get("is_verified"):
-    raise HTTPException(status_code=403, detail="Please verify your email first")
+        raise HTTPException(status_code=403, detail="Please verify your email first")
 
     # ✅ INCLUDE ROLE IN TOKEN (VERY IMPORTANT)
     access_token = create_access_token({
