@@ -16,6 +16,9 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
+from google.oauth2 import id_token
+from google.auth.transport import requests
+import random
 import json
 import resend
 import requests
@@ -296,6 +299,9 @@ async def register(user_data: UserRegister):
     # Create user
     user_id = f"user_{datetime.now(timezone.utc).timestamp()}"
     hashed_pwd = hash_password(user_data.password)
+
+    # ✅ GENERATE OTP (ADD HERE)
+    otp = str(random.randint(100000, 999999))
     
     user_doc = {
         "id": user_id,
@@ -304,10 +310,21 @@ async def register(user_data: UserRegister):
         "password": hashed_pwd,
         "phone": user_data.phone,
         "role": "user",
+        "otp": otp,                 # ✅ ADD
+        "is_verified": False,       # ✅ ADD
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
+    # ✅ SAVE USER
     await db.users.insert_one(user_doc)
+
+    # ✅ SEND EMAIL (ADD HERE)
+    resend.Emails.send({
+        "from": "KhajurKart <contact@khajurkart.com>",
+        "to": [user_data.email],
+        "subject": "Verify your email",
+        "html": f"<h3>Your OTP is: {otp}</h3>"
+    })
     
     # Create access token
     access_token = create_access_token({
@@ -326,6 +343,23 @@ async def register(user_data: UserRegister):
         }
     }
 
+@api_router.post("/auth/verify")
+async def verify(email: str, otp: str):
+    user = await db.users.find_one({"email": email})
+
+    if not user or user.get("otp") != otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+
+    await db.users.update_one(
+        {"email": email},
+        {
+            "$set": {"is_verified": True},
+            "$unset": {"otp": ""}
+        }
+    )
+
+    return {"message": "Email verified successfully"}
+
 @api_router.post("/login")
 @limiter.limit("5/minute")
 async def login(request: Request, data: UserLogin):  # ✅ use model
@@ -337,6 +371,9 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
 
     if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not user.get("is_verified"):
+    raise HTTPException(status_code=403, detail="Please verify your email first")
 
     # ✅ INCLUDE ROLE IN TOKEN (VERY IMPORTANT)
     access_token = create_access_token({
@@ -355,6 +392,49 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
             "role": user.get("role", "user")  # ✅ send role to frontend
         }
     }
+
+@api_router.post("/auth/google")
+async def google_login(data: dict):
+    token = data.get("token")
+
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            token,
+            requests.Request(),
+            os.environ["GOOGLE_CLIENT_ID"]  # ✅ put in .env
+        )
+
+        email = idinfo["email"]
+        name = idinfo.get("name", "")
+
+        user = await db.users.find_one({"email": email})
+
+        # ✅ If user not exists → create
+        if not user:
+            user = {
+                "id": f"user_{uuid.uuid4().hex}",
+                "name": name,
+                "email": email,
+                "role": "user",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.users.insert_one(user)
+
+        # ✅ Create token
+        access_token = create_access_token({
+            "sub": user["id"],
+            "role": user.get("role", "user")
+        })
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": user
+        }
+
+    except Exception as e:
+        print("GOOGLE LOGIN ERROR:", str(e))
+        raise HTTPException(status_code=400, detail="Google login failed")
 
 @api_router.get("/auth/me", response_model=User)
 async def get_me(current_user: dict = Depends(get_current_user)):
