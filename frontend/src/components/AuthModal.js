@@ -305,18 +305,17 @@ const AuthModal = ({ isOpen, onClose }) => {
                               token: credentialResponse.credential
                             })
                           });
-
+                          
                           const data = await res.json();
-                          localStorage.setItem("token", data.access_token);
-                          window.location.reload();  
-                          login(data.user.email, null, data.access_token);
+                          // ✅ USE CONTEXT (VERY IMPORTANT)
+                          loginWithGoogle(data);
+
                           toast.success("Google login successful ✅");
                           onClose();
-                        } catch {
-                          toast.error("Google login failed ❌");
-                        }
-                      }}
-                      onError={() => toast.error("Google login failed ❌")}
+                          } catch {
+                            toast.error("Google login failed ❌");
+                          }
+                        }}
                     />
                   </div>
                 </div>
