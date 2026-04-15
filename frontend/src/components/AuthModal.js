@@ -308,6 +308,8 @@ const AuthModal = ({ isOpen, onClose }) => {
 
                           const data = await res.json();
                           localStorage.setItem("token", data.access_token);
+                          // 🔥 ADD THIS LINE
+                          login(data.user.email, null, data.access_token);
                           toast.success("Google login successful ✅");
                           onClose();
                         } catch {
