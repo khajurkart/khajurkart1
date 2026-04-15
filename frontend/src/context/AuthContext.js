@@ -34,10 +34,13 @@ const logout = useCallback(() => {
 
 const fetchUser = useCallback(async () => {
   try {
-    const response = await axios.get(`${API}/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setUser(response.data);
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`${BACKEND_URL}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    setUser(res.data);
   } catch (error) {
     console.error('Failed to fetch user', error);
     logout();
