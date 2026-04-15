@@ -52,12 +52,12 @@ const fetchUser = useCallback(async () => {
   
 useEffect(() => {
   if (token) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     fetchUser();
-  } 
-  else {
+  } else {
     setLoading(false);
   }
-}, [token, fetchUser]);;
+}, [token, fetchUser]);
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/login`, { email, password });
@@ -79,8 +79,11 @@ useEffect(() => {
 
   const loginWithGoogle = (data) => {
   localStorage.setItem("token", data.access_token);
-  setToken(data.access_token);   // 🔥 IMPORTANT (you missed this)
-  setUser(data.user);            // 🔥 THIS IS KEY
+  setToken(data.access_token);
+  setUser(data.user);
+
+  // ✅ ADD THIS LINE (VERY IMPORTANT)
+  axios.defaults.headers.common["Authorization"] = `Bearer ${data.access_token}`;
 };
  //const logout = () => {
 //   localStorage.removeItem('token');
