@@ -19,7 +19,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [showverification_code, setShowverification_code] = useState(false);
   const [verification_code, setverification_code] = useState("");
 
-  const { login, register } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
 
   if (!isOpen) return null;
 
