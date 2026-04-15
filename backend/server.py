@@ -397,6 +397,9 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
 async def google_login(data: dict):
     token = data.get("token")
 
+    print("TOKEN:", token)
+    print("CLIENT_ID:", os.environ.get("GOOGLE_CLIENT_ID"))
+
     try:
         idinfo = id_token.verify_oauth2_token(
             token,
