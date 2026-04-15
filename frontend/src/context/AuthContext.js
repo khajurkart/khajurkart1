@@ -74,6 +74,11 @@ useEffect(() => {
     return userData;
   };
 
+  const loginWithGoogle = (data) => {
+  localStorage.setItem("token", data.access_token);
+  setToken(data.access_token);   // 🔥 IMPORTANT (you missed this)
+  setUser(data.user);            // 🔥 THIS IS KEY
+};
  //const logout = () => {
 //   localStorage.removeItem('token');
   // setToken(null);
@@ -81,7 +86,7 @@ useEffect(() => {
  // };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, loginWithGoogle, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
