@@ -87,14 +87,14 @@ useEffect(() => {
   };
 
   const loginWithGoogle = (data) => {
-  console.log("GOOGLE RESPONSE:", data); // 👈 ADD THIS
+  console.log("GOOGLE RESPONSE:", data);
 
-  localStorage.setItem("token", data.access_token); // ✅ MUST SAVE
-
+  localStorage.setItem("token", data.access_token); // ✅ MUST
   setToken(data.access_token);
   setUser(data.user);
 
-  axios.defaults.headers.common["Authorization"] = `Bearer ${data.access_token}`;
+  axios.defaults.headers.common["Authorization"] =
+    `Bearer ${data.access_token}`;
 };
  //const logout = () => {
 //   localStorage.removeItem('token');
