@@ -290,36 +290,38 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict
 # ============ EMAIL VERIFICATION ROUTES ============
 
 def send_verification_email(to_email, name, code):
-    subject = "✨ Your Secure Verification Code Inside"
+    try:
+        html = f"""
+        <div style="font-family: Arial; padding: 20px;">
+          <h2>🔐 Verify Your Account</h2>
+          
+          <p>Hi {name} 👋</p>
+          
+          <p>You're just one step away! Use the verification code to continue:</p>
+          
+          <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; margin: 20px 0;">
+            {code}
+          </div>
+          
+          <p>⏳ This code expires soon.</p>
+          <p>🔒 Do not share this code with anyone.</p>
+          
+          <br/>
+          <p>Cheers,<br/><strong>KhajurKart Team</strong></p>
+        </div>
+        """
 
-    body = f"""
-    <div style="font-family: Arial; padding: 20px;">
-      <p>Hi {name} 👋</p>
+        resend.Emails.send({
+            "from": "KhajurKart <onboarding@resend.dev>",  # change later to your domain
+            "to": [to_email],
+            "subject": "✨ Your Verification Code",
+            "html": html
+        })
 
-      <p>You're just one step away! Use the verification code to continue:</p>
+        print("✅ VERIFICATION EMAIL SENT")
 
-      <div style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">
-        {code}
-      </div>
-
-      <p>⏳ This code expires soon.</p>
-      <p>🔒 Never share this code with anyone.</p>
-
-      <br/>
-      <p>Cheers,<br/><strong>KhajurKart</strong></p>
-    </div>
-    """
-
-    msg = MIMEText(body, "html")  # ✅ HTML enabled
-    msg["Subject"] = subject
-    msg["From"] = "your_email@gmail.com"
-    msg["To"] = to_email
-
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login("your_email@gmail.com", "your_app_password")
-    server.send_message(msg)
-    server.quit()
+    except Exception as e:
+        print("❌ EMAIL ERROR:", str(e))
 
 # ============ AUTH ROUTES ============
 
