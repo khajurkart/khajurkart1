@@ -16,6 +16,8 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
+from email.mime.text import MIMEText
+import smtplib
 import requests
 import json
 import resend
@@ -284,6 +286,40 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
 
+# ============ EMAIL VERIFICATION ROUTES ============
+
+def send_verification_email(to_email, name, code):
+    subject = "✨ Your Secure Verification Code Inside"
+
+    body = f"""
+    <div style="font-family: Arial; padding: 20px;">
+      <p>Hi {name} 👋</p>
+
+      <p>You're just one step away! Use the verification code to continue:</p>
+
+      <div style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">
+        {code}
+      </div>
+
+      <p>⏳ This code expires soon.</p>
+      <p>🔒 Never share this code with anyone.</p>
+
+      <br/>
+      <p>Cheers,<br/><strong>KhajurKart</strong></p>
+    </div>
+    """
+
+    msg = MIMEText(body, "html")  # ✅ HTML enabled
+    msg["Subject"] = subject
+    msg["From"] = "your_email@gmail.com"
+    msg["To"] = to_email
+
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login("your_email@gmail.com", "your_app_password")
+    server.send_message(msg)
+    server.quit()
+
 # ============ AUTH ROUTES ============
 
 @api_router.post("/auth/register")
@@ -316,12 +352,11 @@ async def register(user_data: UserRegister):
     await db.users.insert_one(user_doc)
 
     # ✅ SEND EMAIL (ADD HERE)
-    resend.Emails.send({
-        "from": "KhajurKart <contact@khajurkart.com>",
-        "to": [user_data.email],
-        "subject": "Verify your email",
-        "html": f"<h3>Your verification_code is: {verification_code}</h3>"
-    })
+    send_verification_email(
+        user_data.email,
+        user_data.name,
+        verification_code
+    )
     
     # Create access token
     access_token = create_access_token({
