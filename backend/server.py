@@ -17,6 +17,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 from email.mime.text import MIMEText
+import random
 import smtplib
 import requests
 import json
@@ -344,7 +345,7 @@ async def register(user_data: UserRegister):
         "phone": user_data.phone,
         "role": "user",
         "verification_code": verification_code,                 # ✅ ADD
-        "is_verified": True,
+        "is_verified": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
