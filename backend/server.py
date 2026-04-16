@@ -312,7 +312,7 @@ def send_verification_email(to_email, name, code):
         """
 
         resend.Emails.send({
-            "from": "KhajurKart <onboarding@resend.dev>",  # change later to your domain
+            "from": "KhajurKart <no-reply@khajurkart.com>",  # change later to your domain
             "to": [to_email],
             "subject": "✨ Your Verification Code",
             "html": html
