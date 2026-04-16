@@ -313,7 +313,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                            toast.success("Google login successful ✅");
                            onClose();
                          } else {
-                           toast.error(data.detail || "Google login failed ❌");
+                             toast.error(data.detail || "Google login failed ❌");
                          }
                       }}
                     />
