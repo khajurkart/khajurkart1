@@ -308,7 +308,13 @@ const AuthModal = ({ isOpen, onClose }) => {
 
                           const data = await res.json();
 
-                          loginWithGoogle(data);
+                          if (data.access_token) {
+                            loginWithGoogle(data);
+                            toast.success("Google login successful ✅");
+                            onClose();
+                          } else {
+                            toast.error(data.detail || "Google login failed ❌");
+                          }
                           toast.success("Google login successful ✅");
                           onClose();
 
