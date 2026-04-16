@@ -396,14 +396,14 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
 async def google_login(data: dict):
     token = data.get("token")
 
-    print("TOKEN:", token)
-    print("CLIENT_ID:", os.environ.get("GOOGLE_CLIENT_ID"))
+    if not token:
+        raise HTTPException(status_code=400, detail="Token missing")
 
     try:
         idinfo = id_token.verify_oauth2_token(
             token,
             google_requests.Request(),
-            os.environ["GOOGLE_CLIENT_ID"]  # ✅ put in .env
+            os.environ["GOOGLE_CLIENT_ID"]
         )
 
         email = idinfo["email"]
@@ -411,7 +411,6 @@ async def google_login(data: dict):
 
         user = await db.users.find_one({"email": email})
 
-        # ✅ If user not exists → create
         if not user:
             user = {
                 "id": f"user_{uuid.uuid4().hex}",
@@ -422,7 +421,6 @@ async def google_login(data: dict):
             }
             await db.users.insert_one(user)
 
-        # ✅ Create token
         access_token = create_access_token({
             "sub": user["id"],
             "role": user.get("role", "user")
@@ -435,8 +433,8 @@ async def google_login(data: dict):
         }
 
     except Exception as e:
-        print("GOOGLE LOGIN ERROR:", str(e))  # already there
-        raise HTTPException(status_code=400, detail=str(e))  # 👈 CHANGE THIS
+        print("GOOGLE ERROR:", str(e))
+        raise HTTPException(status_code=400, detail="Google login failed")
 
 @api_router.get("/auth/me", response_model=User)
 async def get_me(current_user: dict = Depends(get_current_user)):
