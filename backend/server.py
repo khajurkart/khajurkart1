@@ -436,8 +436,8 @@ async def google_login(data: dict):
         }
 
     except Exception as e:
-        print("GOOGLE LOGIN ERROR:", str(e))
-        raise HTTPException(status_code=400, detail="Google login failed")
+        print("GOOGLE LOGIN ERROR:", str(e))  # already there
+        raise HTTPException(status_code=400, detail=str(e))  # 👈 CHANGE THIS
 
 @api_router.get("/auth/me", response_model=User)
 async def get_me(current_user: dict = Depends(get_current_user)):
