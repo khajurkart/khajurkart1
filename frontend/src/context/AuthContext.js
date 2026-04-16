@@ -61,6 +61,10 @@ useEffect(() => {
   }
 }, [token]);
 
+useEffect(() => {
+  console.log("LOCAL STORAGE TEST:", localStorage.getItem("token"));
+}, []);
+
   const login = async (email, password) => {
     const response = await axios.post(`${API}/login`, { email, password });
     const { access_token, user: userData } = response.data;
@@ -72,19 +76,23 @@ useEffect(() => {
 
   const register = async (name, email, password, phone) => {
     const response = await axios.post(`${API}/auth/register`, { name, email, password, phone });
+    console.log("LOGIN RESPONSE:", response.data);
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
     setToken(access_token);
     setUser(userData);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`; 
     return userData;
   };
 
   const loginWithGoogle = (data) => {
-  localStorage.setItem("token", data.access_token);
+  console.log("GOOGLE RESPONSE:", data); // 👈 ADD THIS
+
+  localStorage.setItem("token", data.access_token); // ✅ MUST SAVE
+
   setToken(data.access_token);
   setUser(data.user);
 
-  // ✅ ADD THIS LINE (VERY IMPORTANT)
   axios.defaults.headers.common["Authorization"] = `Bearer ${data.access_token}`;
 };
  //const logout = () => {
