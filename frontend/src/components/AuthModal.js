@@ -305,16 +305,16 @@ const AuthModal = ({ isOpen, onClose }) => {
                               token: credentialResponse.credential
                             })
                           });
-                          
+
                           const data = await res.json();
-                          // ✅ USE CONTEXT (VERY IMPORTANT)
-                         if (data.access_token) {
-                           loginWithGoogle(data);
-                           toast.success("Google login successful ✅");
-                           onClose();
-                         } else {
-                             toast.error(data.detail || "Google login failed ❌");
-                         }
+
+                          loginWithGoogle(data);
+                          toast.success("Google login successful ✅");
+                          onClose();
+
+                        } catch {
+                          toast.error("Google login failed ❌");
+                        }
                       }}
                     />
                   </div>
