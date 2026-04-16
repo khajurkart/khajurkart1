@@ -59,8 +59,8 @@ useEffect(() => {
   } else {
     setLoading(false);
   }
-}, [token]);
-
+}, [token, fetchUser]);
+  
 useEffect(() => {
   console.log("LOCAL STORAGE TEST:", localStorage.getItem("token"));
 }, []);
@@ -68,6 +68,7 @@ useEffect(() => {
   const login = async (email, password) => {
     const response = await axios.post(`${API}/login`, { email, password });
     const { access_token, user: userData } = response.data;
+    console.log("SAVING TOKEN:", access_token);
     localStorage.setItem('token', access_token);
     setToken(access_token);
     setUser(userData);
