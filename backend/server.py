@@ -17,7 +17,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 from google.oauth2 import id_token
-from google.auth.transport import requests
+from google.auth.transport import requests as google_requests
 import random
 import json
 import resend
@@ -403,7 +403,7 @@ async def google_login(data: dict):
     try:
         idinfo = id_token.verify_oauth2_token(
             token,
-            requests.Request(),
+            google_requests.Request(),
             os.environ["GOOGLE_CLIENT_ID"]  # ✅ put in .env
         )
 
