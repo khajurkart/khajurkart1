@@ -18,10 +18,9 @@ from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-import random
+import requests as py_requests
 import json
 import resend
-import requests
 import aiosmtplib
 import os
 import logging
