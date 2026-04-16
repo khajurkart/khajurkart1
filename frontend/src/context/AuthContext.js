@@ -35,7 +35,8 @@ const logout = useCallback(() => {
 const fetchUser = useCallback(async () => {
   try {
     const token = localStorage.getItem("token");
-    const res = await axios.get(`${BACKEND_URL}/api/auth/me`, {
+    if (!token) return;
+    const res = await axios.get(`${API}/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -51,13 +52,14 @@ const fetchUser = useCallback(async () => {
 
   
 useEffect(() => {
+  console.log("TOKEN:", token);
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     fetchUser();
   } else {
     setLoading(false);
   }
-}, [token, fetchUser]);
+}, [token]);
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/login`, { email, password });
