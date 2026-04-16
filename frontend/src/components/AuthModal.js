@@ -19,7 +19,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [showverification_code, setShowverification_code] = useState(false);
   const [verification_code, setverification_code] = useState("");
 
-  const { login, register, loginWithGoogle } = useAuth();
+  const { login, register } = useAuth();
 
   if (!isOpen) return null;
 
@@ -282,49 +282,6 @@ const AuthModal = ({ isOpen, onClose }) => {
                 >
                   {loading ? 'Please wait...' : isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Login' : 'Register')}
                 </button>
-                <div className="mt-4">
-                  <button
-                    onClick={() => document.querySelector('[role=button]').click()}
-                    className="w-full border-2 border-khajur-gold text-khajur-primary hover:bg-khajur-gold/10 rounded-sm px-8 py-3 flex items-center justify-center gap-2"
-                  >
-                    <img src="https://developers.google.com/identity/images/g-logo.png" className="w-5 h-5" />
-                    Sign in with Google
-                  </button>
-
-                  <div className="hidden">
-                    <GoogleLogin
-                      onSuccess={async (credentialResponse) => {
-                        try {
-                          const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-                          const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                              token: credentialResponse.credential
-                            })
-                          });
-
-                          const data = await res.json();
-
-                          if (data.access_token) {
-                            loginWithGoogle(data);
-                            toast.success("Google login successful ✅");
-                            onClose();
-                          } else {
-                            toast.error(data.detail || "Google login failed ❌");
-                          }
-                          toast.success("Google login successful ✅");
-                          onClose();
-
-                        } catch {
-                          toast.error("Google login failed ❌");
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
               </form>
 
               {/* ✅ FIX: this div must be INSIDE fragment */}
