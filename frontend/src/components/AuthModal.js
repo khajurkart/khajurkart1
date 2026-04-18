@@ -77,9 +77,14 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   const verifyverification_code = async () => {
+    if (!verification_code) {
+      toast.error("Please enter verification code ❌");
+      return;
+    }
+
     try {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      await fetch(`${BACKEND_URL}/api/auth/verify`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -90,12 +95,15 @@ const AuthModal = ({ isOpen, onClose }) => {
         })
       });
 
+      if (!res.ok) {
+        throw new Error();
+      }
+
       toast.success("Verified successfully ✅");
       setShowverification_code(false);
-      onClose(); // ✅ close modal instead of forcing login screen
-
+      onClose();
     } catch (err) {
-      toast.error("Invalid verification_code ❌");
+      toast.error("Invalid verification code ❌");
     }
   };
 
