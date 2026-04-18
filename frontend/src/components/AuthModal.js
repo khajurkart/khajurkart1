@@ -113,6 +113,20 @@ const AuthModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const resendCode = async () => {
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+      await fetch(`${BACKEND_URL}/api/auth/resend-code?email=${formData.email}`, {
+        method: "POST"
+      });
+
+      toast.success("Verification code resent ✅");
+    } catch (err) {
+      toast.error("Failed to resend code ❌");
+    }
+  };
+
   const handleBackToLogin = () => {
     setIsForgotPassword(false);
     setIsLogin(true);
@@ -157,6 +171,13 @@ const AuthModal = ({ isOpen, onClose }) => {
                 onChange={(e) => setverification_code(e.target.value)}
                 className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm outline-none"
               />
+
+              <button
+                onClick={resendCode}
+                className="w-full text-sm text-khajur-primary underline mt-2"
+              >
+                 Resend Code
+              </button>
 
               <button
                 onClick={verifyverification_code}
