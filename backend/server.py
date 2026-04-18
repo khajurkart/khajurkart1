@@ -244,6 +244,10 @@ class ContactForm(BaseModel):
     phone: Optional[str]
     message: str = Field(min_length=5)
 
+class VerifyRequest(BaseModel):
+    email: str
+    verification_code: str
+
 # ============ AUTH HELPERS ============
 
 ADMIN_EMAILS = ["admin@khajurkart.com", "khajurkart@gmail.com"]  # Admin email list
@@ -379,14 +383,14 @@ async def register(user_data: UserRegister):
     }
 
 @api_router.post("/auth/verify")
-async def verify(email: str, verification_code: str):
-    user = await db.users.find_one({"email": email})
+async def verify(data: VerifyRequest):
+    user = await db.users.find_one({"email": data.email})
 
-    if not user or user.get("verification_code") != verification_code:
+    if not user or user.get("verification_code") != data.verification_code:
         raise HTTPException(status_code=400, detail="Invalid verification_code")
 
     await db.users.update_one(
-        {"email": email},
+        {"email": data.email},
         {
             "$set": {"is_verified": True},
             "$unset": {"verification_code": ""}
