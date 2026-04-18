@@ -399,6 +399,28 @@ async def verify(data: VerifyRequest):
 
     return {"message": "Email verified successfully"}
 
+@api_router.post("/auth/resend-code")
+async def resend_code(email: str):
+    user = await db.users.find_one({"email": email})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    verification_code = str(random.randint(100000, 999999))
+
+    await db.users.update_one(
+        {"email": email},
+        {"$set": {"verification_code": verification_code}}
+    )
+
+    send_verification_email(
+        email,
+        user.get("name", "User"),
+        verification_code
+    )
+
+    return {"message": "Verification code resent"}
+
 @api_router.post("/login")
 @limiter.limit("5/minute")
 async def login(request: Request, data: UserLogin):  # ✅ use model
