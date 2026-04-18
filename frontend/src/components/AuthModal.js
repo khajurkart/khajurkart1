@@ -84,6 +84,12 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     try {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      await fetch(
+        `${BACKEND_URL}/api/auth/verify?email=${formData.email}&verification_code=${verification_code}`,
+        {
+          method: "POST"
+        }
+      );
       const res = await fetch(`${BACKEND_URL}/api/auth/verify`, {
         method: "POST",
         headers: {
