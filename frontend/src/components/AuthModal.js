@@ -113,13 +113,14 @@ const AuthModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="auth-modal">
       <div className="bg-khajur-cream max-w-md w-full rounded-sm shadow-2xl relative border-2 border-khajur-gold/30">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-khajur-primary hover:text-khajur-gold transition-colors"
-          data-testid="close-auth-modal"
-        >
-          <X className="w-6 h-6" />
-        </button>
+        {!showverification_code && (
+           <button
+             onClick={onClose}
+             className="absolute top-4 right-4 text-khajur-primary hover:text-khajur-gold transition-colors"
+           >
+             <X className="w-6 h-6" />
+           </button>
+        )}
 
         <div className="p-8">
           <h2 className="font-serif text-4xl font-bold text-khajur-primary mb-2 text-center">
