@@ -421,9 +421,19 @@ async def verify(data: VerifyRequest):
     if user.get("verification_code") != data.verification_code:
         raise HTTPException(400, "Invalid verification_code")
 
-    if not user.get("otp_expiry") or datetime.now(timezone.utc) > user.get("otp_expiry"):
+    # ✅ INSERT HERE (replace old expiry check)
+    otp_expiry = user.get("otp_expiry")
+
+    if not otp_expiry:
         raise HTTPException(400, "OTP expired")
 
+    if isinstance(otp_expiry, str):
+        otp_expiry = datetime.fromisoformat(otp_expiry)
+
+    if datetime.now(timezone.utc) > otp_expiry:
+        raise HTTPException(400, "OTP expired")
+
+    # ✅ success
     await db.users.update_one(
         {"email": data.email},
         {
