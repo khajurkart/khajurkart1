@@ -17,6 +17,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 from email.mime.text import MIMEText
+from twilio.rest import Client
 import random
 import smtplib
 import requests
@@ -327,7 +328,27 @@ def send_verification_email(to_email, name, code):
 
     except Exception as e:
         print("❌ EMAIL ERROR:", str(e))
+        
 
+# ============ SMS VERIFICATION ROUTES ============
+
+twilio_client = Client(
+    os.environ["TWILIO_ACCOUNT_SID"],
+    os.environ["TWILIO_AUTH_TOKEN"]
+)
+
+async def send_sms_otp(phone, code):
+    try:
+        message = twilio_client.messages.create(
+            body=f"🔐 Your KhajurKart verification code is {code}.\n It expires in 5 minutes. Do NOT share this code.",
+            from_=os.environ["TWILIO_PHONE"],
+            to=phone
+        )
+        print("✅ SMS SENT:", message.sid)
+        
+    except Exception as e:
+        print("❌ SMS ERROR:", str(e))
+        
 # ============ AUTH ROUTES ============
 
 @api_router.post("/auth/register")
@@ -343,6 +364,7 @@ async def register(user_data: UserRegister):
 
     # ✅ GENERATE OTP (ADD HERE)
     verification_code = str(random.randint(100000, 999999))
+    otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=2)
     
     user_doc = {
         "id": user_id,
@@ -353,17 +375,23 @@ async def register(user_data: UserRegister):
         "role": "user",
         "verification_code": verification_code,                 # ✅ ADD
         "is_verified": False,
+        "verification_code": verification_code,
+        "otp_expiry": otp_expiry,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     # ✅ SAVE USER
     await db.users.insert_one(user_doc)
 
-    # ✅ SEND EMAIL (ADD HERE)
+    # ✅ SEND SMS FIRST (MAIN OTP)
+    if user_data.phone:
+        await send_sms_otp(user_data.phone, verification_code)
+
+    # ✅ OPTIONAL EMAIL
     send_verification_email(
         user_data.email,
         user_data.name,
-        verification_code
+        verification_code    
     )
     
     # Create access token
@@ -390,16 +418,22 @@ async def verify(data: VerifyRequest):
     if not user or user.get("verification_code") != data.verification_code:
         raise HTTPException(status_code=400, detail="Invalid verification_code")
 
+    if datetime.now(timezone.utc) > user.get("otp_expiry"):
+        raise HTTPException(status_code=400, detail="OTP expired")
+
     await db.users.update_one(
-        {"email": data.email},
+        {"email": email},   # filter (which user)
         {
-            "$set": {"is_verified": True},
-            "$unset": {"verification_code": ""}
+            "$set": {
+                "verification_code": verification_code,
+                "otp_expiry": otp_expiry
+            }
         }
     )
 
     return {"message": "Email verified successfully"}
 
+@limiter.limit("3/minute")
 @api_router.post("/auth/resend-code")
 async def resend_code(email: str):
     user = await db.users.find_one({"email": email})
@@ -408,12 +442,23 @@ async def resend_code(email: str):
         raise HTTPException(status_code=404, detail="User not found")
 
     verification_code = str(random.randint(100000, 999999))
+    otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=2)
 
     await db.users.update_one(
         {"email": email},
-        {"$set": {"verification_code": verification_code}}
+        {
+            "$set": {
+                "verification_code": verification_code,
+                "otp_expiry": otp_expiry
+            }
+        }
     )
 
+    # 🔥 SEND SMS AGAIN (MAIN)
+    if user.get("phone"):
+        await send_sms_otp(user.get("phone"), verification_code)
+
+    # 🔥 OPTIONAL EMAIL
     send_verification_email(
         email,
         user.get("name", "User"),
@@ -507,6 +552,27 @@ async def reset_password(reset_token: str, new_password: str):
     )
 
     return {"message": "Password reset successful"}
+    
+
+@api_router.post("/auth/send-email-verification_code")
+async def send_email_otp(email: str):
+    user = await db.users.find_one({"email": email})
+
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    code = user.get("verification_code")
+
+    if not code:
+        raise HTTPException(400, "No verification_code found")
+
+    send_verification_email(
+        email,
+        user.get("name", "User"),
+        code
+    )
+
+    return {"message": "verification_code sent to email"}
 
 # ============ EMAIL RECEIVER ============
 
