@@ -425,7 +425,7 @@ async def verify(data: VerifyRequest):
         {"email": email},   # filter (which user)
         {
             "$set": {
-                "verification_code": verification_code,
+                "is_verified": verification_code,
                 "otp_expiry": otp_expiry
             }
         }
@@ -448,7 +448,7 @@ async def resend_code(request: Request, email: str):
         {"email": email},
         {
             "$set": {
-                "verification_code": verification_code,
+                "is_verified": verification_code,
                 "otp_expiry": otp_expiry
             }
         }
