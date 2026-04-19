@@ -94,12 +94,12 @@ const AuthModal = ({ isOpen, onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          verification_code: verification_code
-        })
-      });
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        verification_code: verification_code
+      })
+    });
 
       if (!res.ok) {
         throw new Error();
