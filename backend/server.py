@@ -444,6 +444,9 @@ async def verify(data: VerifyRequest):
             }
         }
     )
+    except Exception as e:
+        print("VERIFY ERROR:", str(e))
+        raise HTTPException(500, str(e))
 
     return {"message": "Email verified successfully"}
 
