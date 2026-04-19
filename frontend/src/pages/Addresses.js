@@ -16,7 +16,10 @@ const Addresses = () => {
     const [newAddress, setNewAddress] = useState({
         name: '',
         phone: '',
-        address: ''
+        address: '',
+        city: '',
+        state: '',
+        pincode: ''
     });
 
     // ✅ FETCH ADDRESSES
@@ -132,6 +135,26 @@ const Addresses = () => {
                             placeholder="Address"
                             value={newAddress.address}
                             onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
+                            className="border p-2 w-full mb-2"
+                        />
+                        <input
+                            placeholder="City"
+                            value={newAddress.city}
+                            onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                            className="border p-2 w-full mb-2"
+                        />
+
+                        <input
+                            placeholder="State"
+                            value={newAddress.state}
+                            onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                            className="border p-2 w-full mb-2"
+                        />
+
+                        <input
+                            placeholder="Pincode"
+                            value={newAddress.pincode}
+                            onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
                             className="border p-2 w-full mb-2"
                         />
 
