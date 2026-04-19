@@ -21,7 +21,7 @@ const Addresses = () => {
 
     // ✅ FETCH ADDRESSES
     const fetchAddresses = async () => {
-        const res = await fetch("https://khajurkart.com/api/user/address", {
+        const res = await fetch("https://khajurkart1.onrender.com/api/user/address", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
             }
@@ -45,7 +45,7 @@ const Addresses = () => {
     };
 
     const handleSetDefault = async (index) => {
-        await fetch(`https://khajurkart.com/api/user/address/default/${index}`, {
+        await fetch(`https://khajurkart1.onrender.com/api/user/address/default/${index}`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -60,8 +60,8 @@ const Addresses = () => {
         const method = editIndex !== null ? "PUT" : "POST";
         const url =
             editIndex !== null
-                ? `https://khajurkart.com/api/user/address/${editIndex}`
-                : "https://khajurkart.com/api/user/address";
+                ? `https://khajurkart1.onrender.com/api/user/address/${editIndex}`
+                : "https://khajurkart1.onrender.com/api/user/address";
 
         await fetch(url, {
             method,
@@ -80,7 +80,7 @@ const Addresses = () => {
 
     // ✅ DELETE ADDRESS
     const handleDelete = async (index) => {
-        await fetch(`https://khajurkart.com/api/user/address/${index}`, {
+        await fetch(`https://khajurkart1.onrender.com/api/user/address/${index}`, {
             method: "DELETE",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
