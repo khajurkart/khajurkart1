@@ -15,11 +15,6 @@ const Addresses = () => {
     address: ''
   });
 
-  if (!user) {
-    navigate('/');
-    return null;
-  }
-
   // ✅ FETCH ADDRESSES
   const fetchAddresses = async () => {
     const res = await fetch("https://khajurkart.com/api/user/address", {
