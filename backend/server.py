@@ -444,11 +444,13 @@ async def verify(data: VerifyRequest):
             }
         }
     )
+    
+    return {"message": "Email verified successfully"}
+    
     except Exception as e:
         print("VERIFY ERROR:", str(e))
         raise HTTPException(500, str(e))
 
-    return {"message": "Email verified successfully"}
 
 @api_router.post("/auth/resend-code")
 @limiter.limit("3/minute")
