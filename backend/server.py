@@ -592,7 +592,15 @@ async def add_address(address: dict, current_user: dict = Depends(get_current_us
     )
     return {"message": "Address added"}
 
-# =========== INVOICE PDF DOWNLOAD ======
+@api_router.get("/user/address")
+async def get_addresses(current_user: dict = Depends(get_current_user)):
+    user = await db.users.find_one(
+        {"id": current_user["id"]},
+        {"_id": 0, "addresses": 1}
+    )
+    return user.get("addresses", [])
+
+# ==================== INVOICE PDF DOWNLOAD ========================
 
 def generate_invoice(order):
     file_path = f"/tmp/invoice_{order['id']}.pdf"
