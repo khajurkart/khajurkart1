@@ -35,6 +35,7 @@ import uuid
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+resend.api_key = os.environ["RESEND_API_KEY"]
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -509,8 +510,6 @@ async def reset_password(reset_token: str, new_password: str):
 
 # ============ EMAIL RECEIVER ============
 
-resend.api_key = os.environ["RESEND_API_KEY"]
-
 async def send_email(name, email, phone, message):
     try:
         html = f"""
@@ -610,12 +609,14 @@ async def send_order_email(user_email, user_name, order_id, items, total):
         </div>
         """
 
-        resend.Emails.send({
+        response = resend.Emails.send({
             "from": "KhajurKart <contact@khajurkart.com>",
             "to": [user_email],
             "subject": f"🛒 Order Confirmed - {order_id}",
             "html": html
         })
+
+        print("RESEND RESPONSE:", response)
 
         logging.info("ORDER EMAIL SENT ✅")
 
@@ -1005,7 +1006,7 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
         current_user["email"],
         current_user["name"],
         order_id,
-        order_data.items,
+        items_with_discount,   # ✅ FIX
         order_data.total_amount
     )
     
