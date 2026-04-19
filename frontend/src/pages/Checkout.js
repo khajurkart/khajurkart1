@@ -465,6 +465,7 @@ const Checkout = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
                 </form>
             </div>
         </div>
