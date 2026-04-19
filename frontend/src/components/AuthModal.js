@@ -75,25 +75,20 @@ const AuthModal = ({ isOpen, onClose }) => {
       setLoading(false);
     }
   };
+  
+const verifyverification_code = async () => {
+  if (!verification_code) {
+    toast.error("Please enter verification code ❌");
+    return;
+  }
 
-  const verifyverification_code = async () => {
-    if (!verification_code) {
-      toast.error("Please enter verification code ❌");
-      return;
-    }
+  try {
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-    try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      await fetch(
-        `${BACKEND_URL}/api/auth/verify?email=${formData.email}&verification_code=${verification_code}`,
-        {
-          method: "POST"
-        }
-      );
-      const res = await fetch(`${BACKEND_URL}/api/auth/verify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+    const res = await fetch(`${BACKEND_URL}/api/auth/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         email: formData.email,
@@ -101,17 +96,18 @@ const AuthModal = ({ isOpen, onClose }) => {
       })
     });
 
-      if (!res.ok) {
-        throw new Error();
-      }
-
-      toast.success("Verified successfully ✅");
-      setShowverification_code(false);
-      onClose();
-    } catch (err) {
-      toast.error("Invalid verification code ❌");
+    if (!res.ok) {
+      throw new Error();
     }
-  };
+    
+    toast.success("Verified successfully ✅");
+    setShowverification_code(false);
+    onClose();
+    
+  } catch (err) {
+    toast.error("Invalid verification code ❌");
+  }
+};
 
   const resendCode = async () => {
     try {
