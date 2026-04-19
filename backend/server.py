@@ -34,6 +34,7 @@ import uuid
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+resend.api_key = os.environ["RESEND_API_KEY"] 
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -286,7 +287,7 @@ def send_verification_email(to_email, name, code):
           <p>Cheers,<br/><strong>KhajurKart Team</strong></p>
         </div>
         """
-        resend.Emails.send({
+        response = resend.Emails.send({
             "from": "KhajurKart <no-reply@khajurkart.com>",  # change later to your domain
             "to": [to_email],
             "subject": "✨ Your Verification Code",
@@ -297,6 +298,7 @@ def send_verification_email(to_email, name, code):
         print("❌ EMAIL ERROR:", str(e))
         
 # ============ AUTH ROUTES ============
+
 @api_router.post("/auth/register")
 async def register(user_data: UserRegister):
     # Check if user exists
@@ -382,13 +384,18 @@ async def resend_code(email: str):
 @api_router.post("/login")
 @limiter.limit("5/minute")
 async def login(request: Request, data: UserLogin):  # ✅ use model
+    
     user = await db.users.find_one({"email": data.email.lower()})  # ✅ FIX
+    
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+        
     if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+        
     if not user.get("is_verified"):
         raise HTTPException(status_code=403, detail="Please verify your email first")
+        
     # ✅ INCLUDE ROLE IN TOKEN (VERY IMPORTANT)
     access_token = create_access_token({
         "sub": user["id"],
@@ -409,6 +416,7 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
 @api_router.get("/auth/me", response_model=User)
 async def get_me(current_user: dict = Depends(get_current_user)):
     return User(**current_user)
+
 @api_router.post("/auth/forgot-password")
 async def forgot_password(email: str):
     user = await db.users.find_one({"email": email})
@@ -464,7 +472,7 @@ async def send_email(name, email, phone, message):
           <p>{message}</p>
         </div>
         """
-        resend.Emails.send({
+        response = resend.Emails.send({
             "from": "KhajurKart <contact@khajurkart.com>",
             "to": ["khajurkart@gmail.com"],
             "subject": f"📩 New Contact - {name}",
@@ -495,7 +503,7 @@ async def send_auto_reply(name, email):
           <strong>KhajurKart Team</strong></p>
         </div>
         """
-        resend.Emails.send({
+        response = resend.Emails.send({
             "from": "KhajurKart <contact@khajurkart.com>",
             "to": [email],   # 👈 USER EMAIL
             "subject": "✅ We received your message",
@@ -541,13 +549,14 @@ async def send_order_email(user_email, user_name, order_id, items, total):
           <p><strong>KhajurKart Team</strong></p>
         </div>
         """
-        resend.Emails.send({
+        response = resend.Emails.send({
             "from": "KhajurKart <contact@khajurkart.com>",
             "to": [user_email],
             "subject": f"🛒 Order Confirmed - {order_id}",
             "html": html
         })
         logging.info("ORDER EMAIL SENT ✅")
+        
     except Exception as e:
         logging.error("ORDER EMAIL ERROR", exc_info=True)
         
@@ -918,7 +927,7 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
         current_user["email"],
         current_user["name"],
         order_id,
-        order_data.items,
+        items_with_discount,   # ✅ CORRECT
         order_data.total_amount
     )
     
