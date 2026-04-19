@@ -600,6 +600,18 @@ async def get_addresses(current_user: dict = Depends(get_current_user)):
     )
     return user.get("addresses", [])
 
+@api_router.delete("/user/address/{index}")
+async def delete_address(index: int, current_user: dict = Depends(get_current_user)):
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$unset": {f"addresses.{index}": 1}}
+    )
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$pull": {"addresses": None}}
+    )
+    return {"message": "Address removed"}
+
 # ==================== INVOICE PDF DOWNLOAD ========================
 
 def generate_invoice(order):
