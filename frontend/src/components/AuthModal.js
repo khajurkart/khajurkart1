@@ -65,7 +65,7 @@ const AuthModal = ({ isOpen, onClose }) => {
         setFormData({
           name: '',
           phone: '',
-          { "email": "", "verification_code": "123456" } // ✅ KEEP EMAIL
+          email: formData.email, // ✅ KEEP EMAIL
           password: '',
           confirmPassword: ''
         });
