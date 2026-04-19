@@ -17,6 +17,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   });
   const [loading, setLoading] = useState(false);
   const [showverification_code, setShowverification_code] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [verification_code, setverification_code] = useState("");
 
   const { login, register } = useAuth();
@@ -59,11 +60,12 @@ const AuthModal = ({ isOpen, onClose }) => {
         await register(formData.name, formData.email, formData.password, formData.phone);
 
         toast.success('verification_code sent to your email');
+        setUserEmail(formData.email);
         setShowverification_code(true);   // ✅ SHOW OTP SCREEN
         setFormData({
           name: '',
           phone: '',
-          email: formData.email, // ✅ KEEP EMAIL
+          { "email": "", "verification_code": "123456" } // ✅ KEEP EMAIL
           password: '',
           confirmPassword: ''
         });
@@ -91,7 +93,7 @@ const verifyverification_code = async () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        email: formData.email,
+        email: userEmail, 
         verification_code: verification_code
       })
     });
