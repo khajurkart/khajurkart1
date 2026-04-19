@@ -462,7 +462,7 @@ async def send_email(name, email, phone, message):
     try:
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
-          <img src="https://khajurkart.com/https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg" width="120" />
+          <img src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776596501/LOGO_3_dexxml.pngg" width="120" />
           <h2>📩 New Contact Message</h2>
           <p><strong>Name:</strong> {name}</p>
           <p><strong>Email:</strong> {email}</p>
@@ -489,7 +489,7 @@ async def send_auto_reply(name, email):
     try:
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
-          <img src="https://khajurkart.com/https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg" width="120" />
+          <img src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776596501/LOGO_3_dexxml.png" width="120" />
           <h2>🙏 Thank You for Contacting KhajurKart</h2>
           
           <p>Hi {name},</p>
@@ -523,7 +523,7 @@ async def send_order_email(user_email, user_name, order_id, items, total):
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
           
-          <img src="https://yourdomain.com/logo.png" width="120" />
+          <img src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776596501/LOGO_3_dexxml.png" width="120" />
           
           <h2>🛒 Order Confirmation</h2>
           
@@ -609,7 +609,7 @@ def generate_invoice(order):
     # 🖼️ LOGO
     try:
         c.drawImage(
-            "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1775803413/LOGO_j1u7zu.jpg",
+            "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776596501/LOGO_3_dexxml.png",
             40, height - 110, width=60, height=60
         )
     except:
