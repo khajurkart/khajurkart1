@@ -612,6 +612,29 @@ async def delete_address(index: int, current_user: dict = Depends(get_current_us
     )
     return {"message": "Address removed"}
 
+@api_router.put("/user/address/default/{index}")
+async def set_default_address(index: int, current_user: dict = Depends(get_current_user)):
+    user = await db.users.find_one({"id": current_user["id"]})
+    
+    addresses = user.get("addresses", [])
+    
+    if index < 0 or index >= len(addresses):
+        raise HTTPException(400, "Invalid index")
+
+    # remove default from all
+    for addr in addresses:
+        addr["isDefault"] = False
+
+    # set selected as default
+    addresses[index]["isDefault"] = True
+
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"addresses": addresses}}
+    )
+
+    return {"message": "Default address updated"}
+
 # ==================== INVOICE PDF DOWNLOAD ========================
 
 def generate_invoice(order):
