@@ -435,7 +435,7 @@ async def verify(data: VerifyRequest):
 
 @api_router.post("/auth/resend-code")
 @limiter.limit("3/minute")
-async def resend_code(email: str):
+async def resend_code(request: Request, email: str):
     user = await db.users.find_one({"email": email})
 
     if not user:
