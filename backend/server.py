@@ -31,19 +31,25 @@ import razorpay
 import secrets
 import hashlib
 import uuid
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
 # JWT Configuration
 JWT_SECRET = os.environ['JWT_SECRET']
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+
 # Razorpay client
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
+
 app = FastAPI()
+
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 origins = [
@@ -58,6 +64,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 api_router = APIRouter(prefix="/api")
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -70,7 +77,9 @@ async def root_head():
 async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
 security = HTTPBearer()
+
 # ============ MODELS ============
+
 class UserRegister(BaseModel):
     name: str
     email: EmailStr
@@ -216,7 +225,9 @@ class ContactForm(BaseModel):
 class VerifyRequest(BaseModel):
     email: str
     verification_code: str
+    
 # ============ AUTH HELPERS ============
+
 ADMIN_EMAILS = ["admin@khajurkart.com", "khajurkart@gmail.com"]  # Admin email list
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -251,7 +262,9 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict
     if current_user.get("email") not in ADMIN_EMAILS:
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
+    
 # ============ EMAIL VERIFICATION ROUTES ============
+
 def send_verification_email(to_email, name, code):
     try:
         html = f"""
@@ -282,6 +295,7 @@ def send_verification_email(to_email, name, code):
         print("✅ VERIFICATION EMAIL SENT")
     except Exception as e:
         print("❌ EMAIL ERROR:", str(e))
+        
 # ============ AUTH ROUTES ============
 @api_router.post("/auth/register")
 async def register(user_data: UserRegister):
@@ -333,6 +347,7 @@ async def register(user_data: UserRegister):
             "phone": user_data.phone
         }
     }
+    
 @api_router.post("/auth/verify")
 async def verify(data: VerifyRequest):
     user = await db.users.find_one({"email": data.email})
@@ -346,6 +361,7 @@ async def verify(data: VerifyRequest):
         }
     )
     return {"message": "Email verified successfully"}
+    
 @api_router.post("/auth/resend-code")
 async def resend_code(email: str):
     user = await db.users.find_one({"email": email})
@@ -362,6 +378,7 @@ async def resend_code(email: str):
         verification_code
     )
     return {"message": "Verification code resent"}
+    
 @api_router.post("/login")
 @limiter.limit("5/minute")
 async def login(request: Request, data: UserLogin):  # ✅ use model
@@ -388,6 +405,7 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
             "role": user.get("role", "user")  # ✅ send role to frontend
         }
     }
+    
 @api_router.get("/auth/me", response_model=User)
 async def get_me(current_user: dict = Depends(get_current_user)):
     return User(**current_user)
@@ -410,6 +428,7 @@ async def forgot_password(email: str):
     # send email here with raw token (IMPORTANT)
     reset_url = f"https://khajurkart.com/reset-password?token={token}"
     return {"message": "Reset link sent"}
+    
 @api_router.post("/auth/reset-password")
 async def reset_password(reset_token: str, new_password: str):
     hashed = hashlib.sha256(reset_token.encode()).hexdigest()
@@ -428,7 +447,9 @@ async def reset_password(reset_token: str, new_password: str):
         }
     )
     return {"message": "Password reset successful"}
+    
 # ============ EMAIL RECEIVER ============
+
 async def send_email(name, email, phone, message):
     try:
         html = f"""
@@ -453,7 +474,9 @@ async def send_email(name, email, phone, message):
         logging.info("ADMIN EMAIL SENT ✅")
     except Exception as e:
         logging.error("ADMIN EMAIL ERROR", exc_info=True)
+        
 # ======== SENDER EMAIL ===========
+
 async def send_auto_reply(name, email):
     try:
         html = f"""
@@ -481,6 +504,7 @@ async def send_auto_reply(name, email):
         logging.info("AUTO REPLY SENT ✅")
     except Exception as e:
         logging.error("AUTO REPLY ERROR", exc_info=True)
+        
 # =========== ORDER CONFIRMATION =========
     
 async def send_order_email(user_email, user_name, order_id, items, total):
@@ -526,7 +550,9 @@ async def send_order_email(user_email, user_name, order_id, items, total):
         logging.info("ORDER EMAIL SENT ✅")
     except Exception as e:
         logging.error("ORDER EMAIL ERROR", exc_info=True)
+        
 # ============ CONTACT ROUTES ============
+
 @api_router.post("/contact")
 async def contact_form(data: ContactForm):   
     name = data.name
@@ -546,7 +572,9 @@ async def contact_form(data: ContactForm):
     # ✅ Send auto reply to user
     await send_auto_reply(name, email)
     return {"message": "Message received successfully"}
+    
 # =========== MULTI-ADDRESS SUPPORT ROUTES ==== 
+
 @api_router.post("/user/address")
 async def add_address(address: dict, current_user: dict = Depends(get_current_user)):
     await db.users.update_one(
@@ -554,7 +582,9 @@ async def add_address(address: dict, current_user: dict = Depends(get_current_us
         {"$push": {"addresses": address}}
     )
     return {"message": "Address added"}
+
 # =========== INVOICE PDF DOWNLOAD ======
+
 def generate_invoice(order):
     file_path = f"/tmp/invoice_{order['id']}.pdf"
     c = canvas.Canvas(file_path, pagesize=letter)
@@ -562,7 +592,9 @@ def generate_invoice(order):
     # 🎨 DARK GREEN THEME
     header_color = colors.HexColor("#064E3B")   # dark green
     light_line = colors.HexColor("#A7F3D0")     # light green
+    
     # ================= HEADER =================
+    
     c.setFillColor(header_color)
     c.rect(0, height - 160, width, 160, fill=1)
     # 🖼️ LOGO
@@ -573,40 +605,56 @@ def generate_invoice(order):
         )
     except:
         pass
+   
     # 📄 INVOICE (moved below logo properly)
+    
     c.setFillColor(colors.white)
     c.setFont("Helvetica-Bold", 14)
     c.drawString(40, height - 130, "INVOICE")
+    
     # 🏢 COMPANY DETAILS (RIGHT)
+    
     c.setFont("Helvetica-Bold", 16)
     c.drawRightString(width - 40, height - 50, "KhajurKart")
     c.setFont("Helvetica", 10)
     c.drawRightString(width - 40, height - 70, "Number: 7981002137")
     c.drawRightString(width - 40, height - 85, "Email: khajurkart@gmail.com")
+    
     # ✅ FULL ADDRESS (multi-line)
+    
     c.setFont("Helvetica", 9)
     c.drawRightString(width - 40, height - 100, "10-3-313/a, AR Raheem Residency")
     c.drawRightString(width - 40, height - 112, "Beside Govt IASE College")
     c.drawRightString(width - 40, height - 124, "Potti Sriramulu Nagar")
     c.drawRightString(width - 40, height - 136, "Vijaya Nagar Colony")
     c.drawRightString(width - 40, height - 148, "Hyderabad, Telangana 500057")
+    
     # ================= LINE =================
+    
     c.setStrokeColor(light_line)
     c.line(40, height - 170, width - 40, height - 170)
+    
     # ================= BILL TO =================
+    
     c.setFillColor(colors.black)
     c.setFont("Helvetica-Bold", 11)
     c.drawString(40, height - 190, "Bill To:")
     c.setFont("Helvetica", 10)
     c.drawString(40, height - 205, order['customer_name'])
     c.drawString(40, height - 220, order['customer_email'])
+    
     # ================= ORDER INFO =================
+    
     c.setFont("Helvetica-Bold", 11)
     c.drawRightString(width - 40, height - 190, f"Order ID: {order['id']}")
     c.drawRightString(width - 40, height - 205, f"Date: {order['created_at'][:10]}")
+    
     # ================= LINE =================
+    
     c.line(40, height - 255, width - 40, height - 255)
+    
     # ================= TABLE =================
+    
     y = height - 275
     c.setFillColor(header_color)
     c.rect(40, y, width - 80, 25, fill=1)
@@ -618,7 +666,9 @@ def generate_invoice(order):
     c.drawString(270, y + 8, "Price")
     c.drawString(330, y + 8, "Disc %")
     c.drawString(410, y + 8, "Final Amount")
+    
     # ================= ITEMS =================
+    
     y -= 30
     c.setFillColor(colors.black)
     c.setFont("Helvetica", 10)
@@ -634,23 +684,29 @@ def generate_invoice(order):
         c.drawString(330, y, f"{discount}%")
         c.drawString(410, y, f"Rs.{round(final_price, 2)}")
         y -= 20
+    
     # ================= TOTAL =================
+    
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
     c.drawRightString(width - 40, y - 20, f"Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
+
 # ============ CATEGORY ROUTES ============
+
 @api_router.get("/categories", response_model=List[Category])
 async def get_categories():
     categories = await db.categories.find({}, {"_id": 0}).to_list(100)
     return categories
+
 @api_router.post("/admin/categories")
 async def create_category(category: Category, admin: dict = Depends(get_admin_user)):
     await db.categories.insert_one(category.dict())
     return category
     
 # ============ PRODUCT ROUTES ============
+
 @api_router.get("/products", response_model=List[Product])
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
     query = {}
@@ -661,12 +717,14 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
     
     products = await db.products.find(query, {"_id": 0}).to_list(1000)
     return products
+
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str):
     product = await db.products.find_one({"id": product_id}, {"_id": 0})
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
+
 @api_router.get("/search")
 async def search_products(q: str):
     if not q:
@@ -684,16 +742,21 @@ async def search_products(q: str):
     ).to_list(50)
     
     return products
+
 # ============ REVIEW ROUTES ============
+
 @api_router.get("/reviews/{product_id}")
 async def get_reviews(product_id: str):
     reviews = await db.reviews.find({"product_id": product_id}, {"_id": 0}).to_list(100)
     return reviews
+
 @api_router.post("/reviews")
 async def add_review(review: Review):
     await db.reviews.insert_one(review.dict())
     return {"message": "Review added"}
+
 # ============ CART ROUTES ============
+
 @api_router.get("/cart")
 async def get_cart(current_user: dict = Depends(get_current_user)):
     cart = await db.carts.find_one({"user_id": current_user["id"]}, {"_id": 0})
@@ -708,6 +771,7 @@ async def get_cart(current_user: dict = Depends(get_current_user)):
             item["product"] = product
     
     return cart
+
 @api_router.post("/cart/add")
 async def add_to_cart(cart_item: CartItem, current_user: dict = Depends(get_current_user)):
     # Check if product exists
@@ -740,6 +804,7 @@ async def add_to_cart(cart_item: CartItem, current_user: dict = Depends(get_curr
     )
     
     return {"message": "Item added to cart"}
+
 @api_router.post("/cart/update")
 async def update_cart_item(cart_item: CartItem, current_user: dict = Depends(get_current_user)):
     cart = await db.carts.find_one({"user_id": current_user["id"]})
@@ -759,6 +824,7 @@ async def update_cart_item(cart_item: CartItem, current_user: dict = Depends(get
     )
     
     return {"message": "Cart updated"}
+
 @api_router.delete("/cart/remove/{product_id}")
 async def remove_from_cart(product_id: str, current_user: dict = Depends(get_current_user)):
     cart = await db.carts.find_one({"user_id": current_user["id"]})
@@ -775,6 +841,7 @@ async def remove_from_cart(product_id: str, current_user: dict = Depends(get_cur
     )
     
     return {"message": "Item removed from cart"}
+
 @api_router.delete("/cart/clear")
 async def clear_cart(current_user: dict = Depends(get_current_user)):
     await db.carts.update_one(
@@ -782,7 +849,9 @@ async def clear_cart(current_user: dict = Depends(get_current_user)):
         {"$set": {"items": []}}
     )
     return {"message": "Cart cleared"}
+
 # ============ ORDER ROUTES ============
+
 @api_router.post("/orders")
 async def create_order(order_data: CreateOrder, current_user: dict = Depends(get_current_user)):
     order_id = f"KK-{uuid.uuid4().hex[:10].upper()}"
@@ -860,6 +929,7 @@ async def create_order(order_data: CreateOrder, current_user: dict = Depends(get
     )
     
     return {"order_id": order_id, "message": "Order created successfully"}
+
 @api_router.get("/orders")
 async def get_orders(current_user: dict = Depends(get_current_user)):
     try:
@@ -872,6 +942,7 @@ async def get_orders(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         print("ERROR:", str(e))   # ✅ DEBUG
         raise HTTPException(500, str(e))
+
 @api_router.get("/orders/{order_id}")
 async def get_order(order_id: str, current_user: dict = Depends(get_current_user)):
     try:
@@ -886,6 +957,7 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
     except Exception as e:
         print("ERROR:", str(e))
         raise HTTPException(500, str(e))
+
 @api_router.put("/orders/{order_id}/cancel")
 async def cancel_order(order_id: str, current_user: dict = Depends(get_current_user)):
     order = await db.orders.find_one({
@@ -910,11 +982,14 @@ async def cancel_order(order_id: str, current_user: dict = Depends(get_current_u
         {"$set": {"status": "cancelled"}}
     )
     return {"message": "Order cancelled"}
+
 @app.delete("/api/orders/{order_id}")
 async def delete_order(order_id: str):
     await db.orders.delete_one({"id": order_id})
     return {"message": "Order deleted"}
+
 # ============ INVOICE ROUTES ============
+
 @api_router.get("/invoice/{order_id}")
 async def download_invoice(order_id: str, current_user: dict = Depends(get_current_user)):
     order = await db.orders.find_one({"id": order_id, "user_id": current_user["id"]},{"_id": 0})
@@ -922,6 +997,7 @@ async def download_invoice(order_id: str, current_user: dict = Depends(get_curre
         raise HTTPException(404, "Order not found")
     file_path = generate_invoice(order)
     return FileResponse(file_path, filename=f"invoice_{order_id}.pdf")
+
 @app.get("/api/invoice/{order_id}")
 async def get_invoice(order_id: str):
     try:
@@ -934,7 +1010,9 @@ async def get_invoice(order_id: str):
     except Exception as e:
         print("INVOICE ERROR:", str(e))  # ✅ SEE REAL ERROR
         raise HTTPException(500, str(e))
+
 # ============ RAZORPAY ROUTES ============
+
 @api_router.post("/razorpay/create-order")
 async def create_razorpay_order(order: RazorpayOrder, current_user: dict = Depends(get_current_user)):
     try:
@@ -955,6 +1033,7 @@ async def create_razorpay_order(order: RazorpayOrder, current_user: dict = Depen
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/razorpay/verify-payment")
 async def verify_razorpay_payment(payment_data: RazorpayVerify, current_user: dict = Depends(get_current_user)):
     try:
@@ -993,6 +1072,7 @@ async def verify_razorpay_payment(payment_data: RazorpayVerify, current_user: di
         raise HTTPException(status_code=400, detail="Invalid payment signature")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/razorpay/webhook")
 async def razorpay_webhook(request: Request):
     body = await request.body()
@@ -1013,10 +1093,13 @@ async def razorpay_webhook(request: Request):
             {"$set": {"payment_status": "paid"}}
         )
     return {"status": "ok"}
+
 # ============ ADMIN ROUTES ============
+
 @api_router.get("/admin/check")
 async def check_admin(admin: dict = Depends(get_admin_user)):
     return {"is_admin": True, "email": admin["email"]}
+
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin: dict = Depends(get_admin_user)):
     product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
@@ -1028,6 +1111,7 @@ async def create_product(product_data: ProductCreate, admin: dict = Depends(get_
     
     await db.products.insert_one(product_doc)
     return Product(**product_doc)
+
 @api_router.put("/admin/products/{product_id}", response_model=Product)
 async def update_product(product_id: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)):
     # Get existing product
@@ -1046,12 +1130,14 @@ async def update_product(product_id: str, product_data: ProductUpdate, admin: di
     
     updated_product = await db.products.find_one({"id": product_id}, {"_id": 0})
     return Product(**updated_product)
+
 @api_router.delete("/admin/products/{product_id}")
 async def delete_product(product_id: str, admin: dict = Depends(get_admin_user)):
     result = await db.products.delete_one({"id": product_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product deleted successfully"}
+
 @api_router.put("/admin/orders/{order_id}/status")
 async def update_order_status(order_id: str, status: str, admin: dict = Depends(get_admin_user)):
     valid_statuses = ["pending", "confirmed", "processing", "shipped", "delivered", "exchange", "return", "cancelled"]
@@ -1074,6 +1160,7 @@ async def update_order_status(order_id: str, status: str, admin: dict = Depends(
         raise HTTPException(status_code=404, detail="Order not found")
     
     return {"message": "Order status updated successfully"}
+
 @app.delete("/api/admin/orders/{order_id}")
 async def delete_order(order_id: str):
     await db.orders.update_one(
@@ -1081,6 +1168,7 @@ async def delete_order(order_id: str):
         {"$set": {"is_deleted": True}}
     )
     return {"message": "Order deleted"}
+
 @api_router.get("/admin/orders")
 async def get_all_orders(admin: dict = Depends(get_admin_user)):
     return await db.orders.find(
@@ -1095,16 +1183,19 @@ async def track_order(tracking_id: str):
     if not order:
         raise HTTPException(status_code=404, detail="Order not found with this tracking ID")
     return order
+
 @api_router.get("/admin/reviews")
 async def get_all_reviews(admin: dict = Depends(get_admin_user)):
     reviews = await db.reviews.find({}, {"_id": 0}).to_list(1000)
     return reviews
+
 @api_router.delete("/admin/reviews/{review_id}")
 async def delete_review(review_id: str, admin: dict = Depends(get_admin_user)):
     result = await db.reviews.delete_one({"id": review_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Review not found")
     return {"message": "Review deleted successfully"}
+
 @api_router.delete("/admin/returns/{return_id}")
 async def delete_return(return_id: str, admin: dict = Depends(get_admin_user)):
     await db.returns.update_one(
@@ -1112,6 +1203,7 @@ async def delete_return(return_id: str, admin: dict = Depends(get_admin_user)):
         {"$set": {"is_deleted": True}}
     )
     return {"message": "Return deleted successfully"}
+
 @api_router.get("/admin/returns")
 async def get_all_returns(admin: dict = Depends(get_admin_user)):
     returns = await db.returns.find(
@@ -1119,7 +1211,9 @@ async def get_all_returns(admin: dict = Depends(get_admin_user)):
         {"_id": 0}
     ).to_list(1000)
     return returns
+
 # ============ RETURN/EXCHANGE ROUTES ============
+
 @api_router.post("/returns")
 async def create_return_request(return_data: CreateReturnRequest, current_user: dict = Depends(get_current_user)):
     # Verify order exists and belongs to user
@@ -1155,16 +1249,19 @@ async def create_return_request(return_data: CreateReturnRequest, current_user: 
     
     await db.returns.insert_one(return_doc)
     return {"return_id": return_id, "message": f"{return_data.request_type.title()} request submitted successfully"}
+
 @api_router.get("/returns")
 async def get_user_returns(current_user: dict = Depends(get_current_user)):
     returns = await db.returns.find({"user_id": current_user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return returns
+
 @api_router.get("/returns/{return_id}", response_model=ReturnRequest)
 async def get_return_detail(return_id: str, current_user: dict = Depends(get_current_user)):
     return_req = await db.returns.find_one({"id": return_id, "user_id": current_user["id"]}, {"_id": 0})
     if not return_req:
         raise HTTPException(status_code=404, detail="Return request not found")
     return return_req
+
 @api_router.delete("/returns/{return_id}")
 async def delete_return(return_id: str, admin: dict = Depends(get_admin_user)):
     result = await db.returns.delete_one({"id": return_id})
@@ -1173,11 +1270,14 @@ async def delete_return(return_id: str, admin: dict = Depends(get_admin_user)):
         raise HTTPException(status_code=404, detail="Return request not found")
     
     return {"message": "Return deleted successfully"}
+
 # ============ ADMIN RETURN ROUTES ============
+
 @api_router.get("/admin/returns")
 async def get_all_returns(admin: dict = Depends(get_admin_user)):
     returns = await db.returns.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return returns
+
 @api_router.put("/admin/returns/{return_id}/status")
 async def update_return_status(return_id: str, status: str, admin_notes: Optional[str] = None, admin: dict = Depends(get_admin_user)):
     valid_statuses = ["pending", "approved", "rejected", "completed"]
@@ -1217,6 +1317,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
