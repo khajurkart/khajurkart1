@@ -426,45 +426,45 @@ const Checkout = () => {
 
                         {/* Order Summary */}
                         <div className="lg:col-span-3 flex justify-center">
-                          <div className="bg-white border border-khajur-border p-10 w-full max-w-md">
-                            <div className="bg-white border border-khajur-border p-8 sticky top-24" data-testid="checkout-summary">
-                                <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-6">
-                                    Order Summary
-                                </h2>
+                            <div className="bg-white border border-khajur-border p-10 w-full max-w-md">
+                                <div className="bg-white border border-khajur-border p-8 sticky top-24" data-testid="checkout-summary">
+                                    <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-6">
+                                        Order Summary
+                                    </h2>
 
-                                <div className="space-y-4 mb-6">
-                                    {cart.items.map((item) => (
-                                        <div key={item.product_id} className="flex justify-between text-sm">
-                                            <span className="text-khajur-dark/70">
-                                                {item.product?.name} x {item.quantity}
-                                            </span>
-                                            <span className="font-medium">
-                                                ₹{(item.product?.price * item.quantity).toFixed(2)}
+                                    <div className="space-y-4 mb-6">
+                                        {cart.items.map((item) => (
+                                            <div key={item.product_id} className="flex justify-between text-sm">
+                                                <span className="text-khajur-dark/70">
+                                                    {item.product?.name} x {item.quantity}
+                                                </span>
+                                                <span className="font-medium">
+                                                    ₹{(item.product?.price * item.quantity).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="border-t border-khajur-border pt-4 mb-6">
+                                        <div className="flex justify-between text-lg">
+                                            <span className="font-serif font-medium text-khajur-primary">Total</span>
+                                            <span className="font-serif text-3xl font-bold text-khajur-gold" data-testid="checkout-total">
+                                                ₹{cartTotal.toFixed(2)}
                                             </span>
                                         </div>
-                                    ))}
-                                </div>
-
-                                <div className="border-t border-khajur-border pt-4 mb-6">
-                                    <div className="flex justify-between text-lg">
-                                        <span className="font-serif font-medium text-khajur-primary">Total</span>
-                                        <span className="font-serif text-3xl font-bold text-khajur-gold" data-testid="checkout-total">
-                                            ₹{cartTotal.toFixed(2)}
-                                        </span>
                                     </div>
-                                </div>
 
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                    data-testid="place-order-button"
-                                >
-                                    {loading ? 'Processing...' : 'Place Order'}
-                                </button>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        data-testid="place-order-button"
+                                    >
+                                        {loading ? 'Processing...' : 'Place Order'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
                 </form>
             </div>
         </div>
