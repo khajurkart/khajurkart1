@@ -8,7 +8,6 @@ const Addresses = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-
     // Placeholder for addresses - in real app, fetch from backend
     const [editIndex, setEditIndex] = useState(null);
     const [addresses, setAddresses] = useState([]);
