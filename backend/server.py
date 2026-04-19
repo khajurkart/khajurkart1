@@ -415,14 +415,17 @@ async def register(user_data: UserRegister):
 async def verify(data: VerifyRequest):
     user = await db.users.find_one({"email": data.email})
 
-    if not user or user.get("verification_code") != data.verification_code:
-        raise HTTPException(status_code=400, detail="Invalid verification_code")
+    if not user:
+        raise HTTPException(400, "User not found")
 
-    if datetime.now(timezone.utc) > user.get("otp_expiry"):
-        raise HTTPException(status_code=400, detail="OTP expired")
+    if user.get("verification_code") != data.verification_code:
+        raise HTTPException(400, "Invalid verification_code")
+
+    if not user.get("otp_expiry") or datetime.now(timezone.utc) > user.get("otp_expiry"):
+        raise HTTPException(400, "OTP expired")
 
     await db.users.update_one(
-        {"email": data.email},   # filter (which user)
+        {"email": data.email},
         {
             "$set": {
                 "is_verified": True,
