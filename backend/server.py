@@ -413,40 +413,37 @@ async def register(user_data: UserRegister):
 
 @api_router.post("/auth/verify")
 async def verify(data: VerifyRequest):
-    user = await db.users.find_one({"email": data.email})
+    try:
+        user = await db.users.find_one({"email": data.email})
+        if not user:
+            raise HTTPException(400, "User not found")
 
-    if not user:
-        raise HTTPException(400, "User not found")
+        if user.get("verification_code") != data.verification_code:
+            raise HTTPException(400, "Invalid verification_code")
 
-    if user.get("verification_code") != data.verification_code:
-        raise HTTPException(400, "Invalid verification_code")
+        otp_expiry = user.get("otp_expiry")
+        if not otp_expiry:
+            raise HTTPException(400, "OTP expired")
 
-    # ✅ INSERT HERE (replace old expiry check)
-    otp_expiry = user.get("otp_expiry")
+        if isinstance(otp_expiry, str):
+            otp_expiry = datetime.fromisoformat(otp_expiry)
 
-    if not otp_expiry:
-        raise HTTPException(400, "OTP expired")
+        if datetime.now(timezone.utc) > otp_expiry:
+            raise HTTPException(400, "OTP expired")
 
-    if isinstance(otp_expiry, str):
-        otp_expiry = datetime.fromisoformat(otp_expiry)
-
-    if datetime.now(timezone.utc) > otp_expiry:
-        raise HTTPException(400, "OTP expired")
-
-    # ✅ success
-    await db.users.update_one(
-        {"email": data.email},
-        {
-            "$set": {
-                "is_verified": True,
-                "verification_code": None,
-                "otp_expiry": None
+        await db.users.update_one(
+            {"email": data.email},
+            {
+                "$set": {
+                    "is_verified": True,
+                    "verification_code": None,
+                    "otp_expiry": None
+                }
             }
-        }
-    )
-    
-    return {"message": "Email verified successfully"}
-    
+        )
+
+        return {"message": "Email verified successfully"}
+
     except Exception as e:
         print("VERIFY ERROR:", str(e))
         raise HTTPException(500, str(e))
