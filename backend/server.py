@@ -462,7 +462,7 @@ async def send_email(name, email, phone, message):
     try:
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
-          <img src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776596501/LOGO_3_dexxml.pngg" width="120" />
+          <img src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776596501/LOGO_3_dexxml.png" width="120" />
           <h2>📩 New Contact Message</h2>
           <p><strong>Name:</strong> {name}</p>
           <p><strong>Email:</strong> {email}</p>
