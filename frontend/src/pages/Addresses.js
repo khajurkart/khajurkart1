@@ -10,6 +10,7 @@ const Addresses = () => {
 
 
     // Placeholder for addresses - in real app, fetch from backend
+    const [editIndex, setEditIndex] = useState(null);
     const [addresses, setAddresses] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [newAddress, setNewAddress] = useState({
@@ -37,10 +38,33 @@ const Addresses = () => {
         fetchAddresses();
     }, []);
 
+    const handleEdit = (addr, index) => {
+        setNewAddress(addr);
+        setEditIndex(index);
+        setShowForm(true);
+    };
+
+    const handleSetDefault = async (index) => {
+        await fetch(`https://khajurkart.com/api/user/address/default/${index}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+        fetchAddresses();
+    };
+
+
     // ✅ ADD ADDRESS
     const handleAdd = async () => {
-        await fetch("https://khajurkart.com/api/user/address", {
-            method: "POST",
+        const method = editIndex !== null ? "PUT" : "POST";
+        const url =
+            editIndex !== null
+                ? `https://khajurkart.com/api/user/address/${editIndex}`
+                : "https://khajurkart.com/api/user/address";
+
+        await fetch(url, {
+            method,
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -50,6 +74,7 @@ const Addresses = () => {
 
         setShowForm(false);
         setNewAddress({ name: '', phone: '', address: '' });
+        setEditIndex(null);
         fetchAddresses();
     };
 
@@ -135,15 +160,53 @@ const Addresses = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {addresses.map((addr, index) => (
-                            <div key={index} className="bg-white border p-4 flex justify-between">
+                            <div
+                                key={index}
+                                className="bg-white border-2 border-khajur-primary/20 rounded-sm p-5 flex flex-col justify-between hover:shadow-lg transition-all"
+                            >
                                 <div>
-                                    <p className="font-bold">{addr.name}</p>
-                                    <p>{addr.phone}</p>
-                                    <p>{addr.address}</p>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <p className="font-bold text-lg text-khajur-primary">{addr.name}</p>
+
+                                        {/* DEFAULT BADGE */}
+                                        {addr.isDefault && (
+                                            <span className="text-xs bg-khajur-gold px-2 py-1 rounded">
+                                                Default
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <p className="text-sm text-khajur-dark/70">{addr.phone}</p>
+                                    <p className="text-sm text-khajur-dark mt-1">{addr.address}</p>
                                 </div>
-                                <button onClick={() => handleDelete(index)} className="text-red-500">
-                                    Delete
-                                </button>
+
+                                {/* ACTION BUTTONS */}
+                                <div className="flex justify-between mt-4">
+                                    <button
+                                        onClick={() => handleDelete(index)}
+                                        className="text-red-500 text-sm hover:underline"
+                                    >
+                                        Delete
+                                    </button>
+
+                                    <div className="space-x-3">
+                                        <button
+                                            onClick={() => handleEdit(addr, index)}
+                                            className="text-khajur-primary text-sm hover:underline"
+                                        >
+                                            Edit
+                                        </button>
+
+                                        {!addr.isDefault && (
+                                            <button
+                                                onClick={() => handleSetDefault(index)}
+                                                className="text-khajur-gold text-sm hover:underline"
+                                            >
+                                                Set Default
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
