@@ -422,7 +422,7 @@ async def verify(data: VerifyRequest):
         raise HTTPException(status_code=400, detail="OTP expired")
 
     await db.users.update_one(
-        {"email": email},   # filter (which user)
+        {"email": data.email},   # filter (which user)
         {
             "$set": {
                 "is_verified": verification_code,
@@ -445,7 +445,7 @@ async def resend_code(request: Request, email: str):
     otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=2)
 
     await db.users.update_one(
-        {"email": email},
+        {"email": data.email},
         {
             "$set": {
                 "is_verified": verification_code,
