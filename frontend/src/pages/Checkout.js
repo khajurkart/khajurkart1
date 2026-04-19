@@ -425,9 +425,10 @@ const Checkout = () => {
                         </div>
 
                         {/* Order Summary */}
-                        <div className="lg:col-span-1">
+                        <div className="lg:col-span-3 flex justify-center">
+                          <div className="bg-white border border-khajur-border p-10 w-full max-w-md">
                             <div className="bg-white border border-khajur-border p-8 sticky top-24" data-testid="checkout-summary">
-                                <h2 className="font-serif text-2xl font-medium text-khajur-primary mb-6">
+                                <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-6">
                                     Order Summary
                                 </h2>
 
@@ -447,7 +448,7 @@ const Checkout = () => {
                                 <div className="border-t border-khajur-border pt-4 mb-6">
                                     <div className="flex justify-between text-lg">
                                         <span className="font-serif font-medium text-khajur-primary">Total</span>
-                                        <span className="font-serif text-2xl font-bold text-khajur-gold" data-testid="checkout-total">
+                                        <span className="font-serif text-3xl font-bold text-khajur-gold" data-testid="checkout-total">
                                             ₹{cartTotal.toFixed(2)}
                                         </span>
                                     </div>
