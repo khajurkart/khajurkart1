@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
-import { FaPinterest } from "react-icons/fa";
 
 const Footer = () => {
     return (
@@ -79,33 +78,39 @@ const Footer = () => {
                     <p className="text-sm text-khajur-cream/70 mb-4 md:mb-0">
                         © 2026 KhajurKart. All rights reserved.
                     </p>
-                    <div className="flex space-x-6">
+                    <div className="flex items-center space-x-5">
+
                         <a
                             href=""
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-khajur-cream hover:text-khajur-gold transition-colors"
+                            className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
                         >
-                            <Facebook className="w-5 h-5" />
+                            <Facebook className="w-5 h-5 text-khajur-cream hover:text-khajur-gold" />
                         </a>
 
                         <a
                             href=""
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-khajur-cream hover:text-khajur-gold transition-colors"
+                            className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
                         >
-                            <Instagram className="w-5 h-5" />
+                            <Instagram className="w-5 h-5 text-khajur-cream hover:text-khajur-gold" />
                         </a>
 
                         <a
                             href="https://in.pinterest.com/khajurkart/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-khajur-cream hover:text-khajur-gold transition-colors"
+                            className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
                         >
-                            <FaPinterest className="w-5 h-5" />
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/145/145808.png"
+                                alt="Pinterest"
+                                className="w-5 h-5"
+                            />
                         </a>
+
                     </div>
                 </div>
             </div>
