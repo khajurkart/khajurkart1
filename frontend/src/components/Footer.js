@@ -9,13 +9,13 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     {/* Brand */}
                     <div>
-                        <Link to="/" className="flex items-center space-x-2 mb-4">
+                        <Link to="/" className="flex items-center space-x-0.5 mb-4">
                             <img
-                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776665738/LOGO_7_ubeotd.jpg"
+                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776683032/LOGO_9_lbvt9m.png"
                                 alt="KhajurKart Logo"
-                                className="h-12 w-auto"
+                                className="h-15 w-auto"
                             />
-                            <span className="font-serif text-xl font-bold text-khajur-gold">
+                            <span className="font-serif text-1xl font-bold text-khajur-gold">
                                 KhajurKart
                             </span>
                         </Link>
