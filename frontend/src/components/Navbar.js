@@ -37,7 +37,7 @@ const Navbar = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3" data-testid="logo-link">
               <img 
-                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776662964/LOGO_6_ftibjv.jpg" 
+                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776665738/LOGO_7_ubeotd.jpg" 
                 alt="KhajurKart Logo" 
                 className="h-16 w-auto"
               />
