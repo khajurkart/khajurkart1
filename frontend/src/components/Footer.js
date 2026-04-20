@@ -15,7 +15,7 @@ const Footer = () => {
                                 alt="KhajurKart Logo"
                                 className="h-12 w-auto"
                             />
-                            <span className="font-serif text-1xl font-bold text-khajur-gold">
+                            <span className="font-serif text-2xl font-bold text-khajur-gold">
                                 KhajurKart
                             </span>
                         </Link>
