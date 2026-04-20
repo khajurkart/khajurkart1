@@ -39,7 +39,7 @@ const Navbar = () => {
               <img 
                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776683032/LOGO_9_lbvt9m.png" 
                 alt="KhajurKart Logo" 
-                className="h-16 w-auto"
+                className="h-16.5 w-auto"
               />
               <span className="font-serif text-2xl md:text-3xl font-bold text-khajur-gold">
                 KhajurKart
