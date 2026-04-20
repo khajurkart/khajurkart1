@@ -35,11 +35,11 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3" data-testid="logo-link">
+            <Link to="/" className="flex items-center space-x-2" data-testid="logo-link">
               <img 
                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776683032/LOGO_9_lbvt9m.png" 
                 alt="KhajurKart Logo" 
-                className="h-16 w-auto"
+                className="h-18 w-auto"
               />
               <span className="font-serif text-2xl md:text-3xl font-bold text-khajur-gold">
                 KhajurKart
