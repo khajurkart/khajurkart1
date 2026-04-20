@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Instagram, Pinterest } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, Pin} from 'lucide-react';
 
 const Footer = () => {
     return (
@@ -103,7 +103,7 @@ const Footer = () => {
                             rel="noopener noreferrer"
                             className="text-khajur-cream hover:text-khajur-gold transition-colors"
                         >
-                            <Pinterest className="w-5 h-5" />
+                            <Pin className="w-5 h-5" />
                         </a>
                     </div>
                 </div>
