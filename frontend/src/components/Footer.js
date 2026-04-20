@@ -81,7 +81,7 @@ const Footer = () => {
                     <div className="flex items-center space-x-5">
 
                         <a
-                            href=""
+                            href="https://www.facebook.com/profile.php?id=61572011713195"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
@@ -90,7 +90,7 @@ const Footer = () => {
                         </a>
 
                         <a
-                            href=""
+                            href="https://www.instagram.com/_khajurkart_/"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
