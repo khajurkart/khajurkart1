@@ -99,7 +99,7 @@ const Footer = () => {
                         </a>
 
                         <a
-                            href="https://pinterest.com/yourpage"
+                            href="https://in.pinterest.com/khajurkart/"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-khajur-cream hover:text-khajur-gold transition-colors"
