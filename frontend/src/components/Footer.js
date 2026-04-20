@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Instagram, Pin} from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
+import { FaPinterest } from "react-icons/fa";
 
 const Footer = () => {
     return (
@@ -98,12 +99,12 @@ const Footer = () => {
                         </a>
 
                         <a
-                            href="https://in.pinterest.com/khajurkart/"
+                            href="https://pinterest.com/yourpage"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-khajur-cream hover:text-khajur-gold transition-colors"
                         >
-                            <Pin className="w-5 h-5" />
+                            <FaPinterest className="w-5 h-5" />
                         </a>
                     </div>
                 </div>
