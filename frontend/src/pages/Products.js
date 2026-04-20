@@ -12,122 +12,125 @@ console.log("Backend URL:", BACKEND_URL);
 
 
 const Products = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
-  const [loading, setLoading] = useState(true);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+    useEffect(() => {
+        fetchCategories();
+    }, []);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory]);
+    useEffect(() => {
+        fetchProducts();
+    }, [selectedCategory]);
 
-  useEffect(() => {
-  const params = new URLSearchParams(location.search);
-  const cat = params.get("category") || "";
-  setSelectedCategory(cat);
-}, [location.search]);
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const cat = params.get("category") || "";
+        setSelectedCategory(cat);
+    }, [location.search]);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get(`${API}/categories`);
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Failed to fetch categories', error);
-    }
-  };
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.search]);
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const url = selectedCategory 
-        ? `${API}/products?category=${selectedCategory}`
-        : `${API}/products`;
-      const response = await axios.get(url);
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Failed to fetch products', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-const handleCategoryClick = (cat) => {
-  navigate(`/products?category=${cat}`);
-};
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get(`${API}/categories`);
+            setCategories(response.data);
+        } catch (error) {
+            console.error('Failed to fetch categories', error);
+        }
+    };
 
-  return (
-    <div className="min-h-screen py-20" data-testid="products-page">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="mb-12">
-          <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-4">
-            Our Products
-          </h1>
-          <p className="font-sans text-base text-khajur-dark/70 max-w-2xl">
-            Explore our premium collection of dates, nuts, dry fruits, and spices
-          </p>
+    const fetchProducts = async () => {
+        try {
+            setLoading(true);
+            const url = selectedCategory
+                ? `${API}/products?category=${selectedCategory}`
+                : `${API}/products`;
+            const response = await axios.get(url);
+            setProducts(response.data);
+        } catch (error) {
+            console.error('Failed to fetch products', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCategoryClick = (cat) => {
+        navigate(`/products?category=${cat}`);
+    };
+
+    return (
+        <div className="min-h-screen py-20" data-testid="products-page">
+            <div className="max-w-7xl mx-auto px-6 md:px-12">
+                <div className="mb-12">
+                    <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-4">
+                        Our Products
+                    </h1>
+                    <p className="font-sans text-base text-khajur-dark/70 max-w-2xl">
+                        Explore our premium collection of dates, nuts, dry fruits, and spices
+                    </p>
+                </div>
+
+                {/* Categories Filter */}
+                <div className="mb-12" data-testid="category-filter">
+                    <div className="flex items-center mb-4">
+                        <Filter className="w-5 h-5 text-khajur-gold mr-2" />
+                        <h3 className="font-serif text-xl font-medium text-khajur-primary">Categories</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            onClick={() => handleCategoryClick("")}
+                            className={`px-6 py-2 rounded-sm uppercase tracking-widest text-xs font-bold transition-all ${selectedCategory === ''
+                                ? 'bg-khajur-primary text-khajur-cream'
+                                : 'bg-transparent border border-khajur-primary text-khajur-primary hover:bg-khajur-primary hover:text-khajur-cream'
+                                }`}
+                            data-testid="category-all"
+                        >
+                            All Products
+                        </button>
+                        {categories.map((category) => (
+                            <button
+                                key={category.id}
+                                onClick={() => handleCategoryClick(category.slug)}
+                                className={`px-6 py-2 rounded-sm uppercase tracking-widest text-xs font-bold transition-all ${selectedCategory === category.slug
+                                    ? 'bg-khajur-primary text-khajur-cream'
+                                    : 'bg-transparent border border-khajur-primary text-khajur-primary hover:bg-khajur-primary hover:text-khajur-cream'
+                                    }`}
+                                data-testid={`category-${category.slug}`}
+                            >
+                                {category.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Products Grid */}
+                {loading ? (
+                    <div className="text-center py-20">
+                        <p className="text-khajur-dark/60">Loading products...</p>
+                    </div>
+                ) : products.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" data-testid="products-grid">
+                        {products.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20">
+                        <p className="text-khajur-dark/60">No products found</p>
+                    </div>
+                )}
+            </div>
         </div>
-
-        {/* Categories Filter */}
-        <div className="mb-12" data-testid="category-filter">
-          <div className="flex items-center mb-4">
-            <Filter className="w-5 h-5 text-khajur-gold mr-2" />
-            <h3 className="font-serif text-xl font-medium text-khajur-primary">Categories</h3>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => handleCategoryClick("")}
-              className={`px-6 py-2 rounded-sm uppercase tracking-widest text-xs font-bold transition-all ${
-                selectedCategory === ''
-                  ? 'bg-khajur-primary text-khajur-cream'
-                  : 'bg-transparent border border-khajur-primary text-khajur-primary hover:bg-khajur-primary hover:text-khajur-cream'
-              }`}
-              data-testid="category-all"
-            >
-              All Products
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryClick(category.slug)}
-                className={`px-6 py-2 rounded-sm uppercase tracking-widest text-xs font-bold transition-all ${
-                  selectedCategory === category.slug
-                    ? 'bg-khajur-primary text-khajur-cream'
-                    : 'bg-transparent border border-khajur-primary text-khajur-primary hover:bg-khajur-primary hover:text-khajur-cream'
-                }`}
-                data-testid={`category-${category.slug}`}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        {loading ? (
-          <div className="text-center py-20">
-            <p className="text-khajur-dark/60">Loading products...</p>
-          </div>
-        ) : products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" data-testid="products-grid">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <p className="text-khajur-dark/60">No products found</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Products;
