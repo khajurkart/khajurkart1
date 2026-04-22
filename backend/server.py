@@ -81,21 +81,6 @@ async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
 security = HTTPBearer()
 
-@api_router.get("/products/recommended")
-async def recommended():
-
-    recent = await db.user_activity.find(
-        {"user_id": current_user["id"]}
-    ).sort("timestamp", -1).to_list(5)
-
-    product_ids = [r["product_id"] for r in recent]
-
-    products = await db.products.find(
-        {"id": {"$in": product_ids}}
-    ).to_list(10)
-
-    return products
-
 # ============ MODELS ============
 
 class UserRegister(BaseModel):
@@ -784,16 +769,10 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
     return products
 
 @api_router.get("/products/{product_id}", response_model=Product)
-async def get_product(product_id: str, current_user: dict = Depends(get_current_user)):
+async def get_product(product_id: str):
     product = await db.products.find_one({"id": product_id}, {"_id": 0})
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-        
-    await db.user_activity.insert_one({
-        "user_id": current_user["id"],
-        "product_id": product_id,
-        "timestamp": datetime.now(timezone.utc)
-    })
     return product
 
 @api_router.get("/search")
