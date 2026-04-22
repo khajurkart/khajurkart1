@@ -81,6 +81,21 @@ async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
 security = HTTPBearer()
 
+@api_router.get("/products/recommended")
+async def recommended(current_user: dict = Depends(get_current_user)):
+
+    recent = await db.user_activity.find(
+        {"user_id": current_user["id"]}
+    ).sort("timestamp", -1).to_list(5)
+
+    product_ids = [r["product_id"] for r in recent]
+
+    products = await db.products.find(
+        {"id": {"$in": product_ids}}
+    ).to_list(10)
+
+    return products
+
 # ============ MODELS ============
 
 class UserRegister(BaseModel):
@@ -757,16 +772,22 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
     
 # ============ PRODUCT ROUTES ============
 
-@api_router.get("/products", response_model=List[Product])
-async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
-    query = {}
-    if category:
-        query["category"] = category
-    if featured is not None:
-        query["featured"] = featured
-    
-    products = await db.products.find(query, {"_id": 0}).to_list(1000)
-    return products
+@api_router.get("/products/{product_id}", response_model=Product)
+async def get_product(product_id: str, current_user: dict = Depends(get_current_user)):
+
+    product = await db.products.find_one({"id": product_id}, {"_id": 0})
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    # 🔥 ADD THIS (track user activity)
+    await db.user_activity.insert_one({
+        "user_id": current_user["id"],
+        "product_id": product_id,
+        "timestamp": datetime.now(timezone.utc)
+    })
+
+    return product
 
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str):
@@ -792,18 +813,6 @@ async def search_products(q: str):
     ).to_list(50)
     
     return products
-
-@app.get("/products/{id}/similar")
-def get_similar_products(id: int):
-    product = db.query(Product).filter(Product.id == id).first()
-
-    similar = db.query(Product).filter(
-        Product.category == product.category,
-        Product.price.between(product.price * 0.7, product.price * 1.3),
-        Product.id != id
-    ).limit(10).all()
-
-    return similar
 
 # ============ REVIEW ROUTES ============
 
