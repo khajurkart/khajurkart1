@@ -15,19 +15,9 @@ const Home = () => {
     const [categories, setCategories] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [recommended, setRecommended] = useState([]);
-    const [trending, setTrending] = useState([]);
-    const recent = JSON.parse(localStorage.getItem("recent")) || [];
 
     useEffect(() => {
         fetchData();
-
-        axios.get(`${API}/products/trending`)
-            .then(res => setTrending(res.data));
-
-        axios.get(`${API}/products/recommended`)
-            .then(res => setRecommended(res.data));
-
     }, []);
 
     const fetchData = async () => {
@@ -106,29 +96,6 @@ const Home = () => {
         }
     ];
 
-    const productSliderSettings = {
-        dots: false,
-        infinite: true,
-        speed: 500,
-        slidesToShow: 4,
-        slidesToScroll: 1,
-        arrows: true,
-        responsive: [
-            {
-                breakpoint: 1024,
-                settings: { slidesToShow: 3 }
-            },
-            {
-                breakpoint: 768,
-                settings: { slidesToShow: 2 }
-            },
-            {
-                breakpoint: 480,
-                settings: { slidesToShow: 1 }
-            }
-        ]
-    };
-
     return (
         <div className="min-h-screen" data-testid="home-page">
             {/* Hero Slider */}
@@ -167,40 +134,6 @@ const Home = () => {
                         </div>
                     ))}
                 </Slider>
-            </section>
-
-            {/* Recommended / Trending / Recent */}
-            <section className="py-20 md:py-32 bg-white">
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-
-                    <h2 className="text-2xl font-semibold mb-6">Recommended for you</h2>
-                    <Slider {...productSliderSettings}>
-                        {recommended.map(item => (
-                            <div key={item.id} className="px-2">
-                                <ProductCard product={item} />
-                            </div>
-                        ))}
-                    </Slider>
-
-                    <h2 className="text-2xl font-semibold mb-6">Trending Products</h2>
-                    <Slider {...productSliderSettings}>
-                        {recommended.map(item => (
-                            <div key={item.id} className="px-2">
-                                <ProductCard product={item} />
-                            </div>
-                        ))}
-                    </Slider>
-
-                    <h2 className="text-2xl font-semibold mb-6">Recently Viewed</h2>
-                    <Slider {...productSliderSettings}>
-                        {recommended.map(item => (
-                            <div key={item.id} className="px-2">
-                                <ProductCard product={item} />
-                            </div>
-                        ))}
-                    </Slider>
-
-                </div>
             </section>
 
             {/* Categories Grid */}
