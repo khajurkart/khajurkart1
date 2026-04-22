@@ -82,7 +82,7 @@ async def root():
 security = HTTPBearer()
 
 @api_router.get("/products/recommended")
-async def recommended(current_user: dict = Depends(get_current_user)):
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
 
     recent = await db.user_activity.find(
         {"user_id": current_user["id"]}
