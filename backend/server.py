@@ -94,12 +94,6 @@ async def recommended():
         {"id": {"$in": product_ids}}
     ).to_list(10)
 
-    axios.get("/api/products/recommended", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-
     return products
 
 # ============ MODELS ============
