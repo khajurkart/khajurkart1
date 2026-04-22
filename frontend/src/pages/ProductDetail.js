@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from "react-router-dom";
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ShoppingCart, Heart, ChevronLeft } from 'lucide-react';
@@ -21,6 +22,9 @@ const ProductDetail = () => {
   const [name, setName] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const category = queryParams.get("category");
 
   useEffect(() => {
     fetchProduct();
@@ -102,7 +106,7 @@ return (
     <div className="max-w-7xl mx-auto px-6 md:px-12">
 
       <Link
-        to="/products"
+        to={`/products?category=${category || ""}`}
         className="inline-flex items-center text-khajur-primary hover:text-khajur-gold mb-8 transition-colors"
       >
         <ChevronLeft className="w-5 h-5 mr-1" />
