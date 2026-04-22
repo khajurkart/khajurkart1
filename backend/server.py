@@ -793,6 +793,17 @@ async def search_products(q: str):
     
     return products
 
+@app.get("/products/{id}/similar")
+def get_similar_products(id: int):
+    product = get_product(id)
+
+    similar = db.query(Product).filter(
+        Product.category == product.category,
+        Product.id != id
+    ).limit(10).all()
+
+    return similar
+
 # ============ REVIEW ROUTES ============
 
 @api_router.get("/reviews/{product_id}")
