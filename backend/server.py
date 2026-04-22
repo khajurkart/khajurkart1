@@ -82,7 +82,7 @@ async def root():
 security = HTTPBearer()
 
 @api_router.get("/products/recommended")
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+async def recommended():
 
     recent = await db.user_activity.find(
         {"user_id": current_user["id"]}
@@ -93,6 +93,12 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     products = await db.products.find(
         {"id": {"$in": product_ids}}
     ).to_list(10)
+
+    axios.get("/api/products/recommended", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
     return products
 
