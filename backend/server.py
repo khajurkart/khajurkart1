@@ -18,6 +18,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 from email.mime.text import MIMEText
+from app.auth import get_current_user 
 import random
 import smtplib
 import requests
