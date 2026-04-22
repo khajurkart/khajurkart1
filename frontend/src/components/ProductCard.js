@@ -19,7 +19,7 @@ const ProductCard = ({ product }) => {
       </Link>
 
       <div className="p-6">
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/products/${product.id}?category=${product.category}`}>
           <h3 className="font-serif text-xl font-medium text-khajur-primary mb-2 group-hover:text-khajur-gold transition-colors" data-testid={`product-name-${product.id}`}>
             {product.name}
           </h3>
