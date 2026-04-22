@@ -18,7 +18,6 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 from email.mime.text import MIMEText
-from app.auth import get_current_user 
 import random
 import smtplib
 import requests
@@ -773,28 +772,28 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
     
 # ============ PRODUCT ROUTES ============
 
+@api_router.get("/products", response_model=List[Product])
+async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
+    query = {}
+    if category:
+        query["category"] = category
+    if featured is not None:
+        query["featured"] = featured
+    
+    products = await db.products.find(query, {"_id": 0}).to_list(1000)
+    return products
+
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str, current_user: dict = Depends(get_current_user)):
-
     product = await db.products.find_one({"id": product_id}, {"_id": 0})
-
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-
-    # 🔥 ADD THIS (track user activity)
+        
     await db.user_activity.insert_one({
         "user_id": current_user["id"],
         "product_id": product_id,
         "timestamp": datetime.now(timezone.utc)
     })
-
-    return product
-
-@api_router.get("/products/{product_id}", response_model=Product)
-async def get_product(product_id: str):
-    product = await db.products.find_one({"id": product_id}, {"_id": 0})
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
     return product
 
 @api_router.get("/search")
