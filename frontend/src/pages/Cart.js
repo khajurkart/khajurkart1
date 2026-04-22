@@ -77,7 +77,7 @@ const Cart = () => {
                   />
                   
                   <div className="flex-1">
-                    <Link to={`/product/${product.id}`}>
+                    <Link to={`/products/${product.id}?category=${product.category}`}>
                       <h3 className="font-serif text-xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors mb-2">
                         {product.name}
                       </h3>
