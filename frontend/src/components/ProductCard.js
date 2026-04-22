@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="group relative bg-white border border-transparent hover:border-khajur-gold/30 transition-all duration-500 overflow-hidden" data-testid={`product-card-${product.id}`}>
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/products/${product.id}?category=${product.category}`}>
         <div className="aspect-square overflow-hidden bg-khajur-cream">
           <img
             src={product.image}
