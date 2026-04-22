@@ -94,7 +94,10 @@ const submitReview = async () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <p className="text-khajur-dark/60 mb-4">Product not found</p>
-        <Link to="/products" className="text-khajur-primary hover:text-khajur-gold">
+        <Link 
+          to={`/products?category=${category || ""}`} 
+          className="text-khajur-primary hover:text-khajur-gold"
+        >
           Back to Products
         </Link>
       </div>
