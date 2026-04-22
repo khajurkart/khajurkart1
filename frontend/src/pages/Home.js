@@ -51,17 +51,20 @@ const Home = () => {
     {
       url: 'https://static.prod-images.emergentagent.com/jobs/1488ece7-7b71-4c89-a940-ced66486fd5e/images/9ef22138b1ac284627d8ada276fc5bfcc8c70f752587e055521011939341415b.png',
       title: 'Premium Dates Collection',
-      subtitle: 'Discover the finest dates from around the world'
+      subtitle: 'Discover the finest dates from around the world',
+      category: 'dates'
     },
     {
       url: 'https://static.prod-images.emergentagent.com/jobs/1488ece7-7b71-4c89-a940-ced66486fd5e/images/d0209b13fd7a6d1c6476d2f8679946333984b9966f56d36444d5f94197d0170f.png',
       title: 'Luxury Nuts Selection',
-      subtitle: 'Handpicked nuts for your health and delight'
+      subtitle: 'Handpicked nuts for your health and delight',
+      category: 'nuts'
     },
     {
       url: 'https://images.pexels.com/photos/33654800/pexels-photo-33654800.jpeg',
       title: 'Exotic Spices',
-      subtitle: 'Authentic spices for authentic flavors'
+      subtitle: 'Authentic spices for authentic flavors',
+      category: 'spices'
     }
   ];
 
@@ -117,7 +120,7 @@ const Home = () => {
                         {slide.subtitle}
                       </p>
                       <Link
-                        to="/products"
+                        to={`/products?category=${slide.category}`}
                         className="inline-flex items-center bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-3 uppercase tracking-widest text-xs font-bold transition-all"
                         data-testid="hero-shop-now-button"
                       >
