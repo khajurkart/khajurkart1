@@ -795,10 +795,11 @@ async def search_products(q: str):
 
 @app.get("/products/{id}/similar")
 def get_similar_products(id: int):
-    product = get_product(id)
+    product = db.query(Product).filter(Product.id == id).first()
 
     similar = db.query(Product).filter(
         Product.category == product.category,
+        Product.price.between(product.price * 0.7, product.price * 1.3),
         Product.id != id
     ).limit(10).all()
 
