@@ -3,11 +3,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import ScrollToTop from "./ScrollToTop";
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingButtons from './components/FloatingButtons';
+import ScrollToTop from "./components/ScrollToTop";
 
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -31,7 +31,6 @@ import AdminOrders from './pages/AdminOrders';
 import AdminReturns from './pages/AdminReturns';
 import AdminReviews from "./pages/AdminReviews";
 import Returns from './pages/Returns';
-import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
     return (
@@ -69,7 +68,6 @@ function App() {
                         </main>
                         <Footer />
                         <FloatingButtons />
-                        <ScrollToTop />
                         <Toaster position="top-right" richColors />
                     </div>
                 </BrowserRouter>
