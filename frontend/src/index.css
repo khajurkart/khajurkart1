@@ -101,7 +101,7 @@ code {
 
 /* Smooth scroll */
 html {
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
 }
 
 /* Slick carousel overrides */
