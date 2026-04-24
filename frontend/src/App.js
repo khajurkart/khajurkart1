@@ -37,7 +37,6 @@ function App() {
         <AuthProvider>
             <CartProvider>
                 <BrowserRouter>
-                    <ScrollToTop />
                     <div className="min-h-screen flex flex-col main-scroll">
                         <Navbar />
                         <main className="flex-grow">
@@ -68,6 +67,7 @@ function App() {
                         </main>
                         <Footer />
                         <FloatingButtons />
+                        <ScrollToTop />
                         <Toaster position="top-right" richColors />
                     </div>
                 </BrowserRouter>
