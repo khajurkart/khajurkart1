@@ -38,7 +38,7 @@ function App() {
             <CartProvider>
                 <BrowserRouter>
                     <ScrollToTop />
-                    <div className="min-h-screen flex flex-col">
+                    <div className="min-h-screen flex flex-col main-scroll">
                         <Navbar />
                         <main className="flex-grow">
                             <Routes>
