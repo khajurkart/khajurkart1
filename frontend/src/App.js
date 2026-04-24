@@ -7,7 +7,6 @@ import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingButtons from './components/FloatingButtons';
-import ScrollToTop from "./components/ScrollToTop";
 
 import Home from './pages/Home';
 import Products from './pages/Products';
