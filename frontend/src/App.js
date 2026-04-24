@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import ScrollToTop from "./ScrollToTop";
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -37,6 +38,7 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-grow">
