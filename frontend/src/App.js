@@ -31,6 +31,7 @@ import AdminOrders from './pages/AdminOrders';
 import AdminReturns from './pages/AdminReturns';
 import AdminReviews from "./pages/AdminReviews";
 import Returns from './pages/Returns';
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
     return (
