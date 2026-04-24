@@ -37,7 +37,7 @@ function App() {
         <AuthProvider>
             <CartProvider>
                 <BrowserRouter>
-                    <div className="min-h-screen flex flex-col main-scroll">
+                    <div className="min-h-screen flex flex-col">
                         <Navbar />
                         <main className="flex-grow">
                             <Routes>
