@@ -34,48 +34,48 @@ import Returns from './pages/Returns';
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
-  return (
-    <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/order/:id" element={<OrderDetails />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/my-orders" element={<MyOrders />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/addresses" element={<Addresses />} />
-                <Route path="/track-order" element={<TrackOrder />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
-                <Route path="/admin/orders" element={<AdminOrders />} />
-                <Route path="/admin/returns" element={<AdminReturns />} />
-                <Route path="/admin/reviews" element={<AdminReviews />} />
-                <Route path="/returns" element={<Returns />} />
-              </Routes>
-            </main>
-            <Footer />
-            <FloatingButtons />
-            <ScrollToTop />
-            <Toaster position="top-right" richColors />
-          </div>
-        </BrowserRouter>
-      </CartProvider>
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <CartProvider>
+                <BrowserRouter>
+                    <ScrollToTop />
+                    <div className="min-h-screen flex flex-col">
+                        <Navbar />
+                        <main className="flex-grow">
+                            <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="/products" element={<Products />} />
+                                <Route path="/product/:id" element={<ProductDetail />} />
+                                <Route path="/order/:id" element={<OrderDetails />} />
+                                <Route path="/cart" element={<Cart />} />
+                                <Route path="/checkout" element={<Checkout />} />
+                                <Route path="/about" element={<About />} />
+                                <Route path="/contact" element={<Contact />} />
+                                <Route path="/search" element={<Search />} />
+                                <Route path="/my-orders" element={<MyOrders />} />
+                                <Route path="/account" element={<Account />} />
+                                <Route path="/profile" element={<Profile />} />
+                                <Route path="/addresses" element={<Addresses />} />
+                                <Route path="/track-order" element={<TrackOrder />} />
+                                <Route path="/reset-password" element={<ResetPassword />} />
+                                <Route path="/admin/login" element={<AdminLogin />} />
+                                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                                <Route path="/admin/products" element={<AdminProducts />} />
+                                <Route path="/admin/orders" element={<AdminOrders />} />
+                                <Route path="/admin/returns" element={<AdminReturns />} />
+                                <Route path="/admin/reviews" element={<AdminReviews />} />
+                                <Route path="/returns" element={<Returns />} />
+                            </Routes>
+                        </main>
+                        <Footer />
+                        <FloatingButtons />
+                        <ScrollToTop />
+                        <Toaster position="top-right" richColors />
+                    </div>
+                </BrowserRouter>
+            </CartProvider>
+        </AuthProvider>
+    );
 }
 
 export default App;
