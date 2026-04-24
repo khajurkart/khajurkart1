@@ -190,9 +190,11 @@ const Home = () => {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {featuredProducts.slice(0, 4).map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                        {featuredProducts
+                            .filter(p => [1, 5, 8, 10].includes(p.id))
+                            .map(product => (
+                                <ProductCard key={product.id} product={product} />
+                            ))}
                     </div>
 
                     <div className="text-center mt-12">
