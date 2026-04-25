@@ -6,8 +6,9 @@ const RelatedProducts = ({ products, currentProduct }) => {
     const related = products.filter(
         (p) =>
             p.category === currentProduct.category &&
-            p.id !== currentProduct.id
-    ).slice(0, 6); // show max 4
+            p.id !== currentProduct.id &&
+            Math.abs(p.price - currentProduct.price) < 500
+    ).slice(0, 8);
 
     return (
         <div className="mt-10">
@@ -16,21 +17,21 @@ const RelatedProducts = ({ products, currentProduct }) => {
             </h2>
 
             {/* ✅ GRID FIX */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex gap-6 overflow-x-auto pb-4">
                 {related.map((item) => (
                     <Link
                         to={`/product/${item.id}?category=${item.category}`}
                         key={item.id}
                     >
-                        <div className="bg-white p-4 rounded shadow-sm hover:shadow-md transition">
+                        <div className="min-w-[200px] bg-white p-4 rounded shadow-sm hover:shadow-md transition">
 
                             <img
                                 src={item.image}
                                 alt={item.name}
-                                className="w-full h-48 object-cover rounded mb-3"
+                                className="w-full h-40 object-cover rounded mb-3"
                             />
 
-                            <h4 className="text-khajur-primary font-medium">
+                            <h4 className="text-khajur-primary font-medium text-sm">
                                 {item.name}
                             </h4>
 
