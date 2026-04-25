@@ -312,10 +312,18 @@ const ProductDetail = () => {
                         )}
                     </div>
                 </div>
-                {/* RELATED PRODUCTS */}
+                {/* YOU MAY ALSO LIKE */}
                 <RelatedProducts
-                    products={products} // ✅ FIXED
+                    products={products}
                     currentProduct={product}
+                    type="related"
+                />
+
+                {/* EXPLORE MORE */}
+                <RelatedProducts
+                    products={products}
+                    currentProduct={product}
+                    type="explore"
                 />
             </div>
         </div>
