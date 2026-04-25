@@ -1,24 +1,37 @@
-// RelatedProducts.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 
-const RelatedProducts = ({ products, currentProduct }) => {
-    const related = products.filter(
-        (p) =>
-            p.category === currentProduct.category &&
-            p.id !== currentProduct.id &&
-            Math.abs(p.price - currentProduct.price) < 500
-    ).slice(0, 8);
+const RelatedProducts = ({ products, currentProduct, type }) => {
+
+    let filteredProducts = [];
+
+    if (type === "related") {
+        // SAME CATEGORY
+        filteredProducts = products.filter(
+            (p) =>
+                p.category === currentProduct.category &&
+                p.id !== currentProduct.id &&
+                Math.abs(p.price - currentProduct.price) < 500
+        );
+    } else if (type === "explore") {
+        // DIFFERENT CATEGORY
+        filteredProducts = products.filter(
+            (p) =>
+                p.category !== currentProduct.category
+        );
+    }
+
+    const items = filteredProducts.slice(0, 8);
 
     return (
         <div className="mt-10">
             <h2 className="font-serif text-2xl text-khajur-primary mb-6">
-                You may also like
+                {type === "related" ? "You may also like" : "Explore more"}
             </h2>
 
-            {/* ✅ GRID FIX */}
+            {/* HORIZONTAL SCROLL */}
             <div className="flex gap-6 overflow-x-auto pb-4">
-                {related.map((item) => (
+                {items.map((item) => (
                     <Link
                         to={`/product/${item.id}?category=${item.category}`}
                         key={item.id}
