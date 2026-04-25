@@ -11,10 +11,9 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 console.log("Backend URL:", BACKEND_URL);
 
-
 const ProductDetail = () => {
     const { id } = useParams();
-    const [product, setProduct] = useState(null);
+    const [product, setProduct] = useState([]);
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("description");
@@ -48,6 +47,15 @@ const ProductDetail = () => {
         try {
             const res = await axios.get(`${API}/reviews/${id}`);
             setReviews(res.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const fetchAllProducts = async () => {
+        try {
+            const res = await axios.get(`${API}/products`);
+            setProducts(res.data);
         } catch (err) {
             console.log(err);
         }
