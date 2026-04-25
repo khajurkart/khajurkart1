@@ -20,20 +20,26 @@ const RelatedProducts = ({ products, currentProduct }) => {
                     to={`/product/${item.id}?category=${item.category}`}
                     key={item.id}
                 >
-                    <div className="bg-white p-4 rounded shadow-sm">
-                        <img src={item.image} alt={item.name} className="w-full mb-3" />
+                    <div className="bg-white p-4 rounded shadow-sm w-[200px]">
+                        <div className="bg-white p-4 rounded shadow-sm">
+                            <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-40 object-cover rounded"
+                            />
 
-                        <h4 className="text-khajur-primary font-medium">
-                            {item.name}
-                        </h4>
+                            <h4 className="text-khajur-primary font-medium">
+                                {item.name}
+                            </h4>
 
-                        <p className="text-khajur-gold font-bold">
-                            ₹{item.price}
-                        </p>
+                            <p className="text-khajur-gold font-bold">
+                                ₹{item.price}
+                            </p>
 
-                        <button className="text-sm text-khajur-primary hover:text-khajur-gold">
-                            Add to Cart
-                        </button>
+                            <button className="text-sm text-khajur-primary hover:text-khajur-gold">
+                                Add to Cart
+                            </button>
+                        </div>
                     </div>
                 </Link>
             ))}
