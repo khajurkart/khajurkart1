@@ -26,7 +26,7 @@ const RelatedProducts = ({ products, currentProduct, type }) => {
     return (
         <div className="mt-10">
             <h2 className="font-serif text-2xl text-khajur-primary mb-6">
-                {type === "related" ? "You may also like" : "Explore more"}
+                {type === "related" ? "You May Also Like" : "Explore More"}
             </h2>
 
             {/* HORIZONTAL SCROLL */}
