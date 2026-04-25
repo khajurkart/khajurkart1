@@ -21,7 +21,7 @@ const RelatedProducts = ({ products, currentProduct, type }) => {
         );
     }
 
-    const items = filteredProducts.slice(0, 8);
+    const items = filteredProducts.slice(1, 8);
 
     return (
         <div className="mt-10">
