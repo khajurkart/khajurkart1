@@ -7,7 +7,7 @@ const RelatedProducts = ({ products, currentProduct }) => {
         (p) =>
             p.category === currentProduct.category &&
             p.id !== currentProduct.id
-    ).slice(0, 8); // show max 4
+    ).slice(0, 6); // show max 4
 
     return (
         <div className="mt-10">
