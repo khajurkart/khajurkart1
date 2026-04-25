@@ -10,22 +10,24 @@ const RelatedProducts = ({ products, currentProduct }) => {
     ).slice(0, 4); // show max 4
 
     return (
-        <div style={{ marginTop: "40px" }}>
+        <div className="mt-10">
             <h2 className="font-serif text-2xl text-khajur-primary mb-6">
                 You may also like
             </h2>
 
-            {related.map((item) => (
-                <Link
-                    to={`/product/${item.id}?category=${item.category}`}
-                    key={item.id}
-                >
-                    <div className="bg-white p-4 rounded shadow-sm w-[200px]">
-                        <div className="bg-white p-4 rounded shadow-sm">
+            {/* ✅ GRID FIX */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {related.map((item) => (
+                    <Link
+                        to={`/product/${item.id}?category=${item.category}`}
+                        key={item.id}
+                    >
+                        <div className="bg-white p-4 rounded shadow-sm hover:shadow-md transition">
+
                             <img
                                 src={item.image}
                                 alt={item.name}
-                                className="w-full h-40 object-cover rounded"
+                                className="w-full h-48 object-cover rounded mb-3"
                             />
 
                             <h4 className="text-khajur-primary font-medium">
@@ -36,13 +38,10 @@ const RelatedProducts = ({ products, currentProduct }) => {
                                 ₹{item.price}
                             </p>
 
-                            <button className="text-sm text-khajur-primary hover:text-khajur-gold">
-                                Add to Cart
-                            </button>
                         </div>
-                    </div>
-                </Link>
-            ))}
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 };
