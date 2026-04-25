@@ -6,14 +6,15 @@ const RelatedProducts = ({ products, currentProduct, type }) => {
     let filteredProducts = [];
 
     if (type === "related") {
-        // SAME CATEGORY
         filteredProducts = products.filter(
             (p) =>
                 p.category === currentProduct.category &&
                 p.id !== currentProduct.id &&
-                Math.abs(p.price - currentProduct.price) < 500
+                p.price >= 500 &&
+                p.price <= 1200
         );
-    } else if (type === "explore") {
+    }
+    else if (type === "explore") {
         // DIFFERENT CATEGORY
         filteredProducts = products.filter(
             (p) =>
@@ -21,12 +22,15 @@ const RelatedProducts = ({ products, currentProduct, type }) => {
         );
     }
 
-    const items = filteredProducts.slice(0, 8);
+    const items =
+        type === "related"
+            ? filteredProducts.slice(0, 6)
+            : filteredProducts.slice(0, 10);
 
     return (
         <div className="mt-10">
             <h2 className="font-serif text-2xl text-khajur-primary mb-6">
-                {type === "related" ? "You May Also Like" : "Explore More"}
+                {type === "related" ? "You may also like" : "Explore more"}
             </h2>
 
             {/* HORIZONTAL SCROLL */}
