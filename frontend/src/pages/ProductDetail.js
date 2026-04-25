@@ -11,9 +11,11 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 console.log("Backend URL:", BACKEND_URL);
 
+
 const ProductDetail = () => {
     const { id } = useParams();
-    const [product, setProduct] = useState([]);
+    const [product, setProduct] = useState(null);
+    const [products, setProducts] = useState([]);
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("description");
@@ -312,7 +314,7 @@ const ProductDetail = () => {
                 </div>
                 {/* RELATED PRODUCTS */}
                 <RelatedProducts
-                    products={[product]} // temporary fix (see note below)
+                    products={products} // ✅ FIXED
                     currentProduct={product}
                 />
             </div>
