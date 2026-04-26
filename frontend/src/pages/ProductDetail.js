@@ -379,44 +379,6 @@ const ProductDetail = () => {
                                         Submit Review
                                     </button>
                                 </div>
-
-                                {/* FORM */}
-                                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                                    <h3 className="font-serif text-xl text-khajur-primary mb-4">
-                                        Write a review
-                                    </h3>
-
-                                    <input
-                                        type="text"
-                                        placeholder="Your name"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        className="w-full border p-3 mb-3 rounded"
-                                    />
-
-                                    <input
-                                        type="number"
-                                        placeholder="Rating (1-5)"
-                                        value={rating}
-                                        onChange={(e) => setRating(e.target.value)}
-                                        className="w-full border p-3 mb-3 rounded"
-                                    />
-
-                                    <textarea
-                                        placeholder="Write your review..."
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        className="w-full border p-3 mb-4 rounded h-28"
-                                    />
-
-                                    <button
-                                        onClick={submitReview}
-                                        className="bg-khajur-primary text-white px-6 py-3 rounded hover:bg-khajur-gold transition"
-                                    >
-                                        Submit Review
-                                    </button>
-                                </div>
-
                             </div>
                         )}
                     </div>
