@@ -51,7 +51,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 razorpay_client = razorpay.Client(auth=(os.environ['RAZORPAY_KEY_ID'], os.environ['RAZORPAY_KEY_SECRET']))
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")  # 👈 then add this
+if os.path.isdir("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
