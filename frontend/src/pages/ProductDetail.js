@@ -276,57 +276,56 @@ const ProductDetail = () => {
                         {activeTab === "reviews" && (
                             <div className="max-w-6xl mx-auto">
 
-                                <div className="grid md:grid-cols-2 gap-10">
+                                {/* TOP GRID */}
+                                <div className="grid md:grid-cols-2 gap-12 items-start">
 
-                                    {/* ⭐ LEFT SIDE */}
+                                    {/* ⭐ LEFT: SUMMARY */}
                                     <div>
                                         <h2 className="text-2xl font-serif text-khajur-primary mb-6">
                                             Customer Reviews
                                         </h2>
 
-                                        {/* BIG RATING */}
-                                        <div className="space-y-2">
-                                            {[5, 4, 3, 2, 1].map((star) => {
-                                                const count = reviews.filter(r => r.rating === star).length;
-                                                const percent = reviews.length ? (count / reviews.length) * 100 : 0;
+                                        {/* AVERAGE */}
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <span className="text-4xl font-bold text-khajur-primary">
+                                                {reviews.length
+                                                    ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
+                                                    : "0.0"}
+                                            </span>
 
-                                                return (
-                                                    <div key={star} className="flex items-center gap-3">
-                                                        <span className="w-8 text-sm text-gray-600">{star}★</span>
+                                            <div className="text-yellow-500 text-xl">
+                                                {"★".repeat(
+                                                    Math.round(
+                                                        reviews.length
+                                                            ? reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
+                                                            : 0
+                                                    )
+                                                )}
+                                            </div>
 
-                                                        <div className="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
-                                                            <div
-                                                                className="h-full bg-khajur-gold"
-                                                                style={{ width: `${percent}%` }}
-                                                            />
-                                                        </div>
-
-                                                        <span className="w-10 text-xs text-gray-500 text-right">
-                                                            {Math.round(percent)}%
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
+                                            <span className="text-sm text-gray-500">
+                                                ({reviews.length} reviews)
+                                            </span>
                                         </div>
 
-                                        {/* RATING BARS */}
-                                        <div className="space-y-2">
+                                        {/* BARS */}
+                                        <div className="space-y-3">
                                             {[5, 4, 3, 2, 1].map((star) => {
                                                 const count = reviews.filter(r => r.rating === star).length;
                                                 const percent = reviews.length ? (count / reviews.length) * 100 : 0;
 
                                                 return (
                                                     <div key={star} className="flex items-center gap-3">
-                                                        <span className="w-10 text-sm">{star}★</span>
+                                                        <span className="w-6 text-sm">{star}★</span>
 
-                                                        <div className="flex-1 bg-gray-200 h-2 rounded">
+                                                        <div className="flex-1 h-2 bg-gray-200 rounded">
                                                             <div
-                                                                className="bg-khajur-primary h-2 rounded"
+                                                                className="h-2 bg-khajur-gold rounded"
                                                                 style={{ width: `${percent}%` }}
                                                             />
                                                         </div>
 
-                                                        <span className="text-sm text-gray-500 w-10">
+                                                        <span className="text-xs text-gray-500 w-10 text-right">
                                                             {Math.round(percent)}%
                                                         </span>
                                                     </div>
@@ -335,10 +334,10 @@ const ProductDetail = () => {
                                         </div>
                                     </div>
 
-                                    {/* ✍️ RIGHT SIDE (FORM) */}
-                                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                                    {/* ✍️ RIGHT: FORM */}
+                                    <div className="bg-white border rounded-lg p-6 shadow-sm">
                                         <h3 className="font-serif text-xl text-khajur-primary mb-4">
-                                            Write a review
+                                            Write a Review
                                         </h3>
 
                                         {/* STARS */}
@@ -351,20 +350,20 @@ const ProductDetail = () => {
                                             placeholder="Your name"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            className="w-full border p-3 mb-3 rounded"
+                                            className="w-full border p-3 mb-3 rounded focus:outline-none focus:ring-1 focus:ring-khajur-gold"
                                         />
 
                                         <input
                                             type="email"
                                             placeholder="Email address"
-                                            className="w-full border p-3 mb-3 rounded"
+                                            className="w-full border p-3 mb-3 rounded focus:outline-none focus:ring-1 focus:ring-khajur-gold"
                                         />
 
                                         <textarea
                                             placeholder="Write your review..."
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
-                                            className="w-full border p-3 mb-4 rounded h-28"
+                                            className="w-full border p-3 mb-4 rounded h-28 focus:outline-none focus:ring-1 focus:ring-khajur-gold"
                                         />
 
                                         <button
@@ -376,26 +375,27 @@ const ProductDetail = () => {
                                     </div>
                                 </div>
 
-                                {/* 🧾 REVIEWS LIST BELOW */}
-                                <div className="mt-10 space-y-4">
+                                {/* 🧾 REVIEWS LIST */}
+                                <div className="mt-12 space-y-4">
                                     {reviews.length === 0 ? (
                                         <p className="text-center text-gray-500">No reviews yet</p>
                                     ) : (
                                         reviews.map((rev, i) => (
                                             <div
                                                 key={i}
-                                                className="bg-white border rounded-lg p-4 shadow-sm"
+                                                className="bg-white border rounded-lg p-5 shadow-sm"
                                             >
-                                                <div className="flex justify-between mb-2">
+                                                <div className="flex justify-between items-center mb-2">
                                                     <h4 className="font-semibold text-khajur-primary">
                                                         {rev.user_name}
                                                     </h4>
-                                                    <span className="text-yellow-500">
-                                                        ⭐ {rev.rating}/5
-                                                    </span>
+
+                                                    <div className="text-yellow-500 text-sm">
+                                                        {"★".repeat(rev.rating)}
+                                                    </div>
                                                 </div>
 
-                                                <p className="text-gray-600 text-sm">
+                                                <p className="text-gray-600 text-sm leading-relaxed">
                                                     {rev.comment}
                                                 </p>
                                             </div>
