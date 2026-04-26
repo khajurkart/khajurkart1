@@ -395,7 +395,8 @@ async def login(request: Request, data: UserLogin):  # ✅ use model
     if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
         
-    if not user.get("is_verified"):
+    # ✅ Skip verification for admin
+    if not user.get("is_verified") and user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Please verify your email first")
         
     # ✅ INCLUDE ROLE IN TOKEN (VERY IMPORTANT)
