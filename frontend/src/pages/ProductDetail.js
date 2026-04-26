@@ -63,6 +63,19 @@ const ProductDetail = () => {
         }
     };
 
+    const renderStars = (current, setFunc) => {
+        return [1, 2, 3, 4, 5].map((star) => (
+            <span
+                key={star}
+                onClick={() => setFunc(star)}
+                className={`cursor-pointer text-2xl ${star <= current ? "text-yellow-500" : "text-gray-300"
+                    }`}
+            >
+                ★
+            </span>
+        ));
+    };
+
     const submitReview = async () => {
         try {
             await axios.post(`${API}/reviews`, {
@@ -259,30 +272,126 @@ const ProductDetail = () => {
                             </p>
                         )}
 
+                        {/* Customer Reviews SECTION */}
                         {activeTab === "reviews" && (
-                            <div className="space-y-4">
+                            <div className="max-w-4xl mx-auto">
 
-                                {/* Show Reviews */}
+                                {/* TITLE */}
+                                <h2 className="text-2xl font-serif text-khajur-primary mb-6 text-center">
+                                    Customer Reviews
+                                </h2>
+
+                                {/* RATING SUMMARY */}
+                                <div className="space-y-2">
+                                    {[5, 4, 3, 2, 1].map((star) => {
+                                        const count = reviews.filter(r => r.rating === star).length;
+                                        const percent = reviews.length
+                                            ? (count / reviews.length) * 100
+                                            : 0;
+
+                                        return (
+                                            <div key={star} className="flex items-center gap-3">
+                                                <span className="w-12 text-sm">{star}★</span>
+
+                                                <div className="flex-1 bg-gray-200 h-2 rounded">
+                                                    <div
+                                                        className="bg-khajur-primary h-2 rounded"
+                                                        style={{ width: `${percent}%` }}
+                                                    />
+                                                </div>
+
+                                                <span className="text-sm text-gray-500 w-8">
+                                                    {count}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* NO REVIEWS */}
                                 {reviews.length === 0 ? (
-                                    <p>No reviews yet</p>
+                                    <p className="text-center text-gray-500 mb-6">
+                                        No reviews yet
+                                    </p>
                                 ) : (
-                                    reviews.map((rev, i) => (
-                                        <div key={i} className="border p-4 rounded">
-                                            <h4 className="font-semibold">{rev.user_name}</h4>
-                                            <p className="text-yellow-600">⭐ {rev.rating}/5</p>
-                                            <p className="text-sm text-gray-600">{rev.comment}</p>
-                                        </div>
-                                    ))
+                                    <div className="space-y-4 mb-8">
+                                        {reviews.map((rev, i) => (
+                                            <div
+                                                key={i}
+                                                className="bg-white border rounded-lg p-4 shadow-sm"
+                                            >
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <h4 className="font-semibold text-khajur-primary">
+                                                        {rev.user_name}
+                                                    </h4>
+                                                    <span className="text-yellow-500 font-medium">
+                                                        ⭐ {rev.rating}/5
+                                                    </span>
+                                                </div>
+
+                                                <p className="text-gray-600 text-sm">
+                                                    {rev.comment}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
                                 )}
 
-                                {/* Add Review Form */}
-                                <div className="mt-6">
+                                <div className="bg-white p-6 rounded-lg shadow-sm border mt-8">
+                                    <h3 className="font-serif text-xl text-khajur-primary mb-4">
+                                        Write a review
+                                    </h3>
+
+                                    {/* STAR INPUT */}
+                                    <div className="mb-4">
+                                        <p className="mb-1 text-sm">Rating</p>
+                                        {renderStars(rating, setRating)}
+                                    </div>
+
+                                    {/* TITLE */}
+                                    <input
+                                        type="text"
+                                        placeholder="Review title"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="w-full border p-3 mb-3 rounded"
+                                    />
+
+                                    {/* EMAIL */}
+                                    <input
+                                        type="email"
+                                        placeholder="Email address"
+                                        className="w-full border p-3 mb-3 rounded"
+                                    />
+
+                                    {/* COMMENT */}
+                                    <textarea
+                                        placeholder="Write your review..."
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
+                                        className="w-full border p-3 mb-4 rounded h-28"
+                                    />
+
+                                    <button
+                                        onClick={submitReview}
+                                        className="bg-khajur-primary text-white px-6 py-3 rounded hover:bg-khajur-gold transition"
+                                    >
+                                        Submit Review
+                                    </button>
+                                </div>
+
+                                {/* FORM */}
+                                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                                    <h3 className="font-serif text-xl text-khajur-primary mb-4">
+                                        Write a review
+                                    </h3>
+
                                     <input
                                         type="text"
                                         placeholder="Your name"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="border p-2 w-full mb-2"
+                                        className="w-full border p-3 mb-3 rounded"
                                     />
 
                                     <input
@@ -290,19 +399,19 @@ const ProductDetail = () => {
                                         placeholder="Rating (1-5)"
                                         value={rating}
                                         onChange={(e) => setRating(e.target.value)}
-                                        className="border p-2 w-full mb-2"
+                                        className="w-full border p-3 mb-3 rounded"
                                     />
 
                                     <textarea
-                                        placeholder="Write review..."
+                                        placeholder="Write your review..."
                                         value={comment}
                                         onChange={(e) => setComment(e.target.value)}
-                                        className="border p-2 w-full mb-2"
+                                        className="w-full border p-3 mb-4 rounded h-28"
                                     />
 
                                     <button
                                         onClick={submitReview}
-                                        className="bg-khajur-primary text-white px-6 py-2"
+                                        className="bg-khajur-primary text-white px-6 py-3 rounded hover:bg-khajur-gold transition"
                                     >
                                         Submit Review
                                     </button>
@@ -326,7 +435,7 @@ const ProductDetail = () => {
                     type="explore"
                 />
             </div>
-        </div>
+        </div >
     );
 };
 
