@@ -378,29 +378,26 @@ const ProductDetail = () => {
 
                                 {/* 🧾 REVIEWS LIST BELOW */}
                                 <div className="mt-10 space-y-4">
-                                    {reviews.length === 0 ? (
-                                        <p className="text-center text-gray-500">No reviews yet</p>
-                                    ) : (
-                                        reviews.map((rev, i) => (
-                                            <div
-                                                key={i}
-                                                className="bg-white border rounded-lg p-4 shadow-sm"
-                                            >
-                                                <div className="flex justify-between mb-2">
-                                                    <h4 className="font-semibold text-khajur-primary">
-                                                        {rev.user_name}
-                                                    </h4>
-                                                    <span className="text-yellow-500">
-                                                        ⭐ {rev.rating}/5
-                                                    </span>
-                                                </div>
+                                    {reviews.map((rev, i) => (
+                                        <div
+                                            key={i}
+                                            className="bg-white border border-gray-200 rounded-lg p-5"
+                                        >
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h4 className="font-semibold text-khajur-primary text-sm">
+                                                    {rev.user_name}
+                                                </h4>
 
-                                                <p className="text-gray-600 text-sm">
-                                                    {rev.comment}
-                                                </p>
+                                                <div className="text-yellow-500 text-sm">
+                                                    {"★".repeat(rev.rating)}
+                                                </div>
                                             </div>
-                                        ))
-                                    )}
+
+                                            <p className="text-gray-600 text-sm leading-relaxed">
+                                                {rev.comment}
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
 
                             </div>
