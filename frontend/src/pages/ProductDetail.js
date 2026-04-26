@@ -285,21 +285,28 @@ const ProductDetail = () => {
                                         </h2>
 
                                         {/* BIG RATING */}
-                                        <div className="flex items-center gap-4 mb-4">
-                                            <span className="text-5xl font-bold text-khajur-primary">
-                                                {reviews.length
-                                                    ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
-                                                    : "0"}
-                                            </span>
+                                        <div className="space-y-2">
+                                            {[5, 4, 3, 2, 1].map((star) => {
+                                                const count = reviews.filter(r => r.rating === star).length;
+                                                const percent = reviews.length ? (count / reviews.length) * 100 : 0;
 
-                                            <div>
-                                                <div className="text-yellow-500 text-xl">
-                                                    ★★★★★
-                                                </div>
-                                                <p className="text-gray-500 text-sm">
-                                                    {reviews.length} reviews
-                                                </p>
-                                            </div>
+                                                return (
+                                                    <div key={star} className="flex items-center gap-3">
+                                                        <span className="w-8 text-sm text-gray-600">{star}★</span>
+
+                                                        <div className="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
+                                                            <div
+                                                                className="h-full bg-khajur-gold"
+                                                                style={{ width: `${percent}%` }}
+                                                            />
+                                                        </div>
+
+                                                        <span className="w-10 text-xs text-gray-500 text-right">
+                                                            {Math.round(percent)}%
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
 
                                         {/* RATING BARS */}
