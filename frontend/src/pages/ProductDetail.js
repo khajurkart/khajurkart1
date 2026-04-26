@@ -375,29 +375,64 @@ const ProductDetail = () => {
                                     </div>
                                 </div>
 
-                                {/* 🧾 REVIEWS LIST */}
-                                <div className="mt-12 space-y-4">
+                                {/* 🧾 REVIEWS LIST - ULTRA PREMIUM */}
+                                <div className="mt-14 space-y-6">
                                     {reviews.length === 0 ? (
                                         <p className="text-center text-gray-500">No reviews yet</p>
                                     ) : (
                                         reviews.map((rev, i) => (
                                             <div
                                                 key={i}
-                                                className="bg-white border rounded-lg p-5 shadow-sm"
+                                                className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-md transition"
                                             >
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <h4 className="font-semibold text-khajur-primary">
-                                                        {rev.user_name}
-                                                    </h4>
+                                                {/* TOP */}
+                                                <div className="flex items-start justify-between mb-3">
 
-                                                    <div className="text-yellow-500 text-sm">
+                                                    {/* LEFT */}
+                                                    <div className="flex items-center gap-3">
+                                                        {/* AVATAR */}
+                                                        <div className="w-10 h-10 rounded-full bg-khajur-primary text-white flex items-center justify-center font-semibold">
+                                                            {rev.user_name?.charAt(0).toUpperCase()}
+                                                        </div>
+
+                                                        {/* NAME + DATE */}
+                                                        <div>
+                                                            <h4 className="text-khajur-primary font-semibold text-sm">
+                                                                {rev.user_name}
+                                                            </h4>
+                                                            <p className="text-xs text-gray-400">
+                                                                {new Date(rev.created_at).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* RIGHT: STARS */}
+                                                    <div className="text-yellow-500 text-sm tracking-wide">
                                                         {"★".repeat(rev.rating)}
+                                                        <span className="text-gray-300">
+                                                            {"★".repeat(5 - rev.rating)}
+                                                        </span>
                                                     </div>
                                                 </div>
 
+                                                {/* REVIEW TEXT */}
                                                 <p className="text-gray-600 text-sm leading-relaxed">
                                                     {rev.comment}
                                                 </p>
+
+                                                {/* FOOTER */}
+                                                <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
+                                                    <span>✔ Verified Customer</span>
+
+                                                    <div className="flex gap-4">
+                                                        <button className="hover:text-khajur-primary transition">
+                                                            Helpful
+                                                        </button>
+                                                        <button className="hover:text-khajur-primary transition">
+                                                            Report
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         ))
                                     )}
