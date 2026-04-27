@@ -147,10 +147,6 @@ const ProductDetail = () => {
         );
     }
 
-    const avgRating = reviews.length
-      ? reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
-      : 0;
-
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -393,86 +389,124 @@ const ProductDetail = () => {
                                 </div>
 
                                 {/* ================= REVIEWS ================= */}
-                                <div className="space-y-8">
+                                {/* ================= WRITE REVIEW (ULTRA LUXURY) ================= */}
+                                <div className="max-w-4xl mx-auto mt-16">
 
-                                    {processedReviews.map((rev) => (
-                                        <div
-                                            key={rev.id}
-                                            className="bg-white/80 backdrop-blur border rounded-xl p-6 shadow-sm hover:shadow-xl transition"
-                                        >
+                                    <div className="bg-white/90 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-xl p-10">
 
-                                            {/* TOP */}
-                                            <div className="flex justify-between items-start">
+                                        {/* HEADER */}
+                                        <div className="text-center mb-10">
+                                            <h3 className="text-3xl font-semibold text-khajur-primary tracking-wide">
+                                                Share Your Experience
+                                            </h3>
+                                            <p className="text-gray-500 mt-2 text-sm">
+                                                Your feedback helps others make better choices
+                                            </p>
+                                        </div>
 
-                                                {/* USER */}
-                                                <div className="flex gap-4">
-                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-khajur-primary to-khajur-gold text-white flex items-center justify-center font-bold">
-                                                        {rev.user_name?.charAt(0)}
-                                                    </div>
-
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <h4 className="font-semibold text-khajur-primary">
-                                                                {rev.user_name}
-                                                            </h4>
-
-                                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                                                                ✔ Verified Buyer
-                                                            </span>
-                                                        </div>
-
-                                                        <p className="text-xs text-gray-400">
-                                                            {new Date(rev.created_at).toLocaleDateString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                {/* STARS */}
-                                                <div className="text-yellow-400 text-lg">
-                                                    {[1, 2, 3, 4, 5].map(s => (
-                                                        <span key={s}>{s <= rev.rating ? "★" : "☆"}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            {/* TITLE */}
-                                            {rev.title && (
-                                                <h5 className="mt-4 text-lg font-semibold text-khajur-primary">
-                                                    {rev.title}
-                                                </h5>
-                                            )}
-
-                                            {/* COMMENT */}
-                                            <p className="mt-2 text-gray-600 leading-relaxed">
-                                                {rev.comment}
+                                        {/* RATING */}
+                                        <div className="mb-10 text-center">
+                                            <p className="mb-3 font-medium text-lg text-khajur-primary">
+                                                Your Rating
                                             </p>
 
-                                            {/* IMAGE */}
-                                            {rev.image && (
-                                                <img
-                                                    src={rev.image}
-                                                    className="mt-4 w-32 h-32 object-cover rounded-lg"
-                                                />
-                                            )}
-
-                                            {/* ACTIONS */}
-                                            <div className="flex gap-6 mt-4 text-sm text-gray-500">
-
-                                                <button
-                                                    onClick={() => handleLike(rev.id)}
-                                                    className="hover:text-khajur-primary"
-                                                >
-                                                    👍 Helpful ({likes[rev.id] || 0})
-                                                </button>
-
-                                                <button className="hover:text-khajur-primary">
-                                                    Reply
-                                                </button>
-
+                                            <div className="flex justify-center gap-3 text-4xl">
+                                                {renderStars(rating, setRating)}
                                             </div>
                                         </div>
-                                    ))}
 
+                                        {/* INPUT GRID */}
+                                        <div className="grid md:grid-cols-2 gap-6 mb-6">
+
+                                            {/* NAME */}
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">
+                                                    Your Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    placeholder="John Doe"
+                                                    className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
+                                                />
+                                            </div>
+
+                                            {/* EMAIL */}
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">
+                                                    Email Address
+                                                </label>
+                                                <input
+                                                    type="email"
+                                                    placeholder="john@email.com"
+                                                    className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
+                                                />
+                                            </div>
+
+                                        </div>
+
+                                        {/* TITLE */}
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium mb-2">
+                                                Review Title
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="Amazing quality!"
+                                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
+                                            />
+                                        </div>
+
+                                        {/* COMMENT */}
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium mb-2">
+                                                Your Review
+                                            </label>
+                                            <textarea
+                                                value={comment}
+                                                onChange={(e) => setComment(e.target.value)}
+                                                placeholder="Tell us what you loved..."
+                                                className="w-full p-4 rounded-xl h-40 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
+                                            />
+                                        </div>
+
+                                        {/* IMAGE UPLOAD */}
+                                        <div className="mb-8">
+                                            <label className="block text-sm font-medium mb-2">
+                                                Add Photo (optional)
+                                            </label>
+
+                                            <input
+                                                type="file"
+                                                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-khajur-primary file:text-white hover:file:bg-khajur-gold"
+                                            />
+                                        </div>
+
+                                        {/* POLICY */}
+                                        <p className="text-center text-base font-semibold text-gray-700 mb-8">
+                                            We’ll only contact you about your review if necessary.
+                                        </p>
+
+                                        {/* BUTTONS */}
+                                        <div className="flex justify-center gap-4">
+
+                                            <button
+                                                className="px-8 py-3 rounded-xl border border-khajur-primary text-khajur-primary hover:bg-khajur-primary hover:text-white transition-all duration-300"
+                                            >
+                                                Cancel
+                                            </button>
+
+                                            <button
+                                                onClick={submitReview}
+                                                className="px-10 py-3 rounded-xl bg-gradient-to-r from-khajur-primary to-khajur-gold text-white shadow-lg hover:shadow-2xl transition-all duration-300"
+                                            >
+                                                Submit Review
+                                            </button>
+
+                                        </div>
+
+                                    </div>
                                 </div>
 
                                 {/* LOAD MORE */}
