@@ -275,51 +275,61 @@ const ProductDetail = () => {
                             </p>
                         )}
 
-                        {/* Customer Reviews SECTION */}
                         {/* CUSTOMER REVIEWS */}
                         {activeTab === "reviews" && (
                             <div className="max-w-6xl mx-auto font-[Manrope]">
 
-                                {/* HEADER */}
-                                <h2 className="text-3xl font-semibold text-center text-khajur-primary mb-10">
+                                {/* TITLE */}
+                                <h2 className="text-4xl font-semibold text-center text-khajur-primary mb-12 tracking-wide">
                                     Customer Reviews
                                 </h2>
 
-                                <div className="grid md:grid-cols-3 gap-10 items-start">
+                                {/* TOP SECTION */}
+                                <div className="grid md:grid-cols-3 gap-12 items-center">
 
-                                    {/* LEFT: AVG RATING */}
+                                    {/* AVG RATING */}
                                     <div className="text-center md:text-left">
-                                        <h1 className="text-6xl font-bold text-khajur-primary">
+                                        <h1 className="text-7xl font-bold text-khajur-primary">
                                             {reviews.length
                                                 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
                                                 : "0.0"}
                                         </h1>
 
-                                        <div className="text-blue-600 text-sm mt-2">
-                                            ★★★★★{" "}
+                                        {/* STARS */}
+                                        <div className="flex gap-1 justify-center md:justify-start text-2xl mt-2">
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <span key={star} className="text-yellow-400 drop-shadow">
+                                                    ★
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        <p className="text-blue-600 text-sm mt-2">
                                             {reviews.length
                                                 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(2)
                                                 : "0"} out of 5
-                                        </div>
+                                        </p>
 
-                                        <p className="text-gray-500 text-sm mt-1">
+                                        <p className="text-gray-500 mt-1">
                                             Based on {reviews.length} reviews
                                         </p>
                                     </div>
 
-                                    {/* MIDDLE: BARS */}
-                                    <div className="space-y-3">
-                                        {[5, 4, 3, 2, 1].map((star) => {
+                                    {/* BARS */}
+                                    <div className="space-y-4">
+                                        {[5, 4, 3, 2, 1].map(star => {
                                             const count = reviews.filter(r => r.rating === star).length;
                                             const percent = reviews.length ? (count / reviews.length) * 100 : 0;
 
                                             return (
                                                 <div key={star} className="flex items-center gap-3">
-                                                    <span className="w-6 text-sm text-khajur-primary">{star}★</span>
+                                                    <span className="w-6 text-sm text-khajur-primary font-medium">
+                                                        {star}★
+                                                    </span>
 
                                                     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-khajur-primary"
+                                                            className="h-full bg-gradient-to-r from-khajur-primary to-khajur-gold transition-all duration-700"
                                                             style={{ width: `${percent}%` }}
                                                         />
                                                     </div>
@@ -332,11 +342,11 @@ const ProductDetail = () => {
                                         })}
                                     </div>
 
-                                    {/* RIGHT: BUTTON */}
+                                    {/* BUTTON */}
                                     <div className="flex justify-center md:justify-end">
                                         <button
-                                            onClick={() => window.scrollTo({ top: 800, behavior: "smooth" })}
-                                            className="bg-khajur-primary text-white px-6 py-3 rounded shadow hover:bg-khajur-gold transition"
+                                            onClick={() => window.scrollTo({ top: 900, behavior: "smooth" })}
+                                            className="bg-khajur-primary text-white px-6 py-3 rounded-lg shadow-md hover:shadow-xl hover:bg-khajur-gold transition-all duration-300"
                                         >
                                             Write Review
                                         </button>
@@ -344,79 +354,126 @@ const ProductDetail = () => {
                                 </div>
 
                                 {/* DIVIDER */}
-                                <div className="border-t my-10"></div>
+                                <div className="border-t my-12"></div>
 
-                                {/* REVIEW FORM */}
+                                {/* FORM */}
                                 <div className="max-w-3xl mx-auto">
 
-                                    <h3 className="text-2xl font-semibold text-center mb-8">
+                                    <h3 className="text-3xl font-semibold text-center mb-10">
                                         Write a review
                                     </h3>
 
                                     {/* RATING */}
-                                    <div className="mb-6">
-                                        <p className="text-sm mb-2">Rating</p>
-                                        <div className="flex gap-1 text-2xl">
+                                    <div className="mb-8">
+                                        <p className="mb-2 font-medium">Rating</p>
+                                        <div className="flex gap-2 text-3xl">
                                             {renderStars(rating, setRating)}
                                         </div>
                                     </div>
 
                                     {/* TITLE */}
-                                    <div className="mb-5">
-                                        <p className="text-sm mb-2">Review Title</p>
+                                    <div className="mb-6">
+                                        <p className="mb-2 font-medium">Review Title</p>
                                         <input
                                             type="text"
                                             placeholder="Give your review a title"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            className="w-full border p-4 rounded bg-gray-50 focus:outline-none"
+                                            className="w-full border p-4 rounded-lg bg-gray-50 focus:ring-2 focus:ring-khajur-primary outline-none"
                                         />
                                     </div>
 
                                     {/* CONTENT */}
-                                    <div className="mb-5">
-                                        <p className="text-sm mb-2">Review content</p>
+                                    <div className="mb-6">
+                                        <p className="mb-2 font-medium">Review content</p>
                                         <textarea
                                             placeholder="Start writing here..."
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
-                                            className="w-full border p-4 rounded h-36 bg-gray-50 focus:outline-none"
+                                            className="w-full border p-4 rounded-lg h-40 bg-gray-50 focus:ring-2 focus:ring-khajur-primary outline-none"
                                         />
                                     </div>
 
                                     {/* NAME + EMAIL */}
-                                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                                    <div className="grid md:grid-cols-2 gap-4 mb-8">
                                         <input
                                             type="text"
                                             placeholder="Display name"
-                                            className="border p-3 rounded bg-gray-50"
+                                            className="border p-3 rounded-lg bg-gray-50 focus:ring-2 focus:ring-khajur-primary outline-none"
                                         />
                                         <input
                                             type="email"
                                             placeholder="Your email address"
-                                            className="border p-3 rounded bg-gray-50"
+                                            className="border p-3 rounded-lg bg-gray-50 focus:ring-2 focus:ring-khajur-primary outline-none"
                                         />
                                     </div>
 
-                                    {/* POLICY TEXT */}
-                                    <p className="text-sm font-semibold text-gray-700 text-center mb-6">
+                                    {/* POLICY */}
+                                    <p className="text-center font-semibold text-gray-700 text-base mb-8">
                                         We’ll only contact you about your review if necessary.
                                     </p>
 
-                                    {/* BUTTON */}
+                                    {/* BUTTONS */}
                                     <div className="flex justify-center gap-4">
-                                        <button className="border px-6 py-3 rounded text-khajur-primary">
+                                        <button className="px-6 py-3 rounded-lg border border-khajur-primary text-khajur-primary hover:bg-khajur-primary hover:text-white transition">
                                             Cancel review
                                         </button>
 
                                         <button
                                             onClick={submitReview}
-                                            className="bg-khajur-primary text-white px-8 py-3 rounded hover:bg-khajur-gold transition"
+                                            className="bg-khajur-primary text-white px-8 py-3 rounded-lg shadow hover:shadow-lg hover:bg-khajur-gold transition-all"
                                         >
                                             Submit Review
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* REVIEWS LIST */}
+                                <div className="mt-16 space-y-6 max-w-4xl mx-auto">
+                                    {reviews.map((rev, i) => (
+                                        <div
+                                            key={i}
+                                            className="bg-white/80 backdrop-blur border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-xl transition-all duration-300"
+                                        >
+                                            <div className="flex justify-between items-start">
+
+                                                {/* USER */}
+                                                <div className="flex gap-4 items-center">
+                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-khajur-primary to-khajur-gold text-white flex items-center justify-center font-bold">
+                                                        {rev.user_name?.charAt(0)}
+                                                    </div>
+
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <h4 className="font-semibold text-khajur-primary">
+                                                                {rev.user_name}
+                                                            </h4>
+
+                                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded shadow-sm">
+                                                                ✔ Verified
+                                                            </span>
+                                                        </div>
+
+                                                        <p className="text-xs text-gray-400">
+                                                            {new Date(rev.created_at).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* STARS */}
+                                                <div className="text-yellow-400 text-lg">
+                                                    {[1, 2, 3, 4, 5].map(s => (
+                                                        <span key={s}>{s <= rev.rating ? "★" : "☆"}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* COMMENT */}
+                                            <p className="text-gray-600 mt-4 leading-relaxed">
+                                                {rev.comment}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+
                             </div>
                         )}
                     </div>
