@@ -284,13 +284,13 @@ const ProductDetail = () => {
 
                                     {/* LEFT BIG RATING */}
                                     <div>
-                                        <h3 className="text-4xl font-bold text-khajur-primary leading-none">
+                                        <h3 className="text-3xl font-bold text-khajur-primary leading-none">
                                             {reviews.length
                                                 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
                                                 : "0.0"}
                                         </h3>
 
-                                        <div className="flex items-center gap-2 mt-6 text-blue-700 text-sm font-medium">
+                                        <div className="flex items-center gap-2 mt-2 text-blue-700 text-3xl font-medium">
                                             ★★★★☆
                                             <span>0 out of 5</span>
                                         </div>
@@ -337,14 +337,14 @@ const ProductDetail = () => {
                                     <div className="grid md:grid-cols-2 gap-10 items-center mb-6">
 
                                         <div>
-                                            <p className="mb-4 text-sm font-medium">Rating</p>
+                                            <p className="mb-4 text-2xl font-medium">Rating</p>
                                             <div>
                                                 {renderStars(rating, setRating)}
                                             </div>
                                         </div>
 
                                         <div>
-                                            <p className="mb-4 text-sm font-medium">Review Title</p>
+                                            <p className="mb-4 text-2xl font-medium">Review Title</p>
                                             <input
                                                 type="text"
                                                 placeholder="Give your review a title"
@@ -357,7 +357,7 @@ const ProductDetail = () => {
 
                                     {/* TEXTAREA */}
                                     <div className="mb-6">
-                                        <p className="mb-4 text-sm font-medium">Review content</p>
+                                        <p className="mb-4 text-2xl font-medium">Review content</p>
                                         <textarea
                                             placeholder="Start writing here..."
                                             value={comment}
@@ -369,7 +369,7 @@ const ProductDetail = () => {
                                     {/* NAME + EMAIL */}
                                     <div className="grid md:grid-cols-2 gap-6 mb-6">
                                         <div>
-                                            <p className="mb-4 text-sm font-medium">Display Name</p>
+                                            <p className="mb-4 text-2xl font-medium">Display Name</p>
                                             <input
                                                 type="text"
                                                 placeholder="Display name"
@@ -379,7 +379,7 @@ const ProductDetail = () => {
                                             />
                                         </div>
                                         <div>
-                                            <p className="mb-4 text-sm font-medium">Email</p>
+                                            <p className="mb-4 text-2xl font-medium">Email</p>
                                             <input
                                                 type="email"
                                                 placeholder="Your email address"
@@ -389,7 +389,7 @@ const ProductDetail = () => {
                                     </div>
 
                                     {/* POLICY TEXT */}
-                                    <p className="text-sm font-semibold text-gray-700 text-center mb-8">
+                                    <p className="text-sm font-semibold text-gray-700 text-center mb-6">
                                         We’ll only contact you about your review if necessary.
                                     </p>
 
