@@ -69,7 +69,7 @@ const ProductDetail = () => {
             <span
                 key={star}
                 onClick={() => setFunc(star)}
-                className={`cursor-pointer text-3xl ${star <= current ? "text-yellow-500" : "text-gray-300"
+                className={`cursor-pointer text-4xl ${star <= current ? "text-yellow-500" : "text-gray-300"
                     }`}
             >
                 ★
@@ -284,18 +284,18 @@ const ProductDetail = () => {
 
                                     {/* LEFT BIG RATING */}
                                     <div>
-                                        <h3 className="text-6xl font-bold text-khajur-primary leading-none">
+                                        <h3 className="text-4xl font-bold text-khajur-primary leading-none">
                                             {reviews.length
                                                 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
                                                 : "0.0"}
                                         </h3>
 
-                                        <div className="flex items-center gap-2 mt-4 text-blue-700 text-sm font-medium">
+                                        <div className="flex items-center gap-2 mt-6 text-blue-700 text-sm font-medium">
                                             ★★★★☆
                                             <span>0 out of 5</span>
                                         </div>
 
-                                        <p className="text-gray-500 text-sm mt-1">
+                                        <p className="text-gray-500 text-sm mt-2    ">
                                             Based on {reviews.length} reviews
                                         </p>
                                     </div>
@@ -324,22 +324,12 @@ const ProductDetail = () => {
                                             );
                                         })}
                                     </div>
-
-                                    {/* RIGHT BUTTON */}
-                                    <div className="flex justify-end">
-                                        <button
-                                            onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}
-                                            className="bg-khajur-primary text-white px-6 py-3 rounded"
-                                        >
-                                            Write review
-                                        </button>
-                                    </div>
                                 </div>
 
                                 {/* REVIEW FORM */}
                                 <div className="mt-12 max-w-4xl mx-auto">
 
-                                    <h3 className="text-2xl font-semibold text-center mb-8">
+                                    <h3 className="text-3xl font-semibold text-center mb-8">
                                         Write a review
                                     </h3>
 
@@ -347,14 +337,14 @@ const ProductDetail = () => {
                                     <div className="grid md:grid-cols-2 gap-10 items-center mb-6">
 
                                         <div>
-                                            <p className="mb-3 text-sm font-medium">Rating</p>
+                                            <p className="mb-4 text-sm font-medium">Rating</p>
                                             <div>
                                                 {renderStars(rating, setRating)}
                                             </div>
                                         </div>
 
                                         <div>
-                                            <p className="mb-2 text-sm font-medium">Review Title</p>
+                                            <p className="mb-4 text-sm font-medium">Review Title</p>
                                             <input
                                                 type="text"
                                                 placeholder="Give your review a title"
@@ -367,7 +357,7 @@ const ProductDetail = () => {
 
                                     {/* TEXTAREA */}
                                     <div className="mb-6">
-                                        <p className="mb-2 text-sm font-medium">Review content</p>
+                                        <p className="mb-4 text-sm font-medium">Review content</p>
                                         <textarea
                                             placeholder="Start writing here..."
                                             value={comment}
@@ -378,23 +368,28 @@ const ProductDetail = () => {
 
                                     {/* NAME + EMAIL */}
                                     <div className="grid md:grid-cols-2 gap-6 mb-6">
-                                        <input
-                                            type="text"
-                                            placeholder="Display name"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            className="border p-4 rounded bg-gray-100"
-                                        />
-
-                                        <input
-                                            type="email"
-                                            placeholder="Your email address"
-                                            className="border p-4 rounded bg-gray-100"
-                                        />
+                                        <div>
+                                            <p className="mb-4 text-sm font-medium">Display Name</p>
+                                            <input
+                                                type="text"
+                                                placeholder="Display name"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                className="border p-4 rounded bg-gray-100"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="mb-4 text-sm font-medium">Email</p>
+                                            <input
+                                                type="email"
+                                                placeholder="Your email address"
+                                                className="border p-4 rounded bg-gray-100"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* POLICY TEXT */}
-                                    <p className="text-sm font-semibold text-gray-700 text-center mb-6">
+                                    <p className="text-sm font-semibold text-gray-700 text-center mb-8">
                                         We’ll only contact you about your review if necessary.
                                     </p>
 
