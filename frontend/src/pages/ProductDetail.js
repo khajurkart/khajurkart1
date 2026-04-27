@@ -276,31 +276,38 @@ const ProductDetail = () => {
                         )}
 
                         {/* Customer Reviews SECTION */}
+                        {/* CUSTOMER REVIEWS */}
                         {activeTab === "reviews" && (
-                            <div className="max-w-6xl mx-auto mt-10">
+                            <div className="max-w-6xl mx-auto font-[Manrope]">
 
-                                {/* TOP SUMMARY */}
-                                <div className="grid md:grid-cols-3 gap-10 items-center border-b pb-10">
+                                {/* HEADER */}
+                                <h2 className="text-3xl font-semibold text-center text-khajur-primary mb-10">
+                                    Customer Reviews
+                                </h2>
 
-                                    {/* LEFT BIG RATING */}
-                                    <div>
-                                        <h3 className="text-4xl font-bold text-khajur-primary leading-none items-center gap-3">
+                                <div className="grid md:grid-cols-3 gap-10 items-start">
+
+                                    {/* LEFT: AVG RATING */}
+                                    <div className="text-center md:text-left">
+                                        <h1 className="text-6xl font-bold text-khajur-primary">
                                             {reviews.length
                                                 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
                                                 : "0.0"}
-                                        </h3>
+                                        </h1>
 
-                                        <div className="flex items-center gap-2 mt-2 text-blue-700 text-3xl font-medium">
-                                            ★★★★☆
-                                            <span>0 out of 5</span>
+                                        <div className="text-blue-600 text-sm mt-2">
+                                            ★★★★★{" "}
+                                            {reviews.length
+                                                ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(2)
+                                                : "0"} out of 5
                                         </div>
 
-                                        <p className="text-gray-500 text-2xl mt-2">
+                                        <p className="text-gray-500 text-sm mt-1">
                                             Based on {reviews.length} reviews
                                         </p>
                                     </div>
 
-                                    {/* MIDDLE BARS */}
+                                    {/* MIDDLE: BARS */}
                                     <div className="space-y-3">
                                         {[5, 4, 3, 2, 1].map((star) => {
                                             const count = reviews.filter(r => r.rating === star).length;
@@ -308,11 +315,11 @@ const ProductDetail = () => {
 
                                             return (
                                                 <div key={star} className="flex items-center gap-3">
-                                                    <span className="w-6 text-sm">{star}★</span>
+                                                    <span className="w-6 text-sm text-khajur-primary">{star}★</span>
 
-                                                    <div className="flex-1 h-2 bg-gray-200 rounded">
+                                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-khajur-primary rounded"
+                                                            className="h-full bg-khajur-primary"
                                                             style={{ width: `${percent}%` }}
                                                         />
                                                     </div>
@@ -324,68 +331,71 @@ const ProductDetail = () => {
                                             );
                                         })}
                                     </div>
+
+                                    {/* RIGHT: BUTTON */}
+                                    <div className="flex justify-center md:justify-end">
+                                        <button
+                                            onClick={() => window.scrollTo({ top: 800, behavior: "smooth" })}
+                                            className="bg-khajur-primary text-white px-6 py-3 rounded shadow hover:bg-khajur-gold transition"
+                                        >
+                                            Write Review
+                                        </button>
+                                    </div>
                                 </div>
 
-                                {/* REVIEW FORM */}
-                                <div className="mt-12 max-w-4xl mx-auto">
+                                {/* DIVIDER */}
+                                <div className="border-t my-10"></div>
 
-                                    <h3 className="text-3xl font-semibold text-start mb-8">
+                                {/* REVIEW FORM */}
+                                <div className="max-w-3xl mx-auto">
+
+                                    <h3 className="text-2xl font-semibold text-center mb-8">
                                         Write a review
                                     </h3>
 
-                                    {/* RATING + TITLE */}
-                                    <div className="grid md:grid-cols-2 gap-10 items-start mb-6">
-
-                                        <div>
-                                            <p className="mb-2 text-1xl font-medium">Rating</p>
-                                            <div>
-                                                {renderStars(rating, setRating)}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <p className="mb-2 text-1xl font-medium">Review Title</p>
-                                            <input
-                                                type="text"
-                                                placeholder="Give your review a title"
-                                                value={title}
-                                                onChange={(e) => setTitle(e.target.value)}
-                                                className="w-full border p-4 rounded bg-gray-100"
-                                            />
+                                    {/* RATING */}
+                                    <div className="mb-6">
+                                        <p className="text-sm mb-2">Rating</p>
+                                        <div className="flex gap-1 text-2xl">
+                                            {renderStars(rating, setRating)}
                                         </div>
                                     </div>
 
-                                    {/* TEXTAREA */}
-                                    <div className="mb-6">
-                                        <p className="mb-2 text-1xl font-medium">Review content</p>
+                                    {/* TITLE */}
+                                    <div className="mb-5">
+                                        <p className="text-sm mb-2">Review Title</p>
+                                        <input
+                                            type="text"
+                                            placeholder="Give your review a title"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            className="w-full border p-4 rounded bg-gray-50 focus:outline-none"
+                                        />
+                                    </div>
+
+                                    {/* CONTENT */}
+                                    <div className="mb-5">
+                                        <p className="text-sm mb-2">Review content</p>
                                         <textarea
                                             placeholder="Start writing here..."
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
-                                            className="w-full border p-4 rounded bg-gray-100 h-40"
+                                            className="w-full border p-4 rounded h-36 bg-gray-50 focus:outline-none"
                                         />
                                     </div>
 
                                     {/* NAME + EMAIL */}
-                                    <div className="grid md:grid-cols-2 gap-6 mb-6">
-                                        <div>
-                                            <p className="mb-2 text-1xl font-medium">Display Name</p>
-                                            <input
-                                                type="text"
-                                                placeholder="Display name"
-                                                value={name}
-                                                onChange={(e) => setName(e.target.value)}
-                                                className="border p-4 rounded bg-gray-100"
-                                            />
-                                        </div>
-                                        <div>
-                                            <p className="mb-2 text-1xl font-medium">Email</p>
-                                            <input
-                                                type="email"
-                                                placeholder="Your email address"
-                                                className="border p-4 rounded bg-gray-100"
-                                            />
-                                        </div>
+                                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                                        <input
+                                            type="text"
+                                            placeholder="Display name"
+                                            className="border p-3 rounded bg-gray-50"
+                                        />
+                                        <input
+                                            type="email"
+                                            placeholder="Your email address"
+                                            className="border p-3 rounded bg-gray-50"
+                                        />
                                     </div>
 
                                     {/* POLICY TEXT */}
@@ -393,16 +403,9 @@ const ProductDetail = () => {
                                         We’ll only contact you about your review if necessary.
                                     </p>
 
-                                    {/* BUTTONS */}
+                                    {/* BUTTON */}
                                     <div className="flex justify-center gap-4">
-                                        <button
-                                            onClick={() => {
-                                                setName("");
-                                                setComment("");
-                                                setRating(5);
-                                            }}
-                                            className="border px-6 py-3 rounded text-khajur-primary"
-                                        >
+                                        <button className="border px-6 py-3 rounded text-khajur-primary">
                                             Cancel review
                                         </button>
 
@@ -414,34 +417,6 @@ const ProductDetail = () => {
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* REVIEWS LIST */}
-                                <div className="mt-12 space-y-4 max-w-4xl mx-auto">
-                                    {reviews.length === 0 ? (
-                                        <p className="text-center text-gray-500">No reviews yet</p>
-                                    ) : (
-                                        reviews.map((rev, i) => (
-                                            <div
-                                                key={i}
-                                                className="bg-white border rounded-lg p-5 shadow-sm"
-                                            >
-                                                <div className="flex justify-between mb-2">
-                                                    <h4 className="font-semibold text-khajur-primary">
-                                                        {rev.user_name}
-                                                    </h4>
-                                                    <span className="text-yellow-500 font-medium">
-                                                        ⭐ {rev.rating}/5
-                                                    </span>
-                                                </div>
-
-                                                <p className="text-gray-600 text-sm">
-                                                    {rev.comment}
-                                                </p>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-
                             </div>
                         )}
                     </div>
