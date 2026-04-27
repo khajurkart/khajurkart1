@@ -367,7 +367,7 @@ const ProductDetail = () => {
                                     </div>
                                 </div>
 
-                                {/* 🧾 REVIEWS LIST */}
+                                {/* 🧾 REVIEWS LIST (PRO VERSION) */}
                                 <div className="mt-12 space-y-6">
                                     {reviews.length === 0 ? (
                                         <p className="text-center text-gray-500">No reviews yet</p>
@@ -375,21 +375,45 @@ const ProductDetail = () => {
                                         reviews.map((rev, i) => (
                                             <div
                                                 key={i}
-                                                className="border-b pb-4 flex flex-col gap-2"
+                                                className="flex gap-4 border-b pb-5"
                                             >
-                                                <div className="flex justify-between items-center">
-                                                    <h4 className="font-medium text-khajur-primary">
-                                                        {rev.user_name}
-                                                    </h4>
-
-                                                    <div className="text-yellow-500 text-sm">
-                                                        ⭐ {rev.rating}
-                                                    </div>
+                                                {/* 👤 AVATAR */}
+                                                <div className="w-10 h-10 rounded-full bg-khajur-cream flex items-center justify-center font-semibold text-khajur-primary">
+                                                    {rev.user_name?.charAt(0).toUpperCase()}
                                                 </div>
 
-                                                <p className="text-sm text-gray-600 leading-relaxed">
-                                                    {rev.comment}
-                                                </p>
+                                                {/* 📄 CONTENT */}
+                                                <div className="flex-1">
+
+                                                    {/* NAME + BADGE + DATE */}
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <h4 className="font-semibold text-khajur-primary text-sm">
+                                                                {rev.user_name}
+                                                            </h4>
+
+                                                            {/* ✅ VERIFIED BADGE */}
+                                                            <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">
+                                                                Verified
+                                                            </span>
+                                                        </div>
+
+                                                        {/* 📅 DATE */}
+                                                        <span className="text-xs text-gray-400">
+                                                            {new Date(rev.created_at).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* ⭐ RATING */}
+                                                    <div className="text-yellow-500 text-sm mb-1">
+                                                        {"★".repeat(rev.rating)}
+                                                    </div>
+
+                                                    {/* 💬 COMMENT */}
+                                                    <p className="text-sm text-gray-600 leading-relaxed">
+                                                        {rev.comment}
+                                                    </p>
+                                                </div>
                                             </div>
                                         ))
                                     )}
