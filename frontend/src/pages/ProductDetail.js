@@ -287,13 +287,6 @@ const ProductDetail = () => {
                         </button>
                     </div>
 
-                    <button
-                        onClick={() => setShowForm(true)}
-                        className="bg-khajur-primary text-white px-6 py-3 rounded-lg"
-                    >
-                        Write Review
-                    </button>
-
                     {/* Content */}
                     <div className="text-center">
                         {activeTab === "description" && (
@@ -358,11 +351,11 @@ const ProductDetail = () => {
                                         })}
                                     </div>
 
-                                    {/* CTA */}
-                                    <div className="flex justify-end">
+                                    {/* WRITE BUTTON REVIEW */}
+                                    <div className="text-center mt-12">
                                         <button
-                                            onClick={() => window.scrollTo({ top: 900, behavior: "smooth" })}
-                                            className="bg-khajur-primary text-white px-6 py-3 rounded-lg shadow hover:shadow-xl transition"
+                                            onClick={() => setShowForm(true)}
+                                            className="bg-khajur-primary text-white px-8 py-3 rounded-lg shadow hover:shadow-xl transition"
                                         >
                                             Write Review
                                         </button>
@@ -411,16 +404,6 @@ const ProductDetail = () => {
                                         </button>
                                     </div>
                                 )}
-
-                                {/* WRITE REVIEW BUTTON */}
-                                <div className="text-center mt-12">
-                                    <button
-                                        onClick={() => setShowForm(true)}
-                                        className="bg-khajur-primary text-white px-8 py-3 rounded-lg shadow hover:shadow-xl transition"
-                                    >
-                                        Write Review
-                                    </button>
-                                </div>
 
                                 {/* CONDITIONAL FORM */}
                                 {showForm && (
