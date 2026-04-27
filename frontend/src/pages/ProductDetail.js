@@ -284,7 +284,7 @@ const ProductDetail = () => {
 
                                     {/* LEFT BIG RATING */}
                                     <div>
-                                        <h3 className="text-3xl font-bold text-khajur-primary leading-none">
+                                        <h3 className="text-4xl font-bold text-khajur-primary leading-none items-center gap-3">
                                             {reviews.length
                                                 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
                                                 : "0.0"}
@@ -295,7 +295,7 @@ const ProductDetail = () => {
                                             <span>0 out of 5</span>
                                         </div>
 
-                                        <p className="text-gray-500 text-sm mt-2    ">
+                                        <p className="text-gray-500 text-2xl mt-2">
                                             Based on {reviews.length} reviews
                                         </p>
                                     </div>
@@ -329,22 +329,22 @@ const ProductDetail = () => {
                                 {/* REVIEW FORM */}
                                 <div className="mt-12 max-w-4xl mx-auto">
 
-                                    <h3 className="text-3xl font-semibold text-center mb-8">
+                                    <h3 className="text-3xl font-semibold text-start mb-8">
                                         Write a review
                                     </h3>
 
                                     {/* RATING + TITLE */}
-                                    <div className="grid md:grid-cols-2 gap-10 items-center mb-6">
+                                    <div className="grid md:grid-cols-2 gap-10 items-start mb-6">
 
                                         <div>
-                                            <p className="mb-4 text-2xl font-medium">Rating</p>
+                                            <p className="mb-2 text-1xl font-medium">Rating</p>
                                             <div>
                                                 {renderStars(rating, setRating)}
                                             </div>
                                         </div>
 
                                         <div>
-                                            <p className="mb-4 text-2xl font-medium">Review Title</p>
+                                            <p className="mb-2 text-1xl font-medium">Review Title</p>
                                             <input
                                                 type="text"
                                                 placeholder="Give your review a title"
@@ -357,7 +357,7 @@ const ProductDetail = () => {
 
                                     {/* TEXTAREA */}
                                     <div className="mb-6">
-                                        <p className="mb-4 text-2xl font-medium">Review content</p>
+                                        <p className="mb-2 text-1xl font-medium">Review content</p>
                                         <textarea
                                             placeholder="Start writing here..."
                                             value={comment}
@@ -369,7 +369,7 @@ const ProductDetail = () => {
                                     {/* NAME + EMAIL */}
                                     <div className="grid md:grid-cols-2 gap-6 mb-6">
                                         <div>
-                                            <p className="mb-4 text-2xl font-medium">Display Name</p>
+                                            <p className="mb-2 text-1xl font-medium">Display Name</p>
                                             <input
                                                 type="text"
                                                 placeholder="Display name"
@@ -379,7 +379,7 @@ const ProductDetail = () => {
                                             />
                                         </div>
                                         <div>
-                                            <p className="mb-4 text-2xl font-medium">Email</p>
+                                            <p className="mb-2 text-1xl font-medium">Email</p>
                                             <input
                                                 type="email"
                                                 placeholder="Your email address"
