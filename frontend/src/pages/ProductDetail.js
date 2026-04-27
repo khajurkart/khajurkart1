@@ -32,6 +32,7 @@ const ProductDetail = () => {
     const [visibleCount, setVisibleCount] = useState(5);
     const [likes, setLikes] = useState({});
     const [sortType, setSortType] = useState("latest");
+    const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
         fetchProduct();
@@ -286,6 +287,13 @@ const ProductDetail = () => {
                         </button>
                     </div>
 
+                    <button
+                        onClick={() => setShowForm(true)}
+                        className="bg-khajur-primary text-white px-6 py-3 rounded-lg"
+                    >
+                        Write Review
+                    </button>
+
                     {/* Content */}
                     <div className="text-center">
                         {activeTab === "description" && (
@@ -392,127 +400,6 @@ const ProductDetail = () => {
                                     </select>
                                 </div>
 
-                                {/* ================= REVIEWS ================= */}
-                                {/* ================= WRITE REVIEW (ULTRA LUXURY) ================= */}
-                                <div className="max-w-4xl mx-auto mt-16">
-
-                                    <div className="bg-white/90 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-xl p-10">
-
-                                        {/* HEADER */}
-                                        <div className="text-center mb-10">
-                                            <h3 className="text-3xl font-semibold text-khajur-primary tracking-wide">
-                                                Share Your Experience
-                                            </h3>
-                                            <p className="text-gray-500 mt-2 text-sm">
-                                                Your feedback helps others make better choices
-                                            </p>
-                                        </div>
-
-                                        {/* RATING */}
-                                        <div className="mb-10 text-center">
-                                            <p className="mb-3 font-medium text-lg text-khajur-primary">
-                                                Your Rating
-                                            </p>
-
-                                            <div className="flex justify-center gap-3 text-4xl">
-                                                {renderStars(rating, setRating)}
-                                            </div>
-                                        </div>
-
-                                        {/* INPUT GRID */}
-                                        <div className="grid md:grid-cols-2 gap-6 mb-6">
-
-                                            {/* NAME */}
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">
-                                                    Your Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    placeholder="John Doe"
-                                                    className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
-                                                />
-                                            </div>
-
-                                            {/* EMAIL */}
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">
-                                                    Email Address
-                                                </label>
-                                                <input
-                                                    type="email"
-                                                    placeholder="john@email.com"
-                                                    className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
-                                                />
-                                            </div>
-
-                                        </div>
-
-                                        {/* TITLE */}
-                                        <div className="mb-6">
-                                            <label className="block text-sm font-medium mb-2">
-                                                Review Title
-                                            </label>
-                                            <input
-                                                type="text"
-                                                placeholder="Amazing quality!"
-                                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
-                                            />
-                                        </div>
-
-                                        {/* COMMENT */}
-                                        <div className="mb-6">
-                                            <label className="block text-sm font-medium mb-2">
-                                                Your Review
-                                            </label>
-                                            <textarea
-                                                value={comment}
-                                                onChange={(e) => setComment(e.target.value)}
-                                                placeholder="Tell us what you loved..."
-                                                className="w-full p-4 rounded-xl h-40 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-khajur-primary outline-none transition"
-                                            />
-                                        </div>
-
-                                        {/* IMAGE UPLOAD */}
-                                        <div className="mb-8">
-                                            <label className="block text-sm font-medium mb-2">
-                                                Add Photo (optional)
-                                            </label>
-
-                                            <input
-                                                type="file"
-                                                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-khajur-primary file:text-white hover:file:bg-khajur-gold"
-                                            />
-                                        </div>
-
-                                        {/* POLICY */}
-                                        <p className="text-center text-base font-semibold text-gray-700 mb-8">
-                                            We’ll only contact you about your review if necessary.
-                                        </p>
-
-                                        {/* BUTTONS */}
-                                        <div className="flex justify-center gap-4">
-
-                                            <button
-                                                className="px-8 py-3 rounded-xl border border-khajur-primary text-khajur-primary hover:bg-khajur-primary hover:text-white transition-all duration-300"
-                                            >
-                                                Cancel
-                                            </button>
-
-                                            <button
-                                                onClick={submitReview}
-                                                className="px-10 py-3 rounded-xl bg-gradient-to-r from-khajur-primary to-khajur-gold text-white shadow-lg hover:shadow-2xl transition-all duration-300"
-                                            >
-                                                Submit Review
-                                            </button>
-
-                                        </div>
-
-                                    </div>
-                                </div>
-
                                 {/* LOAD MORE */}
                                 {visibleCount < reviews.length && (
                                     <div className="text-center mt-10">
@@ -522,6 +409,90 @@ const ProductDetail = () => {
                                         >
                                             Load More
                                         </button>
+                                    </div>
+                                )}
+
+                                {/* WRITE REVIEW BUTTON */}
+                                <div className="text-center mt-12">
+                                    <button
+                                        onClick={() => setShowForm(true)}
+                                        className="bg-khajur-primary text-white px-8 py-3 rounded-lg shadow hover:shadow-xl transition"
+                                    >
+                                        Write Review
+                                    </button>
+                                </div>
+
+                                {/* CONDITIONAL FORM */}
+                                {showForm && (
+                                    <div className="max-w-4xl mx-auto mt-16" id="review-form">
+
+                                        <div className="bg-white/90 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-xl p-10">
+
+                                            <div className="text-center mb-10">
+                                                <h3 className="text-3xl font-semibold text-khajur-primary">
+                                                    Share Your Experience
+                                                </h3>
+                                            </div>
+
+                                            {/* RATING */}
+                                            <div className="mb-10 text-center">
+                                                <div className="flex justify-center gap-3 text-4xl">
+                                                    {renderStars(rating, setRating)}
+                                                </div>
+                                            </div>
+
+                                            {/* NAME + EMAIL */}
+                                            <div className="grid md:grid-cols-2 gap-6 mb-6">
+                                                <input
+                                                    type="text"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    placeholder="Your Name"
+                                                    className="p-4 rounded-xl bg-gray-50 border"
+                                                />
+
+                                                <input
+                                                    type="email"
+                                                    placeholder="Email"
+                                                    className="p-4 rounded-xl bg-gray-50 border"
+                                                />
+                                            </div>
+
+                                            {/* TITLE */}
+                                            <input
+                                                type="text"
+                                                value={title}
+                                                onChange={(e) => setTitle(e.target.value)}
+                                                placeholder="Review Title"
+                                                className="w-full p-4 rounded-xl bg-gray-50 border mb-6"
+                                            />
+
+                                            {/* COMMENT */}
+                                            <textarea
+                                                value={comment}
+                                                onChange={(e) => setComment(e.target.value)}
+                                                placeholder="Write your review..."
+                                                className="w-full p-4 rounded-xl h-40 bg-gray-50 border mb-6"
+                                            />
+
+                                            {/* BUTTONS */}
+                                            <div className="flex justify-center gap-4">
+                                                <button
+                                                    onClick={() => setShowForm(false)}
+                                                    className="px-8 py-3 border rounded-xl"
+                                                >
+                                                    Cancel
+                                                </button>
+
+                                                <button
+                                                    onClick={submitReview}
+                                                    className="px-10 py-3 bg-khajur-primary text-white rounded-xl"
+                                                >
+                                                    Submit Review
+                                                </button>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 )}
 
