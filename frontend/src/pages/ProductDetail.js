@@ -28,6 +28,10 @@ const ProductDetail = () => {
     const queryParams = new URLSearchParams(location.search);
     const category = queryParams.get("category");
     const [title, setTitle] = useState("");
+    const [filterRating, setFilterRating] = useState(0);
+    const [visibleCount, setVisibleCount] = useState(5);
+    const [likes, setLikes] = useState({});
+    const [sortType, setSortType] = useState("latest");
 
     useEffect(() => {
         fetchProduct();
@@ -76,6 +80,17 @@ const ProductDetail = () => {
             </span>
         ));
     };
+
+    const processedReviews = [...reviews]
+        .filter(r => (filterRating ? r.rating === filterRating : true))
+        .sort((a, b) => {
+            if (sortType === "latest") {
+                return new Date(b.created_at) - new Date(a.created_at);
+            } else {
+                return b.rating - a.rating;
+            }
+        })
+        .slice(0, visibleCount);
 
     const submitReview = async () => {
         try {
@@ -296,7 +311,11 @@ const ProductDetail = () => {
                                         </h1>
 
                                         <div className="flex gap-1 mt-3 text-yellow-400 text-xl">
-                                            {[1, 2, 3, 4, 5].map(s => <span key={s}>★</span>)}
+                                            {[1, 2, 3, 4, 5].map(s => (
+                                                <span key={s}>
+                                                    {s <= Math.round(avgRating) ? "★" : "☆"}
+                                                </span>
+                                            ))}
                                         </div>
 
                                         <p className="text-gray-500 mt-2">
