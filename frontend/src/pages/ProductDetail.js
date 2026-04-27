@@ -147,6 +147,10 @@ const ProductDetail = () => {
         );
     }
 
+    const avgRating = reviews.length
+      ? reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
+      : 0;
+
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
