@@ -66,17 +66,14 @@ const ProductDetail = () => {
 
     const renderStars = (current, setFunc) => {
         return [1, 2, 3, 4, 5].map((star) => (
-            <svg
+            <span
                 key={star}
                 onClick={() => setFunc(star)}
-                xmlns="http://www.w3.org/2000/svg"
-                fill={star <= current ? "#facc15" : "#e5e7eb"}
-                viewBox="0 0 24 24"
-                stroke="none"
-                className="w-8 h-8 cursor-pointer transition transform hover:scale-110"
+                className={`cursor-pointer text-3xl ${star <= current ? "text-yellow-500" : "text-gray-300"
+                    }`}
             >
-                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l2.036 6.26a1 1 0 00.95.69h6.583c.969 0 1.371 1.24.588 1.81l-5.33 3.873a1 1 0 00-.364 1.118l2.036 6.26c.3.921-.755 1.688-1.54 1.118l-5.33-3.873a1 1 0 00-1.175 0l-5.33 3.873c-.784.57-1.838-.197-1.539-1.118l2.036-6.26a1 1 0 00-.364-1.118L.88 11.687c-.783-.57-.38-1.81.588-1.81h6.583a1 1 0 00.95-.69l2.048-6.26z" />
-            </svg>
+                ★
+            </span>
         ));
     };
 
@@ -134,11 +131,6 @@ const ProductDetail = () => {
             </div>
         );
     }
-
-    const avg =
-        reviews.length > 0
-            ? reviews.reduce((sum, r) => sum + Number(r.rating), 0) / reviews.length
-            : 0;
 
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
@@ -293,17 +285,12 @@ const ProductDetail = () => {
                                     {/* LEFT BIG RATING */}
                                     <div>
                                         <h3 className="text-6xl font-bold text-khajur-primary leading-none">
-                                            {avg.toFixed(1)}
+                                            {reviews.length
+                                                ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
+                                                : "0.0"}
                                         </h3>
 
-                                        <div className="flex items-center gap-2 mt-3">
-                                            {renderStars(Math.round(avg), () => { })}
-                                            <span className="text-blue-700 text-sm font-medium">
-                                                {avg.toFixed(2)} out of 5
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 mt-5 text-blue-700 text-sm font-medium">
+                                        <div className="flex items-center gap-2 mt-4 text-blue-700 text-sm font-medium">
                                             ★★★★☆
                                             <span>0 out of 5</span>
                                         </div>
@@ -314,7 +301,7 @@ const ProductDetail = () => {
                                     </div>
 
                                     {/* MIDDLE BARS */}
-                                    <div className="space-y-8">
+                                    <div className="space-y-3">
                                         {[5, 4, 3, 2, 1].map((star) => {
                                             const count = reviews.filter(r => r.rating === star).length;
                                             const percent = reviews.length ? (count / reviews.length) * 100 : 0;
@@ -325,7 +312,7 @@ const ProductDetail = () => {
 
                                                     <div className="flex-1 h-2 bg-gray-200 rounded">
                                                         <div
-                                                            className="h-full bg-khajur-primary rounded transition-all duration-500"
+                                                            className="h-full bg-khajur-primary rounded"
                                                             style={{ width: `${percent}%` }}
                                                         />
                                                     </div>
@@ -360,7 +347,7 @@ const ProductDetail = () => {
                                     <div className="grid md:grid-cols-2 gap-10 items-center mb-6">
 
                                         <div>
-                                            <p className="mb-2 text-sm font-medium">Rating</p>
+                                            <p className="mb-3 text-sm font-medium">Rating</p>
                                             <div>
                                                 {renderStars(rating, setRating)}
                                             </div>
@@ -373,7 +360,7 @@ const ProductDetail = () => {
                                                 placeholder="Give your review a title"
                                                 value={title}
                                                 onChange={(e) => setTitle(e.target.value)}
-                                                className="w-full border border-gray-200 p-4 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-khajur-primary"
+                                                className="w-full border p-4 rounded bg-gray-100"
                                             />
                                         </div>
                                     </div>
@@ -396,13 +383,13 @@ const ProductDetail = () => {
                                             placeholder="Display name"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            className="w-full border border-gray-200 p-4 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-khajur-primary"
+                                            className="border p-4 rounded bg-gray-100"
                                         />
 
                                         <input
                                             type="email"
                                             placeholder="Your email address"
-                                            className="w-full border border-gray-200 p-4 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-khajur-primary"
+                                            className="border p-4 rounded bg-gray-100"
                                         />
                                     </div>
 
@@ -426,7 +413,7 @@ const ProductDetail = () => {
 
                                         <button
                                             onClick={submitReview}
-                                            className="border border-gray-300 px-6 py-3 rounded-md text-khajur-primary hover:bg-gray-100 transition"
+                                            className="bg-khajur-primary text-white px-8 py-3 rounded hover:bg-khajur-gold transition"
                                         >
                                             Submit Review
                                         </button>
