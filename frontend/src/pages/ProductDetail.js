@@ -27,6 +27,7 @@ const ProductDetail = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const category = queryParams.get("category");
+    const [title, setTitle] = useState("");
 
     useEffect(() => {
         fetchProduct();
@@ -82,12 +83,14 @@ const ProductDetail = () => {
                 id: Date.now().toString(),
                 product_id: id,
                 user_name: name,
+                title: title,
                 rating: Number(rating),
                 comment: comment,
                 created_at: new Date().toISOString()
             });
 
             setName("");
+            setTitle("");
             setRating(5);
             setComment("");
             fetchReviews();
@@ -276,8 +279,8 @@ const ProductDetail = () => {
                         {activeTab === "reviews" && (
                             <div className="max-w-6xl mx-auto">
 
-                                {/* TOP GRID */}
-                                <div className="grid md:grid-cols-2 gap-12 items-start">
+                                {/* 🔝 TOP SECTION */}
+                                <div className="grid md:grid-cols-2 gap-12">
 
                                     {/* ⭐ LEFT SIDE */}
                                     <div>
@@ -285,28 +288,32 @@ const ProductDetail = () => {
                                             Customer Reviews
                                         </h2>
 
-                                        {/* OVERALL RATING */}
-                                        <div className="flex items-center gap-4 mb-6">
-                                            <span className="text-4xl font-bold text-khajur-primary">
+                                        {/* AVERAGE */}
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="text-5xl font-bold text-khajur-primary">
                                                 {reviews.length
                                                     ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
                                                     : "0.0"}
-                                            </span>
-                                            <div className="flex text-yellow-500 text-xl">
-                                                {renderStars(
-                                                    Math.round(
-                                                        reviews.length
-                                                            ? reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
-                                                            : 0
-                                                    )
-                                                )}
                                             </div>
-                                            <span className="text-sm text-gray-500">
-                                                ({reviews.length} reviews)
-                                            </span>
+
+                                            <div>
+                                                <div className="text-yellow-500 text-lg">
+                                                    {"★".repeat(
+                                                        Math.round(
+                                                            reviews.length
+                                                                ? reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
+                                                                : 0
+                                                        )
+                                                    )}
+                                                </div>
+
+                                                <p className="text-sm text-gray-500">
+                                                    Based on {reviews.length} reviews
+                                                </p>
+                                            </div>
                                         </div>
 
-                                        {/* RATING BARS */}
+                                        {/* 📊 RATING BARS */}
                                         <div className="space-y-3">
                                             {[5, 4, 3, 2, 1].map((star) => {
                                                 const count = reviews.filter(r => r.rating === star).length;
@@ -314,7 +321,7 @@ const ProductDetail = () => {
 
                                                 return (
                                                     <div key={star} className="flex items-center gap-3">
-                                                        <span className="w-6 text-sm text-gray-600">{star}★</span>
+                                                        <span className="w-6 text-sm">{star}★</span>
 
                                                         <div className="flex-1 h-2 bg-gray-200 rounded">
                                                             <div
@@ -323,7 +330,7 @@ const ProductDetail = () => {
                                                             />
                                                         </div>
 
-                                                        <span className="w-10 text-xs text-gray-500 text-right">
+                                                        <span className="text-xs text-gray-500 w-10 text-right">
                                                             {Math.round(percent)}%
                                                         </span>
                                                     </div>
@@ -332,10 +339,10 @@ const ProductDetail = () => {
                                         </div>
                                     </div>
 
-                                    {/* ✍️ RIGHT SIDE FORM */}
-                                    <div className="bg-white border rounded-lg p-6 shadow-sm">
-                                        <h3 className="font-serif text-lg text-khajur-primary mb-4">
-                                            Write a review
+                                    {/* ✍️ RIGHT SIDE (FORM) */}
+                                    <div className="bg-white border rounded-xl p-6 shadow-sm">
+                                        <h3 className="font-serif text-xl text-khajur-primary mb-4">
+                                            Write a Review
                                         </h3>
 
                                         {/* STARS */}
@@ -343,40 +350,49 @@ const ProductDetail = () => {
                                             {renderStars(rating, setRating)}
                                         </div>
 
+                                        {/* NAME */}
                                         <input
                                             type="text"
                                             placeholder="Your name"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            className="w-full border border-gray-300 p-3 rounded mb-3 text-sm focus:outline-none focus:ring-1 focus:ring-khajur-gold"
+                                            className="w-full border p-3 mb-3 rounded-md"
                                         />
 
+                                        {/* TITLE */}
+                                        <input
+                                            type="text"
+                                            placeholder="Review title"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            className="w-full border p-3 mb-3 rounded-md"
+                                        />
+
+                                        {/* COMMENT */}
                                         <textarea
                                             placeholder="Write your review..."
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
-                                            className="w-full border border-gray-300 p-3 rounded mb-4 text-sm h-28 focus:outline-none focus:ring-1 focus:ring-khajur-gold"
+                                            className="w-full border p-3 mb-4 rounded-md h-28"
                                         />
 
                                         <button
                                             onClick={submitReview}
-                                            className="w-full bg-khajur-primary text-white py-3 rounded text-sm tracking-wide hover:bg-khajur-gold transition"
+                                            className="w-full bg-khajur-primary text-white py-3 rounded-md hover:bg-khajur-gold transition"
                                         >
                                             Submit Review
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* 🧾 REVIEWS LIST (PRO VERSION) */}
+                                {/* 🧾 REVIEWS LIST (PRO LEVEL) */}
                                 <div className="mt-12 space-y-6">
                                     {reviews.length === 0 ? (
                                         <p className="text-center text-gray-500">No reviews yet</p>
                                     ) : (
                                         reviews.map((rev, i) => (
-                                            <div
-                                                key={i}
-                                                className="flex gap-4 border-b pb-5"
-                                            >
+                                            <div key={i} className="flex gap-4 border-b pb-6">
+
                                                 {/* 👤 AVATAR */}
                                                 <div className="w-10 h-10 rounded-full bg-khajur-cream flex items-center justify-center font-semibold text-khajur-primary">
                                                     {rev.user_name?.charAt(0).toUpperCase()}
@@ -385,20 +401,18 @@ const ProductDetail = () => {
                                                 {/* 📄 CONTENT */}
                                                 <div className="flex-1">
 
-                                                    {/* NAME + BADGE + DATE */}
-                                                    <div className="flex items-center justify-between mb-1">
+                                                    {/* NAME + VERIFIED + DATE */}
+                                                    <div className="flex justify-between items-center mb-1">
                                                         <div className="flex items-center gap-2">
                                                             <h4 className="font-semibold text-khajur-primary text-sm">
                                                                 {rev.user_name}
                                                             </h4>
 
-                                                            {/* ✅ VERIFIED BADGE */}
                                                             <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">
-                                                                Verified
+                                                                Verified Buyer
                                                             </span>
                                                         </div>
 
-                                                        {/* 📅 DATE */}
                                                         <span className="text-xs text-gray-400">
                                                             {new Date(rev.created_at).toLocaleDateString()}
                                                         </span>
@@ -409,6 +423,11 @@ const ProductDetail = () => {
                                                         {"★".repeat(rev.rating)}
                                                     </div>
 
+                                                    {/* 🏷 TITLE */}
+                                                    <h5 className="font-medium text-khajur-primary mb-1">
+                                                        {rev.title || "Good Product"}
+                                                    </h5>
+
                                                     {/* 💬 COMMENT */}
                                                     <p className="text-sm text-gray-600 leading-relaxed">
                                                         {rev.comment}
@@ -418,7 +437,6 @@ const ProductDetail = () => {
                                         ))
                                     )}
                                 </div>
-
                             </div>
                         )}
                     </div>
