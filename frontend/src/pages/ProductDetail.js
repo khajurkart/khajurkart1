@@ -279,163 +279,146 @@ const ProductDetail = () => {
                         {activeTab === "reviews" && (
                             <div className="max-w-6xl mx-auto">
 
-                                {/* 🔝 TOP SECTION */}
-                                <div className="grid md:grid-cols-2 gap-12">
+                                {/* 🔝 HEADER */}
+                                <h2 className="text-center text-2xl font-serif text-khajur-primary mb-10">
+                                    Customer Reviews
+                                </h2>
 
-                                    {/* ⭐ LEFT SIDE */}
-                                    <div>
-                                        <h2 className="text-2xl font-serif text-khajur-primary mb-6">
-                                            Customer Reviews
-                                        </h2>
+                                {/* 🔥 TOP GRID */}
+                                <div className="grid md:grid-cols-3 gap-10 items-center">
 
-                                        {/* AVERAGE */}
-                                        <div className="flex items-center gap-4 mb-8">
-                                            <div className="text-5xl font-bold text-khajur-primary">
-                                                {reviews.length
-                                                    ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
-                                                    : "0.0"}
-                                            </div>
-
-                                            <div>
-                                                <div className="text-yellow-500 text-lg">
-                                                    {"★".repeat(
-                                                        Math.round(
-                                                            reviews.length
-                                                                ? reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
-                                                                : 0
-                                                        )
-                                                    )}
-                                                </div>
-
-                                                <p className="text-sm text-gray-500">
-                                                    Based on {reviews.length} reviews
-                                                </p>
-                                            </div>
+                                    {/* ⭐ LEFT (AVERAGE) */}
+                                    <div className="text-center md:text-left">
+                                        <div className="text-5xl font-bold text-khajur-primary">
+                                            {reviews.length
+                                                ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(2)
+                                                : "0.0"}
                                         </div>
 
-                                        {/* 📊 RATING BARS */}
-                                        <div className="space-y-3">
-                                            {[5, 4, 3, 2, 1].map((star) => {
-                                                const count = reviews.filter(r => r.rating === star).length;
-                                                const percent = reviews.length ? (count / reviews.length) * 100 : 0;
-
-                                                return (
-                                                    <div key={star} className="flex items-center gap-3">
-                                                        <span className="w-6 text-sm">{star}★</span>
-
-                                                        <div className="flex-1 h-2 bg-gray-200 rounded">
-                                                            <div
-                                                                className="h-2 bg-khajur-gold rounded"
-                                                                style={{ width: `${percent}%` }}
-                                                            />
-                                                        </div>
-
-                                                        <span className="text-xs text-gray-500 w-10 text-right">
-                                                            {Math.round(percent)}%
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
+                                        <div className="text-blue-700 mt-2 text-sm">
+                                            ★★★★☆ {reviews.length ? "4.29 out of 5" : "0 out of 5"}
                                         </div>
+
+                                        <p className="text-gray-500 text-sm mt-1">
+                                            Based on {reviews.length} reviews
+                                        </p>
                                     </div>
 
-                                    {/* ✍️ RIGHT SIDE (FORM) */}
-                                    <div className="bg-white border rounded-xl p-6 shadow-sm">
-                                        <h3 className="font-serif text-xl text-khajur-primary mb-4">
-                                            Write a Review
-                                        </h3>
+                                    {/* 📊 CENTER (BARS) */}
+                                    <div className="space-y-3">
+                                        {[5, 4, 3, 2, 1].map((star) => {
+                                            const count = reviews.filter(r => r.rating === star).length;
+                                            const percent = reviews.length ? (count / reviews.length) * 100 : 0;
 
-                                        {/* STARS */}
-                                        <div className="mb-4 flex gap-1">
-                                            {renderStars(rating, setRating)}
-                                        </div>
+                                            return (
+                                                <div key={star} className="flex items-center gap-3">
+                                                    <span className="text-sm w-8 text-khajur-primary">
+                                                        {star}★
+                                                    </span>
 
-                                        {/* NAME */}
-                                        <input
-                                            type="text"
-                                            placeholder="Your name"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            className="w-full border p-3 mb-3 rounded-md"
-                                        />
+                                                    <div className="flex-1 h-2 bg-gray-200 rounded">
+                                                        <div
+                                                            className="h-2 bg-khajur-primary rounded"
+                                                            style={{ width: `${percent}%` }}
+                                                        />
+                                                    </div>
 
-                                        {/* TITLE */}
-                                        <input
-                                            type="text"
-                                            placeholder="Review title"
-                                            value={title}
-                                            onChange={(e) => setTitle(e.target.value)}
-                                            className="w-full border p-3 mb-3 rounded-md"
-                                        />
+                                                    <span className="text-xs text-gray-500 w-8 text-right">
+                                                        {Math.round(percent)}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
 
-                                        {/* COMMENT */}
-                                        <textarea
-                                            placeholder="Write your review..."
-                                            value={comment}
-                                            onChange={(e) => setComment(e.target.value)}
-                                            className="w-full border p-3 mb-4 rounded-md h-28"
-                                        />
-
-                                        <button
-                                            onClick={submitReview}
-                                            className="w-full bg-khajur-primary text-white py-3 rounded-md hover:bg-khajur-gold transition"
-                                        >
-                                            Submit Review
+                                    {/* ❌ RIGHT BUTTON */}
+                                    <div className="flex justify-center md:justify-end">
+                                        <button className="bg-khajur-primary text-white px-6 py-3 rounded hover:bg-khajur-gold transition">
+                                            Cancel review
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* 🧾 REVIEWS LIST (PRO LEVEL) */}
-                                <div className="mt-12 space-y-6">
-                                    {reviews.length === 0 ? (
-                                        <p className="text-center text-gray-500">No reviews yet</p>
-                                    ) : (
-                                        reviews.map((rev, i) => (
-                                            <div key={i} className="flex gap-4 border-b pb-6">
+                                {/* 🔽 DIVIDER */}
+                                <hr className="my-10 border-gray-200" />
 
-                                                {/* 👤 AVATAR */}
-                                                <div className="w-10 h-10 rounded-full bg-khajur-cream flex items-center justify-center font-semibold text-khajur-primary">
-                                                    {rev.user_name?.charAt(0).toUpperCase()}
-                                                </div>
+                                {/* ✍️ WRITE REVIEW SECTION */}
+                                <div className="max-w-4xl mx-auto">
 
-                                                {/* 📄 CONTENT */}
-                                                <div className="flex-1">
+                                    <h3 className="text-xl font-semibold mb-6">
+                                        Write a review
+                                    </h3>
 
-                                                    {/* NAME + VERIFIED + DATE */}
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <h4 className="font-semibold text-khajur-primary text-sm">
-                                                                {rev.user_name}
-                                                            </h4>
+                                    <div className="grid md:grid-cols-2 gap-6">
 
-                                                            <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">
-                                                                Verified Buyer
-                                                            </span>
-                                                        </div>
-
-                                                        <span className="text-xs text-gray-400">
-                                                            {new Date(rev.created_at).toLocaleDateString()}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* ⭐ RATING */}
-                                                    <div className="text-yellow-500 text-sm mb-1">
-                                                        {"★".repeat(rev.rating)}
-                                                    </div>
-
-                                                    {/* 🏷 TITLE */}
-                                                    <h5 className="font-medium text-khajur-primary mb-1">
-                                                        {rev.title || "Good Product"}
-                                                    </h5>
-
-                                                    {/* 💬 COMMENT */}
-                                                    <p className="text-sm text-gray-600 leading-relaxed">
-                                                        {rev.comment}
-                                                    </p>
-                                                </div>
+                                        {/* ⭐ RATING */}
+                                        <div>
+                                            <p className="mb-2 text-sm">Rating</p>
+                                            <div className="text-2xl text-blue-700">
+                                                {renderStars(rating, setRating)}
                                             </div>
-                                        ))
-                                    )}
+                                        </div>
+
+                                        {/* TITLE */}
+                                        <div>
+                                            <p className="mb-2 text-sm">Review Title</p>
+                                            <input
+                                                type="text"
+                                                placeholder="Give your review a title"
+                                                value={title}
+                                                onChange={(e) => setTitle(e.target.value)}
+                                                className="w-full border p-3 rounded"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* COMMENT */}
+                                    <div className="mt-6">
+                                        <p className="mb-2 text-sm">Review content</p>
+                                        <textarea
+                                            placeholder="Start writing here..."
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            className="w-full border p-4 rounded h-32"
+                                        />
+                                    </div>
+
+                                    {/* NAME + EMAIL */}
+                                    <div className="grid md:grid-cols-2 gap-6 mt-6">
+                                        <input
+                                            type="text"
+                                            placeholder="Display name"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            className="border p-3 rounded"
+                                        />
+
+                                        <input
+                                            type="email"
+                                            placeholder="Your email address"
+                                            className="border p-3 rounded"
+                                        />
+                                    </div>
+
+                                    {/* TEXT */}
+                                    <p className="text-xs text-gray-500 mt-6 leading-relaxed">
+                                        How we use your data: We'll only contact you about the review you left,
+                                        and only if necessary.
+                                    </p>
+
+                                    {/* BUTTONS */}
+                                    <div className="flex gap-4 mt-6">
+                                        <button className="border px-6 py-3 rounded text-khajur-primary">
+                                            Cancel review
+                                        </button>
+
+                                        <button
+                                            onClick={submitReview}
+                                            className="bg-khajur-primary text-white px-6 py-3 rounded hover:bg-khajur-gold transition"
+                                        >
+                                            Submit Review
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
