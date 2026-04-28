@@ -55,7 +55,6 @@ const Navbar = () => {
               {user && (
                 <Link to="/my-orders" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors ml-12" data-testid="nav-orders">My Orders</Link>
               )}
-              <Link to="/faq">FAQ</Link>
             </div>
 
             {/* Icons */}
