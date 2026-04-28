@@ -30,6 +30,7 @@ import AdminOrders from './pages/AdminOrders';
 import AdminReturns from './pages/AdminReturns';
 import AdminReviews from "./pages/AdminReviews";
 import Returns from './pages/Returns';
+import FAQ from "./pages/FAQ";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
                                 <Route path="/admin/returns" element={<AdminReturns />} />
                                 <Route path="/admin/reviews" element={<AdminReviews />} />
                                 <Route path="/returns" element={<Returns />} />
+                                <Route path="/faq" element={<FAQ />} />
                             </Routes>
                         </main>
                         <Footer />
