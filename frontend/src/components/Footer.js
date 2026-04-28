@@ -11,7 +11,7 @@ const Footer = () => {
                     <div>
                         <Link to="/" className="flex items-center space-x-0.5 mb-4">
                             <img
-                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1776683032/LOGO_9_lbvt9m.png"
+                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
                                 alt="KhajurKart Logo"
                                 className="h-16 w-auto -mr-1"
                             />
