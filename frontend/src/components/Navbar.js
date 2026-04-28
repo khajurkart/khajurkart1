@@ -116,6 +116,7 @@ const Navbar = () => {
                 <Link to="/contact" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">Contact Us</Link>
                 {user && (
                   <Link to="/my-orders" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">My Orders</Link>
+                <Link to="/faq">FAQ</Link>
                 )}
                 <form onSubmit={handleSearch} className="pt-2">
                   <input
