@@ -13,7 +13,7 @@ const Footer = () => {
                             <img
                                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
                                 alt="KhajurKart Logo"
-                                className="h-12 w-auto -mr-1"
+                                className="h-13 w-auto -mr-1"
                             />
                             <span className="font-serif text-2xl font-bold text-khajur-gold">
                                 KhajurKart
