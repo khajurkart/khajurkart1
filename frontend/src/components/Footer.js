@@ -9,7 +9,7 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     {/* Brand */}
                     <div>
-                        <Link to="/" className="flex items-center space-x-2.5 mb-4">
+                        <Link to="/" className="flex items-center space-x-2 mb-4">
                             <img
                                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
                                 alt="KhajurKart Logo"
