@@ -651,10 +651,6 @@ def generate_invoice(order):
     c.rect(0, height - 160, width, 160, fill=1)
     # 🖼️ LOGO
     try:
-        c.drawImage(
-            "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777635486/Logo_1_xr95c3.png",
-            40, height - 110, width=60, height=60
-        )
     except:
         pass
    
