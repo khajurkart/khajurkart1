@@ -649,10 +649,6 @@ def generate_invoice(order):
     
     c.setFillColor(header_color)
     c.rect(0, height - 160, width, 160, fill=1)
-    # 🖼️ LOGO
-    try:
-    except:
-        pass
    
     # 📄 INVOICE (moved below logo properly)
     
