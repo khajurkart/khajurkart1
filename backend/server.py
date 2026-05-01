@@ -653,20 +653,20 @@ def generate_invoice(order):
     # 📄 INVOICE (moved below logo properly)
     
     c.setFillColor(colors.white)
-    c.setFont("courier new-Bold", 24)
+    c.setFont("courier-Bold", 24)
     c.drawString(40, height - 130, "INVOICE")
     
     # 🏢 COMPANY DETAILS (RIGHT)
     
-    c.setFont("courier new-Bold", 16)
+    c.setFont("courier-Bold", 16)
     c.drawRightString(width - 40, height - 50, "KhajurKart")
-    c.setFont("courier new", 10)
+    c.setFont("courier", 10)
     c.drawRightString(width - 40, height - 70, "Number: 7981002137")
     c.drawRightString(width - 40, height - 85, "Email: khajurkart@gmail.com")
     
     # ✅ FULL ADDRESS (multi-line)
     
-    c.setFont("courier new", 9)
+    c.setFont("courier", 9)
     c.drawRightString(width - 40, height - 100, "10-3-313/a, AR Raheem Residency")
     c.drawRightString(width - 40, height - 112, "Beside Govt IASE College")
     c.drawRightString(width - 40, height - 124, "Potti Sriramulu Nagar")
@@ -681,15 +681,15 @@ def generate_invoice(order):
     # ================= BILL TO =================
     
     c.setFillColor(colors.black)
-    c.setFont("courier new-Bold", 11)
+    c.setFont("courier-Bold", 11)
     c.drawString(40, height - 190, "Bill To:")
-    c.setFont("courier new", 10)
+    c.setFont("courier", 10)
     c.drawString(40, height - 205, order['customer_name'])
     c.drawString(40, height - 220, order['customer_email'])
     
     # ================= ORDER INFO =================
     
-    c.setFont("courier new-Bold", 11)
+    c.setFont("courier-Bold", 11)
     c.drawRightString(width - 40, height - 190, f"Order ID: {order['id']}")
     c.drawRightString(width - 40, height - 205, f"Date: {order['created_at'][:10]}")
     
@@ -703,7 +703,7 @@ def generate_invoice(order):
     c.setFillColor(header_color)
     c.rect(40, y, width - 80, 25, fill=1)
     c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont("courier-Bold", 10)
     c.drawString(45, y + 8, "S.No")
     c.drawString(80, y + 8, "Item Name")
     c.drawString(230, y + 8, "Qty")
@@ -715,7 +715,7 @@ def generate_invoice(order):
     
     y -= 30
     c.setFillColor(colors.black)
-    c.setFont("courier new", 10)
+    c.setFont("courier", 10)
     for i, item in enumerate(order["items"], start=1):
         discount = item.get("discount", 0)
         # ✅ ADD HERE
@@ -732,7 +732,7 @@ def generate_invoice(order):
     # ================= TOTAL =================
     
     c.line(40, y, width - 40, y)
-    c.setFont("courier new-Bold", 12)
+    c.setFont("courier-Bold", 12)
     c.drawRightString(width - 40, y - 20, f"Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
