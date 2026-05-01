@@ -652,7 +652,7 @@ def generate_invoice(order):
     # 🖼️ LOGO
     try:
         c.drawImage(
-            "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png",
+            "https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777635486/Logo_1_xr95c3.png",
             40, height - 110, width=60, height=60
         )
     except:
