@@ -653,7 +653,7 @@ def generate_invoice(order):
     # 📄 INVOICE (moved below logo properly)
     
     c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 14)
+    c.setFont("Helvetica-Bold", 18)
     c.drawString(40, height - 130, "INVOICE")
     
     # 🏢 COMPANY DETAILS (RIGHT)
