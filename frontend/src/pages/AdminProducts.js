@@ -299,7 +299,7 @@ const AdminProducts = () => {
                     <label className="block text-sm font-medium text-khajur-dark mb-2">Description *</label>
                     <textarea
                       required
-                      rows={3}
+                      rows={12}
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       className="w-full bg-transparent border border-khajur-primary/20 focus:border-khajur-primary px-4 py-3 focus:ring-0 outline-none transition-colors rounded-sm"
