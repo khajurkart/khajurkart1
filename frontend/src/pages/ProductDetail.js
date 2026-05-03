@@ -290,9 +290,10 @@ const ProductDetail = () => {
                     {/* Content */}
                     <div className="text-center">
                         {activeTab === "description" && (
-                            <p className="text-khajur-dark/80 leading-relaxed">
-                                {product.description}
-                            </p>
+                            <div
+                                className="text-left text-khajur-dark/80 leading-relaxed space-y-4"
+                                dangerouslySetInnerHTML={{ __html: product.description }}
+                            />
                         )}
 
                         {/* CUSTOMER REVIEWS */}
