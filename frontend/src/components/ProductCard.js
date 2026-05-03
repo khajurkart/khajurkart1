@@ -24,7 +24,8 @@ const ProductCard = ({ product }) => {
             {product.name}
           </h3>
         </Link>
-        <p className="text-sm text-khajur-dark/60 mb-3 line-clamp-2">{product.description}</p>
+        <p className="text-sm text-khajur-dark/60 mb-3 line-clamp-2"><p 
+            dangerouslySetInnerHTML={{__html: product.description}}/></p>
         <p className="text-xs text-khajur-muted mb-4">{product.weight}</p>
         
         <div className="flex items-center justify-between">
