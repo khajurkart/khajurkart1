@@ -117,8 +117,15 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        const selected = product.sizes?.find(s => s.weight === selectedSize);
-        addToCart(product.id, quantity, selectedSize, selected?.price);
+        const selected = product.sizes?.find(
+            s => s.weight === selectedSize || `${s.weight}g` === selectedSize
+        );
+        addToCart(
+            product.id,
+            quantity,
+            selectedSize,
+            selected?.price || product.price
+        );
     };
 
     const handleBuyNow = () => {
@@ -221,7 +228,7 @@ const ProductDetail = () => {
                                         onClick={() => setSelectedSize(size)}
                                         className={`px-5 py-2 border rounded-sm text-sm font-medium transition-all
                                             ${selectedSize === size
-                                                ? "bg-khajur-primary text-white border-khajur-primary"
+                                                ? "bg-khajur-primary text-white border-khajur-primary scale-105 shadow-md"
                                                 : "bg-white text-khajur-primary border-gray-300 hover:border-khajur-gold"
                                             }`}
                                     >
