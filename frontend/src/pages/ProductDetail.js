@@ -117,7 +117,7 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        addToCart(product.id, quantity, selectedSize);
+        addToCart(product.id, quantity, selectedSize, product.sizes?.[selectedSize]);
     };
 
     const handleBuyNow = () => {
@@ -185,7 +185,7 @@ const ProductDetail = () => {
 
                         <div className="mb-6">
                             <span className="text-3xl text-khajur-gold font-bold">
-                                ₹{product.price}
+                                ₹{product.sizes?.[selectedSize] || product.price}
                             </span>
                             {product.original_price && (
                                 <div className="flex items-center gap-3 mt-2">
