@@ -25,7 +25,6 @@ const AdminProducts = () => {
         original_price: '',
         category: '',
         image: '',
-
         stock: '',
         featured: false,
         delivery_charge: ''
