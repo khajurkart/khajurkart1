@@ -129,11 +129,10 @@ class Product(BaseModel):
     id: str
     name: str
     description: str
-    price: float
+    sizes: List[dict]
     original_price: Optional[float] = None
     category: str
     image: str
-    weight: str
     stock: int
     featured: bool = False
     delivery_charge: float = 0.0
@@ -168,6 +167,7 @@ class ProductUpdate(BaseModel):
 class CartItem(BaseModel):
     product_id: str
     quantity: int
+    size: str
 
 
 class CartItemResponse(BaseModel):
@@ -925,14 +925,21 @@ async def add_to_cart(
     # Check if item already in cart
     item_exists = False
     for item in cart["items"]:
-        if item["product_id"] == cart_item.product_id:
+        if (
+            item["product_id"] == cart_item.product_id
+            and item["size"] == cart_item.size
+        ):
             item["quantity"] += cart_item.quantity
             item_exists = True
             break
 
     if not item_exists:
         cart["items"].append(
-            {"product_id": cart_item.product_id, "quantity": cart_item.quantity}
+            {
+                "product_id": cart_item.product_id,
+                "quantity": cart_item.quantity,
+                "size": cart_item.size,
+            }
         )
 
     # Update cart
@@ -1019,7 +1026,14 @@ async def create_order(
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
         if not product:
             continue
-        price = product.get("price", 0)
+        selected_size = item.get("size")
+        size_data = next(
+            (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
+        )
+        if not size_data:
+            raise HTTPException(400, "Invalid size selected")
+        price = size_data["price"]
+
         original_price = product.get("original_price", price)
         # ✅ CALCULATE DISCOUNT %
         if original_price > price:
@@ -1260,14 +1274,13 @@ async def create_product(
 
 
 @api_router.put("/admin/products/{product_id}", response_model=Product)
-async def update_product(product_id: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)):
+async def update_product(
+    product_id: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)
+):
 
     update_data = product_data.model_dump(exclude_none=True)
 
-    result = await db.products.update_one(
-        {"id": product_id},
-        {"$set": update_data}
-    )
+    result = await db.products.update_one({"id": product_id}, {"$set": update_data})
 
     print("UPDATED COUNT:", result.modified_count)  # 👈 DEBUG
 
@@ -1276,6 +1289,7 @@ async def update_product(product_id: str, product_data: ProductUpdate, admin: di
 
     updated_product = await db.products.find_one({"id": product_id}, {"_id": 0})
     return Product(**updated_product)
+
 
 @api_router.delete("/admin/products/{product_id}")
 async def delete_product(product_id: str, admin: dict = Depends(get_admin_user)):
