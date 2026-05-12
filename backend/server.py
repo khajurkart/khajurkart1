@@ -1266,21 +1266,18 @@ async def create_product(
     product_data: ProductCreate, admin: dict = Depends(get_admin_user)
 ):
     try:
-        print("DATA RECEIVED:", product_data.model_dump())
-
         product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
         product_doc = {"id": product_id, **product_data.model_dump()}
 
-        print("SAVING:", product_doc)
-
         result = await db.products.insert_one(product_doc)
 
-        print("INSERT RESULT:", result.inserted_id)
+        # ✅ FIX HERE
+        product_doc["_id"] = str(result.inserted_id)
 
         return product_doc
 
     except Exception as e:
-        print("❌ ERROR:", str(e))  # 🔥 THIS WILL SHOW REAL PROBLEM
+        print("❌ ERROR:", str(e))
         raise HTTPException(500, str(e))
 
 
