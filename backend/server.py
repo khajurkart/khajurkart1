@@ -129,18 +129,18 @@ class Product(BaseModel):
     id: str
     name: str
     description: str
-    sizes: Optional[List[dict]] = []  # ✅ new    original_price: Optional[float] = None
     category: str
     image: str
     stock: int
     featured: bool = False
     delivery_charge: float = 0.0
 
+    sizes: Optional[List[dict]] = []  # ✅ new    original_price: Optional[float] = None
+
 
 class ProductCreate(BaseModel):
     name: str
     description: str
-    sizes: Optional[List[dict]] = []
     original_price: Optional[float] = None
     category: str
     image: str
@@ -148,17 +148,20 @@ class ProductCreate(BaseModel):
     featured: bool = False
     delivery_charge: float = 0.0
 
+    sizes: Optional[List[dict]] = []
+
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    izes: Optional[List[dict]] = None
     original_price: Optional[float] = None
     category: Optional[str] = None
     image: Optional[str] = None
     stock: Optional[int] = None
     featured: Optional[bool] = None
     delivery_charge: Optional[float] = None
+
+    sizes: Optional[List[dict]] = None
 
 
 class CartItem(BaseModel):
@@ -1258,16 +1261,19 @@ async def check_admin(admin: dict = Depends(get_admin_user)):
     return {"is_admin": True, "email": admin["email"]}
 
 
-@api_router.post("/admin/products", response_model=Product)
+@api_router.post("/admin/products")
 async def create_product(
     product_data: ProductCreate, admin: dict = Depends(get_admin_user)
 ):
-    product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
+    print("DATA RECEIVED:", product_data.model_dump())  # 👈 ADD THIS
 
+    product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
     product_doc = {"id": product_id, **product_data.model_dump()}
 
+    print("SAVING:", product_doc)  # 👈 ADD THIS
+
     await db.products.insert_one(product_doc)
-    return Product(**product_doc)
+    return product_doc
 
 
 @api_router.put("/admin/products/{product_id}", response_model=Product)
