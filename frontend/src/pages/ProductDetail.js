@@ -124,7 +124,7 @@ const ProductDetail = () => {
             product.id,
             quantity,
             selectedSize,
-            selected?.price || product.price
+            selected?.price || product.sizes?.[0]?.price || 0
         );
     };
 
@@ -161,6 +161,11 @@ const ProductDetail = () => {
         ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
         : "0.0";
 
+    const currentPrice =
+        product.sizes?.find(s => s.weight === selectedSize)?.price ||
+        product.sizes?.[0]?.price ||
+        0;
+
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -193,7 +198,7 @@ const ProductDetail = () => {
 
                         <div className="mb-6">
                             <span className="text-3xl text-khajur-gold font-bold">
-                                ₹{product.sizes?.find(s => s.weight === selectedSize)?.price || product.price}
+                                ₹{product.sizes?.find(s => s.weight === selectedSize)?.price || product.sizes?.[0]?.price || 0}
                             </span>
                             {product.original_price && (
                                 <div className="flex items-center gap-3 mt-2">
@@ -202,7 +207,7 @@ const ProductDetail = () => {
                                     </span>
                                     <span className="text-green-600 font-bold">
                                         {Math.round(
-                                            ((product.original_price - product.price) / product.original_price) * 100
+                                            (((product.original_price - currentPrice)) / product.original_price) * 100
                                         )}% OFF
                                     </span>
                                 </div>
