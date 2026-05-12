@@ -129,8 +129,8 @@ class Product(BaseModel):
     id: str
     name: str
     description: str
-    sizes: List[dict]
-    original_price: Optional[float] = None
+    price: Optional[float] = None  # ✅ make optional
+    sizes: Optional[List[dict]] = []  # ✅ new    original_price: Optional[float] = None
     category: str
     image: str
     stock: int
