@@ -1265,15 +1265,23 @@ async def check_admin(admin: dict = Depends(get_admin_user)):
 async def create_product(
     product_data: ProductCreate, admin: dict = Depends(get_admin_user)
 ):
-    print("DATA RECEIVED:", product_data.model_dump())  # 👈 ADD THIS
+    try:
+        print("DATA RECEIVED:", product_data.model_dump())
 
-    product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
-    product_doc = {"id": product_id, **product_data.model_dump()}
+        product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
+        product_doc = {"id": product_id, **product_data.model_dump()}
 
-    print("SAVING:", product_doc)  # 👈 ADD THIS
+        print("SAVING:", product_doc)
 
-    await db.products.insert_one(product_doc)
-    return product_doc
+        result = await db.products.insert_one(product_doc)
+
+        print("INSERT RESULT:", result.inserted_id)
+
+        return product_doc
+
+    except Exception as e:
+        print("❌ ERROR:", str(e))  # 🔥 THIS WILL SHOW REAL PROBLEM
+        raise HTTPException(500, str(e))
 
 
 @api_router.put("/admin/products/{product_id}", response_model=Product)
