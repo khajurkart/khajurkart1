@@ -33,7 +33,7 @@ const ProductDetail = () => {
     const [likes, setLikes] = useState({});
     const [sortType, setSortType] = useState("latest");
     const [showForm, setShowForm] = useState(false);
-    const [selectedSize, setSelectedSize] = useState("250g");
+    const [selectedWeight, setSelectedWeight] = useState("250g");
 
     useEffect(() => {
         fetchProduct();
@@ -117,11 +117,11 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        addToCart(product.id, quantity, selectedSize, product.sizes?.[selectedSize]);
+        addToCart(product.id, quantity, selectedWeight, product.sizes?.[selectedWeight]);
     };
 
     const handleBuyNow = () => {
-        addToCart(product.id, quantity, selectedSize);
+        addToCart(product.id, quantity, selectedWeight);
         setTimeout(() => {
             window.location.href = '/cart';
         }, 500);
@@ -185,7 +185,7 @@ const ProductDetail = () => {
 
                         <div className="mb-6">
                             <span className="text-3xl text-khajur-gold font-bold">
-                                ₹{product.sizes?.[selectedSize] || product.price}
+                                ₹{product.weight?.[selectedWeight] || product.price}
                             </span>
                             {product.original_price && (
                                 <div className="flex items-center gap-3 mt-2">
@@ -201,34 +201,25 @@ const ProductDetail = () => {
                             )}
                         </div>
 
-                        <p className="text-sm text-khajur-muted mb-2">
-                            Weight: {product.weight}
-                        </p>
-
-                        <p className="text-sm text-khajur-muted mb-8">
-                            {product.stock > 0
-                                ? `In Stock (${product.stock} available)`
-                                : "Out of Stock"}
-                        </p>
 
                         {/* SIZE SELECTOR*/}
                         <div className="mb-6">
                             <label className="block font-serif text-lg font-medium text-khajur-primary mb-3">
-                                Size
+                                Weight
                             </label>
 
                             <div className="flex gap-3">
-                                {["250g", "500g", "1kg"].map((size) => (
+                                {["250g", "500g", "1kg"].map((weight) => (
                                     <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
+                                        key={weight}
+                                        onClick={() => setSelectedSize(weight)}
                                         className={`px-5 py-2 border rounded-sm text-sm font-medium transition-all
-                                            ${selectedSize === size
+                                            ${selectedWeight === weight
                                                 ? "bg-khajur-primary text-white border-khajur-primary"
                                                 : "bg-white text-khajur-primary border-gray-300 hover:border-khajur-gold"
                                             }`}
                                     >
-                                        {size}
+                                        {weight}
                                     </button>
                                 ))}
                             </div>
