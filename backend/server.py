@@ -129,7 +129,6 @@ class Product(BaseModel):
     id: str
     name: str
     description: str
-    price: Optional[float] = None  # ✅ make optional
     sizes: Optional[List[dict]] = []  # ✅ new    original_price: Optional[float] = None
     category: str
     image: str
@@ -141,11 +140,10 @@ class Product(BaseModel):
 class ProductCreate(BaseModel):
     name: str
     description: str
-    price: float
+    sizes: Optional[List[dict]] = []
     original_price: Optional[float] = None
     category: str
     image: str
-    weight: str
     stock: int
     featured: bool = False
     delivery_charge: float = 0.0
@@ -154,11 +152,10 @@ class ProductCreate(BaseModel):
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    price: Optional[float] = None
+    izes: Optional[List[dict]] = None
     original_price: Optional[float] = None
     category: Optional[str] = None
     image: Optional[str] = None
-    weight: Optional[str] = None
     stock: Optional[int] = None
     featured: Optional[bool] = None
     delivery_charge: Optional[float] = None
