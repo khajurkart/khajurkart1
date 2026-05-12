@@ -25,6 +25,7 @@ const AdminProducts = () => {
         original_price: '',
         category: '',
         image: '',
+
         stock: '',
         featured: false,
         delivery_charge: ''
@@ -55,10 +56,9 @@ const AdminProducts = () => {
         setFormData({
             name: '',
             description: '',
-            price: '',
+            sizes: [{ weight: "", price: "" }],
             category: '',
             image: '',
-            weight: '',
             stock: '',
             featured: false,
             delivery_charge: ''
@@ -83,6 +83,12 @@ const AdminProducts = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (formData.sizes.some(s => !s.weight || !s.price)) {
+            toast.error("Please fill all size and price fields");
+            return;
+        }
+
         try {
             const productData = {
                 ...formData,
@@ -309,18 +315,6 @@ const AdminProducts = () => {
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                        <div>
-                                            <label className="block text-sm font-medium text-khajur-dark mb-2">Price (₹) *</label>
-                                            <input
-                                                type="number"
-                                                required
-                                                step="0.01"
-                                                value={formData.price}
-                                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                                className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
-                                                data-testid="product-price-input"
-                                            />
-                                        </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-khajur-dark mb-2">Original Price (₹)</label>
