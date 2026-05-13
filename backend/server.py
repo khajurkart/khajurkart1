@@ -853,17 +853,33 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
         products = await db.products.find(query, {"_id": 0}).to_list(1000)
         print("PRODUCTS:", products)  # 👈 DEBUG
         for p in products:
-            if p.get("sizes"):
-                selected_size = p["sizes"][0]   # default 250g
-                price = selected_size["price"]
+            sizes = p.get("sizes") or []
+
+            if len(sizes) > 0:
+                selected_size = sizes[0]
+
+                price = selected_size.get("price", 0)
                 original_price = p.get("original_price") or price
 
-                # ✅ SET PRICE
                 p["price"] = price
 
-                # ✅ CALCULATE DISCOUNT
                 if original_price > price:
-                    p["discount"] = round(((original_price - price) / original_price) * 100)
+                    p["discount"] = round(
+                        ((original_price - price) / original_price) * 100
+                    )
+                else:
+                    p["discount"] = 0
+            else:
+                # 👇 fallback if no sizes
+                price = p.get("price", 0)
+                original_price = p.get("original_price") or price
+
+                p["price"] = price
+
+                if original_price > price:
+                    p["discount"] = round(
+                        ((original_price - price) / original_price) * 100
+                    )
                 else:
                     p["discount"] = 0
 
