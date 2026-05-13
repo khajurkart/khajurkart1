@@ -980,7 +980,7 @@ async def add_to_cart(
     for item in cart["items"]:
         if (
             item["product_id"] == cart_item.product_id
-            and item["size"] == cart_item.size   # ✅ FIXED
+            and item["size"] == selectedSize    # ✅ FIXED
         ):
             item["quantity"] += cart_item.quantity
             item_exists = True
