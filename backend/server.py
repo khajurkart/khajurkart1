@@ -18,6 +18,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from fastapi.responses import FileResponse
 from email.mime.text import MIMEText
+from bson import ObjectId
 import random
 import smtplib
 import requests
@@ -128,6 +129,7 @@ class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
     name: str
+    price: float
     description: str
     category: str
     image: str
@@ -135,7 +137,7 @@ class Product(BaseModel):
     featured: bool = False
     delivery_charge: float = 0.0
 
-    sizes: Optional[List[dict]] = []  # ✅ new    original_price: Optional[float] = None
+    sizes: List[dict] = []  # ✅ new    original_price: Optional[float] = None
 
 
 class ProductCreate(BaseModel):
@@ -148,7 +150,7 @@ class ProductCreate(BaseModel):
     featured: bool = False
     delivery_charge: float = 0.0
 
-    sizes: Optional[List[dict]] = []
+    sizes: List[dict] = []
 
 
 class ProductUpdate(BaseModel):
@@ -834,6 +836,11 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
 # ============ PRODUCT ROUTES ============
 
 
+def serialize(product):
+    product["_id"] = str(product["_id"])
+    return product
+
+
 @api_router.get("/products", response_model=List[Product])
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
     query = {}
@@ -871,6 +878,13 @@ async def search_products(q: str):
     ).to_list(50)
 
     return products
+
+
+@app.post("/api/products")
+async def create_product(product: Product):
+    data = product.dict()
+    await db.products.insert_one(data)
+    return data
 
 
 # ============ REVIEW ROUTES ============
