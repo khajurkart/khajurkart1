@@ -852,6 +852,9 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
 
         products = await db.products.find(query, {"_id": 0}).to_list(1000)
         print("PRODUCTS:", products)  # 👈 DEBUG
+        for p in products:
+            if p.get("sizes"):
+                p["price"] = p["sizes"][0]["price"]
         return products
 
     except Exception as e:
