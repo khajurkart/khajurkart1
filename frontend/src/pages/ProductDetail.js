@@ -42,7 +42,7 @@ const ProductDetail = () => {
     }, [id]);
 
     useEffect(() => {
-        if (product?.sizes?.length) {
+        if (product?.sizes?.length && !selectedSize) {
             setSelectedSize(product.sizes[0].weight);
         }
     }, [product]);
@@ -168,14 +168,15 @@ const ProductDetail = () => {
         : "0.0";
 
     const selected = product.sizes?.find(
-        s => s.weight === selectedSize || `${s.weight}` === selectedSize
+        s => s.weight.trim() === selectedSize.trim()
     );
+    
+    const currentPrice = selected?.price ?? product.sizes?.[0]?.price ?? 0;
+    const originalPrice = selected?.original_price ?? currentPrice;
+    
     console.log("Selected:", selected);
     console.log("Current:", currentPrice);
     console.log("Original:", originalPrice);
-
-    const currentPrice = selected?.price ?? product.sizes?.[0]?.price ?? 0;
-    const originalPrice = selected?.original_price ?? currentPrice;
 
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
@@ -209,7 +210,7 @@ const ProductDetail = () => {
 
                         <div className="mb-6">
                             <span className="text-3xl text-khajur-gold font-bold">
-                                ₹{originalPrice}
+                                ₹{currentPrice}
                             </span>
                             {originalPrice > currentPrice && (
                                 <div className="flex items-center gap-3 mt-2">
