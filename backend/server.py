@@ -989,12 +989,9 @@ async def add_to_cart(
     if not item_exists:
         cart["items"].append(
             {
-                
-                console.log({
                     "product_id": cart_item.product_id,
                     "quantity": cart_item.quantity,
                     "size": selectedSize   # ✅ FIXED
-                })
             }
         )
 
