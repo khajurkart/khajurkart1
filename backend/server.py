@@ -875,6 +875,7 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
                 original_price = p.get("original_price") or price
 
                 p["price"] = price
+                p["original_price"] = original_price 
 
                 if original_price > price:
                     p["discount"] = round(
