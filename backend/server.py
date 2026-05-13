@@ -981,7 +981,7 @@ async def add_to_cart(
     for item in cart["items"]:
         if (
             item["product_id"] == cart_item.product_id
-            and item["size"] == cart_item.size
+            and item["size"] == selectedSize
         ):
             item["quantity"] += cart_item.quantity
             item_exists = True
@@ -992,7 +992,8 @@ async def add_to_cart(
             {
                 "product_id": cart_item.product_id,
                 "quantity": cart_item.quantity,
-                "size": cart_item.size,
+                "size": selectedSize,
+                "price": cart_item.price,
             }
         )
 
