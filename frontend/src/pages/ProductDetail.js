@@ -206,7 +206,7 @@ const ProductDetail = () => {
                             <span className="text-3xl text-khajur-gold font-bold">
                                 ₹{product.sizes?.find(s => s.weight === selectedSize)?.price || product.sizes?.[0]?.price || 0}
                             </span>
-                            {product.original_price && (
+                            {product.original_price > currentPrice && (
                                 <div className="flex items-center gap-3 mt-2">
                                     <span className="line-through text-gray-400 text-lg">
                                         ₹{product.original_price}
