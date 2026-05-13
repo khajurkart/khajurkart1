@@ -167,10 +167,15 @@ const ProductDetail = () => {
         ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
         : "0.0";
 
-    const selected = product.sizes?.find(s => s.weight === selectedSize);
+    const selected = product.sizes?.find(
+        s => s.weight === selectedSize || `${s.weight}` === selectedSize
+    );
+    console.log("Selected:", selected);
+    console.log("Current:", currentPrice);
+    console.log("Original:", originalPrice);
 
-    const currentPrice = selected?.price || 0;
-    const originalPrice = selected?.original_price || currentPrice;
+    const currentPrice = selected?.price ?? product.sizes?.[0]?.price ?? 0;
+    const originalPrice = selected?.original_price ?? currentPrice;
 
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
