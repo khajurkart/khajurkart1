@@ -994,7 +994,7 @@ async def add_to_cart(
                     "product_id": cart_item.product_id,
                     "quantity": cart_item.quantity,
                     "size": selectedSize   # ✅ FIXED
-                });
+                })
             }
         )
 
