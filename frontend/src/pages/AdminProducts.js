@@ -100,8 +100,8 @@ const AdminProducts = () => {
                 sizes: formData.sizes.map(s => ({
                     weight: s.weight,
                     price: parseFloat(s.price),
-                    original_price: formData.original_price
-                        ? parseFloat(formData.original_price)
+                    original_price: s.original_price
+                        ? parseFloat(s.original_price)
                         : parseFloat(s.price)
                 })),
                 original_price: formData.original_price
@@ -389,6 +389,18 @@ const AdminProducts = () => {
                                                     onChange={(e) => {
                                                         const newSizes = [...formData.sizes];
                                                         newSizes[index].price = e.target.value;
+                                                        setFormData({ ...formData, sizes: newSizes });
+                                                    }}
+                                                    className="border px-3 py-2 w-1/2"
+                                                />
+
+                                                <input
+                                                    type="number"
+                                                    placeholder="Original Price"
+                                                    value={item.original_price || ""}
+                                                    onChange={(e) => {
+                                                        const newSizes = [...formData.sizes];
+                                                        newSizes[index].original_price = e.target.value;
                                                         setFormData({ ...formData, sizes: newSizes });
                                                     }}
                                                     className="border px-3 py-2 w-1/2"
