@@ -862,6 +862,7 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
                 original_price = p.get("original_price") or price
 
                 p["price"] = price
+                p["original_price"] = original_price 
 
                 if original_price > price:
                     p["discount"] = round(
@@ -875,7 +876,6 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
                 original_price = p.get("original_price") or price
 
                 p["price"] = price
-                p["original_price"] = original_price 
 
                 if original_price > price:
                     p["discount"] = round(
@@ -1323,19 +1323,19 @@ async def create_product(
 
         if category == "saffron":
             product_data.sizes = [
-                {"weight": "0.5g", "price": 0},
-                {"weight": "1g", "price": 0},
-                {"weight": "2g", "price": 0},
-                {"weight": "3g", "price": 0},
-                {"weight": "4g", "price": 0},
-                {"weight": "5g", "price": 0},
+                {"weight": "0.5g", "price": 0, "original_price": 0},
+                {"weight": "1g", "price": 0, "original_price": 0},
+                {"weight": "2g", "price": 0, "original_price": 0},
+                {"weight": "3g", "price": 0, "original_price": 0},
+                {"weight": "4g", "price": 0, "original_price": 0},
+                {"weight": "5g", "price": 0, "original_price": 0},
             ]
         else:
             product_data.sizes = [
-                {"weight": "100g", "price": 0},
-                {"weight": "250g", "price": 0},
-                {"weight": "500g", "price": 0},
-                {"weight": "1kg", "price": 0},
+                {"weight": "100g", "price": 0, "original_price": 0},
+                {"weight": "250g", "price": 0, "original_price": 0},
+                {"weight": "500g", "price": 0, "original_price": 0},
+                {"weight": "1kg", "price": 0, "original_price": 0},
             ]
 
         # ✅ STEP 2: CREATE PRODUCT
