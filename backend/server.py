@@ -856,7 +856,7 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
             if p.get("sizes"):
                 selected_size = p["sizes"][0]   # default 250g
                 price = selected_size["price"]
-                original_price = p.get("original_price", price)
+                original_price = p.get("original_price") or price
 
                 # ✅ SET PRICE
                 p["price"] = price
