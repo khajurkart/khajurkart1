@@ -33,13 +33,19 @@ const ProductDetail = () => {
     const [likes, setLikes] = useState({});
     const [sortType, setSortType] = useState("latest");
     const [showForm, setShowForm] = useState(false);
-    const [selectedSize, setSelectedSize] = useState("250g");
+    const [selectedSize, setSelectedSize] = useState("");
 
     useEffect(() => {
         fetchProduct();
         fetchReviews();
         fetchAllProducts();
     }, [id]);
+
+    useEffect(() => {
+        if (product?.sizes?.length) {
+            setSelectedSize(product.sizes[0].weight);
+        }
+    }, [product]);
 
     const fetchProduct = async () => {
         try {
@@ -227,17 +233,17 @@ const ProductDetail = () => {
                             </label>
 
                             <div className="flex gap-3">
-                                {["250g", "500g", "1kg"].map((size) => (
+                                {product.sizes?.map((size, index) => (
                                     <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
+                                        key={index}
+                                        onClick={() => setSelectedSize(size.weight)}
                                         className={`px-5 py-2 border rounded-sm text-sm font-medium transition-all
-                                            ${selectedSize === size
+                                            ${selectedSize === size.weight
                                                 ? "bg-khajur-primary text-white border-khajur-primary scale-105 shadow-md"
                                                 : "bg-white text-khajur-primary border-gray-300 hover:border-khajur-gold"
                                             }`}
                                     >
-                                        {size}
+                                        {size.weight}
                                     </button>
                                 ))}
                             </div>
