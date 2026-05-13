@@ -854,7 +854,21 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
         print("PRODUCTS:", products)  # 👈 DEBUG
         for p in products:
             if p.get("sizes"):
-                p["price"] = p["sizes"][0]["price"]
+                selected_size = p["sizes"][0]  # default 250g
+
+                price = selected_size["price"]
+                original_price = p.get("original_price", price)
+
+                # ✅ SET PRICE
+                p["price"] = price
+
+                # ✅ SET DISCOUNT
+                if original_price > price:
+                    p["discount"] = round(
+                        ((original_price - price) / original_price) * 100
+                    )
+                else:
+                    p["discount"] = 0
         return products
 
     except Exception as e:
