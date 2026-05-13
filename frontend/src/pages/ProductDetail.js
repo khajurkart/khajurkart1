@@ -209,7 +209,7 @@ const ProductDetail = () => {
                             {originalPrice > currentPrice && (
                                 <div className="flex items-center gap-3 mt-2">
                                     <span className="line-through text-gray-400 text-lg">
-                                        ₹{product.original_price}
+                                        ₹{originalPrice}
                                     </span>
                                     <span className="text-green-600 font-bold">
                                         {Math.round(
