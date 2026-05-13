@@ -843,18 +843,20 @@ def serialize(product):
 
 @api_router.get("/products", response_model=List[Product])
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
-    query = {}
-    if category:
-        query["category"] = category
-    if featured is not None:
-        query["featured"] = featured
+    try:
+        query = {}
+        if category:
+            query["category"] = category
+        if featured is not None:
+            query["featured"] = featured
 
-        try:
-            products = await db.products.find(query, {"_id": 0}).to_list(1000)
-            return products
-        except Exception as e:
-            print("PRODUCT ERROR:", str(e))
-            raise HTTPException(500, str(e))
+        products = await db.products.find(query, {"_id": 0}).to_list(1000)
+        print("PRODUCTS:", products)  # 👈 DEBUG
+        return products
+
+    except Exception as e:
+        print("❌ PRODUCT ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.get("/products/{product_id}", response_model=Product)
