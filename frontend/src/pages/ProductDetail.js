@@ -177,9 +177,11 @@ const ProductDetail = () => {
         product.price ||   // fallback to main price
         currentPrice;
 
-    console.log("Selected:", selected);
-    console.log("Current:", currentPrice);
-    console.log("Original:", originalPrice);
+    if (process.env.NODE_ENV === "development") {
+        console.log("Selected:", selectedSize);
+        console.log("Current:", price);
+        console.log("Original:", originalPrice);
+    }
 
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
