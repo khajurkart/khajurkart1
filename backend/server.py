@@ -880,7 +880,7 @@ async def search_products(q: str):
     return products
 
 
-@app.post("/api/products")
+@api_router.post("/products")
 async def create_product(product: Product):
     data = product.dict()
     await db.products.insert_one(data)
