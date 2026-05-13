@@ -169,7 +169,8 @@ class ProductUpdate(BaseModel):
 class CartItem(BaseModel):
     product_id: str
     quantity: int
-    size: str
+    size: Optional[str] = None
+
 
 
 class CartItemResponse(BaseModel):
@@ -980,7 +981,7 @@ async def add_to_cart(
     for item in cart["items"]:
         if (
             item["product_id"] == cart_item.product_id
-            and item["size"] == selectedSize    # ✅ FIXED
+            and item["size"] == cart_item.size   # ✅ FIXED
         ):
             item["quantity"] += cart_item.quantity
             item_exists = True
@@ -989,9 +990,9 @@ async def add_to_cart(
     if not item_exists:
         cart["items"].append(
             {
-                    "product_id": cart_item.product_id,
-                    "quantity": cart_item.quantity,
-                    "size": selectedSize   # ✅ FIXED
+                "product_id": cart_item.product_id,
+                "quantity": cart_item.quantity,
+                "size": cart_item.size,   # ✅ FIXED
             }
         )
 
@@ -1016,6 +1017,7 @@ async def update_cart_item(
     for item in cart["items"]:
         if item["product_id"] == cart_item.product_id:
             item["quantity"] = cart_item.quantity
+            item["size"] = cart_item.size
             break
 
     await db.carts.update_one(
