@@ -972,7 +972,6 @@ async def add_to_cart(
 
     # Get or create cart
     cart = await db.carts.find_one({"user_id": current_user["id"]})
-
     if not cart:
         cart = {"user_id": current_user["id"], "items": []}
 
@@ -981,7 +980,7 @@ async def add_to_cart(
     for item in cart["items"]:
         if (
             item["product_id"] == cart_item.product_id
-            and item["size"] == selectedSize
+            and item["size"] == cart_item.size   # ✅ FIXED
         ):
             item["quantity"] += cart_item.quantity
             item_exists = True
@@ -992,8 +991,7 @@ async def add_to_cart(
             {
                 "product_id": cart_item.product_id,
                 "quantity": cart_item.quantity,
-                "size": selectedSize,
-                "price": cart_item.price,
+                "size": cart_item.size,   # ✅ FIXED
             }
         )
 
