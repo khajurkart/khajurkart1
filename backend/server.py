@@ -991,7 +991,7 @@ async def add_to_cart(
             {
                 "product_id": cart_item.product_id,
                 "quantity": cart_item.quantity,
-                "size": cart_item.size,   # ✅ FIXED
+                "size": selectedSize   # ✅ FIXED
             }
         )
 
