@@ -55,7 +55,13 @@ const AdminProducts = () => {
         setFormData({
             name: '',
             description: '',
-            sizes: [{ weight: "", price: "" }],
+            // ✅ INSERT HERE
+            sizes: product.sizes?.map(s => ({
+                weight: s.weight,
+                price: s.price,
+                original_price: s.original_price || product.original_price || s.price
+            })) || [{ weight: "", price: "", original_price: "" }],
+
             category: '',
             image: '',
             stock: '',
@@ -93,7 +99,10 @@ const AdminProducts = () => {
                 ...formData,
                 sizes: formData.sizes.map(s => ({
                     weight: s.weight,
-                    price: parseFloat(s.price)
+                    price: parseFloat(s.price),
+                    original_price: formData.original_price
+                        ? parseFloat(formData.original_price)
+                        : parseFloat(s.price)
                 })),
                 original_price: formData.original_price
                     ? parseFloat(formData.original_price)
