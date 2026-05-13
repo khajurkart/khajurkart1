@@ -957,7 +957,22 @@ async def get_cart(current_user: dict = Depends(get_current_user)):
     for item in cart["items"]:
         product = await db.products.find_one({"id": item["product_id"]}, {"_id": 0})
         if product:
+            sizes = product.get("sizes") or []
+    
+            if sizes:
+                selected_size = item.get("size")
+    
+                size_data = next(
+                    (s for s in sizes if s.get("weight") == selected_size),
+                    sizes[0]  # fallback
+                )
+    
+                product["price"] = size_data.get("price", 0)
+                product["original_price"] = size_data.get("original_price", product["price"])
+            else:
+                product["price"] = product.get("price", 0)
             item["product"] = product
+    
 
     return cart
 
