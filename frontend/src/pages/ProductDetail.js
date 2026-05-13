@@ -170,10 +170,13 @@ const ProductDetail = () => {
     const selected = product.sizes?.find(
         s => s.weight.trim() === selectedSize.trim()
     );
-    
+
     const currentPrice = selected?.price ?? product.sizes?.[0]?.price ?? 0;
-    const originalPrice = selected?.original_price ?? currentPrice;
-    
+    const originalPrice =
+        selected?.original_price ||
+        product.price ||   // fallback to main price
+        currentPrice;
+
     console.log("Selected:", selected);
     console.log("Current:", currentPrice);
     console.log("Original:", originalPrice);
