@@ -129,7 +129,7 @@ class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
     name: str
-    price: float
+    price: Optional[float] = None
     description: str
     category: str
     image: str
@@ -849,8 +849,12 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
     if featured is not None:
         query["featured"] = featured
 
-    products = await db.products.find(query, {"_id": 0}).to_list(1000)
-    return products
+        try:
+            products = await db.products.find(query, {"_id": 0}).to_list(1000)
+            return products
+        except Exception as e:
+            print("PRODUCT ERROR:", str(e))
+            raise HTTPException(500, str(e))
 
 
 @api_router.get("/products/{product_id}", response_model=Product)
