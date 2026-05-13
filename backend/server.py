@@ -1289,12 +1289,33 @@ async def create_product(
     product_data: ProductCreate, admin: dict = Depends(get_admin_user)
 ):
     try:
+        # ✅ STEP 1: CATEGORY BASED SIZES
+        category = product_data.category.lower()
+
+        if category == "saffron":
+            product_data.sizes = [
+                {"weight": "0.5g", "price": 0},
+                {"weight": "1g", "price": 0},
+                {"weight": "2g", "price": 0},
+                {"weight": "3g", "price": 0},
+                {"weight": "4g", "price": 0},
+                {"weight": "5g", "price": 0},
+            ]
+        else:
+            product_data.sizes = [
+                {"weight": "100g", "price": 0},
+                {"weight": "250g", "price": 0},
+                {"weight": "500g", "price": 0},
+                {"weight": "1kg", "price": 0},
+            ]
+
+        # ✅ STEP 2: CREATE PRODUCT
         product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
         product_doc = {"id": product_id, **product_data.model_dump()}
 
         result = await db.products.insert_one(product_doc)
 
-        # ✅ FIX HERE
+        # ✅ STEP 3: RETURN WITH _id
         product_doc["_id"] = str(result.inserted_id)
 
         return product_doc
