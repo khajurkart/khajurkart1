@@ -167,10 +167,10 @@ const ProductDetail = () => {
         ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
         : "0.0";
 
-    const currentPrice =
-        product.sizes?.find(s => s.weight === selectedSize)?.price ||
-        product.sizes?.[0]?.price ||
-        0;
+    const selected = product.sizes?.find(s => s.weight === selectedSize);
+
+    const currentPrice = selected?.price || 0;
+    const originalPrice = selected?.original_price || currentPrice;
 
     return (
         <div className="min-h-screen py-20" data-testid="product-detail-page">
@@ -206,14 +206,14 @@ const ProductDetail = () => {
                             <span className="text-3xl text-khajur-gold font-bold">
                                 ₹{product.sizes?.find(s => s.weight === selectedSize)?.price || product.sizes?.[0]?.price || 0}
                             </span>
-                            {product.original_price > currentPrice && (
+                            {originalPrice > currentPrice && (
                                 <div className="flex items-center gap-3 mt-2">
                                     <span className="line-through text-gray-400 text-lg">
                                         ₹{product.original_price}
                                     </span>
                                     <span className="text-green-600 font-bold">
                                         {Math.round(
-                                            (((product.original_price - currentPrice)) / product.original_price) * 100
+                                            ((originalPrice - currentPrice) / originalPrice) * 100
                                         )}% OFF
                                     </span>
                                 </div>
