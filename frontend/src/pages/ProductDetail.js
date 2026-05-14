@@ -133,8 +133,7 @@ const ProductDetail = () => {
         addToCart(
             product.id,
             quantity,
-            selectedSize,
-            selected?.price || product.sizes?.[0]?.price || 0
+            selectedSize
         );
     };
 
