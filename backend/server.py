@@ -1096,7 +1096,7 @@ async def create_order(
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
         if not product:
             continue
-        selected_size = item.get("size")
+        selected_size = item.get("size") or product.get("sizes", [])[0]["weight"]
         size_data = next(
             (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
         )
