@@ -1105,15 +1105,15 @@ async def create_order(
             raise HTTPException(400, "Invalid size selected")
         # ✅ find selected size
         selected_size = item.size
-        
+
         size_data = next(
             (s for s in product.get("sizes", []) if s["weight"] == selected_size),
             None
         )
-        
+
         if not size_data:
             raise HTTPException(400, "Invalid size selected")
-        
+
         price = size_data["price"]
         original_price = size_data.get("original_price", price)
         # ✅ CALCULATE DISCOUNT %
@@ -1126,6 +1126,7 @@ async def create_order(
                 "product_id": item.product_id,  # ✅ ADD THIS
                 "product_name": product.get("name"),
                 "quantity": item.quantity,
+                "size": item.size,
                 "original_price": original_price,
                 "price": price,  # discounted price
                 "discount": discount,
