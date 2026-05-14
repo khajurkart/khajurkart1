@@ -190,6 +190,7 @@ class OrderItem(BaseModel):
     product_id: str
     product_name: str
     quantity: int
+    size: Optional[str] = None
     original_price: Optional[float] = None  # ✅ ADD
     price: float
     discount: Optional[int] = 0  # ✅ ADD
@@ -1096,7 +1097,7 @@ async def create_order(
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
         if not product:
             continue
-        selected_size = item.get("size") or product.get("sizes", [])[0]["weight"]
+        selected_size = item.size or product.get("sizes", [])[0]["weight"]
         size_data = next(
             (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
         )
