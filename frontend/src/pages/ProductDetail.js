@@ -123,6 +123,10 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
+        if (!selectedSize) {
+            alert("Please select size");
+            return;
+        }
         const selected = product.sizes?.find(
             s => s.weight === selectedSize || `${s.weight}g` === selectedSize
         );
@@ -135,6 +139,10 @@ const ProductDetail = () => {
     };
 
     const handleBuyNow = () => {
+        if (!selectedSize) {
+            alert("Please select size");
+            return;
+        }
         addToCart(product.id, quantity, selectedSize);
         setTimeout(() => {
             window.location.href = '/cart';
@@ -179,7 +187,7 @@ const ProductDetail = () => {
 
     if (process.env.NODE_ENV === "development") {
         console.log("Selected:", selectedSize);
-        console.log("Current:", price);
+        console.log("Current:", currentPrice);
         console.log("Original:", originalPrice);
     }
 
