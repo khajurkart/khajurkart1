@@ -107,6 +107,8 @@ export const CartProvider = ({ children }) => {
         return total + (item.product ? item.product.price * item.quantity : 0);
     }, 0);
 
+    console.log("SIZE RECEIVED IN CONTEXT:", size);
+
     return (
         <CartContext.Provider
             value={{
