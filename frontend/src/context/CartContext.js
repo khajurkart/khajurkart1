@@ -44,6 +44,9 @@ export const CartProvider = ({ children }) => {
     }, [user, token, fetchCart]);
 
     const addToCart = async (productId, quantity = 1, size = null) => {
+
+        console.log("SIZE RECEIVED IN CONTEXT:", size);
+        
         if (!user) {
             toast.error('Please login to add items to cart');
             return;
@@ -64,7 +67,7 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    const updateCartItem = async (productId, quantity) => {
+    const updateCartItem = async (productId, quantity, size) => {
         try {
             await axios.post(
                 `${API}/cart/update`,
@@ -107,7 +110,6 @@ export const CartProvider = ({ children }) => {
         return total + (item.product ? item.product.price * item.quantity : 0);
     }, 0);
 
-    console.log("SIZE RECEIVED IN CONTEXT:", size);
 
     return (
         <CartContext.Provider
