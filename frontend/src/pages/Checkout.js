@@ -67,7 +67,8 @@ const Checkout = () => {
                 product_id: item.product.id,
                 product_name: item.product.name,
                 quantity: item.quantity,
-                price: item.product.price
+                price: item.product.price,
+                size: item.size   // ✅ ADD THIS
             }));
 
             const shippingAddress = {
