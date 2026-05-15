@@ -797,21 +797,20 @@ def generate_invoice(order):
     items = order["items"]
 
     for i, item in enumerate(items, start=1):
-        discount = item.get("discount", 0)
-        original = item.get("original_price", item["price"])
         quantity = item["quantity"]
         size = item.get("size", "")
+        price = item["price"]
     
-        item_total = item["price"] * quantity
+        item_total = price * quantity  # ✅ ONLY THIS
     
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
         c.drawString(230, y, str(quantity))
-        c.drawString(270, y, f"Rs.{original}")
-        c.drawString(330, y, f"{discount}%")
+        c.drawString(270, y, f"Rs.{price}")
+        c.drawString(330, y, f"{item.get('discount', 0)}%")
         c.drawString(380, y, "Rs.0")  # no per-item delivery
-        c.drawString(450, y, f"Rs.{round(final_price, 2)}")
-        
+        c.drawString(450, y, f"Rs.{item_total}")  # ✅ FIXED
+    
         y -= 20
 
     # ================= TOTAL =================
