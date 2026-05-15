@@ -791,20 +791,30 @@ def generate_invoice(order):
     y -= 30
     c.setFillColor(colors.black)
     c.setFont("Helvetica", 10)
-    for i, item in enumerate(order["items"], start=1):
+    
+    total_delivery = order.get("delivery_charge", 0)
+    items = order["items"]
+
+    for i, item in enumerate(items, start=1):
         discount = item.get("discount", 0)
-        # ✅ ADD HERE
         original = item.get("original_price", item["price"])
-        final_price = item["price"]
-        c.drawString(45, y, str(i))
+        quantity = item["quantity"]
         size = item.get("size", "")
+
+        # 👉 Split delivery across items
+        item_delivery = total_delivery / len(items) if items else 0
+
+        # 👉 Final including delivery
+        final_price = (item["price"] * quantity) + item_delivery
+
+        c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
-        c.drawString(230, y, str(item["quantity"]))
+        c.drawString(230, y, str(quantity))
         c.drawString(270, y, f"Rs.{original}")
-        c.drawString(330, y, f"{discount}%")
-        delivery = order.get("delivery_charge", 0)
-        c.drawString(410, y, f"Rs.{delivery}")
-        c.drawString(410, y, f"Rs.{round(final_price, 2)}")
+        c.drawString(320, y, f"{discount}%")
+        c.drawString(380, y, f"Rs.{round(item_delivery, 2)}")
+        c.drawString(450, y, f"Rs.{round(final_price, 2)}")
+
         y -= 20
 
     # ================= TOTAL =================
