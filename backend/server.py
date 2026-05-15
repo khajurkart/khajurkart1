@@ -818,13 +818,14 @@ def generate_invoice(order):
 
         y -= 20
         
-        # ✅ DASHED LINE LIKE YOUR EXAMPLE
-        c.setStrokeColor(colors.black)
-        c.setDash(3, 2)  # dash pattern (3 on, 2 off)
-        c.line(40, y, width - 40, y)
-        c.setDash()  # reset to solid
+        # ✅ DRAW LINE ONLY IF NOT LAST ITEM
+        if i < len(items):
+            c.setStrokeColor(colors.black)
+            c.setDash(3, 2)
+            c.line(40, y, width - 40, y)
+            c.setDash()
     
-        y -= 10
+            y -= 10
 
 
     # ================= TOTAL =================
