@@ -793,7 +793,7 @@ def generate_invoice(order):
     c.setFillColor(colors.black)
     c.setFont("Helvetica", 10)
     
-    total_delivery = order.get("delivery_charge", 0)
+    total_delivery = order.get("delivery_charges", 0)
     items = order["items"]
 
     for i, item in enumerate(items, start=1):
@@ -801,13 +801,10 @@ def generate_invoice(order):
         original = item.get("original_price", item["price"])
         quantity = item["quantity"]
         size = item.get("size", "")
-
-        # 👉 Split delivery across items
-        item_delivery = total_delivery / len(items) if items else 0
-
-        # 👉 Final including delivery
+    
+        item_delivery = item.get("delivery_charge", 0) * quantity
         final_price = (item["price"] * quantity) + item_delivery
-
+    
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
         c.drawString(230, y, str(quantity))
@@ -815,7 +812,7 @@ def generate_invoice(order):
         c.drawString(330, y, f"{discount}%")
         c.drawString(380, y, f"Rs.{round(item_delivery, 2)}")
         c.drawString(450, y, f"Rs.{round(final_price, 2)}")
-
+        
         y -= 20
 
     # ================= TOTAL =================
@@ -1103,7 +1100,7 @@ async def create_order(
     for item in order_data.items:
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
         if not product:
-            continue
+            continue 
         selected_size = item.size or product.get("sizes", [])[0]["weight"]
         size_data = next(
             (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
@@ -1137,6 +1134,7 @@ async def create_order(
                 "original_price": original_price,
                 "price": price,  # discounted price
                 "discount": discount,
+                "delivery_charge": product.get("delivery_charge", 0)
             }
         )
 
