@@ -809,7 +809,7 @@ def generate_invoice(order):
         c.drawString(230, y, str(quantity))
         c.drawString(270, y, f"Rs.{original}")
         c.drawString(330, y, f"{discount}%")
-        c.drawString(380, y, f"Rs.{round(item_delivery, 2)}")
+        c.drawString(380, y, "Rs.0")  # no per-item delivery
         c.drawString(450, y, f"Rs.{round(final_price, 2)}")
         
         y -= 20
@@ -818,6 +818,7 @@ def generate_invoice(order):
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
+    items_total = order["total_amount"] - order.get("delivery_charges", 0)
     c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{order['total_amount'] - order['delivery_charges']}")
     c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{order['delivery_charges']}")
     c.drawRightString(width - 40, y - 60, f"Grand Total: Rs.{order['total_amount']}")
