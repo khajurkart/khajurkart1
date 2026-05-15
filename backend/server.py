@@ -801,13 +801,13 @@ def generate_invoice(order):
         original = item.get("original_price", item["price"])
         quantity = item["quantity"]
         size = item.get("size", "")
-    
+
         # ✅ PER ITEM DELIVERY
         item_delivery = item.get("delivery_charge", 0) * quantity
-    
+
         # ✅ FINAL PRICE
         final_price = (item["price"] * quantity) + item_delivery
-    
+
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
         c.drawString(230, y, str(quantity))
@@ -815,8 +815,17 @@ def generate_invoice(order):
         c.drawString(330, y, f"{discount}%")
         c.drawString(380, y, f"Rs.{item_delivery}")   # ✅ FIXED
         c.drawString(450, y, f"Rs.{final_price}")     # ✅ FIXED
-    
+
         y -= 20
+        
+        # ✅ DASHED LINE LIKE YOUR EXAMPLE
+        c.setStrokeColor(colors.black)
+        c.setDash(3, 2)  # dash pattern (3 on, 2 off)
+        c.line(40, y, width - 40, y)
+        c.setDash()  # reset to solid
+    
+        y -= 10
+
 
     # ================= TOTAL =================
 
