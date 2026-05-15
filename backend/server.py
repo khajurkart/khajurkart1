@@ -929,6 +929,17 @@ async def create_product(product: Product):
     return data
 
 
+# ============ Deliery Charges  ============
+
+@app.get("/api/settings/delivery-charge")
+def get_delivery_charge():
+    setting = db.settings.find_one({"type": "delivery"})
+    
+    if not setting:
+        return {"delivery_charge": 0}
+    
+    return {"delivery_charge": setting.get("delivery_charge", 0)}
+
 # ============ REVIEW ROUTES ============
 
 
