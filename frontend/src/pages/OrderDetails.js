@@ -181,7 +181,7 @@ const OrderDetails = () => {
                 </div>
 
                 <div>
-                  ₹{item.price}
+                  ₹{item.price * item.quantity}
                 </div>
               </div>
             ))
