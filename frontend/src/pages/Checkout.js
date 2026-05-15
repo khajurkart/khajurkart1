@@ -18,6 +18,7 @@ const Checkout = () => {
     const [addresses, setAddresses] = useState([]);
     const { Razorpay } = useRazorpay();
     const [selectedAddress, setSelectedAddress] = useState(null);
+    const [deliveryCharge, setDeliveryCharge] = useState(0);
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -28,6 +29,19 @@ const Checkout = () => {
         };
         if (token) fetchAddresses();
     }, [token]);
+
+    useEffect(() => {
+        const fetchDeliveryCharge = async () => {
+            try {
+                const res = await axios.get(`${API}/settings/delivery-charge`);
+                setDeliveryCharge(res.data.delivery_charge);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+
+        fetchDeliveryCharge();
+    }, []);
 
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
@@ -88,7 +102,8 @@ const Checkout = () => {
                 `${API}/orders`,
                 {
                     items: orderItems,
-                    total_amount: cartTotal,
+                    total_amount: finalTotal,
+                    delivery_charge: deliveryCharge,
                     payment_method: 'cod',
                     shipping_address: shippingAddress
                 },
@@ -136,7 +151,8 @@ const Checkout = () => {
                 `${API}/orders`,
                 {
                     items: orderItems,
-                    total_amount: cartTotal,
+                    total_amount: finalTotal,
+                    delivery_charge: deliveryCharge,
                     payment_method: 'razorpay',
                     shipping_address: shippingAddress
                 },
@@ -220,6 +236,8 @@ const Checkout = () => {
             </div>
         );
     }
+
+    const finalTotal = cartTotal + deliveryCharge;
 
     return (
         <div className="min-h-screen py-20" data-testid="checkout-page">
@@ -453,11 +471,21 @@ const Checkout = () => {
                                         ))}
                                     </div>
 
+                                    <div className="flex justify-between text-sm">
+                                        <span>Subtotal</span>
+                                        <span>₹{cartTotal.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="flex justify-between text-sm">
+                                        <span>Delivery</span>
+                                        <span>₹{deliveryCharge.toFixed(2)}</span>
+                                    </div>
+
                                     <div className="border-t border-khajur-border pt-4 mb-6">
                                         <div className="flex justify-between text-lg">
                                             <span className="font-serif font-medium text-khajur-primary">Total</span>
                                             <span className="font-serif text-3xl font-bold text-khajur-gold" data-testid="checkout-total">
-                                                ₹{cartTotal.toFixed(2)}
+                                                ₹{finalTotal.toFixed(2)}
                                             </span>
                                         </div>
                                     </div>
