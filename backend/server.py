@@ -524,7 +524,6 @@ async def reset_password(reset_token: str, new_password: str):
 
 # ============ EMAIL RECEIVER ============
 
-
 async def send_email(name, email, phone, message):
     try:
         html = f"""
@@ -553,7 +552,6 @@ async def send_email(name, email, phone, message):
 
 
 # ======== SENDER EMAIL ===========
-
 
 async def send_auto_reply(name, email):
     try:
@@ -586,7 +584,6 @@ async def send_auto_reply(name, email):
 
 
 # =========== ORDER CONFIRMATION =========
-
 
 async def send_order_email(user_email, user_name, order_id, items, total):
     try:
@@ -636,7 +633,6 @@ async def send_order_email(user_email, user_name, order_id, items, total):
 
 # ============ CONTACT ROUTES ============
 
-
 @api_router.post("/contact")
 async def contact_form(data: ContactForm):
     name = data.name
@@ -661,7 +657,6 @@ async def contact_form(data: ContactForm):
 
 
 # =========== MULTI-ADDRESS SUPPORT ROUTES ====
-
 
 @api_router.post("/user/address")
 async def add_address(address: dict, current_user: dict = Depends(get_current_user)):
@@ -716,7 +711,6 @@ async def set_default_address(
 
 
 # ==================== INVOICE PDF DOWNLOAD ========================
-
 
 def generate_invoice(order):
     file_path = f"/tmp/invoice_{order['id']}.pdf"
@@ -803,7 +797,8 @@ def generate_invoice(order):
         original = item.get("original_price", item["price"])
         final_price = item["price"]
         c.drawString(45, y, str(i))
-        c.drawString(80, y, item["product_name"])
+        size = item.get("size", "")
+        c.drawString(80, y, f"{item['product_name']} ({size})")
         c.drawString(230, y, str(item["quantity"]))
         c.drawString(270, y, f"Rs.{original}")
         c.drawString(330, y, f"{discount}%")
@@ -814,7 +809,16 @@ def generate_invoice(order):
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(width - 40, y - 20, f"Total: Rs.{order['total_amount']}")
+    delivery = order.get("delivery_charge", 0)
+    subtotal = order["total_amount"] - delivery
+    
+    c.setFont("Helvetica", 10)
+    c.drawRightString(width - 40, y - 20, f"Subtotal: Rs.{subtotal}")
+    
+    c.drawRightString(width - 40, y - 35, f"Delivery: Rs.{delivery}")
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawRightString(width - 40, y - 55, f"Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
 
