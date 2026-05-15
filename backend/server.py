@@ -802,6 +802,8 @@ def generate_invoice(order):
         c.drawString(230, y, str(item["quantity"]))
         c.drawString(270, y, f"Rs.{original}")
         c.drawString(330, y, f"{discount}%")
+        delivery = order.get("delivery_charge", 0)
+        c.drawString(410, y, f"Rs.{delivery}")
         c.drawString(410, y, f"Rs.{round(final_price, 2)}")
         y -= 20
 
@@ -809,16 +811,7 @@ def generate_invoice(order):
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
-    delivery = order.get("delivery_charge", 0)
-    subtotal = order["total_amount"] - delivery
-    
-    c.setFont("Helvetica", 10)
-    c.drawRightString(width - 40, y - 20, f"Subtotal: Rs.{subtotal}")
-    
-    c.drawRightString(width - 40, y - 35, f"Delivery: Rs.{delivery}")
-    
-    c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(width - 40, y - 55, f"Total: Rs.{order['total_amount']}")
+    c.drawRightString(width - 40, y - 20, f"Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
 
