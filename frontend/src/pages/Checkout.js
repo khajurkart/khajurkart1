@@ -85,9 +85,6 @@ const Checkout = () => {
                 size: item.size   // ✅ ADD THIS
             }));
 
-            console.log("CART ITEMS:", cart.items); // ✅ ADD HERE
-            console.log("ORDER ITEMS:", orderItems); // ✅ ALSO ADD THIS
-
             const shippingAddress = {
                 fullName: formData.fullName,
                 email: formData.email,
@@ -132,9 +129,6 @@ const Checkout = () => {
                 price: item.product.price,
                 size: item.size   // ✅ ADD THIS
             }));
-
-            console.log("CART ITEMS:", cart.items); // ✅ ADD HERE
-            console.log("ORDER ITEMS:", orderItems); // ✅ ALSO ADD THIS
 
             const shippingAddress = {
                 fullName: formData.fullName,
@@ -471,14 +465,16 @@ const Checkout = () => {
                                         ))}
                                     </div>
 
-                                    <div className="flex justify-between text-sm">
-                                        <span>Subtotal</span>
-                                        <span>₹{cartTotal.toFixed(2)}</span>
-                                    </div>
+                                    <div className="space-y-3 mb-4">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="font-serif text-khajur-primary">Subtotal</span>
+                                            <span>₹{cartTotal.toFixed(2)}</span>
+                                        </div>
 
-                                    <div className="flex justify-between text-sm">
-                                        <span>Delivery</span>
-                                        <span>₹{deliveryCharge.toFixed(2)}</span>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="font-serif text-khajur-primary">Delivery Charge</span>
+                                            <span>₹{deliveryCharge.toFixed(2)}</span>
+                                        </div>
                                     </div>
 
                                     <div className="border-t border-khajur-border pt-4 mb-6">
