@@ -88,12 +88,12 @@ async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
 
 @app.get("/api/settings/delivery-charge")
-def get_delivery_charge():
-    setting = db.settings.find_one({"type": "delivery"})
-    
+async def get_delivery_charge():   # ✅ make async
+    setting = await db.settings.find_one({"type": "delivery"})  # ✅ add await
+
     if not setting:
         return {"delivery_charge": 0}
-    
+
     return {"delivery_charge": setting.get("delivery_charge", 0)}
 
 security = HTTPBearer()
