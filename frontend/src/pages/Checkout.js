@@ -114,9 +114,12 @@ const Checkout = () => {
                 product_id: item.product.id,
                 product_name: item.product.name,
                 quantity: item.quantity,
-                price: item.product.price
+                price: item.product.price,
                 size: item.size   // ✅ ADD THIS
             }));
+
+            console.log("CART ITEMS:", cart.items); // ✅ ADD HERE
+            console.log("ORDER ITEMS:", orderItems); // ✅ ALSO ADD THIS
 
             const shippingAddress = {
                 fullName: formData.fullName,
