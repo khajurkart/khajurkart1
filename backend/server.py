@@ -782,9 +782,9 @@ def generate_invoice(order):
     c.drawString(45, y + 8, "S.No")
     c.drawString(80, y + 8, "Item Name")
     c.drawString(240, y + 8, "Qty")
-    c.drawString(280, y + 8, "Price")
+    c.drawString(290, y + 8, "Price")
     c.drawString(340, y + 8, "Disc %")
-    c.drawString(390, y + 8, "Delivery")   # ✅ ADD THIS
+    c.drawString(400, y + 8, "Delivery")   # ✅ ADD THIS
     c.drawString(460, y + 8, "Final Amount")
 
     # ================= ITEMS =================
@@ -811,9 +811,9 @@ def generate_invoice(order):
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
         c.drawString(245, y, str(quantity))
-        c.drawString(275, y, f"Rs.{original}")
-        c.drawString(350, y, f"{discount}%")
-        c.drawString(390, y, f"Rs.{item_delivery}")   # ✅ FIXED
+        c.drawString(285, y, f"Rs.{original}")
+        c.drawString(345, y, f"{discount}%")
+        c.drawString(405, y, f"Rs.{item_delivery}")   # ✅ FIXED
         c.drawString(470, y, f"Rs.{final_price}")     # ✅ FIXED
 
         y -= 20
@@ -825,7 +825,7 @@ def generate_invoice(order):
             c.line(40, y, width - 40, y)
             c.setDash()
     
-            y -= 19
+            y -= 20
 
 
     # ================= TOTAL =================
