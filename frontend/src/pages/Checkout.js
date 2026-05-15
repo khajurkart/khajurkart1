@@ -30,19 +30,6 @@ const Checkout = () => {
         if (token) fetchAddresses();
     }, [token]);
 
-    useEffect(() => {
-        const fetchDeliveryCharge = async () => {
-            try {
-                const res = await axios.get(`${API}/settings/delivery-charge`);
-                setDeliveryCharge(res.data.delivery_charge);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-
-        fetchDeliveryCharge();
-    }, []);
-
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
@@ -230,6 +217,10 @@ const Checkout = () => {
             </div>
         );
     }
+
+    const deliveryCharge = cartItems.reduce((total, item) => {
+        return total + (item.product.delivery_charge || 0) * item.quantity;
+    }, 0);
 
     const finalTotal = cartTotal + deliveryCharge;
 
