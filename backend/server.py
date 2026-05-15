@@ -825,7 +825,7 @@ def generate_invoice(order):
             c.line(40, y, width - 40, y)
             c.setDash()
     
-            y -= 8
+            y -= 18
 
 
     # ================= TOTAL =================
