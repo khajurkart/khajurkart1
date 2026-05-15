@@ -793,7 +793,7 @@ def generate_invoice(order):
     c.setFillColor(colors.black)
     c.setFont("Helvetica", 10)
     
-    total_delivery = order.get("delivery_charge", 0)
+    total_delivery = order.get("delivery_charges", 0)
     items = order["items"]
 
     for i, item in enumerate(items, start=1):
@@ -802,8 +802,7 @@ def generate_invoice(order):
         quantity = item["quantity"]
         size = item.get("size", "")
     
-        item_delivery = item.get("delivery_charge", 0) * quantity
-        final_price = (item["price"] * quantity) + item_delivery
+        item_total = item["price"] * quantity
     
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
@@ -819,7 +818,9 @@ def generate_invoice(order):
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(width - 40, y - 20, f"Total: Rs.{order['total_amount']}")
+    c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{order['total_amount'] - order['delivery_charges']}")
+    c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{order['delivery_charges']}")
+    c.drawRightString(width - 40, y - 60, f"Grand Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
 
