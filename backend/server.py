@@ -793,7 +793,7 @@ def generate_invoice(order):
     c.setFillColor(colors.black)
     c.setFont("Helvetica", 10)
     
-    total_delivery = order.get("delivery_charges", 0)
+    total_delivery = order.get("delivery_charge", 0)
     items = order["items"]
 
     for i, item in enumerate(items, start=1):
