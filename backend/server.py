@@ -781,11 +781,11 @@ def generate_invoice(order):
     c.setFont("Helvetica-Bold", 10)
     c.drawString(45, y + 8, "S.No")
     c.drawString(80, y + 8, "Item Name")
-    c.drawString(230, y + 8, "Qty")
-    c.drawString(270, y + 8, "Price")
-    c.drawString(330, y + 8, "Disc %")
-    c.drawString(380, y + 8, "Delivery")   # ✅ ADD THIS
-    c.drawString(450, y + 8, "Final Amount")
+    c.drawString(240, y + 8, "Qty")
+    c.drawString(280, y + 8, "Price")
+    c.drawString(340, y + 8, "Disc %")
+    c.drawString(390, y + 8, "Delivery")   # ✅ ADD THIS
+    c.drawString(460, y + 8, "Final Amount")
 
     # ================= ITEMS =================
 
@@ -810,13 +810,13 @@ def generate_invoice(order):
 
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
-        c.drawString(230, y, str(quantity))
-        c.drawString(270, y, f"Rs.{original}")
-        c.drawString(330, y, f"{discount}%")
-        c.drawString(380, y, f"Rs.{item_delivery}")   # ✅ FIXED
-        c.drawString(450, y, f"Rs.{final_price}")     # ✅ FIXED
+        c.drawString(250, y, str(quantity))
+        c.drawString(290, y, f"Rs.{original}")
+        c.drawString(350, y, f"{discount}%")
+        c.drawString(400, y, f"Rs.{item_delivery}")   # ✅ FIXED
+        c.drawString(470, y, f"Rs.{final_price}")     # ✅ FIXED
 
-        y -= 20
+        y -= 15
         
         # ✅ DRAW LINE ONLY IF NOT LAST ITEM
         if i < len(items):
@@ -825,7 +825,7 @@ def generate_invoice(order):
             c.line(40, y, width - 40, y)
             c.setDash()
     
-            y -= 15
+            y -= 12
 
 
     # ================= TOTAL =================
