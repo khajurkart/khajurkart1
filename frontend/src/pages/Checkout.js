@@ -18,8 +18,7 @@ const Checkout = () => {
     const [addresses, setAddresses] = useState([]);
     const { Razorpay } = useRazorpay();
     const [selectedAddress, setSelectedAddress] = useState(null);
-    const [calculatedDeliveryCharge, setcalculatedDeliveryCharge] = useState(0);
-
+    
     useEffect(() => {
         const fetchAddresses = async () => {
             const res = await axios.get(`${API}/user/address`, {
