@@ -18,7 +18,7 @@ const Checkout = () => {
     const [addresses, setAddresses] = useState([]);
     const { Razorpay } = useRazorpay();
     const [selectedAddress, setSelectedAddress] = useState(null);
-    const [deliveryCharge, setDeliveryCharge] = useState(0);
+    const [calculatedDeliveryCharge, setcalculatedDeliveryCharge] = useState(0);
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -87,7 +87,7 @@ const Checkout = () => {
                 {
                     items: orderItems,
                     total_amount: finalTotal,
-                    delivery_charge: deliveryCharge,
+                    delivery_charge: calculatedDeliveryCharge,
                     payment_method: 'cod',
                     shipping_address: shippingAddress
                 },
@@ -133,7 +133,7 @@ const Checkout = () => {
                 {
                     items: orderItems,
                     total_amount: finalTotal,
-                    delivery_charge: deliveryCharge,
+                    delivery_charge: calculatedDeliveryCharge,
                     payment_method: 'razorpay',
                     shipping_address: shippingAddress
                 },
@@ -218,11 +218,11 @@ const Checkout = () => {
         );
     }
 
-    const deliveryCharge = cartItems.reduce((total, item) => {
+    const calculatedDeliveryCharge = cart.items.reduce((total, item) => {
         return total + (item.product.delivery_charge || 0) * item.quantity;
     }, 0);
 
-    const finalTotal = cartTotal + deliveryCharge;
+    const finalTotal = cartTotal + calculatedDeliveryCharge;
 
     return (
         <div className="min-h-screen py-20" data-testid="checkout-page">
@@ -464,7 +464,7 @@ const Checkout = () => {
 
                                         <div className="flex justify-between text-sm">
                                             <span className="font-serif text-khajur-primary">Delivery Charge</span>
-                                            <span>₹{deliveryCharge.toFixed(2)}</span>
+                                            <span>₹{calculatedDeliveryCharge.toFixed(2)}</span>
                                         </div>
                                     </div>
 
