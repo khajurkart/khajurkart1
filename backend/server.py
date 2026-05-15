@@ -784,6 +784,7 @@ def generate_invoice(order):
     c.drawString(230, y + 8, "Qty")
     c.drawString(270, y + 8, "Price")
     c.drawString(330, y + 8, "Disc %")
+    c.drawString(380, y + 8, "Delivery")   # ✅ ADD THIS
     c.drawString(410, y + 8, "Final Amount")
 
     # ================= ITEMS =================
