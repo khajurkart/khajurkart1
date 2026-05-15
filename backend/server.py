@@ -87,6 +87,14 @@ async def root_head():
 async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
 
+@app.get("/api/settings/delivery-charge")
+def get_delivery_charge():
+    setting = db.settings.find_one({"type": "delivery"})
+    
+    if not setting:
+        return {"delivery_charge": 0}
+    
+    return {"delivery_charge": setting.get("delivery_charge", 0)}
 
 security = HTTPBearer()
 
@@ -928,17 +936,6 @@ async def create_product(product: Product):
     await db.products.insert_one(data)
     return data
 
-
-# ============ Deliery Charges  ============
-
-@app.get("/api/settings/delivery-charge")
-def get_delivery_charge():
-    setting = db.settings.find_one({"type": "delivery"})
-    
-    if not setting:
-        return {"delivery_charge": 0}
-    
-    return {"delivery_charge": setting.get("delivery_charge", 0)}
 
 # ============ REVIEW ROUTES ============
 
