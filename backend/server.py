@@ -238,6 +238,11 @@ class CreateReturnRequest(BaseModel):
     reason: str
     request_type: str
     images: Optional[List[str]] = None
+    
+class CreateOrderItem(BaseModel):
+    product_id: str
+    quantity: int
+    size: Optional[str] = None
 
 
 class CreateOrder(BaseModel):
