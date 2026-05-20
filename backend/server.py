@@ -1098,7 +1098,7 @@ async def create_order(
             {"$inc": {"stock": -item.quantity}},
         )
         if result.modified_count == 0:
-            raise HTTPException(400, f"Product {item.product_id} out of stock")
+            raise HTTPException(400, detail=f"Product {item.product_id} out of stock")
 
     # Calculate delivery charges from items
     # ✅ Flat delivery OR free shipping
@@ -1114,12 +1114,19 @@ async def create_order(
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
         if not product:
             continue 
-        selected_size = item.size or product.get("sizes", [])[0]["weight"]
+        sizes = product.get("sizes", [])
+
+        if not sizes:
+            raise HTTPException(400, detail="No sizes available")
+
+        selected_size = item.size or sizes[0]["weight"]
         size_data = next(
-            (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
+            (s for s in product.get("sizes", []) if s["weight"] == selected_size),
+            None
         )
+        
         if not size_data:
-            raise HTTPException(400, "Invalid size selected")
+            raise HTTPException(400, detail="Invalid size selected")
         # ✅ find selected size
         selected_size = item.size
 
