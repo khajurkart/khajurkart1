@@ -594,7 +594,8 @@ async def send_order_email(user_email, user_name, order_id, items, total):
     try:
         items_html = ""
         for item in items:
-            items_html += f"<li>{item['product_name']} x {item['quantity']} - ₹{item['price']}</li>"
+            size = item.get("size", "")
+            items_html += f"<li>{item['product_name']} ({size}) x {item['quantity']} - ₹{item['price']}</li>"
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
           
@@ -832,9 +833,11 @@ def generate_invoice(order):
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
-    items_total = order["total_amount"] - order.get("delivery_charges", 0)
-    c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{order['total_amount'] - order['delivery_charges']}")
-    c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{order['delivery_charges']}")
+    delivery = order.get("delivery_charges", 0)
+    items_total = order["total_amount"] - delivery
+
+    c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{items_total}")
+    c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{delivery}")
     c.drawRightString(width - 40, y - 60, f"Grand Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
@@ -1051,7 +1054,10 @@ async def update_cart_item(
 
     # Update quantity
     for item in cart["items"]:
-        if item["product_id"] == cart_item.product_id:
+        if (
+            item["product_id"] == cart_item.product_id
+            and item.get("size") == cart_item.size
+        ):
             item["quantity"] = cart_item.quantity
             item["size"] = cart_item.size
             break
