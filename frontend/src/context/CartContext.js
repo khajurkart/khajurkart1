@@ -7,6 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 console.log("Backend URL:", BACKEND_URL);
 
+
 const CartContext = createContext();
 
 export const useCart = () => {
@@ -42,17 +43,17 @@ export const CartProvider = ({ children }) => {
         }
     }, [user, token, fetchCart]);
 
-    const addToCart = (productId, quantity, size) => {
+    const addToCart = (product, quantity, size) => {
         setCart(prev => {
             const existing = prev.items.find(
-                item => item.product.id === productId && item.size === size
+                item => item.product.id === product.id && item.size === size
             );
 
             if (existing) {
                 return {
                     ...prev,
                     items: prev.items.map(item =>
-                        item.product.id === productId && item.size === size
+                        item.product.id === product.id && item.size === size
                             ? { ...item, quantity: item.quantity + quantity }
                             : item
                     )
@@ -64,9 +65,9 @@ export const CartProvider = ({ children }) => {
                 items: [
                     ...prev.items,
                     {
-                        product: products.find(p => p.id === productId), // make sure products exists here
+                        product,   // ✅ DIRECT PRODUCT
                         quantity,
-                        size // ✅ THIS FIXES YOUR ISSUE
+                        size       // ✅ CORRECT SIZE
                     }
                 ]
             };
