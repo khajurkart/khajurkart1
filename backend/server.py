@@ -1145,7 +1145,7 @@ async def create_order(
         )
 
         if not size_data:
-            raise HTTPException(400, "Invalid size selected")
+            size_data = sizes[0]  # fallback
 
         price = size_data["price"]
         original_price = size_data.get("original_price", price)
