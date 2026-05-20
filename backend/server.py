@@ -241,7 +241,7 @@ class CreateReturnRequest(BaseModel):
 
 
 class CreateOrder(BaseModel):
-    items: List[OrderItem]
+    items: List[CreateOrderItem]
     total_amount: float
     payment_method: str
     shipping_address: dict
