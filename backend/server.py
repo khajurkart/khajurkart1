@@ -1118,15 +1118,13 @@ async def create_order(
 
         if not sizes:
             raise HTTPException(400, detail="No sizes available")
-
+        
         selected_size = item.size or sizes[0]["weight"]
         size_data = next(
-            (s for s in product.get("sizes", []) if s["weight"] == selected_size),
-            None
+            (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
         )
-        
         if not size_data:
-            raise HTTPException(400, detail="Invalid size selected")
+            raise HTTPException(400, "Invalid size selected")
         # ✅ find selected size
         selected_size = item.size
 
