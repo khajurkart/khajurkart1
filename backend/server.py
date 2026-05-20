@@ -784,7 +784,6 @@ def generate_invoice(order):
     c.drawString(240, y + 8, "Qty")
     c.drawString(290, y + 8, "Price")
     c.drawString(340, y + 8, "Disc %")
-    c.drawString(400, y + 8, "Delivery")   # ✅ ADD THIS
     c.drawString(460, y + 8, "Final Amount")
 
     # ================= ITEMS =================
@@ -802,18 +801,14 @@ def generate_invoice(order):
         quantity = item["quantity"]
         size = item.get("size", "")
 
-        # ✅ PER ITEM DELIVERY
-        item_delivery = item.get("delivery_charge", 0) * quantity
-
         # ✅ FINAL PRICE
-        final_price = (item["price"] * quantity) + item_delivery
+        final_price = item["price"] * quantity
 
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
         c.drawString(245, y, str(quantity))
         c.drawString(285, y, f"Rs.{original}")
         c.drawString(345, y, f"{discount}%")
-        c.drawString(405, y, f"Rs.{item_delivery}")   # ✅ FIXED
         c.drawString(470, y, f"Rs.{final_price}")     # ✅ FIXED
 
         y -= 20
@@ -1106,12 +1101,14 @@ async def create_order(
             raise HTTPException(400, f"Product {item.product_id} out of stock")
 
     # Calculate delivery charges from items
+    # ✅ Flat delivery OR free shipping
     delivery_charges = 0
-    for item in order_data.items:
-        # Get product to fetch delivery charge
-        product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
-        if product:
-            delivery_charges += product.get("delivery_charge", 0) * item.quantity
+
+    FREE_SHIPPING_THRESHOLD = 2000
+    FLAT_DELIVERY_CHARGE = 50
+
+    if order_data.total_amount < FREE_SHIPPING_THRESHOLD:
+        delivery_charges = FLAT_DELIVERY_CHARGE
     items_with_discount = []
     for item in order_data.items:
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
@@ -1150,7 +1147,6 @@ async def create_order(
                 "original_price": original_price,
                 "price": price,  # discounted price
                 "discount": discount,
-                "delivery_charge": product.get("delivery_charge", 0)
             }
         )
 
