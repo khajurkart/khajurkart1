@@ -131,7 +131,7 @@ const ProductDetail = () => {
             s => s.weight === selectedSize || `${s.weight}g` === selectedSize
         );
         addToCart(
-            product.id,
+            product,
             quantity,
             selectedSize
         );
