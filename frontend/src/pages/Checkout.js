@@ -85,7 +85,7 @@ const Checkout = () => {
                 `${API}/orders`,
                 {
                     items: orderItems,
-                    total_amount: cartTotal,
+                    total_amount: finalTotal,
                     payment_method: 'cod',
                     shipping_address: shippingAddress
                 },
@@ -130,7 +130,7 @@ const Checkout = () => {
                 `${API}/orders`,
                 {
                     items: orderItems,
-                    total_amount: cartTotal,
+                    total_amount: finalTotal,
                     payment_method: 'razorpay',
                     shipping_address: shippingAddress
                 },
