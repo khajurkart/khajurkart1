@@ -18,7 +18,7 @@ const Checkout = () => {
     const [addresses, setAddresses] = useState([]);
     const { Razorpay } = useRazorpay();
     const [selectedAddress, setSelectedAddress] = useState(null);
-    
+
     useEffect(() => {
         const fetchAddresses = async () => {
             const res = await axios.get(`${API}/user/address`, {
@@ -85,8 +85,7 @@ const Checkout = () => {
                 `${API}/orders`,
                 {
                     items: orderItems,
-                    total_amount: finalTotal,
-                    delivery_charge: calculatedDeliveryCharge,
+                    total_amount: cartTotal,
                     payment_method: 'cod',
                     shipping_address: shippingAddress
                 },
@@ -131,8 +130,7 @@ const Checkout = () => {
                 `${API}/orders`,
                 {
                     items: orderItems,
-                    total_amount: finalTotal,
-                    delivery_charge: calculatedDeliveryCharge,
+                    total_amount: cartTotal,
                     payment_method: 'razorpay',
                     shipping_address: shippingAddress
                 },
@@ -217,11 +215,12 @@ const Checkout = () => {
         );
     }
 
-    const calculatedDeliveryCharge = cart.items.reduce((total, item) => {
-        return total + (item.product.delivery_charge || 0) * item.quantity;
-    }, 0);
+    const FREE_SHIPPING_THRESHOLD = 2000;
+    const FLAT_DELIVERY = 50;
 
-    const finalTotal = cartTotal + calculatedDeliveryCharge;
+    const deliveryCharge = cartTotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_DELIVERY;
+
+    const finalTotal = cartTotal + deliveryCharge;
 
     return (
         <div className="min-h-screen py-20" data-testid="checkout-page">
@@ -463,7 +462,7 @@ const Checkout = () => {
 
                                         <div className="flex justify-between text-sm">
                                             <span className="font-serif text-khajur-primary">Delivery Charge</span>
-                                            <span>₹{calculatedDeliveryCharge.toFixed(2)}</span>
+                                            <span>₹{deliveryCharge.toFixed(2)}</span>
                                         </div>
                                     </div>
 
