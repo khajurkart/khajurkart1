@@ -68,7 +68,7 @@ const Checkout = () => {
                 product_name: item.product.name,
                 quantity: item.quantity,
                 price: item.product.price,
-                size: item.size   // ✅ ADD THIS
+                size: item.size || item.product.sizes?.[0]?.weight   // ✅ FIX HERE
             }));
 
             const shippingAddress = {
@@ -113,7 +113,7 @@ const Checkout = () => {
                 product_name: item.product.name,
                 quantity: item.quantity,
                 price: item.product.price,
-                size: item.size   // ✅ ADD THIS
+                size: item.size || item.product.sizes?.[0]?.weight   // ✅ FIX HERE
             }));
 
             const shippingAddress = {
