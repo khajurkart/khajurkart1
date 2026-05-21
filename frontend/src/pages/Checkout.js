@@ -17,8 +17,8 @@ const Checkout = () => {
     const navigate = useNavigate();
     const [addresses, setAddresses] = useState([]);
     const { Razorpay } = useRazorpay();
-    const [selectedAddress, setSelectedAddress] = useState(null);
-    
+    const [selectedAddress, setSelectedAddress] = useState(null); 
+
     useEffect(() => {
         const fetchAddresses = async () => {
             const res = await axios.get(`${API}/user/address`, {
