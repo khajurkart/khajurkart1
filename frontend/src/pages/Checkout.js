@@ -18,7 +18,7 @@ const Checkout = () => {
     const [addresses, setAddresses] = useState([]);
     const { Razorpay } = useRazorpay();
     const [selectedAddress, setSelectedAddress] = useState(null);
-
+    
     useEffect(() => {
         const fetchAddresses = async () => {
             const res = await axios.get(`${API}/user/address`, {
@@ -63,19 +63,13 @@ const Checkout = () => {
     const handleCODOrder = async () => {
         setLoading(true);
         try {
-            const orderItems = cart.items.map(item => {
-                const selected = item.product.sizes?.find(
-                    s => s.weight === item.size
-                );
-
-                return {
-                    product_id: item.product.id,
-                    product_name: item.product.name,
-                    quantity: item.quantity,
-                    price: selected?.price || item.product.price,
-                    size: item.size
-                };
-            });
+            const orderItems = cart.items.map(item => ({
+                product_id: item.product.id,
+                product_name: item.product.name,
+                quantity: item.quantity,
+                price: item.product.price,
+                size: item.size   // ✅ ADD THIS
+            }));
 
             const shippingAddress = {
                 fullName: formData.fullName,
@@ -92,6 +86,7 @@ const Checkout = () => {
                 {
                     items: orderItems,
                     total_amount: finalTotal,
+                    delivery_charge: calculatedDeliveryCharge,
                     payment_method: 'cod',
                     shipping_address: shippingAddress
                 },
@@ -137,6 +132,7 @@ const Checkout = () => {
                 {
                     items: orderItems,
                     total_amount: finalTotal,
+                    delivery_charge: calculatedDeliveryCharge,
                     payment_method: 'razorpay',
                     shipping_address: shippingAddress
                 },
@@ -221,12 +217,11 @@ const Checkout = () => {
         );
     }
 
-    const FREE_SHIPPING_THRESHOLD = 2000;
-    const FLAT_DELIVERY = 50;
+    const calculatedDeliveryCharge = cart.items.reduce((total, item) => {
+        return total + (item.product.delivery_charge || 0) * item.quantity;
+    }, 0);
 
-    const deliveryCharge = cartTotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_DELIVERY;
-
-    const finalTotal = cartTotal + deliveryCharge;
+    const finalTotal = cartTotal + calculatedDeliveryCharge;
 
     return (
         <div className="min-h-screen py-20" data-testid="checkout-page">
@@ -468,7 +463,7 @@ const Checkout = () => {
 
                                         <div className="flex justify-between text-sm">
                                             <span className="font-serif text-khajur-primary">Delivery Charge</span>
-                                            <span>₹{deliveryCharge.toFixed(2)}</span>
+                                            <span>₹{calculatedDeliveryCharge.toFixed(2)}</span>
                                         </div>
                                     </div>
 
