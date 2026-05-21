@@ -63,13 +63,19 @@ const Checkout = () => {
     const handleCODOrder = async () => {
         setLoading(true);
         try {
-            const orderItems = cart.items.map(item => ({
-                product_id: item.product.id,
-                product_name: item.product.name,
-                quantity: item.quantity,
-                price: item.product.price,
-                size: item.size   // ✅ ADD THIS
-            }));
+            const orderItems = cart.items.map(item => {
+                const selected = item.product.sizes?.find(
+                    s => s.weight === item.size
+                );
+
+                return {
+                    product_id: item.product.id,
+                    product_name: item.product.name,
+                    quantity: item.quantity,
+                    price: selected?.price || item.product.price,
+                    size: item.size
+                };
+            });
 
             const shippingAddress = {
                 fullName: formData.fullName,
