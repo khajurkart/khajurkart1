@@ -43,7 +43,7 @@ const ProductDetail = () => {
 
     useEffect(() => {
         if (product?.sizes?.length && !selectedSize) {
-            setSelectedSize(product.sizes[0].weight.trim());
+            setSelectedSize(product.sizes[0].weight);
         }
     }, [product]);
 
@@ -131,9 +131,9 @@ const ProductDetail = () => {
             s => s.weight === selectedSize || `${s.weight}g` === selectedSize
         );
         addToCart(
-            product,
+            product.id,
             quantity,
-            selectedSize || product.sizes[0].weight
+            selectedSize
         );
     };
 
@@ -175,7 +175,7 @@ const ProductDetail = () => {
         : "0.0";
 
     const selected = product.sizes?.find(
-        s => s.weight.trim() === selectedSize
+        s => s.weight.trim() === selectedSize.trim()
     );
 
     const currentPrice = selected?.price ?? product.sizes?.[0]?.price ?? 0;
@@ -254,7 +254,7 @@ const ProductDetail = () => {
                                 {product.sizes?.map((size, index) => (
                                     <button
                                         key={index}
-                                        onClick={() => setSelectedSize(size.weight.trim())}
+                                        onClick={() => setSelectedSize(size.weight)}
                                         className={`px-5 py-2 border rounded-sm text-sm font-medium transition-all
                                             ${selectedSize === size.weight
                                                 ? "bg-khajur-primary text-white border-khajur-primary scale-105 shadow-md"
