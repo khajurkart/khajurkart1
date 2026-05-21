@@ -43,35 +43,28 @@ export const CartProvider = ({ children }) => {
         }
     }, [user, token, fetchCart]);
 
-    const addToCart = (product, quantity, size) => {
-        setCart(prev => {
-            const existing = prev.items.find(
-                item => item.product.id === product.id && item.size === size
+    const addToCart = async (productId, quantity = 1, size = null) => {
+
+        console.log("SIZE RECEIVED IN CONTEXT:", size);
+        
+        if (!user) {
+            toast.error('Please login to add items to cart');
+            return;
+        }
+
+        try {
+            await axios.post(
+                `${API}/cart/add`,
+                { product_id: productId, quantity, size },
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            if (existing) {
-                return {
-                    ...prev,
-                    items: prev.items.map(item =>
-                        item.product.id === product.id && item.size === size
-                            ? { ...item, quantity: item.quantity + quantity }
-                            : item
-                    )
-                };
-            }
-
-            return {
-                ...prev,
-                items: [
-                    ...prev.items,
-                    {
-                        product,   // ✅ pass full product directly
-                        quantity,
-                        size       // ✅ always preserved
-                    }
-                ]
-            };
-        });
+            await fetchCart();
+            toast.success('Added to cart');
+        } catch (error) {
+            toast.error('Failed to add to cart');
+            console.error(error);
+        }
     };
 
     const updateCartItem = async (productId, quantity, size) => {
