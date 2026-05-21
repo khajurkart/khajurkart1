@@ -238,15 +238,10 @@ class CreateReturnRequest(BaseModel):
     reason: str
     request_type: str
     images: Optional[List[str]] = None
-    
-class CreateOrderItem(BaseModel):
-    product_id: str
-    quantity: int
-    size: Optional[str] = None
 
 
 class CreateOrder(BaseModel):
-    items: List[CreateOrderItem]
+    items: List[OrderItem]
     total_amount: float
     payment_method: str
     shipping_address: dict
@@ -594,8 +589,7 @@ async def send_order_email(user_email, user_name, order_id, items, total):
     try:
         items_html = ""
         for item in items:
-            size = item.get("size", "")
-            items_html += f"<li>{item['product_name']} ({size}) x {item['quantity']} - ₹{item['price']}</li>"
+            items_html += f"<li>{item['product_name']} x {item['quantity']} - ₹{item['price']}</li>"
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
           
@@ -787,10 +781,11 @@ def generate_invoice(order):
     c.setFont("Helvetica-Bold", 10)
     c.drawString(45, y + 8, "S.No")
     c.drawString(80, y + 8, "Item Name")
-    c.drawString(260, y + 8, "Qty")
-    c.drawString(310, y + 8, "Price")
-    c.drawString(360, y + 8, "Disc %")
-    c.drawString(440, y + 8, "Final Amount")
+    c.drawString(240, y + 8, "Qty")
+    c.drawString(290, y + 8, "Price")
+    c.drawString(340, y + 8, "Disc %")
+    c.drawString(400, y + 8, "Delivery")   # ✅ ADD THIS
+    c.drawString(460, y + 8, "Final Amount")
 
     # ================= ITEMS =================
 
@@ -807,15 +802,19 @@ def generate_invoice(order):
         quantity = item["quantity"]
         size = item.get("size", "")
 
+        # ✅ PER ITEM DELIVERY
+        item_delivery = item.get("delivery_charge", 0) * quantity
+
         # ✅ FINAL PRICE
-        final_price = item["price"] * quantity
+        final_price = (item["price"] * quantity) + item_delivery
 
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
-        c.drawString(265, y, str(quantity))
-        c.drawString(305, y, f"Rs.{original}")
-        c.drawString(365, y, f"{discount}%")
-        c.drawString(440, y, f"Rs.{final_price}")     # ✅ FIXED
+        c.drawString(245, y, str(quantity))
+        c.drawString(285, y, f"Rs.{original}")
+        c.drawString(345, y, f"{discount}%")
+        c.drawString(405, y, f"Rs.{item_delivery}")   # ✅ FIXED
+        c.drawString(470, y, f"Rs.{final_price}")     # ✅ FIXED
 
         y -= 20
         
@@ -833,11 +832,9 @@ def generate_invoice(order):
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
-    delivery = order.get("delivery_charges", 0)
-    items_total = order["total_amount"] - delivery
-
-    c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{items_total}")
-    c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{delivery}")
+    items_total = order["total_amount"] - order.get("delivery_charges", 0)
+    c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{order['total_amount'] - order['delivery_charges']}")
+    c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{order['delivery_charges']}")
     c.drawRightString(width - 40, y - 60, f"Grand Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
@@ -1054,10 +1051,7 @@ async def update_cart_item(
 
     # Update quantity
     for item in cart["items"]:
-        if (
-            item["product_id"] == cart_item.product_id
-            and item.get("size") == cart_item.size
-        ):
+        if item["product_id"] == cart_item.product_id:
             item["quantity"] = cart_item.quantity
             item["size"] = cart_item.size
             break
@@ -1109,28 +1103,21 @@ async def create_order(
             {"$inc": {"stock": -item.quantity}},
         )
         if result.modified_count == 0:
-            raise HTTPException(400, detail=f"Product {item.product_id} out of stock")
+            raise HTTPException(400, f"Product {item.product_id} out of stock")
 
     # Calculate delivery charges from items
-    # ✅ Flat delivery OR free shipping
     delivery_charges = 0
-
-    FREE_SHIPPING_THRESHOLD = 2000
-    FLAT_DELIVERY_CHARGE = 50
-
-    if order_data.total_amount < FREE_SHIPPING_THRESHOLD:
-        delivery_charges = FLAT_DELIVERY_CHARGE
+    for item in order_data.items:
+        # Get product to fetch delivery charge
+        product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
+        if product:
+            delivery_charges += product.get("delivery_charge", 0) * item.quantity
     items_with_discount = []
     for item in order_data.items:
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
         if not product:
             continue 
-        sizes = product.get("sizes", [])
-
-        if not sizes:
-            raise HTTPException(400, detail="No sizes available")
-        
-        selected_size = item.size or sizes[0]["weight"]
+        selected_size = item.size or product.get("sizes", [])[0]["weight"]
         size_data = next(
             (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
         )
@@ -1145,7 +1132,7 @@ async def create_order(
         )
 
         if not size_data:
-            size_data = sizes[0]  # fallback
+            raise HTTPException(400, "Invalid size selected")
 
         price = size_data["price"]
         original_price = size_data.get("original_price", price)
@@ -1159,10 +1146,11 @@ async def create_order(
                 "product_id": item.product_id,  # ✅ ADD THIS
                 "product_name": product.get("name"),
                 "quantity": item.quantity,
-                "size": selected_size,   # ✅ FIXED
+                "size": item.size,
                 "original_price": original_price,
                 "price": price,  # discounted price
                 "discount": discount,
+                "delivery_charge": product.get("delivery_charge", 0)
             }
         )
 
