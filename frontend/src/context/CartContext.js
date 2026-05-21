@@ -65,9 +65,9 @@ export const CartProvider = ({ children }) => {
                 items: [
                     ...prev.items,
                     {
-                        product,   // ✅ DIRECT PRODUCT
+                        product,   // ✅ pass full product directly
                         quantity,
-                        size       // ✅ CORRECT SIZE
+                        size       // ✅ always preserved
                     }
                 ]
             };
