@@ -87,6 +87,7 @@ async def root_head():
 async def root():
     return {"message": "KhajurKart Backend Running 🚀"}
 
+
 security = HTTPBearer()
 
 # ============ MODELS ============
@@ -169,7 +170,6 @@ class CartItem(BaseModel):
     product_id: str
     quantity: int
     size: Optional[str] = None
-
 
 
 class CartItemResponse(BaseModel):
@@ -524,6 +524,7 @@ async def reset_password(reset_token: str, new_password: str):
 
 # ============ EMAIL RECEIVER ============
 
+
 async def send_email(name, email, phone, message):
     try:
         html = f"""
@@ -552,6 +553,7 @@ async def send_email(name, email, phone, message):
 
 
 # ======== SENDER EMAIL ===========
+
 
 async def send_auto_reply(name, email):
     try:
@@ -584,6 +586,7 @@ async def send_auto_reply(name, email):
 
 
 # =========== ORDER CONFIRMATION =========
+
 
 async def send_order_email(user_email, user_name, order_id, items, total):
     try:
@@ -633,6 +636,7 @@ async def send_order_email(user_email, user_name, order_id, items, total):
 
 # ============ CONTACT ROUTES ============
 
+
 @api_router.post("/contact")
 async def contact_form(data: ContactForm):
     name = data.name
@@ -657,6 +661,7 @@ async def contact_form(data: ContactForm):
 
 
 # =========== MULTI-ADDRESS SUPPORT ROUTES ====
+
 
 @api_router.post("/user/address")
 async def add_address(address: dict, current_user: dict = Depends(get_current_user)):
@@ -711,6 +716,7 @@ async def set_default_address(
 
 
 # ==================== INVOICE PDF DOWNLOAD ========================
+
 
 def generate_invoice(order):
     file_path = f"/tmp/invoice_{order['id']}.pdf"
@@ -784,7 +790,7 @@ def generate_invoice(order):
     c.drawString(240, y + 8, "Qty")
     c.drawString(290, y + 8, "Price")
     c.drawString(340, y + 8, "Disc %")
-    c.drawString(400, y + 8, "Delivery")   # ✅ ADD THIS
+    c.drawString(400, y + 8, "Delivery")  # ✅ ADD THIS
     c.drawString(460, y + 8, "Final Amount")
 
     # ================= ITEMS =================
@@ -792,7 +798,7 @@ def generate_invoice(order):
     y -= 30
     c.setFillColor(colors.black)
     c.setFont("Helvetica", 10)
-    
+
     total_delivery = order.get("delivery_charges", 0)
     items = order["items"]
 
@@ -813,27 +819,30 @@ def generate_invoice(order):
         c.drawString(245, y, str(quantity))
         c.drawString(285, y, f"Rs.{original}")
         c.drawString(345, y, f"{discount}%")
-        c.drawString(405, y, f"Rs.{item_delivery}")   # ✅ FIXED
-        c.drawString(470, y, f"Rs.{final_price}")     # ✅ FIXED
+        c.drawString(405, y, f"Rs.{item_delivery}")  # ✅ FIXED
+        c.drawString(470, y, f"Rs.{final_price}")  # ✅ FIXED
 
         y -= 20
-        
+
         # ✅ DRAW LINE ONLY IF NOT LAST ITEM
         if i < len(items):
             c.setStrokeColor(colors.black)
             c.setDash(3, 2)
             c.line(40, y, width - 40, y)
             c.setDash()
-    
-            y -= 20
 
+            y -= 20
 
     # ================= TOTAL =================
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
     items_total = order["total_amount"] - order.get("delivery_charges", 0)
-    c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{order['total_amount'] - order['delivery_charges']}")
+    c.drawRightString(
+        width - 40,
+        y - 20,
+        f"Items Total: Rs.{order['total_amount'] - order['delivery_charges']}",
+    )
     c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{order['delivery_charges']}")
     c.drawRightString(width - 40, y - 60, f"Grand Total: Rs.{order['total_amount']}")
     c.save()
@@ -886,7 +895,7 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
                     original_price = p.get("original_price", price)
 
                 p["price"] = price
-                p["original_price"] = original_price 
+                p["original_price"] = original_price
 
                 if original_price > price:
                     p["discount"] = round(
@@ -979,21 +988,22 @@ async def get_cart(current_user: dict = Depends(get_current_user)):
         product = await db.products.find_one({"id": item["product_id"]}, {"_id": 0})
         if product:
             sizes = product.get("sizes") or []
-    
+
             if sizes:
                 selected_size = item.get("size")
-    
+
                 size_data = next(
                     (s for s in sizes if s.get("weight") == selected_size),
-                    sizes[0]  # fallback
+                    sizes[0],  # fallback
                 )
-    
+
                 product["price"] = size_data.get("price", 0)
-                product["original_price"] = size_data.get("original_price", product["price"])
+                product["original_price"] = size_data.get(
+                    "original_price", product["price"]
+                )
             else:
                 product["price"] = product.get("price", 0)
             item["product"] = product
-    
 
     return cart
 
@@ -1017,7 +1027,7 @@ async def add_to_cart(
     for item in cart["items"]:
         if (
             item["product_id"] == cart_item.product_id
-            and item["size"] == cart_item.size   # ✅ FIXED
+            and item["size"] == cart_item.size  # ✅ FIXED
         ):
             item["quantity"] += cart_item.quantity
             item_exists = True
@@ -1028,7 +1038,7 @@ async def add_to_cart(
             {
                 "product_id": cart_item.product_id,
                 "quantity": cart_item.quantity,
-                "size": cart_item.size,   # ✅ FIXED
+                "size": cart_item.size,  # ✅ FIXED
             }
         )
 
@@ -1115,8 +1125,10 @@ async def create_order(
     items_with_discount = []
     for item in order_data.items:
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
+        print("ITEM:", item)  # ✅ HERE
+        print("AVAILABLE SIZES:", product.get("sizes"))  # ✅ HERE
         if not product:
-            continue 
+            continue
         selected_size = item.size or product.get("sizes", [])[0]["weight"]
         size_data = next(
             (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
@@ -1127,8 +1139,7 @@ async def create_order(
         selected_size = item.size
 
         size_data = next(
-            (s for s in product.get("sizes", []) if s["weight"] == selected_size),
-            None
+            (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
         )
 
         if not size_data:
@@ -1150,7 +1161,7 @@ async def create_order(
                 "original_price": original_price,
                 "price": price,  # discounted price
                 "discount": discount,
-                "delivery_charge": product.get("delivery_charge", 0)
+                "delivery_charge": product.get("delivery_charge", 0),
             }
         )
 
