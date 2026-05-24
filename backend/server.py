@@ -787,11 +787,10 @@ def generate_invoice(order):
     c.setFont("Helvetica-Bold", 10)
     c.drawString(45, y + 8, "S.No")
     c.drawString(80, y + 8, "Item Name")
-    c.drawString(240, y + 8, "Qty")
-    c.drawString(290, y + 8, "Price")
-    c.drawString(340, y + 8, "Disc %")
-    c.drawString(400, y + 8, "Delivery")  # ✅ ADD THIS
-    c.drawString(460, y + 8, "Final Amount")
+    c.drawString(260, y + 8, "Qty")
+    c.drawString(310, y + 8, "Price")
+    c.drawString(360, y + 8, "Disc %")
+    c.drawString(420, y + 8, "Final Amount")
 
     # ================= ITEMS =================
 
@@ -808,19 +807,15 @@ def generate_invoice(order):
         quantity = item["quantity"]
         size = item.get("size", "")
 
-        # ✅ PER ITEM DELIVERY
-        item_delivery = item.get("delivery_charge", 0) * quantity
-
         # ✅ FINAL PRICE
-        final_price = (item["price"] * quantity) + item_delivery
+        final_price = item["price"] * quantity
 
         c.drawString(45, y, str(i))
         c.drawString(80, y, f"{item['product_name']} ({size})")
-        c.drawString(245, y, str(quantity))
-        c.drawString(285, y, f"Rs.{original}")
-        c.drawString(345, y, f"{discount}%")
-        c.drawString(405, y, f"Rs.{item_delivery}")  # ✅ FIXED
-        c.drawString(470, y, f"Rs.{final_price}")  # ✅ FIXED
+        c.drawString(265, y, str(quantity))
+        c.drawString(305, y, f"Rs.{original}")
+        c.drawString(365, y, f"{discount}%")
+        c.drawString(430, y, f"Rs.{final_price}")  # ✅ FIXED
 
         y -= 20
 
@@ -1116,12 +1111,12 @@ async def create_order(
             raise HTTPException(400, f"Product {item.product_id} out of stock")
 
     # Calculate delivery charges from items
-    delivery_charges = 0
-    for item in order_data.items:
-        # Get product to fetch delivery charge
-        product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
-        if product:
-            delivery_charges += product.get("delivery_charge", 0) * item.quantity
+    distance = order_data.shipping_address.get("distance_km", 0)
+
+    if order_data.total_amount >= 2000:
+        delivery_charges = 0
+    else:
+        delivery_charges = calculate_delivery(distance)
     items_with_discount = []
     for item in order_data.items:
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
@@ -1161,10 +1156,15 @@ async def create_order(
                 "original_price": original_price,
                 "price": price,  # discounted price
                 "discount": discount,
-                "delivery_charge": product.get("delivery_charge", 0),
             }
         )
-
+    def calculate_delivery(distance_km):
+        if distance_km <= 5:
+            return 40
+        elif distance_km <= 10:
+            return 60
+        else:
+            return 100
     order_doc = {
         "id": order_id,
         "user_id": current_user["id"],
