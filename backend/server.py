@@ -1111,8 +1111,15 @@ async def create_order(
             raise HTTPException(400, f"Product {item.product_id} out of stock")
 
     # Calculate delivery charges from items
-    distance = order_data.shipping_address.get("distance_km", 0)
-
+    def calculate_delivery(distance_km):
+        if distance_km <= 5:
+            return 40
+        elif distance_km <= 10:
+            return 60
+        else:
+            return 100
+    
+    # then use it
     if order_data.total_amount >= 2000:
         delivery_charges = 0
     else:
