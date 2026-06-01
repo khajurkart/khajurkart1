@@ -592,7 +592,9 @@ async def send_order_email(user_email, user_name, order_id, items, total):
     try:
         items_html = ""
         for item in items:
-            items_html += f"<li>{item['product_name']} x {item['quantity']} - ₹{item['price']}</li>"
+            size = item.get('size', '')
+            size_text = f" ({size})" if size else ""
+            items_html += f"<li>{item['product_name']}{size_text} x {item['quantity']} - ₹{item['price']}</li>"
         html = f"""
         <div style="font-family: Arial; padding: 20px;">
           
@@ -660,7 +662,7 @@ async def contact_form(data: ContactForm):
     return {"message": "Message received successfully"}
 
 
-# =========== MULTI-ADDRESS SUPPORT ROUTES ====
+# =========== MULTI-ADDRESS SUPPORT ROUTES ============
 
 
 @api_router.post("/user/address")
