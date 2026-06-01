@@ -145,7 +145,7 @@ const Checkout = () => {
             const razorpayOrderResponse = await axios.post(
                 `${API}/razorpay/create-order`,
                 {
-                    amount: cartTotal,
+                    amount: finalTotal,
                     currency: 'INR'
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
