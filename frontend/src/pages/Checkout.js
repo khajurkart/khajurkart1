@@ -17,7 +17,7 @@ const Checkout = () => {
     const navigate = useNavigate();
     const [addresses, setAddresses] = useState([]);
     const { Razorpay } = useRazorpay();
-    const [selectedAddress, setSelectedAddress] = useState(null); 
+    const [selectedAddress, setSelectedAddress] = useState(null);
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -217,11 +217,8 @@ const Checkout = () => {
         );
     }
 
-    const calculatedDeliveryCharge = cart.items.reduce((total, item) => {
-        return total + (item.product.delivery_charge || 0) * item.quantity;
-    }, 0);
-
-    const finalTotal = cartTotal + calculatedDeliveryCharge;
+    const calculatedDeliveryCharge = 0; // Free delivery
+    const finalTotal = cartTotal;
 
     return (
         <div className="min-h-screen py-20" data-testid="checkout-page">
@@ -463,7 +460,7 @@ const Checkout = () => {
 
                                         <div className="flex justify-between text-sm">
                                             <span className="font-serif text-khajur-primary">Delivery Charge</span>
-                                            <span>₹{calculatedDeliveryCharge.toFixed(2)}</span>
+                                            <span className="text-green-600 font-semibold">FREE</span>
                                         </div>
                                     </div>
 
