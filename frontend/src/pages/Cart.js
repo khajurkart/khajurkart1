@@ -1,171 +1,494 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { useRazorpay } from 'react-razorpay';
 
-const Cart = () => {
-    const { cart, updateCartItem, removeFromCart, cartTotal, loading } = useCart();
-    const { user } = useAuth();
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+console.log("Backend URL:", BACKEND_URL);
+
+
+const Checkout = () => {
+    const { cart, cartTotal, clearCart } = useCart();
+    const { user, token } = useAuth();
     const navigate = useNavigate();
+    const [addresses, setAddresses] = useState([]);
+    const { Razorpay } = useRazorpay();
+    const [selectedAddress, setSelectedAddress] = useState(null);
 
-    const handleQuantityChange = (productId, newQuantity) => {
-        if (newQuantity > 0) {
-            updateCartItem(productId, newQuantity);
-        }
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            const res = await axios.get(`${API}/user/address`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAddresses(res.data);
+        };
+        if (token) fetchAddresses();
+    }, [token]);
+
+    const [formData, setFormData] = useState({
+        fullName: user?.name || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+        address: '',
+        city: '',
+        state: '',
+        pincode: '',
+        paymentMethod: 'cod'
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleCheckout = () => {
-        if (!user) {
-            alert('Please login to checkout');
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!cart.items || cart.items.length === 0) {
+            toast.error('Your cart is empty');
             return;
         }
-        navigate('/checkout');
+
+        if (formData.paymentMethod === 'razorpay') {
+            await handleRazorpayPayment();
+        } else {
+            await handleCODOrder();
+        }
     };
 
-    if (loading) {
+    const handleCODOrder = async () => {
+        setLoading(true);
+        try {
+            const orderItems = cart.items.map(item => ({
+                product_id: item.product.id,
+                product_name: item.product.name,
+                quantity: item.quantity,
+                price: item.product.price,
+                size: item.size || item.product.sizes?.[0]?.weight   // ✅ FIX HERE
+            }));
+
+            const shippingAddress = {
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                pincode: formData.pincode
+            };
+
+            await axios.post(
+                `${API}/orders`,
+                {
+                    items: orderItems,
+                    total_amount: finalTotal,
+                    delivery_charge: calculatedDeliveryCharge,
+                    payment_method: 'cod',
+                    shipping_address: shippingAddress
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            toast.success('Order placed successfully!');
+            await clearCart();
+            navigate('/');
+        } catch (error) {
+            console.error('Order failed', error);
+            toast.error(error.response?.data?.detail || 'Failed to place order');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRazorpayPayment = async () => {
+        setLoading(true);
+        try {
+            // Create order items
+            const orderItems = cart.items.map(item => ({
+                product_id: item.product.id,
+                product_name: item.product.name,
+                quantity: item.quantity,
+                price: item.product.price,
+                size: item.size || item.product.sizes?.[0]?.weight   // ✅ FIX HERE
+            }));
+
+            const shippingAddress = {
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                pincode: formData.pincode
+            };
+
+            // Create order in backend
+            const orderResponse = await axios.post(
+                `${API}/orders`,
+                {
+                    items: orderItems,
+                    total_amount: finalTotal,
+                    delivery_charge: calculatedDeliveryCharge,
+                    payment_method: 'razorpay',
+                    shipping_address: shippingAddress
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const orderId = orderResponse.data.order_id;
+
+            // Create Razorpay order
+            const razorpayOrderResponse = await axios.post(
+                `${API}/razorpay/create-order`,
+                {
+                    amount: cartTotal,
+                    currency: 'INR'
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const razorpayOrder = razorpayOrderResponse.data;
+
+            // Initialize Razorpay payment
+            const options = {
+                key: razorpayOrder.key_id,
+                amount: razorpayOrder.amount,
+                currency: razorpayOrder.currency,
+                order_id: razorpayOrder.id,
+                name: 'KhajurKart',
+                description: 'Premium Dry Fruits & Spices',
+                image: 'https://customer-assets.emergentagent.com/job_premium-spice-cart/artifacts/p1zf2opj_WhatsApp%20Image%202026-02-23%20at%204.12.54%20PM.jpeg',
+                prefill: {
+                    name: formData.fullName,
+                    email: formData.email,
+                    contact: formData.phone
+                },
+                theme: {
+                    color: '#0F3D2E'
+                },
+                handler: async (response) => {
+                    try {
+                        // Verify payment
+                        await axios.post(
+                            `${API}/razorpay/verify-payment`,
+                            {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                order_id: orderId
+                            },
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+
+                        toast.success('Payment successful! Order confirmed.');
+                        await clearCart();
+                        navigate('/');
+                    } catch (error) {
+                        console.error('Payment verification failed', error);
+                        toast.error('Payment verification failed');
+                    }
+                },
+                modal: {
+                    ondismiss: () => {
+                        setLoading(false);
+                        toast.error('Payment cancelled');
+                    }
+                }
+            };
+
+            const razorpayInstance = new Razorpay(options);
+            razorpayInstance.open();
+        } catch (error) {
+            console.error('Razorpay payment failed', error);
+            toast.error(error.response?.data?.detail || 'Failed to initiate payment');
+            setLoading(false);
+        }
+    };
+
+    if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-khajur-dark/60">Loading cart...</p>
+            <div className="min-h-screen flex flex-col items-center justify-center">
+                <p className="text-khajur-dark/60 mb-4">Please login to checkout</p>
             </div>
         );
     }
 
-    if (!cart.items || cart.items.length === 0) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center py-20" data-testid="empty-cart">
-                <ShoppingBag className="w-24 h-24 text-khajur-muted mb-4" />
-                <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-4">
-                    Your cart is empty
-                </h2>
-                <p className="text-khajur-dark/60 mb-8">Add some products to get started</p>
-                <Link
-                    to="/products"
-                    className="bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90 rounded-sm px-8 py-3 uppercase tracking-widest text-xs font-bold transition-all border border-transparent hover:border-khajur-gold"
-                    data-testid="continue-shopping-empty"
-                >
-                    Continue Shopping
-                </Link>
-            </div>
-        );
-    }
+    const calculatedDeliveryCharge = 0; // Free delivery
+    const finalTotal = cartTotal;
 
     return (
-        <div className="min-h-screen py-20" data-testid="cart-page">
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="min-h-screen py-20" data-testid="checkout-page">
+            <div className="max-w-5xl mx-auto px-6 md:px-12">
                 <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-12">
-                    Shopping Cart
+                    Checkout
                 </h1>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Cart Items */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {cart.items.map((item) => {
-                            const product = item.product;
-                            if (!product || product.price === undefined) return null;
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-                            return (
-                                <div
-                                    key={item.product_id}
-                                    className="bg-white border border-khajur-border p-6 flex flex-col sm:flex-row gap-6"
-                                    data-testid={`cart-item-${item.product_id}`}
-                                >
-                                    <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="w-full sm:w-32 h-32 object-cover"
-                                    />
+                        {/* SAVED ADDRESSES */}
+                        {addresses.length > 0 && (
+                            <div className="bg-white border border-khajur-border p-6 mb-8">
+                                <h2 className="font-serif text-2xl text-khajur-primary mb-4">
+                                    Saved Addresses
+                                </h2>
 
-                                    <div className="flex-1">
-                                        <Link to={`/products/${product.id}?category=${product.category}`}>
-                                            <h3 className="font-serif text-xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors mb-2">
-                                                {product.name}
-                                            </h3>
-                                        </Link>
-                                        <p className="text-sm text-khajur-muted mb-3">{product.weight}</p>
-                                        <p className="font-serif text-xl text-khajur-gold font-bold" data-testid={`cart-item-price-${item.product_id}`}>
-                                            ₹{(product.price || 0).toFixed(2)}
-                                        </p>
-                                    </div>
-
-                                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4">
-                                        <div className="flex items-center space-x-3">
-                                            <button
-                                                onClick={() => handleQuantityChange(item.product_id, item.quantity - 1)}
-                                                className="bg-khajur-cream hover:bg-khajur-accent text-khajur-primary w-8 h-8 rounded-sm transition-colors flex items-center justify-center"
-                                                data-testid={`decrease-cart-quantity-${item.product_id}`}
-                                            >
-                                                <Minus className="w-4 h-4" />
-                                            </button>
-                                            <span className="text-lg font-medium w-8 text-center" data-testid={`cart-item-quantity-${item.product_id}`}>{item.quantity}</span>
-                                            <button
-                                                onClick={() => handleQuantityChange(item.product_id, item.quantity + 1)}
-                                                className="bg-khajur-cream hover:bg-khajur-accent text-khajur-primary w-8 h-8 rounded-sm transition-colors flex items-center justify-center"
-                                                data-testid={`increase-cart-quantity-${item.product_id}`}
-                                            >
-                                                <Plus className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                        <button
-                                            onClick={() => removeFromCart(item.product_id)}
-                                            className="text-red-500 hover:text-red-700 transition-colors"
-                                            data-testid={`remove-cart-item-${item.product_id}`}
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {addresses.map((addr, index) => (
+                                        <div
+                                            key={index}
+                                            onClick={() => {
+                                                setSelectedAddress(index);
+                                                setFormData({
+                                                    ...formData,
+                                                    fullName: addr.name,
+                                                    phone: addr.phone,
+                                                    address: addr.address,
+                                                    city: addr.city || '',
+                                                    state: addr.state || '',
+                                                    pincode: addr.pincode || ''
+                                                });
+                                            }}
+                                            className={`border p-4 cursor-pointer transition-all rounded-sm 
+                                              ${selectedAddress === index
+                                                    ? "border-khajur-gold shadow-[0_0_10px_rgba(198,169,98,0.3)]"
+                                                    : "border-khajur-border hover:border-khajur-gold"
+                                                }`}
                                         >
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
+                                            <p className="font-semibold text-khajur-primary">{addr.name}</p>
+                                            <p className="text-sm text-khajur-dark">{addr.phone}</p>
+                                            <p className="text-sm text-khajur-dark/70">{addr.address}</p>
+
+                                            {selectedAddress === index && (
+                                                <p className="text-xs text-khajur-gold mt-2 font-bold">
+                                                    Selected
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => navigate('/addresses')}
+                                    className="mt-4 text-sm text-khajur-gold underline"
+                                >
+                                    + Add / Manage Addresses
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Shipping Information */}
+                        <div className="lg:col-span-2">
+                            <div className="bg-white border border-khajur-border p-8">
+                                <h2 className="font-serif text-2xl font-medium text-khajur-primary mb-6">
+                                    Shipping Information
+                                </h2>
+
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                                Full Name *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="fullName"
+                                                required
+                                                value={formData.fullName}
+                                                onChange={handleInputChange}
+                                                className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                                                data-testid="checkout-fullname"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                                Email *
+                                            </label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                required
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                                className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                                                data-testid="checkout-email"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                            Phone *
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            required
+                                            value={formData.phone}
+                                            onChange={handleInputChange}
+                                            className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                                            data-testid="checkout-phone"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                            Address *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="address"
+                                            required
+                                            value={formData.address}
+                                            onChange={handleInputChange}
+                                            className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                                            data-testid="checkout-address"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                                City *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="city"
+                                                required
+                                                value={formData.city}
+                                                onChange={handleInputChange}
+                                                className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                                                data-testid="checkout-city"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                                State *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="state"
+                                                required
+                                                value={formData.state}
+                                                onChange={handleInputChange}
+                                                className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                                                data-testid="checkout-state"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                                Pincode *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="pincode"
+                                                required
+                                                value={formData.pincode}
+                                                onChange={handleInputChange}
+                                                className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 focus:ring-0 outline-none transition-colors"
+                                                data-testid="checkout-pincode"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            );
-                        })}
-                    </div>
 
-                    {/* Order Summary */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white border border-khajur-border p-8 sticky top-24" data-testid="order-summary">
-                            <h2 className="font-serif text-2xl font-medium text-khajur-primary mb-6">
-                                Order Summary
-                            </h2>
-
-                            <div className="space-y-4 mb-6">
-                                <div className="flex justify-between">
-                                    <span className="text-khajur-dark/70">Subtotal</span>
-                                    <span className="font-medium" data-testid="cart-subtotal">₹{(cartTotal || 0).toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-khajur-dark/70">Delivery Charges</span>
-                                    <span className="font-medium text-green-600">FREE</span>
-                                </div>
-                                <div className="border-t border-khajur-border pt-4">
-                                    <div className="flex justify-between text-lg">
-                                        <span className="font-serif font-medium text-khajur-primary">Total</span>
-                                        <span className="font-serif text-2xl font-bold text-khajur-gold" data-testid="cart-total">
-                                            ₹{(cartTotal || 0).toFixed(2)}
-                                        </span>
+                                {/* Payment Method */}
+                                <div className="mt-8">
+                                    <h3 className="font-serif text-xl font-medium text-khajur-primary mb-4">
+                                        Payment Method
+                                    </h3>
+                                    <div className="space-y-3">
+                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value="cod"
+                                                checked={formData.paymentMethod === 'cod'}
+                                                onChange={handleInputChange}
+                                                className="text-khajur-primary focus:ring-khajur-gold"
+                                                data-testid="payment-cod"
+                                            />
+                                            <span className="text-khajur-dark">Cash on Delivery</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value="razorpay"
+                                                checked={formData.paymentMethod === 'razorpay'}
+                                                onChange={handleInputChange}
+                                                className="text-khajur-primary focus:ring-khajur-gold"
+                                                data-testid="payment-razorpay"
+                                            />
+                                            <span className="text-khajur-dark">Pay Online (Razorpay)</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <button
-                                onClick={handleCheckout}
-                                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all mb-4"
-                                data-testid="proceed-to-checkout"
-                            >
-                                Proceed to Checkout
-                            </button>
+                        {/* Order Summary */}
+                        <div className="lg:col-span-3 flex justify-center">
+                            <div className="bg-white border border-khajur-border p-10 w-full max-w-md">
+                                <div className="bg-white border border-khajur-border p-8 sticky top-24" data-testid="checkout-summary">
+                                    <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-6">
+                                        Order Summary
+                                    </h2>
 
-                            <Link
-                                to="/products"
-                                className="block text-center text-khajur-primary hover:text-khajur-gold transition-colors text-sm"
-                                data-testid="continue-shopping"
-                            >
-                                Continue Shopping
-                            </Link>
+                                    <div className="space-y-4 mb-6">
+                                        {cart.items.map((item) => (
+                                            <div key={item.product_id} className="flex justify-between text-sm">
+                                                <span className="text-khajur-dark/70">
+                                                    {item.product?.name} {item.size ? `(${item.size})` : ''} x {item.quantity}
+                                                </span>
+                                                <span className="font-medium">
+                                                    ₹{(item.product?.price * item.quantity).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="space-y-3 mb-4">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="font-serif text-khajur-primary">Subtotal</span>
+                                            <span>₹{cartTotal.toFixed(2)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between text-sm">
+                                            <span className="font-serif text-khajur-primary">Delivery Charge</span>
+                                            <span className="text-green-600 font-semibold">FREE</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t border-khajur-border pt-4 mb-6">
+                                        <div className="flex justify-between text-lg">
+                                            <span className="font-serif font-medium text-khajur-primary">Total</span>
+                                            <span className="font-serif text-3xl font-bold text-khajur-gold" data-testid="checkout-total">
+                                                ₹{finalTotal.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        data-testid="place-order-button"
+                                    >
+                                        {loading ? 'Processing...' : 'Place Order'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );
 };
 
-export default Cart;
+export default Checkout;
