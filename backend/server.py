@@ -1113,7 +1113,6 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
             query["featured"] = featured
 
         products = await db.products.find(query, {"_id": 0}).to_list(1000)
-        print("PRODUCTS:", products)  # 👈 DEBUG
         for p in products:
             sizes = p.get("sizes") or []
 
@@ -1351,8 +1350,6 @@ async def create_order(
     items_with_discount = []
     for item in order_data.items:
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
-        print("ITEM:", item)  # ✅ HERE
-        print("AVAILABLE SIZES:", product.get("sizes"))  # ✅ HERE
         if not product:
             continue
         selected_size = item.size or product.get("sizes", [])[0]["weight"]
@@ -1430,7 +1427,6 @@ async def get_orders(current_user: dict = Depends(get_current_user)):
         orders = await db.orders.find(
             {"user_id": current_user["id"]}, {"_id": 0}
         ).to_list(100)
-        print("ORDERS:", orders)  # ✅ DEBUG
         return orders
     except Exception as e:
         print("ERROR:", str(e))  # ✅ DEBUG
@@ -1443,7 +1439,6 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
         order = await db.orders.find_one(
             {"id": order_id, "user_id": current_user["id"]}, {"_id": 0}
         )
-        print("ORDER DATA:", order)
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
         return order
@@ -1651,8 +1646,6 @@ async def update_product(
 
     result = await db.products.update_one({"id": product_id}, {"$set": update_data})
 
-    print("UPDATED COUNT:", result.modified_count)  # 👈 DEBUG
-
     if result.matched_count == 0:
         raise HTTPException(404, "Product not found")
 
@@ -1714,7 +1707,6 @@ async def delete_order(order_id: str):
 @api_router.get("/admin/orders")
 async def get_all_orders(admin: dict = Depends(get_admin_user)):
     return await db.orders.find({"is_deleted": {"$ne": True}}, {"_id": 0}).to_list(1000)
-    return orders
 
 
 @api_router.get("/orders/track/{tracking_id}")
