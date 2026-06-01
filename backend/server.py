@@ -833,12 +833,8 @@ def generate_invoice(order):
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
     items_total = order["total_amount"] - order.get("delivery_charges", 0)
-    c.drawRightString(
-        width - 40,
-        y - 20,
-        f"Items Total: Rs.{order['total_amount'] - order['delivery_charges']}",
-    )
-    c.drawRightString(width - 40, y - 40, f"Delivery: Rs.{order['delivery_charges']}")
+    c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{order['total_amount']}")
+    c.drawRightString(width - 40, y - 40, "Delivery: FREE 🎉")
     c.drawRightString(width - 40, y - 60, f"Grand Total: Rs.{order['total_amount']}")
     c.save()
     return file_path
@@ -1110,20 +1106,8 @@ async def create_order(
         if result.modified_count == 0:
             raise HTTPException(400, f"Product {item.product_id} out of stock")
 
-    # Calculate delivery charges from items
-    def calculate_delivery(distance_km):
-        if distance_km <= 5:
-            return 40
-        elif distance_km <= 10:
-            return 60
-        else:
-            return 100
-    
-    # then use it
-    if order_data.total_amount >= 2000:
-        delivery_charges = 0
-    else:
-        delivery_charges = calculate_delivery(distance)
+    # Delivery charges disabled (free delivery)
+    delivery_charges = 0
     items_with_discount = []
     for item in order_data.items:
         product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
@@ -1163,15 +1147,10 @@ async def create_order(
                 "original_price": original_price,
                 "price": price,  # discounted price
                 "discount": discount,
+                "delivery_charge": 0,  # Free delivery
             }
         )
-    def calculate_delivery(distance_km):
-        if distance_km <= 5:
-            return 40
-        elif distance_km <= 10:
-            return 60
-        else:
-            return 100
+
     order_doc = {
         "id": order_id,
         "user_id": current_user["id"],
