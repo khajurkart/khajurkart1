@@ -145,7 +145,7 @@ const Checkout = () => {
             const razorpayOrderResponse = await axios.post(
                 `${API}/razorpay/create-order`,
                 {
-                    amount: finalTotal,
+                    amount: cartTotal,
                     currency: 'INR'
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -443,7 +443,7 @@ const Checkout = () => {
                                         {cart.items.map((item) => (
                                             <div key={item.product_id} className="flex justify-between text-sm">
                                                 <span className="text-khajur-dark/70">
-                                                    {item.product?.name} x {item.quantity}
+                                                    {item.product?.name} {item.size ? `(${item.size})` : ''} x {item.quantity}
                                                 </span>
                                                 <span className="font-medium">
                                                     ₹{(item.product?.price * item.quantity).toFixed(2)}
