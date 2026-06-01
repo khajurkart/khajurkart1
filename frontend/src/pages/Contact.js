@@ -49,7 +49,7 @@ const handleSubmit = async (e) => {
     {
       icon: MapPin,
       title: 'Address',
-      details: '10-3-313/a, AR Raheem Residency, beside gove IASE college, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana 500057',
+      details: '10-3-313/a, AR Raheem Residency, beside govt IASE college, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana 500057',
       link: null
     },
     {
