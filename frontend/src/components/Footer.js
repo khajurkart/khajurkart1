@@ -64,7 +64,7 @@ const Footer = () => {
                                 <MapPin className="w-5 h-5 text-khajur-gold flex-shrink-0 mt-0.5" />
                                 <span className="text-sm">
                                     10-3-313/a, AR Raheem Residency<br />
-                                    beside gove IASE college,<br />
+                                    beside govt IASE college,<br />
                                     Potti Sriramulu Nagar,<br />
                                     Vijaya Nagar Colony,<br />
                                     Hyderabad, Telangana 500057
