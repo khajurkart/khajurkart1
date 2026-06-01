@@ -70,7 +70,7 @@ const Home = () => {
 
     const statusFeatures = [
         { icon: Award, title: 'Premium Quality', description: 'Only the finest selection' },
-        { icon: Truck, title: 'Fast Delivery', description: 'Quick and secure shipping' },
+        { icon: Truck, title: 'Fast & Free Delivery', description: 'Quick and secure shipping' },
         { icon: Shield, title: 'Trusted Products', description: '100% authentic guarantee' },
         { icon: CreditCard, title: 'Secure Payment', description: 'Safe transaction methods' }
     ];
