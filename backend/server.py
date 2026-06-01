@@ -488,6 +488,7 @@ async def forgot_password(email: str):
 
     if not user:
         return {"message": "If the email exists, a reset link has been sent"}
+
     token, hashed = generate_reset_token()
     await db.users.update_one(
         {"email": email},
@@ -498,8 +499,47 @@ async def forgot_password(email: str):
             }
         },
     )
-    # send email here with raw token (IMPORTANT)
+
     reset_url = f"https://khajurkart.com/reset-password?token={token}"
+
+    # ✅ SEND EMAIL
+    try:
+        resend.Emails.send(
+            {
+                "from": "KhajurKart <no-reply@khajurkart.com>",
+                "to": [email],
+                "subject": "🔐 Reset Your Password - KhajurKart",
+                "html": f"""
+                <div style="font-family: Arial; padding: 20px; max-width: 600px;">
+                  <div style="background:#064E3B; padding:20px; text-align:center;">
+                    <h1 style="color:#C6A962; margin:0;">KhajurKart</h1>
+                  </div>
+                  <div style="padding:30px;">
+                    <h2 style="color:#064E3B;">Reset Your Password 🔐</h2>
+                    <p>Hi {user.get('name', 'there')} 👋</p>
+                    <p>We received a request to reset your password.</p>
+                    <p>Click the button below to set a new password:</p>
+                    <div style="text-align:center; margin:30px 0;">
+                      <a href="{reset_url}" 
+                         style="background:#064E3B; color:#C6A962; padding:14px 30px; 
+                                text-decoration:none; border-radius:4px; 
+                                font-weight:bold; font-size:14px;">
+                        Reset Password
+                      </a>
+                    </div>
+                    <p style="color:#666; font-size:13px;">⏳ This link expires in <strong>1 hour</strong>.</p>
+                    <p style="color:#666; font-size:13px;">🔒 If you didn't request this, ignore this email.</p>
+                    <hr style="margin:20px 0;"/>
+                    <p><strong>KhajurKart Team</strong></p>
+                  </div>
+                </div>
+                """,
+            }
+        )
+        print("✅ RESET EMAIL SENT")
+    except Exception as e:
+        print("❌ RESET EMAIL ERROR:", str(e))
+
     return {"message": "Reset link sent"}
 
 
@@ -592,7 +632,7 @@ async def send_order_email(user_email, user_name, order_id, items, total):
     try:
         items_html = ""
         for item in items:
-            size = item.get('size', '')
+            size = item.get("size", "")
             size_text = f" ({size})" if size else ""
             items_html += f"<li>{item['product_name']}{size_text} x {item['quantity']} - ₹{item['price']}</li>"
         html = f"""
