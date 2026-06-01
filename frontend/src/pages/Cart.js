@@ -132,7 +132,7 @@ const Cart = () => {
                                     <span className="font-medium" data-testid="cart-subtotal">₹{(cartTotal || 0).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-khajur-dark/70">Shipping</span>
+                                    <span className="text-khajur-dark/70">Delivery Charges</span>
                                     <span className="font-medium text-green-600">FREE</span>
                                 </div>
                                 <div className="border-t border-khajur-border pt-4">
