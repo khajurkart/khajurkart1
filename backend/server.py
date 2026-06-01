@@ -834,7 +834,7 @@ def generate_invoice(order):
 
     c.line(40, y, width - 40, y)
     c.setFont("Helvetica-Bold", 12)
-    items_total = order["total_amount"] - order.get("delivery_charges", 0)
+    f"Items Total: Rs.{order['total_amount']}"
     c.drawRightString(width - 40, y - 20, f"Items Total: Rs.{order['total_amount']}")
     c.drawRightString(width - 40, y - 40, "Delivery: FREE")
     c.drawRightString(width - 40, y - 60, f"Grand Total: Rs.{order['total_amount']}")
