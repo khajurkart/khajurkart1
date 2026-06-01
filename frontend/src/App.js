@@ -31,6 +31,7 @@ import AdminReturns from './pages/AdminReturns';
 import AdminReviews from "./pages/AdminReviews";
 import Returns from './pages/Returns';
 import FAQ from "./pages/FAQ";
+import NotFound from './pages/NotFound';
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
                                 <Route path="/admin/reviews" element={<AdminReviews />} />
                                 <Route path="/returns" element={<Returns />} />
                                 <Route path="/faq" element={<FAQ />} />
+                                <Route path="*" element={<NotFound />} />
                             </Routes>
                         </main>
                         <Footer />
