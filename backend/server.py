@@ -334,41 +334,72 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict
     return current_user
 
 
-# ============ EMAIL VERIFICATION ROUTES ============
+# ============ EMAIL VERIFICATION ============
 
 
 def send_verification_email(to_email, name, code):
     try:
         html = f"""
-        <div style="font-family: Arial; padding: 20px;">
-          <h2>🔐 Verify Your Account</h2>
-          
-          <p>Hi {name} 👋</p>
-          
-          <p>You're just one step away! Use the verification code to continue:</p>
-          
-          <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; margin: 20px 0;">
-            {code}
-          </div>
-          
-          <p>⏳ This code expires soon.</p>
-          <p>🔒 Do not share this code with anyone.</p>
-          
-          <br/>
-          <p>Cheers,<br/><strong>KhajurKart Team</strong></p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center" style="padding:40px 0;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+                  
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:30px; text-align:center;">
+                      <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">Premium Dates, Dry Fruits & Spices</p>
+                    </td>
+                  </tr>
+
+                  <!-- BODY -->
+                  <tr>
+                    <td style="padding:40px 30px;">
+                      <h2 style="color:#064E3B; margin:0 0 20px;">🔐 Verify Your Account</h2>
+                      <p style="color:#333; font-size:15px;">Hi <strong>{name}</strong> 👋</p>
+                      <p style="color:#555; font-size:14px;">You're just one step away! Use the verification code below to continue:</p>
+                      
+                      <!-- OTP BOX -->
+                      <div style="background:#f0fdf4; border:2px dashed #064E3B; border-radius:8px; padding:20px; text-align:center; margin:25px 0;">
+                        <p style="margin:0 0 5px; color:#555; font-size:13px;">Your Verification Code</p>
+                        <h1 style="margin:0; color:#064E3B; font-size:42px; letter-spacing:8px;">{code}</h1>
+                      </div>
+
+                      <p style="color:#555; font-size:13px;">⏳ This code expires in <strong>10 minutes</strong>.</p>
+                      <p style="color:#555; font-size:13px;">🔒 Do not share this code with anyone.</p>
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:20px; text-align:center;">
+                      <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:12px;">Hyderabad, Telangana 500057</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
         """
-        response = resend.Emails.send(
+        resend.Emails.send(
             {
-                "from": "KhajurKart <no-reply@khajurkart.com>",  # change later to your domain
+                "from": "KhajurKart <no-reply@khajurkart.com>",
                 "to": [to_email],
-                "subject": "✨ Your Verification Code",
+                "subject": "✨ Your Verification Code - KhajurKart",
                 "html": html,
             }
         )
         print("✅ VERIFICATION EMAIL SENT")
     except Exception as e:
-        print("❌ EMAIL ERROR:", str(e))
+        print("❌ VERIFICATION EMAIL ERROR:", str(e))
 
 
 # ============ AUTH ROUTES ============
@@ -562,118 +593,285 @@ async def reset_password(reset_token: str, new_password: str):
     return {"message": "Password reset successful"}
 
 
-# ============ EMAIL RECEIVER ============
+# ============ EMAIL RECEIVER (Admin Notification) ============
 
 
 async def send_email(name, email, phone, message):
     try:
         html = f"""
-        <div style="font-family: Arial; padding: 20px;">
-          <h2>📩 New Contact Message</h2>
-          <p><strong>Name:</strong> {name}</p>
-          <p><strong>Email:</strong> {email}</p>
-          <p><strong>Phone:</strong> {phone}</p>
-          <hr/>
-          <p><strong>Message:</strong></p>
-          <p>{message}</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center" style="padding:40px 0;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:30px; text-align:center;">
+                      <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">New Contact Message</p>
+                    </td>
+                  </tr>
+
+                  <!-- BODY -->
+                  <tr>
+                    <td style="padding:40px 30px;">
+                      <h2 style="color:#064E3B; margin:0 0 20px;">📩 New Contact Message</h2>
+                      
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                            <p style="margin:0; color:#555; font-size:13px;">Name</p>
+                            <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{name}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                            <p style="margin:0; color:#555; font-size:13px;">Email</p>
+                            <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{email}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                            <p style="margin:0; color:#555; font-size:13px;">Phone</p>
+                            <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{phone}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 0;">
+                            <p style="margin:0; color:#555; font-size:13px;">Message</p>
+                            <p style="margin:4px 0 0; color:#333; font-size:14px; line-height:1.6;">{message}</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:20px; text-align:center;">
+                      <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
         """
-        response = resend.Emails.send(
+        resend.Emails.send(
             {
                 "from": "KhajurKart <contact@khajurkart.com>",
                 "to": ["khajurkart@gmail.com"],
-                "subject": f"📩 New Contact - {name}",
+                "subject": f"📩 New Contact Message - {name}",
                 "html": html,
                 "reply_to": email,
             }
         )
-        logging.info("ADMIN EMAIL SENT ✅")
+        logging.info("✅ ADMIN EMAIL SENT")
     except Exception as e:
-        logging.error("ADMIN EMAIL ERROR", exc_info=True)
+        logging.error("❌ ADMIN EMAIL ERROR", exc_info=True)
 
 
-# ======== SENDER EMAIL ===========
+# ============ SENDER EMAIL (Auto Reply to User) ============
 
 
 async def send_auto_reply(name, email):
     try:
         html = f"""
-        <div style="font-family: Arial; padding: 20px;">
-          <h2>🙏 Thank You for Contacting KhajurKart</h2>
-          
-          <p>Hi {name},</p>
-          
-          <p>We have received your message successfully.</p>
-          <p>Our team will get back to you within 24 hours.</p>
-          
-          <br/>
-          
-          <p>Best Regards,<br/>
-          <strong>KhajurKart Team</strong></p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center" style="padding:40px 0;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:30px; text-align:center;">
+                      <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">Premium Dates, Dry Fruits & Spices</p>
+                    </td>
+                  </tr>
+
+                  <!-- BODY -->
+                  <tr>
+                    <td style="padding:40px 30px; text-align:center;">
+                      <div style="background:#f0fdf4; border-radius:50%; width:80px; height:80px; margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size:40px;">🙏</span>
+                      </div>
+                      <h2 style="color:#064E3B; margin:0 0 15px;">Thank You for Contacting Us!</h2>
+                      <p style="color:#333; font-size:15px;">Hi <strong>{name}</strong>,</p>
+                      <p style="color:#555; font-size:14px; line-height:1.6;">
+                        We have received your message successfully.<br/>
+                        Our team will get back to you within <strong>24 hours</strong>.
+                      </p>
+                      <div style="background:#f9f9f9; border-left:4px solid #C6A962; padding:15px; margin:25px 0; text-align:left;">
+                        <p style="margin:0; color:#555; font-size:13px;">📞 Need urgent help? Call us at</p>
+                        <p style="margin:5px 0 0; color:#064E3B; font-size:16px; font-weight:bold;">+91 7981002137</p>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:20px; text-align:center;">
+                      <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:12px;">Hyderabad, Telangana 500057</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
         """
-        response = resend.Emails.send(
+        resend.Emails.send(
             {
                 "from": "KhajurKart <contact@khajurkart.com>",
-                "to": [email],  # 👈 USER EMAIL
-                "subject": "✅ We received your message",
+                "to": [email],
+                "subject": "✅ We received your message - KhajurKart",
                 "html": html,
             }
         )
-        logging.info("AUTO REPLY SENT ✅")
+        logging.info("✅ AUTO REPLY SENT")
     except Exception as e:
-        logging.error("AUTO REPLY ERROR", exc_info=True)
+        logging.error("❌ AUTO REPLY ERROR", exc_info=True)
 
 
-# =========== ORDER CONFIRMATION =========
+# ============ ORDER CONFIRMATION EMAIL ============
 
 
 async def send_order_email(user_email, user_name, order_id, items, total):
     try:
-        items_html = ""
+        # Build items rows
+        items_rows = ""
         for item in items:
             size = item.get("size", "")
             size_text = f" ({size})" if size else ""
-            items_html += f"<li>{item['product_name']}{size_text} x {item['quantity']} - ₹{item['price']}</li>"
+            discount = item.get("discount", 0)
+            original_price = item.get("original_price", item["price"])
+            final_price = item["price"] * item["quantity"]
+
+            items_rows += f"""
+            <tr>
+              <td style="padding:12px; border-bottom:1px solid #f0f0f0; color:#333; font-size:14px;">
+                {item['product_name']}{size_text}
+              </td>
+              <td style="padding:12px; border-bottom:1px solid #f0f0f0; color:#555; font-size:14px; text-align:center;">
+                {item['quantity']}
+              </td>
+              <td style="padding:12px; border-bottom:1px solid #f0f0f0; color:#555; font-size:14px; text-align:center;">
+                <span style="text-decoration:line-through; color:#999;">₹{original_price}</span>
+                <span style="color:#064E3B; font-weight:bold; margin-left:5px;">₹{item['price']}</span>
+              </td>
+              <td style="padding:12px; border-bottom:1px solid #f0f0f0; text-align:center;">
+                <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:12px; font-size:12px;">{discount}% OFF</span>
+              </td>
+              <td style="padding:12px; border-bottom:1px solid #f0f0f0; color:#064E3B; font-size:14px; font-weight:bold; text-align:right;">
+                ₹{final_price}
+              </td>
+            </tr>
+            """
+
         html = f"""
-        <div style="font-family: Arial; padding: 20px;">
-          
-          <h2>🛒 Order Confirmation</h2>
-          
-          <p>Hi {user_name},</p>
-          
-          <p>Your order has been placed successfully!</p>
-          
-          <p><strong>Order ID:</strong> {order_id}</p>
-          
-          <h3>Items:</h3>
-          <ul>
-            {items_html}
-          </ul>
-          
-          <h3>Total: ₹{total}</h3>
-          
-          <br/>
-          
-          <p>We will deliver your order soon 🚚</p>
-          
-          <p>Thank you for shopping with us!</p>
-          
-          <p><strong>KhajurKart Team</strong></p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center" style="padding:40px 0;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:30px; text-align:center;">
+                      <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">Order Confirmation</p>
+                    </td>
+                  </tr>
+
+                  <!-- SUCCESS BANNER -->
+                  <tr>
+                    <td style="background:#f0fdf4; padding:25px; text-align:center; border-bottom:2px solid #064E3B;">
+                      <p style="font-size:40px; margin:0;">🎉</p>
+                      <h2 style="color:#064E3B; margin:10px 0 5px;">Order Placed Successfully!</h2>
+                      <p style="color:#555; margin:0; font-size:14px;">Thank you for shopping with KhajurKart</p>
+                    </td>
+                  </tr>
+
+                  <!-- ORDER INFO -->
+                  <tr>
+                    <td style="padding:25px 30px;">
+                      <p style="color:#333; font-size:15px;">Hi <strong>{user_name}</strong> 👋</p>
+                      <p style="color:#555; font-size:14px;">Your order has been placed successfully and is being processed.</p>
+                      
+                      <div style="background:#f9f9f9; border-radius:8px; padding:15px; margin:15px 0;">
+                        <p style="margin:0; color:#555; font-size:13px;">Order ID</p>
+                        <p style="margin:5px 0 0; color:#064E3B; font-size:18px; font-weight:bold; letter-spacing:1px;">{order_id}</p>
+                      </div>
+
+                      <!-- ITEMS TABLE -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px; border:1px solid #f0f0f0; border-radius:8px; overflow:hidden;">
+                        <tr style="background:#064E3B;">
+                          <th style="padding:12px; color:#C6A962; font-size:13px; text-align:left;">Item</th>
+                          <th style="padding:12px; color:#C6A962; font-size:13px; text-align:center;">Qty</th>
+                          <th style="padding:12px; color:#C6A962; font-size:13px; text-align:center;">Price</th>
+                          <th style="padding:12px; color:#C6A962; font-size:13px; text-align:center;">Discount</th>
+                          <th style="padding:12px; color:#C6A962; font-size:13px; text-align:right;">Total</th>
+                        </tr>
+                        {items_rows}
+                      </table>
+
+                      <!-- TOTAL -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:15px;">
+                        <tr>
+                          <td style="padding:8px 0; color:#555; font-size:14px;">Delivery Charge</td>
+                          <td style="padding:8px 0; color:#16a34a; font-size:14px; font-weight:bold; text-align:right;">FREE</td>
+                        </tr>
+                        <tr style="border-top:2px solid #064E3B;">
+                          <td style="padding:12px 0; color:#064E3B; font-size:16px; font-weight:bold;">Grand Total</td>
+                          <td style="padding:12px 0; color:#C6A962; font-size:22px; font-weight:bold; text-align:right;">₹{total}</td>
+                        </tr>
+                      </table>
+
+                      <p style="color:#555; font-size:14px; margin-top:20px;">🚚 We will deliver your order soon!</p>
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:20px; text-align:center;">
+                      <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:12px;">📞 7981002137 | khajurkart@gmail.com</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
         """
-        response = resend.Emails.send(
+        resend.Emails.send(
             {
                 "from": "KhajurKart <contact@khajurkart.com>",
                 "to": [user_email],
-                "subject": f"🛒 Order Confirmed - {order_id}",
+                "subject": f"🛒 Order Confirmed - {order_id} | KhajurKart",
                 "html": html,
             }
         )
-        logging.info("ORDER EMAIL SENT ✅")
-
+        logging.info("✅ ORDER EMAIL SENT")
     except Exception as e:
-        logging.error("ORDER EMAIL ERROR", exc_info=True)
+        logging.error("❌ ORDER EMAIL ERROR", exc_info=True)
 
 
 # ============ CONTACT ROUTES ============
