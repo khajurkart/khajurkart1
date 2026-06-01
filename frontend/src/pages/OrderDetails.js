@@ -7,192 +7,197 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const OrderDetails = () => {
-  const { id } = useParams();
+    const { id } = useParams();
 
-  const [order, setOrder] = useState(null);
-  const downloadInvoice = async () => {
-    const token = localStorage.getItem("token"); // ✅ ADD THIS
+    const [order, setOrder] = useState(null);
+    const downloadInvoice = async () => {
+        const token = localStorage.getItem("token"); // ✅ ADD THIS
 
-    const res = await fetch(`${API}/invoice/${order.id}`, { // ✅ use API
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+        const res = await fetch(`${API}/invoice/${order.id}`, { // ✅ use API
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 
-    if (!res.ok) {
-      alert("Invoice failed to load");
-      return;
+        if (!res.ok) {
+            alert("Invoice failed to load");
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice_${order.id}.pdf`;
+        a.click();
+    };
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        fetchOrder();
+        // eslint-disable-next-line
+    }, [id]);
+
+    const cancelOrder = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            await axios.put(`${API}/orders/${id}/cancel`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            alert("Order cancelled successfully");
+
+            // refresh order data
+            fetchOrder();
+
+        } catch (err) {
+            console.error("Cancel failed", err);
+            alert("Failed to cancel order");
+        }
+    };
+
+    const fetchOrder = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await axios.get(`${API}/orders/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setOrder(response.data);
+        } catch (err) {
+            console.error("Failed to fetch order", err);
+            setError("Order not found or unauthorized");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p>Loading order details...</p>
+            </div>
+        );
     }
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `invoice_${order.id}.pdf`;
-    a.click();
-  };
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetchOrder();
-    // eslint-disable-next-line
-  }, [id]);
-
-  const cancelOrder = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    await axios.put(`${API}/orders/${id}/cancel`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    alert("Order cancelled successfully");
-
-    // refresh order data
-    fetchOrder();
-
-  } catch (err) {
-    console.error("Cancel failed", err);
-    alert("Failed to cancel order");
-  }
-};
-
-  const fetchOrder = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      const response = await axios.get(`${API}/orders/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setOrder(response.data);
-    } catch (err) {
-      console.error("Failed to fetch order", err);
-      setError("Order not found or unauthorized");
-    } finally {
-      setLoading(false);
+    if (error || !order) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center">
+                <p className="mb-4 text-red-500">{error}</p>
+                <Link to="/my-orders" className="text-blue-600 underline">
+                    Back to My Orders
+                </Link>
+            </div>
+        );
     }
-  };
 
-  if (loading) {
+    const getStatusStep = (status) => {
+        const steps = ["pending", "confirmed", "processing", "shipped", "delivered", "exchange", "return"];
+        return steps.indexOf(status);
+    };
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading order details...</p>
-      </div>
-    );
-  }
+        <div className="min-h-screen py-20">
+            <div className="max-w-5xl mx-auto px-6">
 
-  if (error || !order) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <p className="mb-4 text-red-500">{error}</p>
-        <Link to="/my-orders" className="text-blue-600 underline">
-          Back to My Orders
-        </Link>
-      </div>
-    );
-  }
+                {/* Back Button */}
+                <Link
+                    to="/my-orders"
+                    className="inline-flex items-center mb-6 text-blue-600 hover:underline"
+                >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Back to Orders
+                </Link>
 
-  const getStatusStep = (status) => {
-  const steps = ["pending", "confirmed", "processing", "shipped", "delivered", "exchange", "return"];
-  return steps.indexOf(status);
-};
+                <h1 className="text-3xl font-bold mb-6">Order Details</h1>
 
-  return (
-    <div className="min-h-screen py-20">
-      <div className="max-w-5xl mx-auto px-6">
+                {/* Order Info */}
+                <div className="bg-white shadow-md rounded p-6 mb-6">
+                    <p><strong>Order ID:</strong> {order.id}</p>
+                    <p><strong>Status:</strong> {order.status}</p>
+                    <p><strong>Total Amount:</strong> ₹{order.total_amount}</p>
+                    <p><strong>Payment Method:</strong> {order.payment_method}</p>
+                    <p>
+                        <strong>Created At:</strong>{" "}
+                        {order.created_at
+                            ? new Date(order.created_at).toLocaleString()
+                            : "N/A"}
+                    </p>
+                    <button
+                        onClick={downloadInvoice}
+                        className="mt-3 bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-800"
+                    >
+                        Download Invoice
+                    </button>
 
-        {/* Back Button */}
-        <Link
-          to="/my-orders"
-          className="inline-flex items-center mb-6 text-blue-600 hover:underline"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Back to Orders
-        </Link>
-
-        <h1 className="text-3xl font-bold mb-6">Order Details</h1>
-
-        {/* Order Info */}
-        <div className="bg-white shadow-md rounded p-6 mb-6">
-          <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Status:</strong> {order.status}</p>
-          <p><strong>Total Amount:</strong> ₹{order.total_amount}</p>
-          <p><strong>Payment Method:</strong> {order.payment_method}</p>
-          <p>
-            <strong>Created At:</strong>{" "}
-            {order.created_at
-              ? new Date(order.created_at).toLocaleString()
-              : "N/A"}
-            </p>
-          <button
-            onClick={downloadInvoice}
-            className="mt-3 bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-800"
-          >
-            Download Invoice
-          </button>
-         
-          {/* ✅ CANCEL BUTTON */}
-          {(order.status === "pending" || order.status === "confirmed") && (
-            <button
-              onClick={cancelOrder}
-              className="mt-3 ml-5 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-             >
-              Cancel Order
-            </button>
-           )}
-        </div>
-
-        {/* Ordered Items */}
-        <div className="bg-white shadow-md rounded p-6">
-          {/* 🚚 ORDER TRACKING UI */}
-          <div className="bg-white shadow-md rounded p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Order Tracking</h2>
-
-            {["pending", "confirmed", "processing", "shipped", "delivered"].map((step, index) => (
-              <div key={step} className="flex items-center mb-2">
-                <span className="mr-2">
-                  {index <= getStatusStep(order.status) ? "✅" : "⭕"}
-                </span>
-                <span className="capitalize">{step}</span>
-              </div>
-            ))}
-          </div>
-            
-          <h2 className="text-xl font-semibold mb-4">Items</h2>
-
-          {order.items && order.items.length > 0 ? (
-            order.items.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between border-b py-3"
-              >
-                <div>
-                  <p className="font-medium">{item.product_name}</p>
-                  <p className="text-sm text-gray-500">
-                    Quantity: {item.quantity}
-                  </p>
+                    {/* ✅ CANCEL BUTTON */}
+                    {(order.status === "pending" || order.status === "confirmed") && (
+                        <button
+                            onClick={cancelOrder}
+                            className="mt-3 ml-5 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        >
+                            Cancel Order
+                        </button>
+                    )}
                 </div>
 
-                <div>
-                  ₹{item.price * item.quantity}
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No items found in this order.</p>
-          )}
-        </div>
+                {/* Ordered Items */}
+                <div className="bg-white shadow-md rounded p-6">
+                    {/* 🚚 ORDER TRACKING UI */}
+                    <div className="bg-white shadow-md rounded p-6 mb-6">
+                        <h2 className="text-xl font-semibold mb-4">Order Tracking</h2>
 
-      </div>
-    </div>
-  );
+                        {["pending", "confirmed", "processing", "shipped", "delivered"].map((step, index) => (
+                            <div key={step} className="flex items-center mb-2">
+                                <span className="mr-2">
+                                    {index <= getStatusStep(order.status) ? "✅" : "⭕"}
+                                </span>
+                                <span className="capitalize">{step}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <h2 className="text-xl font-semibold mb-4">Items</h2>
+
+                    {order.items && order.items.length > 0 ? (
+                        order.items.map((item) => (
+                            <div
+                                key={item.id}
+                                className="flex justify-between border-b py-3"
+                            >
+                                <div>
+                                    <p className="font-medium">{item.product_name}</p>
+                                    {item.size && (
+                                        <p className="text-sm text-gray-500">
+                                            Size: {item.size}
+                                        </p>
+                                    )}
+                                    <p className="text-sm text-gray-500">
+                                        Quantity: {item.quantity}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    ₹{item.price * item.quantity}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p>No items found in this order.</p>
+                    )}
+                </div>
+
+            </div>
+        </div>
+    );
 };
 
 export default OrderDetails;
