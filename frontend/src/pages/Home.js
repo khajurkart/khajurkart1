@@ -9,7 +9,6 @@ import 'slick-carousel/slick/slick-theme.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-console.log("Backend URL:", BACKEND_URL);
 
 const Home = () => {
     const [categories, setCategories] = useState([]);
@@ -44,7 +43,8 @@ const Home = () => {
         autoplay: true,
         autoplaySpeed: 4000,
         fade: true,
-        cssEase: 'ease-in-out'
+        cssEase: 'ease-in-out',
+        lazyLoad: 'ondemand', // ✅ lazy load slider images
     };
 
     const heroImages = [
@@ -70,7 +70,7 @@ const Home = () => {
 
     const statusFeatures = [
         { icon: Award, title: 'Premium Quality', description: 'Only the finest selection' },
-        { icon: Truck, title: 'Fast & Free Delivery', description: 'Quick and secure shipping' },
+        { icon: Truck, title: 'Free Delivery', description: 'Quick and secure shipping' }, // ✅ changed Fast & Free to Free
         { icon: Shield, title: 'Trusted Products', description: '100% authentic guarantee' },
         { icon: CreditCard, title: 'Secure Payment', description: 'Safe transaction methods' }
     ];
@@ -98,7 +98,8 @@ const Home = () => {
 
     return (
         <div className="min-h-screen" data-testid="home-page">
-            {/* Hero Slider */}
+
+            {/* ===== HERO SLIDER ===== */}
             <section className="relative" data-testid="hero-slider">
                 <Slider {...heroSliderSettings}>
                     {heroImages.map((slide, index) => (
@@ -107,7 +108,10 @@ const Home = () => {
                                 <img
                                     src={slide.url}
                                     alt={slide.title}
+                                    loading={index === 0 ? 'eager' : 'lazy'} // ✅ first image eager, rest lazy
                                     className="w-full h-full object-cover"
+                                    width="1920"
+                                    height="700"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary/80 to-khajur-primary/40" />
                                 <div className="absolute inset-0 flex items-center">
@@ -136,7 +140,7 @@ const Home = () => {
                 </Slider>
             </section>
 
-            {/* Categories Grid */}
+            {/* ===== CATEGORIES GRID ===== */}
             <section className="py-20 md:py-32" data-testid="categories-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="text-center mb-16">
@@ -160,6 +164,7 @@ const Home = () => {
                                     <img
                                         src={category.image}
                                         alt={category.name}
+                                        loading="lazy" // ✅ lazy load category images
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                 </div>
@@ -177,7 +182,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Featured Products */}
+            {/* ===== FEATURED PRODUCTS ===== */}
             <section className="py-20 md:py-32 bg-white" data-testid="featured-products-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="text-center mb-16">
@@ -189,11 +194,27 @@ const Home = () => {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {featuredProducts.slice(0, 4).map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+                    {loading ? (
+                        // ✅ skeleton loading instead of blank
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="bg-gray-100 animate-pulse rounded-sm">
+                                    <div className="aspect-square bg-gray-200" />
+                                    <div className="p-5 space-y-3">
+                                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                                        <div className="h-3 bg-gray-200 rounded w-full" />
+                                        <div className="h-6 bg-gray-200 rounded w-1/2" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {featuredProducts.slice(0, 4).map((product) => (
+                                <ProductCard key={product.id} product={product} />
+                            ))}
+                        </div>
+                    )}
 
                     <div className="text-center mt-12">
                         <Link
@@ -208,7 +229,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Status Section */}
+            {/* ===== FEATURES ===== */}
             <section className="py-20 md:py-32" data-testid="status-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -220,7 +241,7 @@ const Home = () => {
                                     className="p-8 border border-khajur-primary/10 bg-khajur-cream hover:bg-white transition-colors duration-300 text-center"
                                     data-testid={`status-feature-${index}`}
                                 >
-                                    <Icon className="w-12 h-12 text-khajur-gold mx-auto mb-4" />
+                                    <Icon className="w-12 h-12 text-khajur-gold mx-auto mb-4" aria-hidden="true" />
                                     <h3 className="font-serif text-xl font-medium text-khajur-primary mb-2">
                                         {feature.title}
                                     </h3>
@@ -232,7 +253,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Customer Reviews */}
+            {/* ===== CUSTOMER REVIEWS ===== */}
             <section className="py-20 md:py-32 bg-white" data-testid="reviews-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="text-center mb-16">
@@ -255,13 +276,18 @@ const Home = () => {
                                     <img
                                         src={review.image}
                                         alt={review.name}
+                                        loading="lazy" // ✅ lazy load review images
+                                        width="64"
+                                        height="64"
                                         className="w-16 h-16 rounded-full mr-4 object-cover"
                                     />
                                     <div>
-                                        <h4 className="font-serif text-lg font-medium text-khajur-primary">{review.name}</h4>
-                                        <div className="flex space-x-1">
+                                        <h4 className="font-serif text-lg font-medium text-khajur-primary">
+                                            {review.name}
+                                        </h4>
+                                        <div className="flex space-x-1" aria-label={`${review.rating} stars`}>
                                             {[...Array(review.rating)].map((_, i) => (
-                                                <Star key={i} className="w-4 h-4 fill-khajur-gold text-khajur-gold" />
+                                                <Star key={i} className="w-4 h-4 fill-khajur-gold text-khajur-gold" aria-hidden="true" />
                                             ))}
                                         </div>
                                     </div>
@@ -274,6 +300,7 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
         </div>
     );
 };
