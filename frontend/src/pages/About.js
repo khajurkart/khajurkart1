@@ -41,6 +41,7 @@ const About = () => {
                     <img
                         src="https://images.pexels.com/photos/18740976/pexels-photo-18740976.jpeg"
                         alt="About KhajurKart"
+                        loading="lazy"
                         className="w-full h-full object-cover opacity-20"
                     />
                     {/* Gradient overlay */}
