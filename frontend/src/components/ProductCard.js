@@ -65,6 +65,7 @@ const ProductCard = ({ product }) => {
 
           <button
             onClick={() => addToCart(product.id)}
+            aria-label={`Add ${product.name} to cart`}
             className="bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary p-3 rounded-sm transition-all duration-300 flex items-center gap-2"
             data-testid={`add-to-cart-${product.id}`}
           >
