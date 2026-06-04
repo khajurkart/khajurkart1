@@ -2,9 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-console.log("Backend URL:", BACKEND_URL);
 const API = `${BACKEND_URL}/api`;
-
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -33,12 +31,19 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
+      const savedToken = localStorage.getItem("token");
       const res = await axios.get(`${BACKEND_URL}/api/auth/me`, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${savedToken}`
         }
       });
+
+      // ✅ CHECK IF USER IS VERIFIED
+      if (!res.data.is_verified) {
+        logout(); // ← kick out unverified users on reload
+        return;
+      }
+
       setUser(res.data);
     } catch (error) {
       console.error('Failed to fetch user', error);
@@ -51,8 +56,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       fetchUser();
-    }
-    else {
+    } else {
       setLoading(false);
     }
   }, [token, fetchUser]);
@@ -66,19 +70,15 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  // ✅ FIXED: register does NOT save token anymore
   const register = async (name, email, password, phone) => {
-    const response = await axios.post(`${API}/auth/register`, { name, email, password, phone });
-    const { access_token, user: userData } = response.data;
-    localStorage.setItem('token', access_token);
-    setToken(access_token);
-    setUser(userData);
-    return userData;
+    const response = await axios.post(`${API}/auth/register`, {
+      name, email, password, phone
+    });
+    // ✅ Don't save token here — wait for email verification
+    return response.data;
   };
-  //const logout = () => {
-  //   localStorage.removeItem('token');
-  // setToken(null);
-  //setUser(null);
-  // };
+
   return (
     <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
       {children}
