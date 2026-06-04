@@ -21,7 +21,7 @@ const AuthModal = ({ isOpen, onClose }) => {
     // ✅ Store password temporarily for auto-login after verify
     const [tempPassword, setTempPassword] = useState('');
 
-    const { login, register } = useAuth();
+    const { login, register, setAuth } = useAuth(); // ✅ add setAuth
     if (!isOpen) return null;
 
     const handleSubmit = async (e) => {
@@ -101,13 +101,16 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             if (!res.ok) throw new Error();
 
-            // ✅ Auto login after successful verification
-            await login(formData.email, tempPassword);
+            const data = await res.json();
+
+            // ✅ Set auth directly - no login API call needed
+            setAuth(data.access_token, data.user);
 
             toast.success("Verified successfully ✅");
             setShowverification_code(false);
-            setTempPassword(''); // ✅ clear temp password
+            setverification_code("");
             onClose();
+
         } catch (err) {
             toast.error("Invalid verification code ❌");
         }
