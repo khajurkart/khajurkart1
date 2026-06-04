@@ -407,15 +407,23 @@ def send_verification_email(to_email, name, code):
 
 @api_router.post("/auth/register")
 async def register(user_data: UserRegister):
-    # Check if user exists
-    existing_user = await db.users.find_one({"email": user_data.email})
+    # Check if fully verified user exists
+    existing_user = await db.users.find_one({
+        "email": user_data.email,
+        "is_verified": True  # ✅ only block if already verified
+    })
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+
+    # ✅ Delete any previous unverified registration with same email
+    await db.users.delete_one({
+        "email": user_data.email,
+        "is_verified": False
+    })
 
     # Create user
     user_id = f"user_{datetime.now(timezone.utc).timestamp()}"
     hashed_pwd = hash_password(user_data.password)
-    # ✅ GENERATE OTP (ADD HERE)
     verification_code = str(random.randint(100000, 999999))
 
     user_doc = {
@@ -425,28 +433,18 @@ async def register(user_data: UserRegister):
         "password": hashed_pwd,
         "phone": user_data.phone,
         "role": "user",
-        "verification_code": verification_code,  # ✅ ADD
+        "verification_code": verification_code,
         "is_verified": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    # ✅ SAVE USER
     await db.users.insert_one(user_doc)
-    # ✅ SEND EMAIL (ADD HERE)
     send_verification_email(user_data.email, user_data.name, verification_code)
 
-    # Create access token
-    access_token = create_access_token({"sub": user_id, "role": "user"})
-
+    # ✅ Don't return token — just success message
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": user_id,
-            "name": user_data.name,
-            "email": user_data.email.lower(),
-            "phone": user_data.phone,
-        },
+        "message": "Verification code sent",
+        "email": user_data.email
     }
 
 
@@ -454,12 +452,30 @@ async def register(user_data: UserRegister):
 async def verify(data: VerifyRequest):
     user = await db.users.find_one({"email": data.email})
     if not user or user.get("verification_code") != data.verification_code:
-        raise HTTPException(status_code=400, detail="Invalid verification_code")
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+    
     await db.users.update_one(
         {"email": data.email},
         {"$set": {"is_verified": True}, "$unset": {"verification_code": ""}},
     )
-    return {"message": "Email verified successfully"}
+    
+    # ✅ Return token after verification so frontend can login automatically
+    access_token = create_access_token({
+        "sub": user["id"],
+        "role": user.get("role", "user")
+    })
+    
+    return {
+        "message": "Email verified successfully",
+        "access_token": access_token,
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "phone": user.get("phone"),
+            "role": user.get("role", "user")
+        }
+    }
 
 
 @api_router.post("/auth/resend-code")
