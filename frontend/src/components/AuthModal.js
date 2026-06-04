@@ -103,9 +103,11 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             const data = await res.json();
 
-            // ✅ Save token from verify response directly
+            // ✅ Save token first
             localStorage.setItem('token', data.access_token);
-            window.location.reload(); // ✅ reload to apply auth state
+
+            // ✅ Update auth context directly without reload
+            await login(data.user.email, null, data.access_token);
 
             toast.success("Verified successfully ✅");
             setShowverification_code(false);
@@ -257,10 +259,10 @@ const AuthModal = ({ isOpen, onClose }) => {
                                             </span>
                                             {formData.password && (
                                                 <p className={`text-sm mt-1 ${getPasswordStrength(formData.password) === "Strong"
-                                                        ? "text-green-600"
-                                                        : getPasswordStrength(formData.password) === "Medium"
-                                                            ? "text-yellow-600"
-                                                            : "text-red-600"
+                                                    ? "text-green-600"
+                                                    : getPasswordStrength(formData.password) === "Medium"
+                                                        ? "text-yellow-600"
+                                                        : "text-red-600"
                                                     }`}>
                                                     Password Strength: {getPasswordStrength(formData.password)}
                                                 </p>
