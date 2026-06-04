@@ -371,6 +371,20 @@ def send_verification_email(to_email, name, code):
 
                       <p style="color:#555; font-size:13px;">⏳ This code expires in <strong>10 minutes</strong>.</p>
                       <p style="color:#555; font-size:13px;">🔒 Do not share this code with anyone.</p>
+
+                      <!-- NOT SPAM -->
+                      <div style="background:#fff3cd; padding:15px; border-radius:4px; margin:20px 0;">
+                        <p style="margin:0; color:#856404; font-size:13px;">
+                          📬 If this email is in spam, please mark it as 
+                          <strong>"Not Spam"</strong> to receive future emails properly.
+                        </p>
+                      </div>
+
+                      <!-- ADDRESS FOOTER -->
+                      <div style="text-align:center; padding:15px 0; color:#999; font-size:11px;">
+                        <p style="margin:0;">KhajurKart | 10-3-313/a, AR Raheem Residency, Hyderabad 500057</p>
+                        <p style="margin:5px 0 0;">You received this because you registered at khajurkart.com</p>
+                      </div>
                     </td>
                   </tr>
 
@@ -578,6 +592,20 @@ async def forgot_password(email: str):
                     <p style="color:#666; font-size:13px;">🔒 If you didn't request this, ignore this email.</p>
                     <hr style="margin:20px 0;"/>
                     <p><strong>KhajurKart Team</strong></p>
+
+                    <!-- NOT SPAM -->
+                    <div style="background:#fff3cd; padding:15px; border-radius:4px; margin:20px 0;">
+                      <p style="margin:0; color:#856404; font-size:13px;">
+                        📬 If this email is in spam, please mark it as 
+                        <strong>"Not Spam"</strong> to receive future emails properly.
+                      </p>
+                    </div>
+
+                    <!-- ADDRESS FOOTER -->
+                    <div style="text-align:center; padding:15px 0; color:#999; font-size:11px;">
+                      <p style="margin:0;">KhajurKart | 10-3-313/a, AR Raheem Residency, Hyderabad 500057</p>
+                      <p style="margin:5px 0 0;">You received this because you requested a password reset at khajurkart.com</p>
+                    </div>
                   </div>
                 </div>
                 """,
@@ -731,6 +759,20 @@ async def send_auto_reply(name, email):
                         <p style="margin:0; color:#555; font-size:13px;">📞 Need urgent help? Call us at</p>
                         <p style="margin:5px 0 0; color:#064E3B; font-size:16px; font-weight:bold;">+91 7981002137</p>
                       </div>
+
+                      <!-- NOT SPAM -->
+                      <div style="background:#fff3cd; padding:15px; border-radius:4px; margin:20px 0; text-align:left;">
+                        <p style="margin:0; color:#856404; font-size:13px;">
+                          📬 If this email is in spam, please mark it as 
+                          <strong>"Not Spam"</strong> to receive future emails properly.
+                        </p>
+                      </div>
+
+                      <!-- ADDRESS FOOTER -->
+                      <div style="text-align:center; padding:15px 0; color:#999; font-size:11px;">
+                        <p style="margin:0;">KhajurKart | 10-3-313/a, AR Raheem Residency, Hyderabad 500057</p>
+                        <p style="margin:5px 0 0;">You received this because you contacted us at khajurkart.com</p>
+                      </div>
                     </td>
                   </tr>
 
@@ -859,6 +901,20 @@ async def send_order_email(user_email, user_name, order_id, items, total):
                       </table>
 
                       <p style="color:#555; font-size:14px; margin-top:20px;">🚚 We will deliver your order soon!</p>
+
+                      <!-- NOT SPAM -->
+                      <div style="background:#fff3cd; padding:15px; border-radius:4px; margin:20px 0;">
+                        <p style="margin:0; color:#856404; font-size:13px;">
+                          📬 If this email is in spam, please mark it as 
+                          <strong>"Not Spam"</strong> to receive future emails properly.
+                        </p>
+                      </div>
+
+                      <!-- ADDRESS FOOTER -->
+                      <div style="text-align:center; padding:15px 0; color:#999; font-size:11px;">
+                        <p style="margin:0;">KhajurKart | 10-3-313/a, AR Raheem Residency, Hyderabad 500057</p>
+                        <p style="margin:5px 0 0;">You received this because you placed an order at khajurkart.com</p>
+                      </div>
                     </td>
                   </tr>
 
