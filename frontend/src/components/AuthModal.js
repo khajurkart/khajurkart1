@@ -101,16 +101,13 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             if (!res.ok) throw new Error();
 
-            const data = await res.json();
-
-            // ✅ Set token and user directly in auth context
-            await login(null, null, data.access_token, data.user);
+            // ✅ Auto login after successful verification
+            await login(formData.email, tempPassword);
 
             toast.success("Verified successfully ✅");
             setShowverification_code(false);
-            setverification_code("");
+            setTempPassword(''); // ✅ clear temp password
             onClose();
-
         } catch (err) {
             toast.error("Invalid verification code ❌");
         }
