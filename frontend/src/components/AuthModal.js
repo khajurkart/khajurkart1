@@ -101,12 +101,14 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             if (!res.ok) throw new Error();
 
-            // ✅ Auto login after successful verification
-            await login(formData.email, tempPassword);
+            const data = await res.json();
+
+            // ✅ Save token from verify response directly
+            localStorage.setItem('token', data.access_token);
+            window.location.reload(); // ✅ reload to apply auth state
 
             toast.success("Verified successfully ✅");
             setShowverification_code(false);
-            setTempPassword(''); // ✅ clear temp password
             onClose();
         } catch (err) {
             toast.error("Invalid verification code ❌");
@@ -254,13 +256,12 @@ const AuthModal = ({ isOpen, onClose }) => {
                                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                             </span>
                                             {formData.password && (
-                                                <p className={`text-sm mt-1 ${
-                                                    getPasswordStrength(formData.password) === "Strong"
+                                                <p className={`text-sm mt-1 ${getPasswordStrength(formData.password) === "Strong"
                                                         ? "text-green-600"
                                                         : getPasswordStrength(formData.password) === "Medium"
                                                             ? "text-yellow-600"
                                                             : "text-red-600"
-                                                }`}>
+                                                    }`}>
                                                     Password Strength: {getPasswordStrength(formData.password)}
                                                 </p>
                                             )}
