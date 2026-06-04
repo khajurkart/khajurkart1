@@ -61,7 +61,16 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, fetchUser]);
 
-  const login = async (email, password) => {
+  const login = async (email, password, existingToken = null, existingUser = null) => {
+    // ✅ If token already exists (from verify), just set it directly
+    if (existingToken && existingUser) {
+      localStorage.setItem('token', existingToken);
+      setToken(existingToken);
+      setUser(existingUser);
+      return existingUser;
+    }
+
+    // Normal login flow
     const response = await axios.post(`${API}/login`, { email, password });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
