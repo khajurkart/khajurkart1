@@ -103,15 +103,14 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             const data = await res.json();
 
-            // ✅ Save token first
-            localStorage.setItem('token', data.access_token);
-
-            // ✅ Update auth context directly without reload
-            await login(data.user.email, null, data.access_token);
+            // ✅ Set token and user directly in auth context
+            await login(null, null, data.access_token, data.user);
 
             toast.success("Verified successfully ✅");
             setShowverification_code(false);
+            setverification_code("");
             onClose();
+
         } catch (err) {
             toast.error("Invalid verification code ❌");
         }
