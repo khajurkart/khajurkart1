@@ -61,16 +61,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, fetchUser]);
 
-  const login = async (email, password, existingToken = null, existingUser = null) => {
-    // ✅ If token already exists (from verify), just set it directly
-    if (existingToken && existingUser) {
-      localStorage.setItem('token', existingToken);
-      setToken(existingToken);
-      setUser(existingUser);
-      return existingUser;
-    }
-
-    // Normal login flow
+  const login = async (email, password) => {
     const response = await axios.post(`${API}/login`, { email, password });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
@@ -79,6 +70,12 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  // ✅ NEW FUNCTION - set auth directly without API call
+  const setAuth = (access_token, userData) => {
+    localStorage.setItem('token', access_token);
+    setToken(access_token);
+    setUser(userData);
+  };  
   // ✅ FIXED: register does NOT save token anymore
   const register = async (name, email, password, phone) => {
     const response = await axios.post(`${API}/auth/register`, {
@@ -89,7 +86,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, loading, setAuth }}>
       {children}
     </AuthContext.Provider>
   );
