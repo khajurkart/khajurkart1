@@ -18,10 +18,9 @@ const AuthModal = ({ isOpen, onClose }) => {
     const [showverification_code, setShowverification_code] = useState(false);
     const [verification_code, setverification_code] = useState("");
 
-    // ✅ Store password temporarily for auto-login after verify
-    const [tempPassword, setTempPassword] = useState('');
+    // ✅ Use setAuth instead of login after verify
+    const { login, register, setAuth } = useAuth();
 
-    const { login, register, setAuth } = useAuth(); // ✅ add setAuth
     if (!isOpen) return null;
 
     const handleSubmit = async (e) => {
@@ -61,20 +60,15 @@ const AuthModal = ({ isOpen, onClose }) => {
                 );
                 toast.success('Verification code sent to your email');
                 setShowverification_code(true);
-
-                // ✅ Save password temporarily for auto-login after verify
-                setTempPassword(formData.password);
-
                 setFormData({
                     name: '',
                     phone: '',
-                    email: formData.email, // keep email
+                    email: formData.email,
                     password: '',
                     confirmPassword: ''
                 });
             }
         } catch (error) {
-            console.error('Auth error:', error);
             toast.error(
                 error.response?.data?.detail || error.message || 'Authentication failed'
             );
@@ -99,11 +93,15 @@ const AuthModal = ({ isOpen, onClose }) => {
                 })
             });
 
-            if (!res.ok) throw new Error();
+            if (!res.ok) {
+                const err = await res.json();
+                toast.error(err.detail || "Invalid verification code ❌");
+                return;
+            }
 
             const data = await res.json();
 
-            // ✅ Set auth directly - no login API call needed
+            // ✅ Set auth directly - NO login API call - NO 403 error
             setAuth(data.access_token, data.user);
 
             toast.success("Verified successfully ✅");
@@ -169,7 +167,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 Enter Verification Code
                             </h2>
                             <p className="text-center text-sm text-khajur-dark/60">
-                                Sent to {formData.email}
+                                Code sent to <strong>{formData.email}</strong>
                             </p>
                             <input
                                 type="text"
@@ -177,6 +175,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 value={verification_code}
                                 onChange={(e) => setverification_code(e.target.value)}
                                 className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm outline-none text-center text-2xl tracking-widest"
+                                maxLength={6}
                             />
                             <button
                                 onClick={resendCode}
@@ -196,9 +195,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 {!isLogin && !isForgotPassword && (
                                     <div>
-                                        <label className="block text-sm font-medium text-khajur-primary mb-2">
-                                            Full Name *
-                                        </label>
+                                        <label className="block text-sm font-medium text-khajur-primary mb-2">Full Name *</label>
                                         <input
                                             type="text"
                                             required
@@ -211,9 +208,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 )}
                                 {!isLogin && !isForgotPassword && (
                                     <div>
-                                        <label className="block text-sm font-medium text-khajur-primary mb-2">
-                                            Phone Number *
-                                        </label>
+                                        <label className="block text-sm font-medium text-khajur-primary mb-2">Phone Number *</label>
                                         <input
                                             type="tel"
                                             required
@@ -224,9 +219,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-sm font-medium text-khajur-primary mb-2">
-                                        Email Address *
-                                    </label>
+                                    <label className="block text-sm font-medium text-khajur-primary mb-2">Email Address *</label>
                                     <input
                                         type="email"
                                         required
@@ -238,9 +231,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 </div>
                                 {!isForgotPassword && (
                                     <div>
-                                        <label className="block text-sm font-medium text-khajur-primary mb-2">
-                                            Password *
-                                        </label>
+                                        <label className="block text-sm font-medium text-khajur-primary mb-2">Password *</label>
                                         <div className="relative">
                                             <input
                                                 type={showPassword ? "text" : "password"}
@@ -257,12 +248,13 @@ const AuthModal = ({ isOpen, onClose }) => {
                                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                             </span>
                                             {formData.password && (
-                                                <p className={`text-sm mt-1 ${getPasswordStrength(formData.password) === "Strong"
-                                                    ? "text-green-600"
-                                                    : getPasswordStrength(formData.password) === "Medium"
-                                                        ? "text-yellow-600"
-                                                        : "text-red-600"
-                                                    }`}>
+                                                <p className={`text-sm mt-1 ${
+                                                    getPasswordStrength(formData.password) === "Strong"
+                                                        ? "text-green-600"
+                                                        : getPasswordStrength(formData.password) === "Medium"
+                                                            ? "text-yellow-600"
+                                                            : "text-red-600"
+                                                }`}>
                                                     Password Strength: {getPasswordStrength(formData.password)}
                                                 </p>
                                             )}
@@ -271,9 +263,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 )}
                                 {!isLogin && !isForgotPassword && (
                                     <div>
-                                        <label className="block text-sm font-medium text-khajur-primary mb-2">
-                                            Confirm Password *
-                                        </label>
+                                        <label className="block text-sm font-medium text-khajur-primary mb-2">Confirm Password *</label>
                                         <div className="relative">
                                             <input
                                                 type={showPassword ? "text" : "password"}
