@@ -422,18 +422,17 @@ def send_verification_email(to_email, name, code):
 @api_router.post("/auth/register")
 async def register(user_data: UserRegister):
     # Check if fully verified user exists
-    existing_user = await db.users.find_one({
-        "email": user_data.email,
-        "is_verified": True  # ✅ only block if already verified
-    })
+    existing_user = await db.users.find_one(
+        {
+            "email": user_data.email,
+            "is_verified": True,  # ✅ only block if already verified
+        }
+    )
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     # ✅ Delete any previous unverified registration with same email
-    await db.users.delete_one({
-        "email": user_data.email,
-        "is_verified": False
-    })
+    await db.users.delete_one({"email": user_data.email, "is_verified": False})
 
     # Create user
     user_id = f"user_{datetime.now(timezone.utc).timestamp()}"
@@ -456,10 +455,7 @@ async def register(user_data: UserRegister):
     send_verification_email(user_data.email, user_data.name, verification_code)
 
     # ✅ Don't return token — just success message
-    return {
-        "message": "Verification code sent",
-        "email": user_data.email
-    }
+    return {"message": "Verification code sent", "email": user_data.email}
 
 
 @api_router.post("/auth/verify")
@@ -467,18 +463,17 @@ async def verify(data: VerifyRequest):
     user = await db.users.find_one({"email": data.email})
     if not user or user.get("verification_code") != data.verification_code:
         raise HTTPException(status_code=400, detail="Invalid verification code")
-    
+
     await db.users.update_one(
         {"email": data.email},
         {"$set": {"is_verified": True}, "$unset": {"verification_code": ""}},
     )
-    
+
     # ✅ Return token after verification so frontend can login automatically
-    access_token = create_access_token({
-        "sub": user["id"],
-        "role": user.get("role", "user")
-    })
-    
+    access_token = create_access_token(
+        {"sub": user["id"], "role": user.get("role", "user")}
+    )
+
     return {
         "message": "Email verified successfully",
         "access_token": access_token,
@@ -487,8 +482,8 @@ async def verify(data: VerifyRequest):
             "name": user["name"],
             "email": user["email"],
             "phone": user.get("phone"),
-            "role": user.get("role", "user")
-        }
+            "role": user.get("role", "user"),
+        },
     }
 
 
@@ -944,6 +939,162 @@ async def send_order_email(user_email, user_name, order_id, items, total):
         logging.info("✅ ORDER EMAIL SENT")
     except Exception as e:
         logging.error("❌ ORDER EMAIL ERROR", exc_info=True)
+
+
+# ============ ADMIN ORDER NOTIFICATION ============
+
+
+async def send_admin_order_notification(
+    order_id,
+    customer_name,
+    customer_email,
+    shipping_address,
+    items,
+    total,
+    payment_method,
+):
+    try:
+        items_rows = ""
+        for item in items:
+            size = item.get("size", "")
+            size_text = f" ({size})" if size else ""
+            items_rows += f"""
+            <tr>
+              <td style="padding:10px; border-bottom:1px solid #f0f0f0; font-size:14px;">
+                {item['product_name']}{size_text}
+              </td>
+              <td style="padding:10px; border-bottom:1px solid #f0f0f0; font-size:14px; text-align:center;">
+                {item['quantity']}
+              </td>
+              <td style="padding:10px; border-bottom:1px solid #f0f0f0; font-size:14px; text-align:right; font-weight:bold; color:#064E3B;">
+                Rs.{item['price'] * item['quantity']}
+              </td>
+            </tr>
+            """
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center" style="padding:40px 0;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:30px; text-align:center;">
+                      <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">New Order Received!</p>
+                    </td>
+                  </tr>
+
+                  <!-- BODY -->
+                  <tr>
+                    <td style="padding:30px;">
+                      <h2 style="color:#064E3B; margin:0 0 20px;">New Order Alert</h2>
+
+                      <!-- ORDER ID -->
+                      <div style="background:#f0fdf4; border-left:4px solid #064E3B; padding:15px; margin:15px 0;">
+                        <p style="margin:0; color:#555; font-size:13px;">Order ID</p>
+                        <p style="margin:5px 0 0; color:#064E3B; font-size:18px; font-weight:bold;">{order_id}</p>
+                      </div>
+
+                      <!-- CUSTOMER INFO -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+                        <tr>
+                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                            <p style="margin:0; color:#555; font-size:12px;">Customer Name</p>
+                            <p style="margin:4px 0 0; color:#333; font-size:15px; font-weight:bold;">{customer_name}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                            <p style="margin:0; color:#555; font-size:12px;">Customer Email</p>
+                            <p style="margin:4px 0 0; color:#333; font-size:15px;">{customer_email}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                            <p style="margin:0; color:#555; font-size:12px;">Payment Method</p>
+                            <p style="margin:4px 0 0; color:#333; font-size:15px; font-weight:bold; text-transform:uppercase;">{payment_method}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                            <p style="margin:0; color:#555; font-size:12px;">Delivery Address</p>
+                            <p style="margin:4px 0 0; color:#333; font-size:14px;">
+                              {shipping_address.get('address', '')},
+                              {shipping_address.get('city', '')},
+                              {shipping_address.get('state', '')} -
+                              {shipping_address.get('pincode', '')}
+                            </p>
+                            <p style="margin:4px 0 0; color:#333; font-size:14px;">
+                              Phone: {shipping_address.get('phone', '')}
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- ITEMS TABLE -->
+                      <h3 style="color:#064E3B; margin:20px 0 10px;">Order Items:</h3>
+                      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #f0f0f0; border-radius:8px; overflow:hidden;">
+                        <tr style="background:#064E3B;">
+                          <th style="padding:10px; color:#C6A962; font-size:13px; text-align:left;">Item</th>
+                          <th style="padding:10px; color:#C6A962; font-size:13px; text-align:center;">Qty</th>
+                          <th style="padding:10px; color:#C6A962; font-size:13px; text-align:right;">Amount</th>
+                        </tr>
+                        {items_rows}
+                      </table>
+
+                      <!-- TOTAL -->
+                      <div style="background:#f9f9f9; padding:15px; margin:20px 0; text-align:right;">
+                        <p style="margin:0; color:#555; font-size:14px;">Delivery: <span style="color:#16a34a; font-weight:bold;">FREE</span></p>
+                        <p style="margin:10px 0 0; color:#064E3B; font-size:20px; font-weight:bold;">
+                          Grand Total: Rs.{total}
+                        </p>
+                      </div>
+
+                      <!-- ACTION BUTTON -->
+                      <div style="text-align:center; margin:25px 0;">
+                        <a href="https://www.khajurkart.com/admin/orders"
+                           style="background:#064E3B; color:#C6A962; padding:14px 30px;
+                                  text-decoration:none; border-radius:4px;
+                                  font-weight:bold; font-size:14px;">
+                          View Order in Admin Panel
+                        </a>
+                      </div>
+
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:20px; text-align:center;">
+                      <p style="color:#C6A962; margin:0; font-size:13px;">KhajurKart Admin Notification</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """
+
+        resend.Emails.send(
+            {
+                "from": "KhajurKart <contact@khajurkart.com>",
+                "to": ["khajurkart@gmail.com"],
+                "subject": f"New Order Received - {order_id} | Rs.{total}",
+                "html": html,
+                "headers": {"X-Priority": "1", "Importance": "high"},
+            }
+        )
+        logging.info("✅ ADMIN ORDER EMAIL SENT")
+    except Exception as e:
+        logging.error("❌ ADMIN ORDER EMAIL ERROR", exc_info=True)
 
 
 # ============ CONTACT ROUTES ============
@@ -1479,12 +1630,25 @@ async def create_order(
     }
 
     await db.orders.insert_one(order_doc)
+
+    # ✅ Send confirmation to customer
     await send_order_email(
         current_user["email"],
         current_user["name"],
         order_id,
-        items_with_discount,  # ✅ CORRECT
+        items_with_discount,
         order_data.total_amount,
+    )
+
+    # ✅ Send notification to admin
+    await send_admin_order_notification(
+        order_id,
+        current_user.get("name", ""),
+        current_user.get("email", ""),
+        order_data.shipping_address,
+        items_with_discount,
+        order_data.total_amount,
+        order_data.payment_method,
     )
 
     # Clear cart
