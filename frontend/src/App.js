@@ -31,6 +31,7 @@ import AdminReturns from './pages/AdminReturns';
 import AdminReviews from "./pages/AdminReviews";
 import Returns from './pages/Returns';
 import FAQ from "./pages/FAQ";
+import ThankYou from './pages/ThankYou';
 import NotFound from './pages/NotFound';
 import ScrollToTop from "./components/ScrollToTop";
 
