@@ -66,6 +66,7 @@ function App() {
                                 <Route path="/admin/reviews" element={<AdminReviews />} />
                                 <Route path="/returns" element={<Returns />} />
                                 <Route path="/faq" element={<FAQ />} />
+                                <Route path="/thank-you" element={<ThankYou />} />
                                 <Route path="*" element={<NotFound />} />
                             </Routes>
                         </main>
