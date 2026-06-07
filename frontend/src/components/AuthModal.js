@@ -162,33 +162,73 @@ const AuthModal = ({ isOpen, onClose }) => {
                     </p>
 
                     {showverification_code ? (
-                        <div className="space-y-5">
-                            <h2 className="text-center text-xl font-semibold text-khajur-primary">
+                        <div className="space-y-4">
+
+                            {/* ===== TITLE ===== */}
+                            <h2 className="text-center font-serif text-3xl font-bold text-khajur-primary">
                                 Enter Verification Code
                             </h2>
+
+                            {/* ===== EMAIL SENT INFO ===== */}
                             <p className="text-center text-sm text-khajur-dark/60">
-                                Code sent to <strong>{formData.email}</strong>
+                                Code sent to <strong className="text-khajur-primary">{formData.email}</strong>
                             </p>
+
+                            {/* ===== SPAM WARNING ===== */}
+                            <div style={{
+                                background: '#fff3cd',
+                                border: '1px solid #ffc107',
+                                borderRadius: '8px',
+                                padding: '12px 16px',
+                                margin: '10px 0'
+                            }}>
+                                <p style={{
+                                    margin: 0,
+                                    color: '#856404',
+                                    fontSize: '13px',
+                                    lineHeight: '1.6',
+                                    textAlign: 'center'
+                                }}>
+                                    📬 <strong>Check your Spam folder!</strong><br />
+                                    If the email is in spam, please mark it as{' '}
+                                    <strong>"Not Spam"</strong>{' '}
+                                    to receive future emails properly.
+                                </p>
+                            </div>
+
+                            {/* ===== OTP INPUT ===== */}
                             <input
                                 type="text"
-                                placeholder="Enter 6-digit code"
+                                placeholder="000000"
                                 value={verification_code}
                                 onChange={(e) => setverification_code(e.target.value)}
-                                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm outline-none text-center text-2xl tracking-widest"
+                                className="w-full bg-white border-2 border-khajur-primary/30 focus:border-khajur-gold text-khajur-primary px-4 py-4 rounded-sm outline-none text-center tracking-widest font-serif font-bold"
+                                style={{ fontSize: '32px', letterSpacing: '12px' }}
                                 maxLength={6}
                             />
+
+                            {/* ===== EXPIRES INFO ===== */}
+                            <p className="text-center text-xs text-khajur-dark/50">
+                                ⏳ Code expires in <strong>10 minutes</strong>
+                            </p>
+
+                            {/* ===== RESEND ===== */}
                             <button
                                 onClick={resendCode}
-                                className="w-full text-sm text-khajur-primary underline mt-2"
+                                className="w-full text-sm text-khajur-primary hover:text-khajur-gold transition-colors underline"
                             >
-                                Resend Code
+                                Didn't receive? Resend Code
                             </button>
+
+                            {/* ===== VERIFY BUTTON ===== */}
                             <button
                                 onClick={verifyverification_code}
-                                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all"
+                                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 font-serif font-bold transition-all"
+                                style={{ fontSize: '16px', letterSpacing: '2px' }}
                             >
                                 VERIFY
                             </button>
+
                         </div>
                     ) : (
                         <>
@@ -248,13 +288,12 @@ const AuthModal = ({ isOpen, onClose }) => {
                                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                             </span>
                                             {formData.password && (
-                                                <p className={`text-sm mt-1 ${
-                                                    getPasswordStrength(formData.password) === "Strong"
-                                                        ? "text-green-600"
-                                                        : getPasswordStrength(formData.password) === "Medium"
-                                                            ? "text-yellow-600"
-                                                            : "text-red-600"
-                                                }`}>
+                                                <p className={`text-sm mt-1 ${getPasswordStrength(formData.password) === "Strong"
+                                                    ? "text-green-600"
+                                                    : getPasswordStrength(formData.password) === "Medium"
+                                                        ? "text-yellow-600"
+                                                        : "text-red-600"
+                                                    }`}>
                                                     Password Strength: {getPasswordStrength(formData.password)}
                                                 </p>
                                             )}
