@@ -93,8 +93,8 @@ const Checkout = () => {
             );
 
             toast.success('Order placed successfully!');
-            await clearCart();
             navigate('/thank-you');
+            await clearCart();
         } catch (error) {
             console.error('Order failed', error);
             toast.error(error.response?.data?.detail || 'Failed to place order');
@@ -184,8 +184,8 @@ const Checkout = () => {
                         );
 
                         toast.success('Payment successful! Order confirmed.');
-                        await clearCart();
                         navigate('/thank-you');
+                        await clearCart();
                     } catch (error) {
                         console.error('Payment verification failed', error);
                         toast.error('Payment verification failed');
