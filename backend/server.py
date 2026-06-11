@@ -438,21 +438,31 @@ async def send_verification_sms(phone: str, code: str, name: str) -> bool:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://www.fast2sms.com/dev/bulkV2",
-                headers={"authorization": api_key, "Content-Type": "application/json"},
+                headers={
+                    "authorization": api_key,
+                    "Content-Type": "application/json"
+                },
                 json={
                     "route": "otp",
                     "variables_values": code,
                     "numbers": clean_phone,
-                    "flash": 0,
+                    "flash": 0
                 },
-                timeout=10.0,
+                timeout=10.0
             )
             result = response.json()
+        
+            # ✅ DETAILED LOGGING
+            logging.info(f"📱 SMS API KEY: {api_key[:10]}...")
+            logging.info(f"📱 SMS PHONE: {clean_phone}")
+            logging.info(f"📱 SMS CODE: {code}")
+            logging.info(f"📱 SMS RESPONSE: {result}")
+        
             if result.get("return") == True:
                 logging.info(f"✅ SMS SENT to {clean_phone}")
                 return True
             else:
-                logging.error(f"❌ SMS FAILED: {result}")
+                logging.error(f"❌ SMS FAILED REASON: {result}")
                 return False
     except Exception as e:
         logging.error(f"❌ SMS ERROR: {str(e)}")
