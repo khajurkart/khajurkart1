@@ -17,6 +17,7 @@ const AuthModal = ({ isOpen, onClose }) => {
     const [loading, setLoading] = useState(false);
     const [showverification_code, setShowverification_code] = useState(false);
     const [verification_code, setverification_code] = useState("");
+    const [sentViaPhone, setSentViaPhone] = useState(false);
 
     // ✅ Use setAuth instead of login after verify
     const { login, register, setAuth } = useAuth();
@@ -52,13 +53,21 @@ const AuthModal = ({ isOpen, onClose }) => {
                     setLoading(false);
                     return;
                 }
-                await register(
+                const result = await register(
                     formData.name,
                     formData.email,
                     formData.password,
                     formData.phone
                 );
-                toast.success('Verification code sent to your email');
+
+                // ✅ Show different message based on SMS or email
+                if (result.sms_sent) {
+                    toast.success(`Verification code sent to ${formData.phone}`);
+                    setSentViaPhone(true);
+                } else {
+                    toast.success('Verification code sent to your email');
+                    setSentViaPhone(false);
+                }
                 setShowverification_code(true);
                 setFormData({
                     name: '',
@@ -174,27 +183,49 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 Code sent to <strong className="text-khajur-primary">{formData.email}</strong>
                             </p>
 
-                            {/* ===== SPAM WARNING ===== */}
-                            <div style={{
-                                background: '#fff3cd',
-                                border: '1px solid #ffc107',
-                                borderRadius: '8px',
-                                padding: '12px 16px',
-                                margin: '10px 0'
-                            }}>
-                                <p style={{
-                                    margin: 0,
-                                    color: '#856404',
-                                    fontSize: '13px',
-                                    lineHeight: '1.6',
-                                    textAlign: 'center'
+                            {/* ===== SENT VIA INFO AND SPAM WARNING ===== */}
+                            {sentViaPhone ? (
+                                <div style={{
+                                    background: '#dcfce7',
+                                    border: '1px solid #16a34a',
+                                    borderRadius: '8px',
+                                    padding: '12px 16px',
+                                    margin: '10px 0'
                                 }}>
-                                    📬 <strong>Check your Spam folder!</strong><br />
-                                    If the email is in spam, please mark it as{' '}
-                                    <strong>"Not Spam"</strong>{' '}
-                                    to receive future emails properly.
-                                </p>
-                            </div>
+                                    <p style={{
+                                        margin: 0,
+                                        color: '#15803d',
+                                        fontSize: '13px',
+                                        lineHeight: '1.6',
+                                        textAlign: 'center'
+                                    }}>
+                                        📱 <strong>Code sent to your phone!</strong><br />
+                                        Check your SMS messages on{' '}
+                                        <strong>{formData.phone}</strong>
+                                    </p>
+                                </div>
+                            ) : (
+                                <div style={{
+                                    background: '#fff3cd',
+                                    border: '1px solid #ffc107',
+                                    borderRadius: '8px',
+                                    padding: '12px 16px',
+                                    margin: '10px 0'
+                                }}>
+                                    <p style={{
+                                        margin: 0,
+                                        color: '#856404',
+                                        fontSize: '13px',
+                                        lineHeight: '1.6',
+                                        textAlign: 'center'
+                                    }}>
+                                        📬 <strong>Check your Spam folder!</strong><br />
+                                        If the email is in spam, please mark it as{' '}
+                                        <strong>"Not Spam"</strong>{' '}
+                                        to receive future emails properly.
+                                    </p>
+                                </div>
+                            )}
 
                             {/* ===== OTP INPUT ===== */}
                             <input
@@ -217,7 +248,10 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 onClick={resendCode}
                                 className="w-full text-sm text-khajur-primary hover:text-khajur-gold transition-colors underline"
                             >
-                                Didn't receive? Resend Code
+                                {sentViaPhone
+                                    ? "Didn't receive SMS? Resend Code"
+                                    : "Didn't receive email? Resend Code"
+                                }
                             </button>
 
                             {/* ===== VERIFY BUTTON ===== */}
