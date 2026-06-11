@@ -33,6 +33,7 @@ import razorpay
 import secrets
 import hashlib
 import uuid
+import httpx
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -416,6 +417,48 @@ def send_verification_email(to_email, name, code):
         print("❌ VERIFICATION EMAIL ERROR:", str(e))
 
 
+# ============ SMS VERIFICATION ============
+
+
+async def send_verification_sms(phone: str, code: str, name: str) -> bool:
+    """Send OTP via SMS using Fast2SMS. Returns True if successful."""
+    try:
+        # Clean phone number - remove +91 or 0 prefix
+        clean_phone = phone.strip()
+        if clean_phone.startswith("+91"):
+            clean_phone = clean_phone[3:]
+        if clean_phone.startswith("0"):
+            clean_phone = clean_phone[1:]
+
+        api_key = os.environ.get("FAST2SMS_API_KEY", "")
+        if not api_key:
+            logging.warning("FAST2SMS_API_KEY not set")
+            return False
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://www.fast2sms.com/dev/bulkV2",
+                headers={"authorization": api_key, "Content-Type": "application/json"},
+                json={
+                    "route": "otp",
+                    "variables_values": code,
+                    "numbers": clean_phone,
+                    "flash": 0,
+                },
+                timeout=10.0,
+            )
+            result = response.json()
+            if result.get("return") == True:
+                logging.info(f"✅ SMS SENT to {clean_phone}")
+                return True
+            else:
+                logging.error(f"❌ SMS FAILED: {result}")
+                return False
+    except Exception as e:
+        logging.error(f"❌ SMS ERROR: {str(e)}")
+        return False
+
+
 # ============ AUTH ROUTES ============
 
 
@@ -423,15 +466,12 @@ def send_verification_email(to_email, name, code):
 async def register(user_data: UserRegister):
     # Check if fully verified user exists
     existing_user = await db.users.find_one(
-        {
-            "email": user_data.email,
-            "is_verified": True,  # ✅ only block if already verified
-        }
+        {"email": user_data.email, "is_verified": True}
     )
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # ✅ Delete any previous unverified registration with same email
+    # Delete any previous unverified registration
     await db.users.delete_one({"email": user_data.email, "is_verified": False})
 
     # Create user
@@ -452,10 +492,24 @@ async def register(user_data: UserRegister):
     }
 
     await db.users.insert_one(user_doc)
-    send_verification_email(user_data.email, user_data.name, verification_code)
 
-    # ✅ Don't return token — just success message
-    return {"message": "Verification code sent", "email": user_data.email}
+    # ✅ Try SMS first, fallback to email
+    sms_sent = False
+    if user_data.phone:
+        sms_sent = await send_verification_sms(
+            user_data.phone, verification_code, user_data.name
+        )
+
+    if not sms_sent:
+        # ✅ Fallback to email if SMS fails
+        logging.info("SMS failed or no phone — sending email OTP")
+        send_verification_email(user_data.email, user_data.name, verification_code)
+
+    return {
+        "message": "Verification code sent",
+        "email": user_data.email,
+        "sms_sent": sms_sent,  # ✅ tell frontend which method was used
+    }
 
 
 @api_router.post("/auth/verify")
@@ -492,12 +546,23 @@ async def resend_code(email: str):
     user = await db.users.find_one({"email": email})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
     verification_code = str(random.randint(100000, 999999))
     await db.users.update_one(
         {"email": email}, {"$set": {"verification_code": verification_code}}
     )
-    send_verification_email(email, user.get("name", "User"), verification_code)
-    return {"message": "Verification code resent"}
+
+    # ✅ Try SMS first, fallback to email
+    sms_sent = False
+    if user.get("phone"):
+        sms_sent = await send_verification_sms(
+            user["phone"], verification_code, user.get("name", "User")
+        )
+
+    if not sms_sent:
+        send_verification_email(email, user.get("name", "User"), verification_code)
+
+    return {"message": "Verification code resent", "sms_sent": sms_sent}
 
 
 @api_router.post("/login")
