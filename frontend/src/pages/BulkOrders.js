@@ -28,7 +28,7 @@ const BulkOrders = () => {
                 phone: formData.phone,
                 message: `
 BULK ORDER ENQUIRY
-==================
+================== 
 Business: ${formData.business_name}
 Type: ${formData.business_type}
 Products: ${formData.products_needed}
@@ -322,8 +322,6 @@ Message: ${formData.message}
                                         'Free delivery in Hyderabad',
                                         'Upto 20% discount',
                                         'Custom packaging available',
-                                        'Monthly subscription available',
-                                        'Invoice provided for GST',
                                         'COD & online payment accepted',
                                     ].map((item, index) => (
                                         <li key={index} className="flex items-center gap-3 text-khajur-cream/80 text-sm">
