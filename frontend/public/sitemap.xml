@@ -71,6 +71,14 @@
     <priority>0.80</priority>
   </url>
 
+  <!-- bulk-orders Page -->
+  <url>
+    <loc>https://www.khajurkart.com/bulk-orders</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
   <!-- About Page -->
   <url>
     <loc>https://www.khajurkart.com/about</loc>
