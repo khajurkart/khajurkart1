@@ -229,6 +229,32 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* ===== BULK ORDERS BANNER ===== */}
+            <section className="py-16 bg-khajur-primary">
+                <div className="max-w-7xl mx-auto px-6 md:px-12">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div>
+                            <p className="text-khajur-gold text-sm uppercase tracking-widest mb-2">
+                                — For Businesses
+                            </p>
+                            <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-cream mb-4">
+                                Bulk Orders Available
+                            </h2>
+                            <p className="text-khajur-cream/70 text-base max-w-xl">
+                                Special discounts for offices, hotels, restaurants and
+                                event planners. Minimum order ₹2,000. Free delivery in Hyderabad.
+                            </p>
+                        </div>
+                        <Link
+                            to="/bulk-orders"
+                            className="whitespace-nowrap bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 rounded-sm px-10 py-4 uppercase tracking-widest text-xs font-bold transition-all"
+                        >
+                            Get Bulk Quote
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
             {/* ===== FEATURES ===== */}
             <section className="py-20 md:py-32" data-testid="status-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
