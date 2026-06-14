@@ -18,6 +18,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Search from './pages/Search';
 import MyOrders from './pages/MyOrders';
+import BulkOrders from './pages/BulkOrders';
 import Account from './pages/Account';
 import Profile from './pages/Profile';
 import Addresses from './pages/Addresses';
@@ -47,6 +48,7 @@ function App() {
                                 <Route path="/" element={<Home />} />
                                 <Route path="/products" element={<Products />} />
                                 <Route path="/product/:id" element={<ProductDetail />} />
+                                <Route path="/bulk-orders" element={<BulkOrders />} />
                                 <Route path="/order/:id" element={<OrderDetails />} />
                                 <Route path="/cart" element={<Cart />} />
                                 <Route path="/checkout" element={<Checkout />} />
