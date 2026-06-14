@@ -51,6 +51,7 @@ const Navbar = () => {
               <Link to="/" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-home">Home</Link>
               <Link to="/about" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-about">About Us</Link>
               <Link to="/products" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-products">Products</Link>
+              <Link to="/bulk-orders" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-bulk">BULK ORDERS</Link>
               <Link to="/contact" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-contact">Contact Us</Link>
               {user && (
                 <Link to="/my-orders" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors ml-12" data-testid="nav-orders">My Orders</Link>
@@ -113,6 +114,7 @@ const Navbar = () => {
                 <Link to="/" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">Home</Link>
                 <Link to="/about" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">About Us</Link>
                 <Link to="/products" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">Products</Link>
+                <Link to="/bulk-orders" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">BULK ORDERS</Link>
                 <Link to="/contact" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">Contact Us</Link>
                 {user && (
                   <Link to="/my-orders" onClick={() => {setIsMenuOpen(false); window.scrollTo(0,0);}} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors">My Orders</Link>
