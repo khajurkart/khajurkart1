@@ -206,8 +206,9 @@ Message: ${formData.message}
                                         <option>Mosque / Madrasa</option>
                                         <option>Gym / Fitness Center</option>
                                         <option>Bakery / Sweet Shop</option>
-                                        <option>Wholesale / Kirana</option>    
-                                        <option>Retail / Kirana</option>
+                                        <option>Supermarkets</option>
+                                        <option>Wholesale</option>
+                                        <option>Retail</option>
                                         <option>Gift Shop</option>
                                         <option>Other</option>
                                     </select>
