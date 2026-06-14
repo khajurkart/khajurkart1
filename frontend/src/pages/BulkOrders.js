@@ -73,10 +73,10 @@ Message: ${formData.message}
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         {[
-                            { number: '5%', label: 'Off on ₹2,000+' },
-                            { number: '10%', label: 'Off on ₹5,000+' },
-                            { number: '15%', label: 'Off on ₹10,000+' },
-                            { number: '20%', label: 'Off on ₹25,000+' },
+                            { number: '5%', label: 'Off on ₹5,000+' },
+                            { number: '10%', label: 'Off on ₹15,000+' },
+                            { number: '15%', label: 'Off on ₹25,000+' },
+                            { number: '20%', label: 'Off on ₹50,000+' },
                         ].map((item, index) => (
                             <div key={index} className="bg-khajur-cream p-6 border border-khajur-border">
                                 <p className="font-serif text-4xl font-bold text-khajur-gold mb-2">
@@ -106,6 +106,8 @@ Message: ${formData.message}
                             { icon: '💪', label: 'Gyms & Fitness' },
                             { icon: '🍰', label: 'Bakeries & Sweet Shops' },
                             { icon: '🛒', label: 'Supermarkets' },
+                            { icon: '📦', label: 'Wholesale Dealers' },
+                            { icon: '🏪', label: 'Retail Stores' },
                             { icon: '🎁', label: 'Gift Shops' },
                         ].map((item, index) => (
                             <div
@@ -204,7 +206,8 @@ Message: ${formData.message}
                                         <option>Mosque / Madrasa</option>
                                         <option>Gym / Fitness Center</option>
                                         <option>Bakery / Sweet Shop</option>
-                                        <option>Supermarket / Kirana</option>
+                                        <option>Wholesale / Kirana</option>    
+                                        <option>Retail / Kirana</option>
                                         <option>Gift Shop</option>
                                         <option>Other</option>
                                     </select>
@@ -314,7 +317,7 @@ Message: ${formData.message}
                                 </h3>
                                 <ul className="space-y-3">
                                     {[
-                                        'Minimum order ₹2,000',
+                                        'Minimum order ₹5,000',
                                         'Free delivery in Hyderabad',
                                         'Upto 20% discount',
                                         'Custom packaging available',
