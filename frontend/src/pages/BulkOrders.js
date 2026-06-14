@@ -62,7 +62,7 @@ Message: ${formData.message}
                         Bulk Orders
                     </h1>
                     <p className="text-khajur-cream/70 text-lg max-w-2xl mx-auto">
-                        Special pricing for offices, hotels, restaurants, 
+                        Special pricing for offices, hotels, restaurants,
                         event planners and retailers across Hyderabad
                     </p>
                 </div>
@@ -142,7 +142,7 @@ Message: ${formData.message}
                                             type="text"
                                             required
                                             value={formData.name}
-                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                         />
                                     </div>
@@ -154,7 +154,7 @@ Message: ${formData.message}
                                             type="text"
                                             required
                                             value={formData.business_name}
-                                            onChange={(e) => setFormData({...formData, business_name: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
                                             className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                         />
                                     </div>
@@ -169,7 +169,7 @@ Message: ${formData.message}
                                             type="email"
                                             required
                                             value={formData.email}
-                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                         />
                                     </div>
@@ -181,7 +181,7 @@ Message: ${formData.message}
                                             type="tel"
                                             required
                                             value={formData.phone}
-                                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                             className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                         />
                                     </div>
@@ -194,7 +194,7 @@ Message: ${formData.message}
                                     <select
                                         required
                                         value={formData.business_type}
-                                        onChange={(e) => setFormData({...formData, business_type: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, business_type: e.target.value })}
                                         className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                     >
                                         <option value="">Select business type</option>
@@ -219,7 +219,7 @@ Message: ${formData.message}
                                         required
                                         placeholder="e.g. Ajwa Dates, Cashews, Mixed Nuts"
                                         value={formData.products_needed}
-                                        onChange={(e) => setFormData({...formData, products_needed: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, products_needed: e.target.value })}
                                         className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                     />
                                 </div>
@@ -233,7 +233,7 @@ Message: ${formData.message}
                                         required
                                         placeholder="e.g. 10kg or ₹10,000"
                                         value={formData.quantity}
-                                        onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                                         className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                     />
                                 </div>
@@ -245,7 +245,7 @@ Message: ${formData.message}
                                     <textarea
                                         rows={3}
                                         value={formData.message}
-                                        onChange={(e) => setFormData({...formData, message: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                         placeholder="Any special requirements..."
                                         className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors resize-none"
                                     />
@@ -270,7 +270,7 @@ Message: ${formData.message}
                             <div className="space-y-6">
                                 <div className="bg-khajur-cream border border-khajur-border p-6">
                                     <p className="text-sm text-khajur-dark/60 mb-1">WhatsApp / Call</p>
-                                    
+                                    <a
                                         href="tel:+917981002137"
                                         className="font-serif text-2xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors"
                                     >
@@ -280,7 +280,7 @@ Message: ${formData.message}
 
                                 <div className="bg-khajur-cream border border-khajur-border p-6">
                                     <p className="text-sm text-khajur-dark/60 mb-1">Email</p>
-                                    
+                                    <a
                                         href="mailto:khajurkart@gmail.com"
                                         className="font-serif text-xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors"
                                     >
@@ -296,7 +296,7 @@ Message: ${formData.message}
                                 </div>
 
                                 {/* WhatsApp Button */}
-                                
+                                <a
                                     href="https://wa.me/917981002137?text=Hi KhajurKart! I am interested in placing a bulk order."
                                     target="_blank"
                                     rel="noreferrer"
