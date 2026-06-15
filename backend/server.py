@@ -637,76 +637,199 @@ async def reset_password(reset_token: str, new_password: str):
 
 async def send_email(name, email, phone, message):
     try:
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td align="center" style="padding:40px 0;">
-                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+        # ✅ Check if bulk order
+        is_bulk = "BULK ORDER ENQUIRY" in message
 
-                  <!-- HEADER -->
-                  <tr>
-                    <td style="background:#064E3B; padding:30px; text-align:center;">
-                      <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
-                      <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">New Contact Message</p>
-                    </td>
-                  </tr>
+        if is_bulk:
+            # Parse bulk order details
+            parts = message.split(" | ")
+            details = {}
+            for part in parts:
+                if ": " in part:
+                    key, value = part.split(": ", 1)
+                    details[key.strip()] = value.strip()
 
-                  <!-- BODY -->
-                  <tr>
-                    <td style="padding:40px 30px;">
-                      <h2 style="color:#064E3B; margin:0 0 20px;">📩 New Contact Message</h2>
-                      
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
-                            <p style="margin:0; color:#555; font-size:13px;">Name</p>
-                            <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{name}</p>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
-                            <p style="margin:0; color:#555; font-size:13px;">Email</p>
-                            <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{email}</p>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
-                            <p style="margin:0; color:#555; font-size:13px;">Phone</p>
-                            <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{phone}</p>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding:10px 0;">
-                            <p style="margin:0; color:#555; font-size:13px;">Message</p>
-                            <p style="margin:4px 0 0; color:#333; font-size:14px; line-height:1.6;">{message}</p>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
+            html = f"""
+            <!DOCTYPE html>
+            <html>
+            <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:40px 0;">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
 
-                  <!-- FOOTER -->
-                  <tr>
-                    <td style="background:#064E3B; padding:20px; text-align:center;">
-                      <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
-                    </td>
-                  </tr>
+                      <!-- HEADER -->
+                      <tr>
+                        <td style="background:#064E3B; padding:30px; text-align:center;">
+                          <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                          <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">🛒 New Bulk Order Enquiry!</p>
+                        </td>
+                      </tr>
 
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
-        </html>
-        """
+                      <!-- BODY -->
+                      <tr>
+                        <td style="padding:30px;">
+                          <h2 style="color:#064E3B; margin:0 0 20px;">Bulk Order Details</h2>
+
+                          <!-- ALERT BOX -->
+                          <div style="background:#f0fdf4; border-left:4px solid #064E3B; padding:15px; margin:15px 0;">
+                            <p style="margin:0; color:#064E3B; font-size:15px; font-weight:bold;">
+                              New bulk order enquiry received!
+                            </p>
+                          </div>
+
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Customer Name</p>
+                                <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{name}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Email</p>
+                                <p style="margin:4px 0 0; color:#064E3B; font-size:15px;">{email}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Phone</p>
+                                <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{phone}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Business Name</p>
+                                <p style="margin:4px 0 0; color:#333; font-size:15px;">{details.get('Business', 'N/A')}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Business Type</p>
+                                <p style="margin:4px 0 0; color:#333; font-size:15px;">{details.get('Type', 'N/A')}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Products Needed</p>
+                                <p style="margin:4px 0 0; color:#C6A962; font-size:15px; font-weight:bold;">{details.get('Products', 'N/A')}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Quantity / Budget</p>
+                                <p style="margin:4px 0 0; color:#064E3B; font-size:18px; font-weight:bold;">{details.get('Quantity', 'N/A')}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Delivery Address</p>
+                                <p style="margin:4px 0 0; color:#333; font-size:14px;">{details.get('Address', 'N/A')}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0;">
+                                <p style="margin:0; color:#555; font-size:12px;">Additional Message</p>
+                                <p style="margin:4px 0 0; color:#333; font-size:14px;">{details.get('Message', 'N/A')}</p>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <!-- CALL TO ACTION -->
+                          <div style="text-align:center; margin:25px 0;">
+                            <a href="tel:+91{phone}"
+                               style="background:#064E3B; color:#C6A962; padding:14px 30px;
+                                      text-decoration:none; border-radius:4px;
+                                      font-weight:bold; font-size:14px;">
+                              Call Customer Now
+                            </a>
+                          </div>
+
+                        </td>
+                      </tr>
+
+                      <!-- FOOTER -->
+                      <tr>
+                        <td style="background:#064E3B; padding:20px; text-align:center;">
+                          <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            """
+            subject = f"🛒 Bulk Order Enquiry - {name} | {details.get('Quantity', '')}"
+
+        else:
+            # ✅ Regular contact message
+            html = f"""
+            <!DOCTYPE html>
+            <html>
+            <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:40px 0;">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+                      <tr>
+                        <td style="background:#064E3B; padding:30px; text-align:center;">
+                          <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                          <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">New Contact Message</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:40px 30px;">
+                          <h2 style="color:#064E3B; margin:0 0 20px;">📩 New Contact Message</h2>
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:13px;">Name</p>
+                                <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{name}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:13px;">Email</p>
+                                <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{email}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                                <p style="margin:0; color:#555; font-size:13px;">Phone</p>
+                                <p style="margin:4px 0 0; color:#064E3B; font-size:15px; font-weight:bold;">{phone}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:10px 0;">
+                                <p style="margin:0; color:#555; font-size:13px;">Message</p>
+                                <p style="margin:4px 0 0; color:#333; font-size:14px; line-height:1.6;">{message}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="background:#064E3B; padding:20px; text-align:center;">
+                          <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            """
+            subject = f"📩 New Contact Message - {name}"
+
         resend.Emails.send(
             {
                 "from": "KhajurKart <contact@khajurkart.com>",
                 "to": ["khajurkart@gmail.com"],
-                "subject": f"📩 New Contact Message - {name}",
+                "subject": subject,
                 "html": html,
                 "reply_to": email,
             }
@@ -720,6 +843,10 @@ async def send_email(name, email, phone, message):
 
 
 async def send_auto_reply(name, email):
+    if "BULK ORDER ENQUIRY" in message:
+        await send_bulk_order_reply(name, email)
+    else:
+        await send_auto_reply(name, email)
     try:
         html = f"""
         <!DOCTYPE html>
@@ -797,6 +924,99 @@ async def send_auto_reply(name, email):
         logging.info("✅ AUTO REPLY SENT")
     except Exception as e:
         logging.error("❌ AUTO REPLY ERROR", exc_info=True)
+
+
+# ============ BULK ORDER AUTO REPLY ============
+
+
+async def send_bulk_order_reply(name, email):
+    try:
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center" style="padding:40px 0;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:30px; text-align:center;">
+                      <h1 style="color:#C6A962; margin:0; font-size:28px;">KhajurKart</h1>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:13px;">Bulk Order Enquiry Received</p>
+                    </td>
+                  </tr>
+
+                  <!-- BODY -->
+                  <tr>
+                    <td style="padding:40px 30px; text-align:center;">
+                      <p style="font-size:50px; margin:0 0 20px;">🎉</p>
+                      <h2 style="color:#064E3B; margin:0 0 15px;">Thank You for Your Bulk Enquiry!</h2>
+                      <p style="color:#333; font-size:15px;">Hi <strong>{name}</strong>,</p>
+                      <p style="color:#555; font-size:14px; line-height:1.6;">
+                        We have received your bulk order enquiry successfully.<br/>
+                        Our team will get back to you within <strong>2-4 hours</strong> with a custom quote.
+                      </p>
+
+                      <!-- CONTACT BOX -->
+                      <div style="background:#f9f9f9; border-left:4px solid #C6A962; padding:20px; margin:25px 0; text-align:left;">
+                        <p style="margin:0 0 10px; color:#555; font-size:13px; font-weight:bold;">Need urgent help?</p>
+                        <p style="margin:0 0 8px; color:#064E3B; font-size:16px; font-weight:bold;">
+                          📞 +91 7981002137
+                        </p>
+                        <p style="margin:0; color:#064E3B; font-size:14px;">
+                          💬 WhatsApp us for faster response
+                        </p>
+                      </div>
+
+                      <!-- WHATSAPP BUTTON -->
+                      <a href="https://wa.me/917981002137"
+                         style="display:inline-block; background:#25D366; color:#ffffff;
+                                padding:14px 30px; text-decoration:none; border-radius:4px;
+                                font-weight:bold; font-size:14px; margin:10px 0;">
+                        💬 Chat on WhatsApp
+                      </a>
+
+                      <!-- BENEFITS -->
+                      <div style="margin:25px 0; text-align:left;">
+                        <p style="color:#064E3B; font-weight:bold; margin:0 0 10px;">Your bulk order includes:</p>
+                        <p style="color:#555; font-size:14px; margin:5px 0;">✓ Special bulk discount (up to 20%)</p>
+                        <p style="color:#555; font-size:14px; margin:5px 0;">✓ Free delivery in Hyderabad</p>
+                        <p style="color:#555; font-size:14px; margin:5px 0;">✓ Custom packaging available</p>
+                        <p style="color:#555; font-size:14px; margin:5px 0;">✓ GST invoice provided</p>
+                        <p style="color:#555; font-size:14px; margin:5px 0;">✓ COD & online payment accepted</p>
+                      </div>
+
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#064E3B; padding:20px; text-align:center;">
+                      <p style="color:#C6A962; margin:0; font-size:13px;">© 2026 KhajurKart. All rights reserved.</p>
+                      <p style="color:#ffffff; margin:5px 0 0; font-size:12px;">Hyderabad, Telangana 500057</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """
+        resend.Emails.send(
+            {
+                "from": "KhajurKart <contact@khajurkart.com>",
+                "to": [email],
+                "subject": "🛒 Bulk Order Enquiry Received - KhajurKart",
+                "html": html,
+            }
+        )
+        logging.info("✅ BULK ORDER REPLY SENT")
+    except Exception as e:
+        logging.error("❌ BULK ORDER REPLY ERROR", exc_info=True)
 
 
 # ============ ORDER CONFIRMATION EMAIL ============
