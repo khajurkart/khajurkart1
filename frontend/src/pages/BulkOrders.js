@@ -14,6 +14,7 @@ const BulkOrders = () => {
         business_type: '',
         products_needed: '',
         quantity: '',
+        address: '',  // ✅ ADD THIS
         message: ''
     });
     const [loading, setLoading] = useState(false);
@@ -26,21 +27,13 @@ const BulkOrders = () => {
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
-                message: `
-BULK ORDER ENQUIRY
-================== 
-Business: ${formData.business_name}
-Type: ${formData.business_type}
-Products: ${formData.products_needed}
-Quantity: ${formData.quantity}
-Message: ${formData.message}
-                `
+                message: `BULK ORDER ENQUIRY | Business: ${formData.business_name} | Type: ${formData.business_type} | Products: ${formData.products_needed} | Quantity: ${formData.quantity} | Address: ${formData.address} | Message: ${formData.message}`
             });
             toast.success('Bulk order enquiry sent! We will contact you within 24 hours.');
             setFormData({
                 name: '', email: '', phone: '',
                 business_name: '', business_type: '',
-                products_needed: '', quantity: '', message: ''
+                products_needed: '', quantity: '', address: '', message: ''
             });
         } catch (error) {
             toast.error('Failed to send enquiry. Please call us directly.');
@@ -238,6 +231,20 @@ Message: ${formData.message}
                                         placeholder="e.g. 10kg or ₹10,000"
                                         value={formData.quantity}
                                         onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                                        className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-khajur-dark mb-2">
+                                        Delivery Address *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="Your full delivery address"
+                                        value={formData.address}
+                                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                         className="w-full bg-transparent border-b border-khajur-primary/20 focus:border-khajur-primary px-0 py-3 outline-none transition-colors"
                                     />
                                 </div>
