@@ -54,7 +54,7 @@ const Navbar = () => {
               <Link to="/bulk-orders" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-bulk">BULK ORDERS</Link>
               <Link to="/contact" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-contact">Contact Us</Link>
               {user && (
-                <Link to="/my-orders" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors ml-12" data-testid="nav-orders">My Orders</Link>
+                <Link to="/my-orders" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-orders">My Orders</Link>
               )}
             </div>
 
