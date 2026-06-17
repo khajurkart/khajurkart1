@@ -47,7 +47,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-7">
               <Link to="/" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-home">Home</Link>
               <Link to="/about" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-about">About Us</Link>
               <Link to="/products" onClick={() => window.scrollTo(0,0)} className="font-sans text-sm uppercase tracking-widest hover:text-khajur-gold transition-colors" data-testid="nav-products">Products</Link>
@@ -68,7 +68,7 @@ const Navbar = () => {
                     placeholder="Search..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-khajur-primary/50 border border-khajur-gold/30 text-khajur-cream placeholder-khajur-cream/50 px-4 py-2 pr-10 rounded-sm focus:outline-none focus:border-khajur-gold transition-colors w-36"
+                    className="bg-khajur-primary/50 border border-khajur-gold/30 text-khajur-cream placeholder-khajur-cream/50 px-4 py-2 pr-10 rounded-sm focus:outline-none focus:border-khajur-gold transition-colors w-43"
                     data-testid="search-input"
                   />
                   <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2" data-testid="search-button">
