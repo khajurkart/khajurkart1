@@ -242,7 +242,7 @@ const Home = () => {
                             </h2>
                             <p className="text-khajur-cream/70 text-base max-w-xl">
                                 Special discounts for offices, hotels, restaurants and
-                                event planners. Minimum order ₹2,000. Free delivery in Hyderabad.
+                                event planners. Minimum order ₹5,000. Free delivery in Hyderabad.
                             </p>
                         </div>
                         <Link
