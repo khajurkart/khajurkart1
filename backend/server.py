@@ -60,8 +60,11 @@ if os.path.isdir("static"):
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 origins = [
+    "http://localhost:3000",
     "https://khajurkart.com",
     "https://www.khajurkart.com",
+    "https://khajurkart1.vercel.app",
+    "https://khajurkart1.onrender.com",
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -843,10 +846,6 @@ async def send_email(name, email, phone, message):
 
 
 async def send_auto_reply(name, email):
-    if "BULK ORDER ENQUIRY" in message:
-        await send_bulk_order_reply(name, email)
-    else:
-        await send_auto_reply(name, email)
     try:
         html = f"""
         <!DOCTYPE html>
@@ -1326,7 +1325,6 @@ async def contact_form(data: ContactForm):
     email = data.email
     phone = data.phone
     message = data.message
-    # ✅ Save to DB
     await db.contacts.insert_one(
         {
             "name": name,
@@ -1338,8 +1336,11 @@ async def contact_form(data: ContactForm):
     )
     # ✅ Send admin email
     await send_email(name, email, phone, message)
-    # ✅ Send auto reply to user
-    await send_auto_reply(name, email)
+    # ✅ Send different reply based on type
+    if "BULK ORDER ENQUIRY" in message:
+        await send_bulk_order_reply(name, email)
+    else:
+        await send_auto_reply(name, email)
     return {"message": "Message received successfully"}
 
 
