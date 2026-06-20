@@ -13,18 +13,20 @@ const ProductCard = ({ product }) => {
         >
             {/* Discount Badge */}
             {product.original_price && product.original_price > product.price && (
-                <div className="absolute top-0 right-0 z-10">
-                    <div style={{
+                <div
+                    className="absolute top-3 right-3 z-10"
+                    style={{
                         background: '#C6A962',
                         color: '#064E3B',
-                        fontSize: '10px',
+                        fontSize: '11px',
                         fontWeight: '800',
-                        padding: '6px 12px',
-                        letterSpacing: '1px',
-                        clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)',
-                    }}>
-                        UPTO {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% OFF
-                    </div>
+                        padding: '4px 10px',
+                        letterSpacing: '0.5px',
+                        borderRadius: '2px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                    }}
+                >
+                    {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% OFF
                 </div>
             )}
 
