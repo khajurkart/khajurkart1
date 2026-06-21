@@ -6,36 +6,27 @@ import { useCart } from '../context/CartContext';
 const ProductCard = ({ product }) => {
     const { addToCart } = useCart();
 
-    // ✅ Use discount field from backend directly
-    const discount = product.discount || (
-        product.original_price && product.original_price > product.price
-            ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-            : 0
-    );
-
-    const hasDiscount = discount > 0;
-
     return (
         <div
             className="group relative bg-white border border-khajur-border hover:border-khajur-gold hover:shadow-xl transition-all duration-500 overflow-hidden rounded-sm"
             data-testid={`product-card-${product.id}`}
         >
-            {/* ✅ Discount Badge */}
-            {hasDiscount && (
+            {/* Discount Badge */}
+            {product.original_price && product.original_price > product.price && (
                 <div
-                    className="absolute top-3 right-0 z-10"
+                    className="absolute top-3 right-3 z-10"
                     style={{
                         background: '#C6A962',
                         color: '#064E3B',
                         fontSize: '11px',
                         fontWeight: '800',
-                        padding: '5px 12px 5px 10px',
+                        padding: '4px 10px',
                         letterSpacing: '0.5px',
-                        borderRadius: '2px 0 0 2px',
-                        boxShadow: '-2px 2px 6px rgba(0,0,0,0.2)',
+                        borderRadius: '2px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                     }}
                 >
-                    {discount}% OFF
+                    {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% OFF
                 </div>
             )}
 
@@ -72,12 +63,12 @@ const ProductCard = ({ product }) => {
                 {/* Price + Cart */}
                 <div className="flex items-center justify-between mt-auto">
                     <div className="flex flex-col">
-                        {/* Discounted Price */}
-                        <span className="font-serif text-xl text-khajur-gold font-bold">
+                        <span
+                            className="font-serif text-xl text-khajur-gold font-bold"
+                        >
                             ₹{product.price}
                         </span>
-                        {/* Original Price strikethrough */}
-                        {hasDiscount && product.original_price && (
+                        {product.original_price && product.original_price > product.price && (
                             <span className="line-through text-gray-400 text-xs">
                                 ₹{product.original_price}
                             </span>
