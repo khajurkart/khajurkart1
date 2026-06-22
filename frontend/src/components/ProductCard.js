@@ -42,26 +42,16 @@ const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 
 const DiscountBadge = ({ discount }) => (
   <div className="absolute top-0 right-0 z-10 flex items-center">
-    {/* Left pointing notch — uses khajur-gold color */}
     <div
       style={{
         width:        0,
         height:       0,
         borderTop:    '16px solid transparent',
         borderBottom: '16px solid transparent',
-        borderRight:  '12px solid #C6A962', // khajur-gold hex
+        borderRight:  '12px solid #1a3a2a', // khajur-primary
       }}
     />
-    {/* Ribbon body */}
-    <div
-      className="
-        bg-khajur-gold text-khajur-primary
-        pr-3 pl-1 h-8
-        flex items-center
-        text-[10px] font-extrabold tracking-[0.12em] uppercase
-        select-none whitespace-nowrap
-      "
-    >
+    <div className="bg-khajur-primary text-khajur-gold pr-3 pl-1 h-8 flex items-center text-[10px] font-extrabold tracking-[0.12em] uppercase whitespace-nowrap">
       {discount}% OFF
     </div>
   </div>
