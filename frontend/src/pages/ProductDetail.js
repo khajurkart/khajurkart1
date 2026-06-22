@@ -11,6 +11,7 @@ import {
   X,
   Send,
   AlertTriangle,
+  MessageSquare,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
@@ -28,56 +29,92 @@ const TABS = [
 
 const SORT_OPTIONS = [
   { value: 'latest', label: 'Newest First' },
-  { value: 'top',    label: 'Top Rated' },
+  { value: 'top',    label: 'Top Rated'   },
 ];
 
 const REVIEWS_PER_PAGE = 5;
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-const formatDate = (dateStr) =>
-  new Date(dateStr).toLocaleDateString('en-IN', {
-    day: '2-digit',
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-IN', {
+    day:   '2-digit',
     month: 'short',
-    year: 'numeric',
+    year:  'numeric',
   });
+};
+
+const calcAvg = (reviews) =>
+  reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : '0.0';
 
 const calcDiscount = (original, current) =>
   Math.round(((original - current) / original) * 100);
 
-// ─── Sub-Components ────────────────────────────────────────────────────────────
+// ─── Shared Sub-Components ─────────────────────────────────────────────────────
 
 // ── Star Display ───────────────────────────────────────────────────────────────
 
 const StarDisplay = ({ rating, size = 'sm', interactive = false, onChange }) => {
-  const sizes = { sm: 'w-4 h-4', md: 'w-5 h-5', lg: 'w-7 h-7' };
+  const [hovered, setHovered] = useState(0);
+  const sizes  = { sm: 'w-4 h-4', md: 'w-5 h-5', lg: 'w-8 h-8' };
+  const active = interactive ? hovered || rating : rating;
 
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, i) => (
         <Star
           key={i}
-          onClick={() => interactive && onChange?.(i + 1)}
           className={`
-            ${sizes[size]} transition-colors
-            ${i < rating
+            ${sizes[size]} transition-all
+            ${i < active
               ? 'text-khajur-gold fill-khajur-gold'
               : 'text-khajur-dark/20 fill-transparent'
             }
-            ${interactive ? 'cursor-pointer hover:text-khajur-gold hover:fill-khajur-gold' : ''}
+            ${interactive ? 'cursor-pointer hover:scale-110' : ''}
           `}
+          onClick={()      => interactive && onChange?.(i + 1)}
+          onMouseEnter={() => interactive && setHovered(i + 1)}
+          onMouseLeave={() => interactive && setHovered(0)}
         />
       ))}
     </div>
   );
 };
 
+// ── Quantity Selector ──────────────────────────────────────────────────────────
+
+const QuantitySelector = ({ quantity, stock, onChange }) => (
+  <div className="flex items-center gap-0">
+    <button
+      onClick={() => onChange(Math.max(1, quantity - 1))}
+      className="w-10 h-10 bg-khajur-cream hover:bg-khajur-border text-khajur-primary font-bold text-lg transition-colors border border-khajur-border"
+      aria-label="Decrease quantity"
+    >
+      −
+    </button>
+    <span className="w-14 h-10 flex items-center justify-center font-medium text-khajur-primary border-y border-khajur-border text-sm">
+      {quantity}
+    </span>
+    <button
+      onClick={() => onChange(Math.min(stock, quantity + 1))}
+      className="w-10 h-10 bg-khajur-cream hover:bg-khajur-border text-khajur-primary font-bold text-lg transition-colors border border-khajur-border"
+      aria-label="Increase quantity"
+    >
+      +
+    </button>
+  </div>
+);
+
 // ── Price Block ────────────────────────────────────────────────────────────────
 
 const PriceBlock = ({ currentPrice, originalPrice }) => {
-  const discount = originalPrice > currentPrice
-    ? calcDiscount(originalPrice, currentPrice)
-    : 0;
+  const discount =
+    originalPrice > currentPrice
+      ? calcDiscount(originalPrice, currentPrice)
+      : 0;
 
   return (
     <div className="mb-6">
@@ -98,92 +135,77 @@ const PriceBlock = ({ currentPrice, originalPrice }) => {
   );
 };
 
-// ── Quantity Selector ──────────────────────────────────────────────────────────
+// ─── Reviews Sub-Components ────────────────────────────────────────────────────
 
-const QuantitySelector = ({ quantity, stock, onChange }) => (
-  <div className="flex items-center gap-0">
-    <button
-      onClick={() => onChange(Math.max(1, quantity - 1))}
-      className="
-        w-10 h-10 bg-khajur-cream hover:bg-khajur-border
-        text-khajur-primary font-bold text-lg transition-colors
-        border border-khajur-border
-      "
-      aria-label="Decrease quantity"
-    >
-      −
-    </button>
-    <span className="w-14 h-10 flex items-center justify-center font-medium text-khajur-primary border-y border-khajur-border text-sm">
-      {quantity}
-    </span>
-    <button
-      onClick={() => onChange(Math.min(stock, quantity + 1))}
-      className="
-        w-10 h-10 bg-khajur-cream hover:bg-khajur-border
-        text-khajur-primary font-bold text-lg transition-colors
-        border border-khajur-border
-      "
-      aria-label="Increase quantity"
-    >
-      +
-    </button>
-  </div>
-);
+// ── Rating Distribution ────────────────────────────────────────────────────────
+
+const RatingDistribution = ({ reviews }) => {
+  const total = reviews.length;
+
+  return (
+    <div className="space-y-2.5">
+      {[5, 4, 3, 2, 1].map((star) => {
+        const count = reviews.filter((r) => r.rating === star).length;
+        const pct   = total ? (count / total) * 100 : 0;
+
+        return (
+          <div key={star} className="flex items-center gap-3">
+            <span className="w-3 text-xs font-medium text-khajur-dark/60 flex-shrink-0">
+              {star}
+            </span>
+            <Star className="w-3 h-3 text-khajur-gold fill-khajur-gold flex-shrink-0" />
+            <div className="flex-1 h-2 bg-khajur-border rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-khajur-primary to-khajur-gold rounded-full transition-all duration-700"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className="w-5 text-xs text-khajur-dark/50 text-right flex-shrink-0">
+              {count}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 // ── Reviews Summary ────────────────────────────────────────────────────────────
 
 const ReviewsSummary = ({ reviews, onWriteReview }) => {
+  const avg   = calcAvg(reviews);
   const total = reviews.length;
-  const avg = total
-    ? (reviews.reduce((a, b) => a + b.rating, 0) / total).toFixed(1)
-    : '0.0';
-
-  const dist = [5, 4, 3, 2, 1].map((star) => {
-    const count = reviews.filter((r) => r.rating === star).length;
-    return { star, count, pct: total ? (count / total) * 100 : 0 };
-  });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center mb-12 p-8 bg-khajur-cream border border-khajur-border">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center bg-khajur-cream border border-khajur-border p-8 mb-10">
 
-      {/* Average */}
+      {/* Average Score */}
       <div className="text-center md:text-left">
-        <p className="font-serif text-7xl font-bold text-khajur-primary leading-none mb-2">
+        <p className="font-serif text-8xl font-bold text-khajur-primary leading-none mb-3">
           {avg}
         </p>
         <StarDisplay rating={Math.round(parseFloat(avg))} size="md" />
         <p className="text-sm text-khajur-dark/50 mt-2">
-          Based on {total} review{total !== 1 ? 's' : ''}
+          {total > 0
+            ? `Based on ${total} review${total !== 1 ? 's' : ''}`
+            : 'No reviews yet'}
         </p>
       </div>
 
       {/* Distribution */}
-      <div className="space-y-2">
-        {dist.map(({ star, count, pct }) => (
-          <div key={star} className="flex items-center gap-3 text-sm">
-            <span className="w-4 text-right text-khajur-dark/60 font-medium">{star}</span>
-            <Star className="w-3.5 h-3.5 text-khajur-gold fill-khajur-gold flex-shrink-0" />
-            <div className="flex-1 h-2 bg-khajur-border rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-khajur-primary to-khajur-gold transition-all duration-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <span className="w-6 text-khajur-dark/50">{count}</span>
-          </div>
-        ))}
-      </div>
+      <RatingDistribution reviews={reviews} />
 
       {/* CTA */}
       <div className="flex justify-center md:justify-end">
         <button
           onClick={onWriteReview}
           className="
-            bg-khajur-primary text-khajur-cream
-            hover:bg-khajur-primary/90 px-7 py-3
+            flex items-center gap-2 bg-khajur-primary text-khajur-cream
+            hover:bg-khajur-primary/90 px-7 py-3.5
             text-xs font-bold uppercase tracking-widest transition-colors
           "
         >
+          <MessageSquare className="w-4 h-4" />
           Write a Review
         </button>
       </div>
@@ -194,45 +216,53 @@ const ReviewsSummary = ({ reviews, onWriteReview }) => {
 // ── Review Card ────────────────────────────────────────────────────────────────
 
 const ReviewCard = ({ review }) => (
-  <div className="border-b border-khajur-border pb-6 last:border-0">
-    <div className="flex items-start justify-between gap-4 mb-2">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 bg-khajur-primary flex-shrink-0 flex items-center justify-center">
-          <span className="text-khajur-cream text-sm font-bold uppercase">
-            {review.user_name?.charAt(0) ?? '?'}
-          </span>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-khajur-primary">
-            {review.user_name ?? 'Anonymous'}
-          </p>
-          <p className="text-xs text-khajur-dark/40">{formatDate(review.created_at)}</p>
-        </div>
-      </div>
-      <StarDisplay rating={review.rating} size="sm" />
-    </div>
+  <div className="py-6 border-b border-khajur-border last:border-0">
+    <div className="flex items-start gap-4">
 
-    {review.title && (
-      <p className="text-sm font-semibold text-khajur-dark mt-2 mb-1">{review.title}</p>
-    )}
-    {review.comment && (
-      <p className="text-sm text-khajur-dark/70 leading-relaxed">{review.comment}</p>
-    )}
+      {/* Avatar */}
+      <div className="w-10 h-10 flex-shrink-0 bg-khajur-primary flex items-center justify-center">
+        <span className="text-khajur-cream text-sm font-bold uppercase">
+          {review.user_name?.charAt(0) ?? '?'}
+        </span>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+          <div className="flex items-center gap-3">
+            <p className="text-sm font-semibold text-khajur-primary">
+              {review.user_name ?? 'Anonymous'}
+            </p>
+            <span className="text-khajur-dark/20 text-xs">·</span>
+            <p className="text-xs text-khajur-dark/40">
+              {formatDate(review.created_at)}
+            </p>
+          </div>
+          <StarDisplay rating={review.rating} size="sm" />
+        </div>
+
+        {review.title && (
+          <p className="text-sm font-semibold text-khajur-dark mb-1">
+            {review.title}
+          </p>
+        )}
+        {review.comment && (
+          <p className="text-sm text-khajur-dark/70 leading-relaxed">
+            {review.comment}
+          </p>
+        )}
+      </div>
+    </div>
   </div>
 );
 
-// ── Review Form Modal ──────────────────────────────────────────────────────────
+// ── Review Form (inline, not modal) ───────────────────────────────────────────
 
-const ReviewFormModal = ({ productId, onClose, onSubmitted }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    title: '',
-    comment: '',
-    rating: 5,
-  });
+const ReviewForm = ({ productId, onClose, onSubmitted }) => {
+  const [formData, setFormData]     = useState({ name: '', title: '', comment: '', rating: 5 });
   const [submitting, setSubmitting] = useState(false);
 
-  const updateField = (field, value) =>
+  const update = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async (e) => {
@@ -244,15 +274,15 @@ const ReviewFormModal = ({ productId, onClose, onSubmitted }) => {
     setSubmitting(true);
     try {
       await axios.post(`${API}/reviews`, {
-        id: Date.now().toString(),
+        id:         Date.now().toString(),
         product_id: productId,
-        user_name: formData.name,
-        title: formData.title,
-        rating: formData.rating,
-        comment: formData.comment,
+        user_name:  formData.name.trim(),
+        title:      formData.title.trim(),
+        rating:     formData.rating,
+        comment:    formData.comment.trim(),
         created_at: new Date().toISOString(),
       });
-      toast.success('Review submitted successfully!');
+      toast.success('Review submitted — thank you!');
       onSubmitted();
       onClose();
     } catch {
@@ -263,172 +293,207 @@ const ReviewFormModal = ({ productId, onClose, onSubmitted }) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white w-full max-w-lg shadow-2xl">
+    <div className="mt-10 border border-khajur-border bg-white">
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-7 py-5 border-b border-khajur-border">
+      {/* Form Header */}
+      <div className="flex items-center justify-between px-7 py-5 border-b border-khajur-border bg-khajur-cream">
+        <div>
+          <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
+            Leave a Review
+          </p>
           <h3 className="font-serif text-xl font-medium text-khajur-primary">
             Share Your Experience
           </h3>
-          <button
-            onClick={onClose}
-            className="text-khajur-dark/40 hover:text-khajur-primary transition-colors"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
+        <button
+          onClick={onClose}
+          className="text-khajur-dark/40 hover:text-khajur-primary transition-colors"
+          aria-label="Close review form"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-7 py-6 space-y-5">
+      {/* Form Body */}
+      <form onSubmit={handleSubmit} className="px-7 py-6 space-y-5">
 
-          {/* Star Rating */}
-          <div>
-            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-2 block">
-              Your Rating
-            </label>
+        {/* Star Picker */}
+        <div>
+          <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-2 block">
+            Your Rating <span className="text-red-500">*</span>
+          </label>
+          <div className="flex items-center gap-2">
             <StarDisplay
               rating={formData.rating}
               size="lg"
               interactive
-              onChange={(r) => updateField('rating', r)}
+              onChange={(r) => update('rating', r)}
             />
+            <span className="text-sm text-khajur-dark/50 ml-1">
+              {formData.rating} / 5
+            </span>
           </div>
+        </div>
 
-          {/* Name */}
-          <div>
-            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
-              Your Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) => updateField('name', e.target.value)}
-              placeholder="e.g. Priya Sharma"
-              className="
-                w-full border border-khajur-border px-4 py-2.5 text-sm
-                text-khajur-primary placeholder:text-khajur-dark/30
-                focus:outline-none focus:border-khajur-gold transition-colors bg-white
-              "
-            />
-          </div>
+        {/* Name */}
+        <div>
+          <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
+            Your Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            required
+            value={formData.name}
+            onChange={(e) => update('name', e.target.value)}
+            placeholder="e.g. Priya Sharma"
+            className="
+              w-full border border-khajur-border px-4 py-2.5 text-sm
+              text-khajur-primary placeholder:text-khajur-dark/30 bg-white
+              focus:outline-none focus:border-khajur-gold transition-colors
+            "
+          />
+        </div>
 
-          {/* Title */}
-          <div>
-            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
-              Review Title
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => updateField('title', e.target.value)}
-              placeholder="Summarise your experience…"
-              className="
-                w-full border border-khajur-border px-4 py-2.5 text-sm
-                text-khajur-primary placeholder:text-khajur-dark/30
-                focus:outline-none focus:border-khajur-gold transition-colors bg-white
-              "
-            />
-          </div>
+        {/* Review Title */}
+        <div>
+          <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
+            Review Title
+          </label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => update('title', e.target.value)}
+            placeholder="Summarise your experience…"
+            className="
+              w-full border border-khajur-border px-4 py-2.5 text-sm
+              text-khajur-primary placeholder:text-khajur-dark/30 bg-white
+              focus:outline-none focus:border-khajur-gold transition-colors
+            "
+          />
+        </div>
 
-          {/* Comment */}
-          <div>
-            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
-              Review
-            </label>
-            <textarea
-              value={formData.comment}
-              onChange={(e) => updateField('comment', e.target.value)}
-              placeholder="Tell others what you think about this product…"
-              rows={4}
-              className="
-                w-full border border-khajur-border px-4 py-2.5 text-sm
-                text-khajur-primary placeholder:text-khajur-dark/30
-                focus:outline-none focus:border-khajur-gold transition-colors
-                bg-white resize-none
-              "
-            />
-          </div>
+        {/* Comment */}
+        <div>
+          <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
+            Your Review
+          </label>
+          <textarea
+            value={formData.comment}
+            onChange={(e) => update('comment', e.target.value)}
+            placeholder="What did you like or dislike? How was the quality?"
+            rows={4}
+            className="
+              w-full border border-khajur-border px-4 py-2.5 text-sm
+              text-khajur-primary placeholder:text-khajur-dark/30 bg-white
+              focus:outline-none focus:border-khajur-gold transition-colors resize-none
+            "
+          />
+        </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-1">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="
-                flex-1 flex items-center justify-center gap-2
-                bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90
-                py-3 text-xs font-bold uppercase tracking-widest transition-colors
-                disabled:opacity-50 disabled:cursor-not-allowed
-              "
-            >
-              {submitting
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <Send className="w-4 h-4" />
-              }
-              Submit Review
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="
-                px-6 py-3 border border-khajur-border text-khajur-dark/60
-                hover:bg-khajur-cream text-xs font-bold uppercase tracking-widest
-                transition-colors
-              "
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* Actions */}
+        <div className="flex gap-3 pt-1">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="
+              flex-1 flex items-center justify-center gap-2
+              bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90
+              py-3 text-xs font-bold uppercase tracking-widest
+              transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+            "
+          >
+            {submitting
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <Send className="w-4 h-4" />
+            }
+            {submitting ? 'Submitting…' : 'Submit Review'}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="
+              px-5 py-3 border border-khajur-border text-khajur-dark/60
+              hover:bg-khajur-cream text-xs font-bold uppercase tracking-widest
+              transition-colors
+            "
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
 
-// ── Reviews Tab ────────────────────────────────────────────────────────────────
+// ── Reviews Tab Content ────────────────────────────────────────────────────────
 
-const ReviewsTab = ({ productId, reviews, onRefresh }) => {
+const ReviewsSection = ({ productId, reviews, onRefresh }) => {
   const [filterRating, setFilterRating] = useState(0);
   const [sortType, setSortType]         = useState('latest');
   const [visibleCount, setVisibleCount] = useState(REVIEWS_PER_PAGE);
   const [showForm, setShowForm]         = useState(false);
 
-  const processedReviews = useMemo(() => {
-    return [...reviews]
-      .filter((r) => (filterRating ? r.rating === filterRating : true))
-      .sort((a, b) =>
-        sortType === 'latest'
-          ? new Date(b.created_at) - new Date(a.created_at)
-          : b.rating - a.rating
-      );
-  }, [reviews, filterRating, sortType]);
+  const handleFilterChange = useCallback((val) => {
+    setFilterRating(val);
+    setVisibleCount(REVIEWS_PER_PAGE);
+  }, []);
+
+  const handleSortChange = useCallback((val) => {
+    setSortType(val);
+    setVisibleCount(REVIEWS_PER_PAGE);
+  }, []);
+
+  const processedReviews = useMemo(
+    () =>
+      [...reviews]
+        .filter((r) => (filterRating ? r.rating === filterRating : true))
+        .sort((a, b) =>
+          sortType === 'latest'
+            ? new Date(b.created_at) - new Date(a.created_at)
+            : b.rating - a.rating
+        ),
+    [reviews, filterRating, sortType]
+  );
 
   const visible = processedReviews.slice(0, visibleCount);
   const hasMore = visibleCount < processedReviews.length;
 
   return (
     <div>
-      {/* Summary */}
-      <ReviewsSummary reviews={reviews} onWriteReview={() => setShowForm(true)} />
 
-      {/* Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      {/* Section Title */}
+      <div className="text-center mb-10">
+        <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
+          What customers say
+        </p>
+        <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-primary">
+          Customer Reviews
+        </h2>
+      </div>
 
-        {/* Rating filter chips */}
+      {/* Summary + Distribution + Write CTA */}
+      <ReviewsSummary
+        reviews={reviews}
+        onWriteReview={() => {
+          setShowForm(true);
+          setTimeout(() =>
+            document.getElementById('review-form')?.scrollIntoView({ behavior: 'smooth' }), 100
+          );
+        }}
+      />
+
+      {/* Filter & Sort Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+
+        {/* Rating Chips */}
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={() => setFilterRating(0)}
+            onClick={() => handleFilterChange(0)}
             className={`
-              px-3 py-1.5 text-xs font-medium border transition-colors
+              px-3.5 py-1.5 text-xs font-semibold border transition-colors
               ${filterRating === 0
                 ? 'bg-khajur-primary text-khajur-cream border-khajur-primary'
-                : 'border-khajur-border text-khajur-dark/60 hover:border-khajur-gold'
+                : 'border-khajur-border text-khajur-dark/60 hover:border-khajur-gold bg-white'
               }
             `}
           >
@@ -437,12 +502,12 @@ const ReviewsTab = ({ productId, reviews, onRefresh }) => {
           {[5, 4, 3, 2, 1].map((star) => (
             <button
               key={star}
-              onClick={() => setFilterRating(star)}
+              onClick={() => handleFilterChange(star)}
               className={`
-                flex items-center gap-1 px-3 py-1.5 text-xs font-medium border transition-colors
+                flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold border transition-colors
                 ${filterRating === star
                   ? 'bg-khajur-primary text-khajur-cream border-khajur-primary'
-                  : 'border-khajur-border text-khajur-dark/60 hover:border-khajur-gold'
+                  : 'border-khajur-border text-khajur-dark/60 hover:border-khajur-gold bg-white'
                 }
               `}
             >
@@ -452,39 +517,53 @@ const ReviewsTab = ({ productId, reviews, onRefresh }) => {
           ))}
         </div>
 
-        {/* Sort */}
+        {/* Sort Dropdown */}
         <div className="relative">
           <select
             value={sortType}
-            onChange={(e) => setSortType(e.target.value)}
+            onChange={(e) => handleSortChange(e.target.value)}
             className="
               appearance-none pl-3 pr-8 py-2 text-xs border border-khajur-border
               text-khajur-primary bg-white focus:outline-none focus:border-khajur-gold
-              cursor-pointer
+              cursor-pointer transition-colors
             "
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-khajur-dark/40 pointer-events-none" />
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-khajur-dark/40 pointer-events-none" />
         </div>
       </div>
 
+      {/* Results Count */}
+      <p className="text-xs text-khajur-dark/40 mb-5">
+        Showing{' '}
+        <span className="font-medium text-khajur-primary">{visible.length}</span> of{' '}
+        <span className="font-medium text-khajur-primary">{processedReviews.length}</span>{' '}
+        review{processedReviews.length !== 1 ? 's' : ''}
+      </p>
+
       {/* Review List */}
       {visible.length === 0 ? (
-        <div className="text-center py-16 text-khajur-dark/30">
-          <Star className="w-10 h-10 mx-auto mb-3" />
-          <p className="text-sm">
-            {filterRating
-              ? `No ${filterRating}-star reviews yet.`
-              : 'No reviews yet. Be the first to share your experience!'}
+        <div className="flex flex-col items-center justify-center py-16 border border-khajur-border bg-khajur-cream text-khajur-dark/30">
+          <MessageSquare className="w-10 h-10 mb-3" />
+          <p className="text-sm font-medium text-khajur-dark/50 mb-1">
+            {filterRating ? 'No reviews match this filter.' : 'No reviews yet.'}
           </p>
+          {!filterRating && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-2 text-xs underline underline-offset-2 text-khajur-gold hover:text-khajur-primary transition-colors"
+            >
+              Be the first to write one
+            </button>
+          )}
         </div>
       ) : (
-        <div className="space-y-6">
-          {visible.map((r) => (
-            <ReviewCard key={r.id} review={r} />
+        <div className="border border-khajur-border bg-white px-6">
+          {visible.map((review) => (
+            <ReviewCard key={review.id} review={review} />
           ))}
         </div>
       )}
@@ -505,13 +584,15 @@ const ReviewsTab = ({ productId, reviews, onRefresh }) => {
         </div>
       )}
 
-      {/* Review Form Modal */}
+      {/* ── Inline Review Form ── */}
       {showForm && (
-        <ReviewFormModal
-          productId={productId}
-          onClose={() => setShowForm(false)}
-          onSubmitted={onRefresh}
-        />
+        <div id="review-form">
+          <ReviewForm
+            productId={productId}
+            onClose={() => setShowForm(false)}
+            onSubmitted={onRefresh}
+          />
+        </div>
       )}
     </div>
   );
@@ -520,20 +601,20 @@ const ReviewsTab = ({ productId, reviews, onRefresh }) => {
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const ProductDetail = () => {
-  const { id }       = useParams();
-  const navigate     = useNavigate();
-  const location     = useLocation();
+  const { id }        = useParams();
+  const navigate      = useNavigate();
+  const location      = useLocation();
   const { addToCart } = useCart();
 
   const category = new URLSearchParams(location.search).get('category');
 
-  const [product, setProduct]       = useState(null);
-  const [products, setProducts]     = useState([]);
-  const [reviews, setReviews]       = useState([]);
+  const [product, setProduct]           = useState(null);
+  const [products, setProducts]         = useState([]);
+  const [reviews, setReviews]           = useState([]);
   const [selectedSize, setSelectedSize] = useState('');
-  const [quantity, setQuantity]     = useState(1);
-  const [activeTab, setActiveTab]   = useState('description');
-  const [loading, setLoading]       = useState(true);
+  const [quantity, setQuantity]         = useState(1);
+  const [activeTab, setActiveTab]       = useState('description');
+  const [loading, setLoading]           = useState(true);
 
   // ── Data Fetching ──────────────────────────────────────────────────────────
 
@@ -553,7 +634,7 @@ const ProductDetail = () => {
       const { data } = await axios.get(`${API}/reviews/${id}`);
       setReviews(data);
     } catch {
-      // silent — reviews are non-critical
+      // reviews are non-critical — fail silently
     }
   }, [id]);
 
@@ -562,7 +643,7 @@ const ProductDetail = () => {
       const { data } = await axios.get(`${API}/products`);
       setProducts(data);
     } catch {
-      // silent
+      // non-critical
     }
   }, []);
 
@@ -572,22 +653,22 @@ const ProductDetail = () => {
     fetchAllProducts();
   }, [fetchProduct, fetchReviews, fetchAllProducts]);
 
-  // Auto-select first size
+  // Auto-select first size variant
   useEffect(() => {
     if (product?.sizes?.length && !selectedSize) {
       setSelectedSize(product.sizes[0].weight);
     }
   }, [product]);
 
-  // ── Derived State ──────────────────────────────────────────────────────────
+  // ── Derived Pricing ────────────────────────────────────────────────────────
 
   const selectedSizeObj = useMemo(
     () => product?.sizes?.find((s) => s.weight.trim() === selectedSize.trim()),
     [product, selectedSize]
   );
 
-  const currentPrice   = selectedSizeObj?.price ?? product?.sizes?.[0]?.price ?? 0;
-  const originalPrice  = selectedSizeObj?.original_price ?? product?.price ?? currentPrice;
+  const currentPrice  = selectedSizeObj?.price ?? product?.sizes?.[0]?.price ?? 0;
+  const originalPrice = selectedSizeObj?.original_price ?? product?.price ?? currentPrice;
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
@@ -630,7 +711,7 @@ const ProductDetail = () => {
           Product Not Found
         </h1>
         <p className="text-sm text-khajur-dark/50">
-          The product you're looking for doesn't exist or has been removed.
+          This product doesn't exist or has been removed.
         </p>
         <Link
           to={`/products${category ? `?category=${category}` : ''}`}
@@ -657,10 +738,10 @@ const ProductDetail = () => {
           Back to Products
         </Link>
 
-        {/* ── Product Hero ─────────────────────────────────────────────────── */}
+        {/* ── Product Hero ────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
 
-          {/* Image */}
+          {/* Product Image */}
           <div className="bg-khajur-cream flex items-center justify-center p-10 border border-khajur-border">
             <img
               src={product.image}
@@ -669,22 +750,20 @@ const ProductDetail = () => {
             />
           </div>
 
-          {/* Info */}
+          {/* Product Info */}
           <div className="flex flex-col">
 
-            {/* Category */}
             {product.category && (
               <p className="text-xs uppercase tracking-widest text-khajur-gold mb-2">
                 {product.category}
               </p>
             )}
 
-            {/* Name */}
             <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-4 leading-tight">
               {product.name}
             </h1>
 
-            {/* Rating snippet */}
+            {/* Inline rating snippet */}
             {reviews.length > 0 && (
               <div className="flex items-center gap-2 mb-4">
                 <StarDisplay
@@ -694,8 +773,7 @@ const ProductDetail = () => {
                   size="sm"
                 />
                 <span className="text-xs text-khajur-dark/50">
-                  {(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)}
-                  {' '}({reviews.length} review{reviews.length !== 1 ? 's' : ''})
+                  {calcAvg(reviews)} ({reviews.length} review{reviews.length !== 1 ? 's' : ''})
                 </span>
               </div>
             )}
@@ -707,7 +785,9 @@ const ProductDetail = () => {
             <div className="flex items-center gap-2 mb-8">
               <Package className="w-4 h-4 text-khajur-dark/40" />
               <p className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
+                {product.stock > 0
+                  ? `In Stock (${product.stock} available)`
+                  : 'Out of Stock'}
               </p>
             </div>
 
@@ -780,7 +860,7 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* ── Tabs ─────────────────────────────────────────────────────────── */}
+        {/* ── Tabs ────────────────────────────────────────────────────────── */}
         <div className="max-w-5xl mx-auto mb-20">
 
           {/* Tab Bar */}
@@ -807,7 +887,7 @@ const ProductDetail = () => {
             ))}
           </div>
 
-          {/* Tab Content */}
+          {/* Description Tab */}
           {activeTab === 'description' && (
             <div
               className="
@@ -819,8 +899,9 @@ const ProductDetail = () => {
             />
           )}
 
+          {/* Reviews Tab — fully inline, no separate file */}
           {activeTab === 'reviews' && (
-            <ReviewsTab
+            <ReviewsSection
               productId={id}
               reviews={reviews}
               onRefresh={fetchReviews}
@@ -829,16 +910,8 @@ const ProductDetail = () => {
         </div>
 
         {/* ── Related Products ─────────────────────────────────────────────── */}
-        <RelatedProducts
-          products={products}
-          currentProduct={product}
-          type="related"
-        />
-        <RelatedProducts
-          products={products}
-          currentProduct={product}
-          type="explore"
-        />
+        <RelatedProducts products={products} currentProduct={product} type="related" />
+        <RelatedProducts products={products} currentProduct={product} type="explore" />
       </div>
     </div>
   );
