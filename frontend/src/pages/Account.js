@@ -1,7 +1,176 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, MapPin, Package, MessageCircle, RefreshCw, Phone, Truck, LogOut, Home, ShoppingBag } from 'lucide-react';
+import {
+  User,
+  MapPin,
+  Package,
+  MessageCircle,
+  RefreshCw,
+  Phone,
+  Truck,
+  LogOut,
+  Home,
+  ShoppingBag,
+  ChevronRight,
+} from 'lucide-react';
+
+// ─── Constants ─────────────────────────────────────────────────────────────────
+
+const QUICK_LINKS = [
+  {
+    icon: User,
+    label: 'Profile',
+    description: 'Manage your personal info',
+    to: '/profile',
+    testId: 'profile-card',
+  },
+  {
+    icon: MapPin,
+    label: 'Addresses',
+    description: 'Saved delivery addresses',
+    to: '/addresses',
+    testId: 'addresses-card',
+  },
+  {
+    icon: Package,
+    label: 'Orders',
+    description: 'Track & view your orders',
+    to: '/my-orders',
+    testId: 'orders-card',
+  },
+];
+
+const MENU_ITEMS = [
+  {
+    icon: MessageCircle,
+    label: 'WhatsApp Support',
+    description: 'Chat with us instantly',
+    action: () => window.open('https://wa.me/917981002137', '_blank'),
+    iconClass: 'text-green-500',
+    testId: 'menu-whatsapp-support',
+  },
+  {
+    icon: RefreshCw,
+    label: 'Return & Exchange',
+    description: 'Hassle-free returns',
+    to: '/returns',
+    iconClass: 'text-khajur-gold',
+    testId: 'menu-return-&-exchange',
+  },
+  {
+    icon: Phone,
+    label: 'Contact Us',
+    description: 'Get in touch with our team',
+    to: '/contact',
+    iconClass: 'text-khajur-gold',
+    testId: 'menu-contact-us',
+  },
+  {
+    icon: Truck,
+    label: 'Track Order',
+    description: 'Live shipment tracking',
+    to: '/track-order',
+    iconClass: 'text-khajur-gold',
+    testId: 'menu-track-order',
+  },
+];
+
+// ─── Sub-Components ────────────────────────────────────────────────────────────
+
+// ── Quick Link Card ────────────────────────────────────────────────────────────
+
+const QuickLinkCard = ({ icon: Icon, label, description, to, testId }) => (
+  <Link
+    to={to}
+    data-testid={testId}
+    className="
+      group flex flex-col gap-5 bg-white border border-khajur-border
+      hover:border-khajur-gold/60 hover:shadow-[0_4px_20px_rgba(198,169,98,0.12)]
+      p-7 rounded-sm transition-all duration-300
+    "
+  >
+    <div className="w-12 h-12 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm">
+      <Icon className="w-5 h-5 text-khajur-primary" />
+    </div>
+    <div>
+      <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50 mb-0.5">
+        {label}
+      </p>
+      <p className="text-sm text-khajur-primary font-medium leading-snug">
+        {description}
+      </p>
+    </div>
+    <ChevronRight className="w-4 h-4 text-khajur-gold opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 mt-auto" />
+  </Link>
+);
+
+// ── Menu Row ───────────────────────────────────────────────────────────────────
+
+const MenuRow = ({ icon: Icon, label, description, iconClass, to, action, testId }) => {
+  const inner = (
+    <div className="
+      group flex items-center gap-5 bg-white border border-khajur-border
+      hover:border-khajur-gold/60 hover:shadow-[0_4px_20px_rgba(198,169,98,0.08)]
+      px-6 py-5 rounded-sm transition-all duration-300 cursor-pointer
+    ">
+      <div className="w-10 h-10 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm flex-shrink-0">
+        <Icon className={`w-4 h-4 ${iconClass}`} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-khajur-primary uppercase tracking-wider">
+          {label}
+        </p>
+        <p className="text-xs text-khajur-dark/50 mt-0.5">{description}</p>
+      </div>
+      <ChevronRight className="w-4 h-4 text-khajur-gold/60 group-hover:text-khajur-gold group-hover:translate-x-1 transition-all duration-300 flex-shrink-0" />
+    </div>
+  );
+
+  return to ? (
+    <Link to={to} data-testid={testId}>{inner}</Link>
+  ) : (
+    <div onClick={action} data-testid={testId}>{inner}</div>
+  );
+};
+
+// ── Bottom Nav ─────────────────────────────────────────────────────────────────
+
+const BottomNav = () => {
+  const NAV = [
+    { icon: Home,        label: 'Home',       to: '/',         testId: 'bottom-nav-home'    },
+    { icon: ShoppingBag, label: 'Shop',        to: '/products', testId: 'bottom-nav-shop'    },
+    { icon: User,        label: 'My Account',  to: '/account',  testId: 'bottom-nav-account', active: true },
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-khajur-primary border-t border-khajur-gold/30 py-3 px-6 shadow-2xl z-40">
+      <div className="max-w-7xl mx-auto flex items-center justify-around">
+        {NAV.map(({ icon: Icon, label, to, testId, active }) => (
+          <Link
+            key={to}
+            to={to}
+            data-testid={testId}
+            className={`
+              flex flex-col items-center gap-1.5 transition-colors
+              ${active ? 'text-khajur-gold' : 'text-khajur-cream/60 hover:text-khajur-cream'}
+            `}
+          >
+            <div className="relative">
+              <Icon className="w-5 h-5" />
+              {active && (
+                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-khajur-gold" />
+              )}
+            </div>
+            <span className="text-[10px] uppercase tracking-widest font-medium">{label}</span>
+          </Link>
+        ))}
+      </div>
+    </nav>
+  );
+};
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 const Account = () => {
   const { user, logout } = useAuth();
@@ -17,171 +186,76 @@ const Account = () => {
     navigate('/');
   };
 
-  const menuItems = [
-    {
-      icon: MessageCircle,
-      label: 'WHATSAPP SUPPORT',
-      action: () => window.open('https://wa.me/917981002137', '_blank'),
-      hasGreenIcon: true
-    },
-    {
-      icon: RefreshCw,
-      label: 'RETURN & EXCHANGE',
-      link: '/returns'
-    },
-    {
-      icon: Phone,
-      label: 'CONTACT US',
-      link: '/contact'
-    },
-    {
-      icon: Truck,
-      label: 'TRACK ORDER',
-      link: '/track-order'
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-khajur-cream pb-24" data-testid="account-page">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Greeting */}
-        <div className="mb-8 border-b-2 border-khajur-gold/30 pb-6">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-khajur-primary mb-2">
-            Hey {user.name || 'User'}
+    <div className="min-h-screen bg-khajur-cream pb-28" data-testid="account-page">
+      <div className="max-w-2xl mx-auto px-6 py-12 space-y-10">
+
+        {/* ── Page Header ── */}
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-widest text-khajur-gold">
+            My Account
+          </p>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">
+            Hello, {user.name?.split(' ')[0] || 'there'}.
           </h1>
-          <p className="text-khajur-dark/70 text-base">
-            Logged in Via {user.phone || user.email}
+          <p className="text-sm text-khajur-dark/50 pt-1">
+            Signed in as{' '}
+            <span className="text-khajur-primary font-medium">
+              {user.phone || user.email}
+            </span>
           </p>
         </div>
 
-        {/* Quick Access Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Link
-            to="/profile"
-            className="bg-white border-2 border-khajur-primary/20 hover:border-khajur-gold hover:shadow-hover p-8 rounded-sm transition-all group"
-            data-testid="profile-card"
+        {/* ── Quick Links ── */}
+        <section>
+          <p className="text-xs uppercase tracking-widest text-khajur-dark/40 mb-4">
+            Quick Access
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {QUICK_LINKS.map((item) => (
+              <QuickLinkCard key={item.to} {...item} />
+            ))}
+          </div>
+        </section>
+
+        {/* ── Support & Links ── */}
+        <section>
+          <p className="text-xs uppercase tracking-widest text-khajur-dark/40 mb-4">
+            Support
+          </p>
+          <div className="space-y-3">
+            {MENU_ITEMS.map((item) => (
+              <MenuRow key={item.label} {...item} />
+            ))}
+          </div>
+        </section>
+
+        {/* ── Logout ── */}
+        <section>
+          <button
+            onClick={handleLogout}
+            data-testid="logout-button"
+            className="
+              w-full flex items-center justify-center gap-3
+              border border-red-300 hover:border-red-500
+              bg-white hover:bg-red-50
+              text-red-500 hover:text-red-600
+              px-6 py-4 rounded-sm
+              text-xs uppercase tracking-widest font-semibold
+              transition-all duration-300
+            "
           >
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="bg-khajur-primary/10 p-6 rounded-sm group-hover:bg-khajur-gold/20 transition-colors">
-                <User className="w-12 h-12 text-khajur-primary" />
-              </div>
-              <span className="text-khajur-primary text-lg uppercase tracking-widest font-bold">
-                PROFILE
-              </span>
-            </div>
-          </Link>
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
+          <p className="text-center text-xs text-khajur-dark/30 mt-4">
+            You'll be redirected to the homepage after signing out.
+          </p>
+        </section>
 
-          <Link
-            to="/addresses"
-            className="bg-white border-2 border-khajur-primary/20 hover:border-khajur-gold hover:shadow-hover p-8 rounded-sm transition-all group"
-            data-testid="addresses-card"
-          >
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="bg-khajur-primary/10 p-6 rounded-sm group-hover:bg-khajur-gold/20 transition-colors">
-                <MapPin className="w-12 h-12 text-khajur-primary" />
-              </div>
-              <span className="text-khajur-primary text-lg uppercase tracking-widest font-bold">
-                ADDRESSES
-              </span>
-            </div>
-          </Link>
-
-          <Link
-            to="/my-orders"
-            className="bg-white border-2 border-khajur-primary/20 hover:border-khajur-gold hover:shadow-hover p-8 rounded-sm transition-all group"
-            data-testid="orders-card"
-          >
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="bg-khajur-primary/10 p-6 rounded-sm group-hover:bg-khajur-gold/20 transition-colors">
-                <Package className="w-12 h-12 text-khajur-primary" />
-              </div>
-              <span className="text-khajur-primary text-lg uppercase tracking-widest font-bold">
-                ORDERS
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Menu Items */}
-        <div className="space-y-4 mb-8">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon;
-            const content = (
-              <div className="flex items-center justify-between bg-white border-2 border-khajur-primary/20 hover:border-khajur-gold hover:shadow-card p-6 rounded-sm transition-all group cursor-pointer">
-                <div className="flex items-center space-x-4">
-                  <Icon className={`w-6 h-6 ${item.hasGreenIcon ? 'text-green-600' : 'text-khajur-primary'}`} />
-                  <span className="text-khajur-primary text-base uppercase tracking-wider font-bold">
-                    {item.label}
-                  </span>
-                </div>
-                <svg 
-                  className="w-6 h-6 text-khajur-gold group-hover:translate-x-1 transition-transform" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            );
-
-            return item.link ? (
-              <Link key={index} to={item.link} data-testid={`menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                {content}
-              </Link>
-            ) : (
-              <div key={index} onClick={item.action} data-testid={`menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                {content}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="w-full bg-transparent border-2 border-red-600 hover:bg-red-600 text-red-600 hover:text-white p-6 rounded-sm transition-all uppercase tracking-wider font-bold text-lg flex items-center justify-center space-x-2"
-          data-testid="logout-button"
-        >
-          <LogOut className="w-6 h-6" />
-          <span>LOGOUT</span>
-        </button>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-khajur-primary border-t-2 border-khajur-gold py-4 px-6 shadow-2xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-around">
-          <Link
-            to="/"
-            className="flex flex-col items-center space-y-2 text-khajur-cream hover:text-khajur-gold transition-colors"
-            data-testid="bottom-nav-home"
-          >
-            <Home className="w-6 h-6" />
-            <span className="text-xs uppercase tracking-wider font-medium">HOME</span>
-          </Link>
-
-          <Link
-            to="/products"
-            className="flex flex-col items-center space-y-2 text-khajur-cream hover:text-khajur-gold transition-colors"
-            data-testid="bottom-nav-shop"
-          >
-            <ShoppingBag className="w-6 h-6" />
-            <span className="text-xs uppercase tracking-wider font-medium">SHOP</span>
-          </Link>
-
-          <Link
-            to="/account"
-            className="flex flex-col items-center space-y-2 text-khajur-gold transition-colors"
-            data-testid="bottom-nav-account"
-          >
-            <div className="relative">
-              <User className="w-6 h-6" />
-              <div className="absolute -top-1 left-1/2 right-0 h-1 bg-khajur-gold rounded-full"></div>
-            </div>
-            <span className="text-xs uppercase tracking-wider font-medium">MY ACCOUNT</span>
-          </Link>
-        </div>
-      </div>
+      <BottomNav />
     </div>
   );
 };
