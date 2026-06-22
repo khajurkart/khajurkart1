@@ -41,17 +41,8 @@ const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 // Matches your site: khajur-gold color, sharp edges, uppercase tracking-widest
 
 const DiscountBadge = ({ discount }) => (
-  <div className="absolute top-0 right-0 z-10 flex items-center">
-    <div
-      style={{
-        width:        0,
-        height:       0,
-        borderTop:    '16px solid transparent',
-        borderBottom: '16px solid transparent',
-        borderRight:  '12px solid #1a3a2a', // khajur-primary
-      }}
-    />
-    <div className="bg-khajur-primary text-khajur-gold pr-3 pl-1 h-8 flex items-center text-[10px] font-extrabold tracking-[0.12em] uppercase whitespace-nowrap">
+  <div className="absolute top-3 right-3 z-10">
+    <div className="bg-khajur-cream border border-khajur-gold text-khajur-primary px-2.5 py-1 text-[10px] font-extrabold tracking-widest uppercase">
       {discount}% OFF
     </div>
   </div>
