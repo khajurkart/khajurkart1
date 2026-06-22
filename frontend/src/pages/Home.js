@@ -49,7 +49,7 @@ const STATUS_FEATURES = [
     },
     {
         icon: Truck,
-        title: 'Fast Delivery',
+        title: 'Fast & Free Delivery',
         description: 'Quick and secure shipping across India',
     },
     {
