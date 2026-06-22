@@ -350,7 +350,7 @@ const Home = () => {
             </section>
 
             {/* ── Categories Grid ──────────────────────────────────────────────────── */}
-            <section className="py-12 md:py-16 bg-white" data-testid="categories-section">
+            <section className="py-16 md:py-20 bg-white" data-testid="categories-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <SectionHeader
                         eyebrow="Browse by Category"
@@ -375,7 +375,7 @@ const Home = () => {
             <Divider />
 
             {/* ── Featured Products ─────────────────────────────────────────────────── */}
-            <section className="py-12 md:py-16 bg-white" data-testid="featured-products-section">
+            <section className="py-16 md:py-20 bg-white" data-testid="featured-products-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <SectionHeader
                         eyebrow="Handpicked For You"
@@ -419,7 +419,7 @@ const Home = () => {
             <Divider />
 
             {/* ── Bulk Orders Banner ────────────────────────────────────────────────── */}
-            <section className="py-12 bg-khajur-primary">
+            <section className="py-16 bg-khajur-primary">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-10">
 
@@ -459,7 +459,7 @@ const Home = () => {
             <Divider />
 
             {/* ── Trust Features ────────────────────────────────────────────────────── */}
-            <section className="py-12 md:py-16" data-testid="status-section">
+            <section className="py-16 md:py-20" data-testid="status-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <SectionHeader
                         eyebrow="Why Choose Us"
@@ -477,7 +477,7 @@ const Home = () => {
             <Divider />
 
             {/* ── Customer Reviews ──────────────────────────────────────────────────── */}
-            <section className="py-12 md:py-16 bg-white" data-testid="reviews-section">
+            <section className="py-16 md:py-20 bg-white" data-testid="reviews-section">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <SectionHeader
                         eyebrow="Customer Stories"
@@ -493,7 +493,7 @@ const Home = () => {
             </section>
 
             {/* ── Final CTA Banner ──────────────────────────────────────────────────── */}
-            <section className="py-12 bg-khajur-cream border-t border-khajur-border">
+            <section className="py-16 bg-khajur-cream border-t border-khajur-border">
                 <div className="max-w-3xl mx-auto px-6 md:px-12 text-center">
                     <p className="text-xs uppercase tracking-widest text-khajur-gold font-semibold mb-4">
                         Start Shopping
