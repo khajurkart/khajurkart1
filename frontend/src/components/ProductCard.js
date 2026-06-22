@@ -41,26 +41,28 @@ const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 // Matches your site: khajur-gold color, sharp edges, uppercase tracking-widest
 
 const DiscountBadge = ({ discount }) => (
-  <div className="absolute top-4 right-0 z-10 flex items-center">
-    {/* Left arrow notch — creates the ribbon-tab effect */}
+  <div className="absolute top-0 right-0 z-10 flex items-center">
+    {/* Left pointing notch — uses khajur-gold color */}
     <div
-      className="w-0 h-0"
       style={{
-        borderTop:    '13px solid transparent',
-        borderBottom: '13px solid transparent',
-        borderRight:  '10px solid #C8102E',
+        width:        0,
+        height:       0,
+        borderTop:    '16px solid transparent',
+        borderBottom: '16px solid transparent',
+        borderRight:  '12px solid #C6A962', // khajur-gold hex
       }}
     />
-    {/* Badge body */}
+    {/* Ribbon body */}
     <div
       className="
-        bg-[#C8102E] text-white
-        pl-1 pr-3 py-0.5
-        text-[11px] font-extrabold tracking-[0.08em] uppercase
-        select-none
+        bg-khajur-gold text-khajur-primary
+        pr-3 pl-1 h-8
+        flex items-center
+        text-[10px] font-extrabold tracking-[0.12em] uppercase
+        select-none whitespace-nowrap
       "
     >
-      UPTO {discount}% OFF
+      {discount}% OFF
     </div>
   </div>
 );
