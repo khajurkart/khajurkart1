@@ -7,38 +7,76 @@ import { toast } from 'sonner';
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 const calcDiscount = (product) => {
-  if (product.discount) return product.discount;
+  if (product.discount && product.discount > 0) return product.discount;
+
+  // Calculate from sizes — find the best discount across all size variants
+  if (product.sizes?.length) {
+    const discounts = product.sizes
+      .filter((s) => s.original_price && s.original_price > s.price)
+      .map((s) =>
+        Math.round(((s.original_price - s.price) / s.original_price) * 100)
+      );
+    if (discounts.length) return Math.max(...discounts);
+  }
+
+  // Fallback to top-level price fields
   if (product.original_price && product.original_price > product.price) {
     return Math.round(
       ((product.original_price - product.price) / product.original_price) * 100
     );
   }
+
   return 0;
+};
+
+const getDisplayPrice = (product) => {
+  // Show lowest size price if available
+  if (product.sizes?.length) {
+    const prices = product.sizes.map((s) => s.price).filter(Boolean);
+    if (prices.length) return Math.min(...prices);
+  }
+  return product.price ?? 0;
 };
 
 const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 
-// ─── Sub-Components ────────────────────────────────────────────────────────────
+// ─── Discount Badge ─────────────────────────────────────────────────────────────
+// Matches the reference image: red/crimson pill anchored to the top-right corner
+// with a sharp left edge (no border-radius on the left side).
 
 const DiscountBadge = ({ discount }) => (
-  <div className="
-    absolute top-3 right-0 z-10
-    bg-khajur-gold text-khajur-primary
-    text-[11px] font-extrabold tracking-wide
-    px-3 py-1
-    rounded-l-sm
-    shadow-md
-  ">
-    {discount}% OFF
+  <div className="absolute top-4 right-0 z-10 flex items-center">
+    {/* Left arrow notch — creates the ribbon-tab effect */}
+    <div
+      className="w-0 h-0"
+      style={{
+        borderTop:    '13px solid transparent',
+        borderBottom: '13px solid transparent',
+        borderRight:  '10px solid #C8102E',
+      }}
+    />
+    {/* Badge body */}
+    <div
+      className="
+        bg-[#C8102E] text-white
+        pl-1 pr-3 py-0.5
+        text-[11px] font-extrabold tracking-[0.08em] uppercase
+        select-none
+      "
+    >
+      UPTO {discount}% OFF
+    </div>
   </div>
 );
 
-const StockBadge = () => (
+// ─── Out of Stock Badge ─────────────────────────────────────────────────────────
+
+const OutOfStockBadge = () => (
   <div className="
-    absolute top-3 left-0 z-10
-    bg-red-500 text-white
-    text-[10px] font-bold tracking-widest uppercase
+    absolute top-4 left-0 z-10
+    bg-khajur-dark/80 text-white
     px-3 py-1
+    text-[10px] font-bold tracking-widest uppercase
     rounded-r-sm
   ">
     Sold Out
@@ -48,21 +86,21 @@ const StockBadge = () => (
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const ProductCard = ({ product }) => {
-  const { addToCart }   = useCart();
-  const [adding, setAdding] = useState(false);
+  const { addToCart }         = useCart();
+  const [adding, setAdding]   = useState(false);
   const [imgError, setImgError] = useState(false);
 
-  const discount    = calcDiscount(product);
-  const hasDiscount = discount > 0;
+  const discount     = calcDiscount(product);
+  const hasDiscount  = discount > 0;
+  const displayPrice = getDisplayPrice(product);
   const isOutOfStock = product.stock === 0;
-  const productUrl  = `/product/${product.id}?category=${product.category ?? ''}`;
+  const productUrl   = `/product/${product.id}?category=${product.category ?? ''}`;
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
     if (isOutOfStock || adding) return;
-
     setAdding(true);
     try {
       await addToCart(product.id);
@@ -81,22 +119,22 @@ const ProductCard = ({ product }) => {
       className={`
         group relative bg-white border transition-all duration-500 overflow-hidden
         ${isOutOfStock
-          ? 'border-khajur-border opacity-75'
+          ? 'border-khajur-border opacity-70'
           : 'border-khajur-border hover:border-khajur-gold hover:shadow-xl'
         }
       `}
       data-testid={`product-card-${product.id}`}
     >
 
-      {/* ── Badges ─────────────────────────────────────────────────────── */}
+      {/* ── Badges ─────────────────────────────────────────────────────────── */}
       {hasDiscount && !isOutOfStock && <DiscountBadge discount={discount} />}
-      {isOutOfStock && <StockBadge />}
+      {isOutOfStock && <OutOfStockBadge />}
 
-      {/* ── Product Image ───────────────────────────────────────────────── */}
+      {/* ── Product Image ───────────────────────────────────────────────────── */}
       <Link to={productUrl} aria-label={`View ${product.name}`}>
         <div className="aspect-square overflow-hidden bg-khajur-cream">
           {imgError ? (
-            <div className="w-full h-full flex flex-col items-center justify-center text-khajur-dark/20 gap-2">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-khajur-dark/20">
               <ImageOff className="w-10 h-10" />
               <p className="text-xs">No image</p>
             </div>
@@ -108,19 +146,19 @@ const ProductCard = ({ product }) => {
               onError={() => setImgError(true)}
               className={`
                 w-full h-full object-cover transition-transform duration-700
-                ${isOutOfStock ? '' : 'group-hover:scale-105'}
+                ${!isOutOfStock ? 'group-hover:scale-105' : ''}
               `}
             />
           )}
         </div>
       </Link>
 
-      {/* ── Product Info ────────────────────────────────────────────────── */}
+      {/* ── Product Info ─────────────────────────────────────────────────────── */}
       <div className="p-5 flex flex-col gap-2">
 
         {/* Category */}
         {product.category && (
-          <p className="text-xs uppercase tracking-widest text-khajur-gold font-medium">
+          <p className="text-[10px] uppercase tracking-widest text-khajur-gold font-semibold">
             {product.category}
           </p>
         )}
@@ -129,9 +167,8 @@ const ProductCard = ({ product }) => {
         <Link to={productUrl}>
           <h3
             className="
-              font-serif text-lg font-medium text-khajur-primary
-              group-hover:text-khajur-gold transition-colors
-              line-clamp-1 leading-snug
+              font-serif text-lg font-medium text-khajur-primary leading-snug
+              group-hover:text-khajur-gold transition-colors line-clamp-1
             "
             data-testid={`product-name-${product.id}`}
           >
@@ -144,25 +181,38 @@ const ProductCard = ({ product }) => {
           {stripHtml(product.description)}
         </p>
 
-        {/* ── Price & CTA ────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mt-3">
+        {/* ── Price + Sale label + Cart ──────────────────────────────────── */}
+        <div className="flex items-end justify-between mt-3 gap-2">
 
           {/* Price Block */}
           <div className="flex flex-col gap-0.5">
-            <span
-              className="font-serif text-xl font-bold text-khajur-gold"
-              data-testid={`product-price-${product.id}`}
-            >
-              ₹{product.price}
-            </span>
-            {hasDiscount && product.original_price && (
-              <span className="text-xs text-khajur-dark/40 line-through">
-                ₹{product.original_price}
-              </span>
+
+            {/* "On Sale from" label — shown only when discount exists */}
+            {hasDiscount && (
+              <p className="text-[10px] text-khajur-dark/40 font-medium tracking-wide">
+                On Sale from
+              </p>
             )}
+
+            <div className="flex items-baseline gap-2">
+              {/* Current / Sale price */}
+              <span
+                className="font-serif text-xl font-bold text-khajur-gold"
+                data-testid={`product-price-${product.id}`}
+              >
+                ₹{displayPrice}
+              </span>
+
+              {/* Original price strikethrough */}
+              {hasDiscount && (product.original_price || product.sizes?.[0]?.original_price) && (
+                <span className="text-xs text-khajur-dark/35 line-through">
+                  ₹{product.original_price ?? product.sizes[0].original_price}
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Add to Cart */}
+          {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock || adding}
@@ -172,12 +222,13 @@ const ProductCard = ({ product }) => {
                 : `Add ${product.name} to cart`
             }
             className={`
-              flex items-center justify-center p-3 transition-all duration-300
+              flex-shrink-0 flex items-center justify-center
+              w-11 h-11 transition-all duration-300
               ${isOutOfStock
                 ? 'bg-khajur-border text-khajur-dark/30 cursor-not-allowed'
                 : adding
-                ? 'bg-khajur-primary text-khajur-cream cursor-wait'
-                : 'bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary'
+                ? 'bg-khajur-primary text-khajur-cream cursor-wait scale-95'
+                : 'bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary hover:scale-105'
               }
             `}
             data-testid={`add-to-cart-${product.id}`}
