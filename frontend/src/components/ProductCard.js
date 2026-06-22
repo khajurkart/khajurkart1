@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 const calcDiscount = (product) => {
   if (product.discount && product.discount > 0) return product.discount;
 
-  // Calculate from sizes — find the best discount across all size variants
   if (product.sizes?.length) {
     const discounts = product.sizes
       .filter((s) => s.original_price && s.original_price > s.price)
@@ -19,7 +18,6 @@ const calcDiscount = (product) => {
     if (discounts.length) return Math.max(...discounts);
   }
 
-  // Fallback to top-level price fields
   if (product.original_price && product.original_price > product.price) {
     return Math.round(
       ((product.original_price - product.price) / product.original_price) * 100
@@ -30,7 +28,6 @@ const calcDiscount = (product) => {
 };
 
 const getDisplayPrice = (product) => {
-  // Show lowest size price if available
   if (product.sizes?.length) {
     const prices = product.sizes.map((s) => s.price).filter(Boolean);
     if (prices.length) return Math.min(...prices);
@@ -40,31 +37,32 @@ const getDisplayPrice = (product) => {
 
 const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 
-// ─── Discount Badge ─────────────────────────────────────────────────────────────
-// Matches the reference image: red/crimson pill anchored to the top-right corner
-// with a sharp left edge (no border-radius on the left side).
+// ─── Discount Ribbon Badge ──────────────────────────────────────────────────────
+// Matches your site: khajur-gold color, sharp edges, uppercase tracking-widest
 
 const DiscountBadge = ({ discount }) => (
-  <div className="absolute top-4 right-0 z-10 flex items-center">
-    {/* Left arrow notch — creates the ribbon-tab effect */}
+  <div className="absolute top-0 right-0 z-10 flex items-center">
+    {/* Left pointing notch — uses khajur-gold color */}
     <div
-      className="w-0 h-0"
       style={{
-        borderTop:    '13px solid transparent',
-        borderBottom: '13px solid transparent',
-        borderRight:  '10px solid #C8102E',
+        width:        0,
+        height:       0,
+        borderTop:    '16px solid transparent',
+        borderBottom: '16px solid transparent',
+        borderRight:  '12px solid #C6A962', // khajur-gold hex
       }}
     />
-    {/* Badge body */}
+    {/* Ribbon body */}
     <div
       className="
-        bg-[#C8102E] text-white
-        pl-1 pr-3 py-0.5
-        text-[11px] font-extrabold tracking-[0.08em] uppercase
-        select-none
+        bg-khajur-gold text-khajur-primary
+        pr-3 pl-1 h-8
+        flex items-center
+        text-[10px] font-extrabold tracking-[0.12em] uppercase
+        select-none whitespace-nowrap
       "
     >
-      UPTO {discount}% OFF
+      {discount}% OFF
     </div>
   </div>
 );
@@ -72,13 +70,14 @@ const DiscountBadge = ({ discount }) => (
 // ─── Out of Stock Badge ─────────────────────────────────────────────────────────
 
 const OutOfStockBadge = () => (
-  <div className="
-    absolute top-4 left-0 z-10
-    bg-khajur-dark/80 text-white
-    px-3 py-1
-    text-[10px] font-bold tracking-widest uppercase
-    rounded-r-sm
-  ">
+  <div
+    className="
+      absolute top-3 left-0 z-10
+      bg-khajur-primary text-khajur-cream
+      px-3 py-1
+      text-[10px] font-bold tracking-widest uppercase
+    "
+  >
     Sold Out
   </div>
 );
@@ -86,8 +85,8 @@ const OutOfStockBadge = () => (
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const ProductCard = ({ product }) => {
-  const { addToCart }         = useCart();
-  const [adding, setAdding]   = useState(false);
+  const { addToCart }           = useCart();
+  const [adding, setAdding]     = useState(false);
   const [imgError, setImgError] = useState(false);
 
   const discount     = calcDiscount(product);
@@ -95,8 +94,6 @@ const ProductCard = ({ product }) => {
   const displayPrice = getDisplayPrice(product);
   const isOutOfStock = product.stock === 0;
   const productUrl   = `/product/${product.id}?category=${product.category ?? ''}`;
-
-  // ── Handlers ─────────────────────────────────────────────────────────────
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -111,8 +108,6 @@ const ProductCard = ({ product }) => {
       setAdding(false);
     }
   };
-
-  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div
@@ -181,13 +176,12 @@ const ProductCard = ({ product }) => {
           {stripHtml(product.description)}
         </p>
 
-        {/* ── Price + Sale label + Cart ──────────────────────────────────── */}
+        {/* ── Price + Cart ──────────────────────────────────────────────────── */}
         <div className="flex items-end justify-between mt-3 gap-2">
 
           {/* Price Block */}
           <div className="flex flex-col gap-0.5">
 
-            {/* "On Sale from" label — shown only when discount exists */}
             {hasDiscount && (
               <p className="text-[10px] text-khajur-dark/40 font-medium tracking-wide">
                 On Sale from
@@ -195,7 +189,6 @@ const ProductCard = ({ product }) => {
             )}
 
             <div className="flex items-baseline gap-2">
-              {/* Current / Sale price */}
               <span
                 className="font-serif text-xl font-bold text-khajur-gold"
                 data-testid={`product-price-${product.id}`}
@@ -203,16 +196,16 @@ const ProductCard = ({ product }) => {
                 ₹{displayPrice}
               </span>
 
-              {/* Original price strikethrough */}
-              {hasDiscount && (product.original_price || product.sizes?.[0]?.original_price) && (
-                <span className="text-xs text-khajur-dark/35 line-through">
-                  ₹{product.original_price ?? product.sizes[0].original_price}
-                </span>
-              )}
+              {hasDiscount &&
+                (product.original_price || product.sizes?.[0]?.original_price) && (
+                  <span className="text-xs text-khajur-dark/35 line-through">
+                    ₹{product.original_price ?? product.sizes[0].original_price}
+                  </span>
+                )}
             </div>
           </div>
 
-          {/* Add to Cart Button */}
+          {/* Add to Cart */}
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock || adding}
