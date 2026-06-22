@@ -344,368 +344,218 @@ const ProductDetail = () => {
                         </button>
                     </div>
 
-                    {activeTab === "reviews" && (
-                        <div className="w-full">
+                    {/* Content */}
+                    <div className="text-center">
+                        {activeTab === "description" && (
+                            <div
+                                className="text-left text-khajur-dark/80 leading-8 space-y-4 [&_b]:font-bold [&_h3]:font-bold [&_h3]:text-xl"
+                                dangerouslySetInnerHTML={{ __html: product.description }}
+                            />
+                        )}
 
-                            {/* ── Section Title ─────────────────────────────────────────────── */}
-                            <div className="text-center mb-10">
-                                <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
-                                    What customers say
-                                </p>
-                                <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-primary">
+                        {/* CUSTOMER REVIEWS */}
+                        {activeTab === "reviews" && (
+                            <div className="max-w-7xl mx-auto font-[Manrope]">
+
+                                {/* HEADER */}
+                                <h2 className="text-4xl font-semibold text-center text-khajur-primary mb-14">
                                     Customer Reviews
                                 </h2>
-                            </div>
 
-                            {/* ── Summary Panel ─────────────────────────────────────────────── */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center bg-khajur-cream border border-khajur-border p-8 mb-10">
+                                {/* ================= TOP SUMMARY ================= */}
+                                <div className="grid md:grid-cols-3 gap-12 items-center mb-14">
 
-                                {/* Average Score */}
-                                <div className="text-center md:text-left">
-                                    <p className="font-serif text-8xl font-bold text-khajur-primary leading-none mb-3">
-                                        {reviews.length
-                                            ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
-                                            : "0.0"}
-                                    </p>
+                                    {/* AVG */}
+                                    <div>
+                                        <h1 className="text-7xl font-bold text-khajur-primary leading-none">
+                                            {reviews.length
+                                                ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
+                                                : "0.0"}
+                                        </h1>
 
-                                    {/* Star display */}
-                                    <div className="flex gap-1">
-                                        {[1, 2, 3, 4, 5].map((s) => (
-                                            <Star
-                                                key={s}
-                                                className={`w-5 h-5 ${s <= Math.round(avgRating)
-                                                    ? "text-khajur-gold fill-khajur-gold"
-                                                    : "text-khajur-dark/20 fill-transparent"
-                                                    }`}
-                                            />
-                                        ))}
+                                        <div className="flex gap-1 mt-3 text-yellow-400 text-xl">
+                                            {[1, 2, 3, 4, 5].map(s => (
+                                                <span key={s}>
+                                                    {s <= Math.round(avgRating) ? "★" : "☆"}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        <p className="text-gray-500 mt-2">
+                                            Based on {reviews.length} reviews
+                                        </p>
                                     </div>
 
-                                    <p className="text-sm text-khajur-dark/50 mt-2">
-                                        {reviews.length > 0
-                                            ? `Based on ${reviews.length} review${reviews.length !== 1 ? "s" : ""}`
-                                            : "No reviews yet"}
-                                    </p>
-                                </div>
+                                    {/* DISTRIBUTION */}
+                                    <div className="space-y-3">
+                                        {[5, 4, 3, 2, 1].map(star => {
+                                            const count = reviews.filter(r => r.rating === star).length;
+                                            const percent = reviews.length ? (count / reviews.length) * 100 : 0;
 
-                                {/* Star Distribution */}
-                                <div className="space-y-2.5">
-                                    {[5, 4, 3, 2, 1].map((star) => {
-                                        const count = reviews.filter((r) => r.rating === star).length;
-                                        const percent = reviews.length ? (count / reviews.length) * 100 : 0;
+                                            return (
+                                                <div key={star} className="flex items-center gap-3">
+                                                    <span className="w-6">{star}★</span>
 
-                                        return (
-                                            <div key={star} className="flex items-center gap-3">
-                                                <span className="w-3 text-xs font-medium text-khajur-dark/60 flex-shrink-0">
-                                                    {star}
-                                                </span>
-                                                <Star className="w-3 h-3 text-khajur-gold fill-khajur-gold flex-shrink-0" />
-                                                <div className="flex-1 h-2 bg-khajur-border rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-gradient-to-r from-khajur-primary to-khajur-gold rounded-full transition-all duration-700"
-                                                        style={{ width: `${percent}%` }}
-                                                    />
-                                                </div>
-                                                <span className="w-5 text-xs text-khajur-dark/50 text-right flex-shrink-0">
-                                                    {count}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {/* Write Review CTA */}
-                                <div className="flex justify-center md:justify-end">
-                                    <button
-                                        onClick={() => {
-                                            setShowForm(true);
-                                            setTimeout(() =>
-                                                document.getElementById("review-form")?.scrollIntoView({ behavior: "smooth" }), 100
-                                            );
-                                        }}
-                                        className="flex items-center gap-2 bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90 px-7 py-3.5 text-xs font-bold uppercase tracking-widest transition-colors"
-                                    >
-                                        <MessageSquare className="w-4 h-4" />
-                                        Write a Review
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* ── Filter & Sort Toolbar ──────────────────────────────────────── */}
-                            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-
-                                {/* Rating Filter Chips */}
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        onClick={() => { setFilterRating(0); setVisibleCount(5); }}
-                                        className={`px-3.5 py-1.5 text-xs font-semibold border transition-colors ${filterRating === 0
-                                            ? "bg-khajur-primary text-khajur-cream border-khajur-primary"
-                                            : "border-khajur-border text-khajur-dark/60 hover:border-khajur-gold bg-white"
-                                            }`}
-                                    >
-                                        All
-                                    </button>
-                                    {[5, 4, 3, 2, 1].map((star) => (
-                                        <button
-                                            key={star}
-                                            onClick={() => { setFilterRating(star); setVisibleCount(5); }}
-                                            className={`flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold border transition-colors ${filterRating === star
-                                                ? "bg-khajur-primary text-khajur-cream border-khajur-primary"
-                                                : "border-khajur-border text-khajur-dark/60 hover:border-khajur-gold bg-white"
-                                                }`}
-                                        >
-                                            {star}
-                                            <Star className="w-3 h-3 fill-current" />
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Sort Dropdown */}
-                                <div className="relative">
-                                    <select
-                                        value={sortType}
-                                        onChange={(e) => { setSortType(e.target.value); setVisibleCount(5); }}
-                                        className="appearance-none pl-3 pr-8 py-2 text-xs border border-khajur-border text-khajur-primary bg-white focus:outline-none focus:border-khajur-gold cursor-pointer transition-colors"
-                                    >
-                                        <option value="latest">Newest First</option>
-                                        <option value="top">Top Rated</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-khajur-dark/40 pointer-events-none" />
-                                </div>
-                            </div>
-
-                            {/* Results Count */}
-                            <p className="text-xs text-khajur-dark/40 mb-5">
-                                Showing{" "}
-                                <span className="font-medium text-khajur-primary">
-                                    {processedReviews.length}
-                                </span>{" "}
-                                of{" "}
-                                <span className="font-medium text-khajur-primary">
-                                    {reviews.filter((r) => (filterRating ? r.rating === filterRating : true)).length}
-                                </span>{" "}
-                                review{reviews.length !== 1 ? "s" : ""}
-                            </p>
-
-                            {/* ── Review List ───────────────────────────────────────────────── */}
-                            {processedReviews.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-16 border border-khajur-border bg-khajur-cream text-khajur-dark/30">
-                                    <MessageSquare className="w-10 h-10 mb-3" />
-                                    <p className="text-sm font-medium text-khajur-dark/50 mb-1">
-                                        {filterRating
-                                            ? `No ${filterRating}-star reviews yet.`
-                                            : "No reviews yet."}
-                                    </p>
-                                    {!filterRating && (
-                                        <button
-                                            onClick={() => setShowForm(true)}
-                                            className="mt-2 text-xs underline underline-offset-2 text-khajur-gold hover:text-khajur-primary transition-colors"
-                                        >
-                                            Be the first to write one
-                                        </button>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="border border-khajur-border bg-white divide-y divide-khajur-border">
-                                    {processedReviews.map((review) => (
-                                        <div key={review.id} className="p-6">
-                                            <div className="flex items-start gap-4">
-
-                                                {/* Avatar */}
-                                                <div className="w-10 h-10 flex-shrink-0 bg-khajur-primary flex items-center justify-center">
-                                                    <span className="text-khajur-cream text-sm font-bold uppercase">
-                                                        {review.user_name?.charAt(0) ?? "?"}
-                                                    </span>
-                                                </div>
-
-                                                {/* Content */}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                                                        <div className="flex items-center gap-3">
-                                                            <p className="text-sm font-semibold text-khajur-primary">
-                                                                {review.user_name ?? "Anonymous"}
-                                                            </p>
-                                                            <span className="text-khajur-dark/20">·</span>
-                                                            <p className="text-xs text-khajur-dark/40">
-                                                                {review.created_at
-                                                                    ? new Date(review.created_at).toLocaleDateString("en-IN", {
-                                                                        day: "2-digit", month: "short", year: "numeric",
-                                                                    })
-                                                                    : "—"}
-                                                            </p>
-                                                        </div>
-
-                                                        {/* Stars */}
-                                                        <div className="flex gap-0.5">
-                                                            {[1, 2, 3, 4, 5].map((s) => (
-                                                                <Star
-                                                                    key={s}
-                                                                    className={`w-3.5 h-3.5 ${s <= review.rating
-                                                                        ? "text-khajur-gold fill-khajur-gold"
-                                                                        : "text-khajur-dark/20 fill-transparent"
-                                                                        }`}
-                                                                />
-                                                            ))}
-                                                        </div>
+                                                    <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-khajur-primary to-khajur-gold transition-all duration-700"
+                                                            style={{ width: `${percent}%` }}
+                                                        />
                                                     </div>
 
-                                                    {review.title && (
-                                                        <p className="text-sm font-semibold text-khajur-dark mb-1">
-                                                            {review.title}
-                                                        </p>
-                                                    )}
-                                                    {review.comment && (
-                                                        <p className="text-sm text-khajur-dark/70 leading-relaxed">
-                                                            {review.comment}
-                                                        </p>
-                                                    )}
+                                                    <span className="text-sm text-gray-500">{count}</span>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                            );
+                                        })}
+                                    </div>
 
-                            {/* Load More */}
-                            {visibleCount < reviews.filter((r) => (filterRating ? r.rating === filterRating : true)).length && (
-                                <div className="text-center mt-8">
-                                    <button
-                                        onClick={() => setVisibleCount((prev) => prev + 5)}
-                                        className="px-8 py-2.5 border border-khajur-border text-khajur-primary hover:bg-khajur-primary hover:text-khajur-cream hover:border-khajur-primary text-xs font-bold uppercase tracking-widest transition-colors"
-                                    >
-                                        Load More Reviews
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* ── Inline Review Form ─────────────────────────────────────────── */}
-                            {showForm && (
-                                <div id="review-form" className="mt-10 border border-khajur-border bg-white">
-
-                                    {/* Form Header */}
-                                    <div className="flex items-center justify-between px-7 py-5 border-b border-khajur-border bg-khajur-cream">
-                                        <div>
-                                            <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
-                                                Leave a Review
-                                            </p>
-                                            <h3 className="font-serif text-xl font-medium text-khajur-primary">
-                                                Share Your Experience
-                                            </h3>
-                                        </div>
+                                    {/* WRITE BUTTON REVIEW */}
+                                    <div className="text-center mt-12">
                                         <button
-                                            onClick={() => setShowForm(false)}
-                                            className="text-khajur-dark/40 hover:text-khajur-primary transition-colors"
-                                            aria-label="Close review form"
+                                            onClick={() => setShowForm(true)}
+                                            className="bg-khajur-primary text-white px-8 py-3 rounded-lg shadow hover:shadow-xl transition"
                                         >
-                                            <X className="w-5 h-5" />
+                                            Write Review
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* ================= CONTROLS ================= */}
+                                <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
+
+                                    {/* FILTER */}
+                                    <div className="flex gap-2 flex-wrap">
+                                        {[5, 4, 3, 2, 1].map(star => (
+                                            <button
+                                                key={star}
+                                                onClick={() => setFilterRating(star)}
+                                                className={`px-3 py-1 rounded border ${filterRating === star ? "bg-khajur-primary text-white" : ""
+                                                    }`}
+                                            >
+                                                {star}★
+                                            </button>
+                                        ))}
+                                        <button onClick={() => setFilterRating(0)} className="px-3 py-1 border rounded">
+                                            All
                                         </button>
                                     </div>
 
-                                    {/* Form Body */}
-                                    <div className="px-7 py-6 space-y-5">
+                                    {/* SORT */}
+                                    <select
+                                        value={sortType}
+                                        onChange={(e) => setSortType(e.target.value)}
+                                        className="border px-3 py-2 rounded"
+                                    >
+                                        <option value="latest">Newest</option>
+                                        <option value="top">Top Rated</option>
+                                    </select>
+                                </div>
 
-                                        {/* Interactive Star Rating */}
-                                        <div>
-                                            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-2 block">
-                                                Your Rating <span className="text-red-500">*</span>
-                                            </label>
-                                            <div className="flex items-center gap-1">
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <Star
-                                                        key={star}
-                                                        onClick={() => setRating(star)}
-                                                        className={`w-8 h-8 cursor-pointer transition-all hover:scale-110 ${star <= rating
-                                                            ? "text-khajur-gold fill-khajur-gold"
-                                                            : "text-khajur-dark/20 fill-transparent"
-                                                            }`}
-                                                    />
-                                                ))}
-                                                <span className="ml-2 text-sm text-khajur-dark/50">
-                                                    {rating} / 5
-                                                </span>
+                                {/* LOAD MORE */}
+                                {visibleCount < reviews.length && (
+                                    <div className="text-center mt-10">
+                                        <button
+                                            onClick={() => setVisibleCount(prev => prev + 5)}
+                                            className="px-6 py-2 border rounded hover:bg-khajur-primary hover:text-white"
+                                        >
+                                            Load More
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* CONDITIONAL FORM */}
+                                {showForm && (
+                                    <div className="max-w-4xl mx-auto mt-16" id="review-form">
+
+                                        <div className="bg-white/90 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-xl p-10">
+
+                                            <div className="text-center mb-10">
+                                                <h3 className="text-3xl font-semibold text-khajur-primary">
+                                                    Share Your Experience
+                                                </h3>
                                             </div>
-                                        </div>
 
-                                        {/* Name */}
-                                        <div>
-                                            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
-                                                Your Name <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={name}
-                                                onChange={(e) => setName(e.target.value)}
-                                                placeholder="e.g. Priya Sharma"
-                                                className="w-full border border-khajur-border px-4 py-2.5 text-sm text-khajur-primary placeholder:text-khajur-dark/30 bg-white focus:outline-none focus:border-khajur-gold transition-colors"
-                                            />
-                                        </div>
+                                            {/* RATING */}
+                                            <div className="mb-10 text-center">
+                                                <div className="flex justify-center gap-3 text-4xl">
+                                                    {renderStars(rating, setRating)}
+                                                </div>
+                                            </div>
 
-                                        {/* Review Title */}
-                                        <div>
-                                            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
-                                                Review Title
-                                            </label>
+                                            {/* NAME + EMAIL */}
+                                            <div className="grid md:grid-cols-2 gap-6 mb-6">
+                                                <input
+                                                    type="text"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    placeholder="Your Name"
+                                                    className="p-4 rounded-xl bg-gray-50 border"
+                                                />
+
+                                                <input
+                                                    type="email"
+                                                    placeholder="Email"
+                                                    className="p-4 rounded-xl bg-gray-50 border"
+                                                />
+                                            </div>
+
+                                            {/* TITLE */}
                                             <input
                                                 type="text"
                                                 value={title}
                                                 onChange={(e) => setTitle(e.target.value)}
-                                                placeholder="Summarise your experience…"
-                                                className="w-full border border-khajur-border px-4 py-2.5 text-sm text-khajur-primary placeholder:text-khajur-dark/30 bg-white focus:outline-none focus:border-khajur-gold transition-colors"
+                                                placeholder="Review Title"
+                                                className="w-full p-4 rounded-xl bg-gray-50 border mb-6"
                                             />
-                                        </div>
 
-                                        {/* Comment */}
-                                        <div>
-                                            <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-1.5 block">
-                                                Your Review
-                                            </label>
+                                            {/* COMMENT */}
                                             <textarea
                                                 value={comment}
                                                 onChange={(e) => setComment(e.target.value)}
-                                                placeholder="What did you like or dislike? How was the quality?"
-                                                rows={4}
-                                                className="w-full border border-khajur-border px-4 py-2.5 text-sm text-khajur-primary placeholder:text-khajur-dark/30 bg-white focus:outline-none focus:border-khajur-gold transition-colors resize-none"
+                                                placeholder="Write your review..."
+                                                className="w-full p-4 rounded-xl h-40 bg-gray-50 border mb-6"
                                             />
-                                        </div>
 
-                                        {/* Actions */}
-                                        <div className="flex gap-3 pt-1">
-                                            <button
-                                                onClick={submitReview}
-                                                className="flex-1 flex items-center justify-center gap-2 bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90 py-3 text-xs font-bold uppercase tracking-widest transition-colors"
-                                            >
-                                                <Send className="w-4 h-4" />
-                                                Submit Review
-                                            </button>
-                                            <button
-                                                onClick={() => setShowForm(false)}
-                                                className="px-5 py-3 border border-khajur-border text-khajur-dark/60 hover:bg-khajur-cream text-xs font-bold uppercase tracking-widest transition-colors"
-                                            >
-                                                Cancel
-                                            </button>
+                                            {/* BUTTONS */}
+                                            <div className="flex justify-center gap-4">
+                                                <button
+                                                    onClick={() => setShowForm(false)}
+                                                    className="px-8 py-3 border rounded-xl"
+                                                >
+                                                    Cancel
+                                                </button>
+
+                                                <button
+                                                    onClick={submitReview}
+                                                    className="px-10 py-3 bg-khajur-primary text-white rounded-xl"
+                                                >
+                                                    Submit Review
+                                                </button>
+                                            </div>
+
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </div>
-            {/* YOU MAY ALSO LIKE */}
-            <RelatedProducts
-                products={products}
-                currentProduct={product}
-                type="related"
-            />
+                                )}
 
-            {/* EXPLORE MORE */}
-            <RelatedProducts
-                products={products}
-                currentProduct={product}
-                type="explore"
-            />
-        </div>
-        // </div >
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {/* YOU MAY ALSO LIKE */}
+                <RelatedProducts
+                    products={products}
+                    currentProduct={product}
+                    type="related"
+                />
+
+                {/* EXPLORE MORE */}
+                <RelatedProducts
+                    products={products}
+                    currentProduct={product}
+                    type="explore"
+                />
+            </div>
+        </div >
     );
 };
 
