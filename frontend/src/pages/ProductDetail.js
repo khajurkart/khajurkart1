@@ -909,7 +909,7 @@ const ProductDetail = () => {
         </div>
 
         {/* ── Divider before You May Also Like ─────────────────────────────── */}
-        <SectionDivider label="" />
+        <SectionDivider/>
 
         <RelatedProducts
           products={products}
@@ -918,7 +918,7 @@ const ProductDetail = () => {
         />
 
         {/* ── Divider before Explore More ───────────────────────────────────── */}
-        <SectionDivider label="" />
+        <SectionDivider/>
 
         <RelatedProducts
           products={products}
