@@ -52,22 +52,12 @@ const calcAvg = (reviews) =>
 const calcDiscount = (original, current) =>
   Math.round(((original - current) / original) * 100);
 
-const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
-
 // ─── Shared UI ─────────────────────────────────────────────────────────────────
 
-// ── Section Divider ────────────────────────────────────────────────────────────
+// ── Thin Section Divider ───────────────────────────────────────────────────────
 
-const SectionDivider = ({ label }) => (
-  <div className="flex items-center gap-4 my-16">
-    <div className="flex-1 h-px bg-khajur-border" />
-    {label && (
-      <span className="text-xs uppercase tracking-widest text-khajur-gold font-medium px-2 flex-shrink-0">
-        {label}
-      </span>
-    )}
-    <div className="flex-1 h-px bg-khajur-border" />
-  </div>
+const SectionDivider = () => (
+  <div className="w-full h-px bg-khajur-border my-16" />
 );
 
 // ── Star Display ───────────────────────────────────────────────────────────────
@@ -105,17 +95,29 @@ const QuantitySelector = ({ quantity, stock, onChange }) => (
   <div className="flex items-center">
     <button
       onClick={() => onChange(Math.max(1, quantity - 1))}
-      className="w-10 h-10 bg-khajur-cream hover:bg-khajur-border text-khajur-primary font-bold text-lg border border-khajur-border transition-colors"
+      className="
+        w-10 h-10 bg-khajur-cream hover:bg-khajur-border
+        text-khajur-primary font-bold text-lg
+        border border-khajur-border transition-colors
+      "
       aria-label="Decrease quantity"
     >
       −
     </button>
-    <span className="w-14 h-10 flex items-center justify-center text-sm font-medium text-khajur-primary border-y border-khajur-border">
+    <span className="
+      w-14 h-10 flex items-center justify-center
+      text-sm font-medium text-khajur-primary
+      border-y border-khajur-border
+    ">
       {quantity}
     </span>
     <button
       onClick={() => onChange(Math.min(stock, quantity + 1))}
-      className="w-10 h-10 bg-khajur-cream hover:bg-khajur-border text-khajur-primary font-bold text-lg border border-khajur-border transition-colors"
+      className="
+        w-10 h-10 bg-khajur-cream hover:bg-khajur-border
+        text-khajur-primary font-bold text-lg
+        border border-khajur-border transition-colors
+      "
       aria-label="Increase quantity"
     >
       +
@@ -188,11 +190,15 @@ const RatingDistribution = ({ reviews }) => {
 const ReviewCard = ({ review }) => (
   <div className="py-6 border-b border-khajur-border last:border-0">
     <div className="flex items-start gap-4">
+
+      {/* Avatar */}
       <div className="w-9 h-9 flex-shrink-0 bg-khajur-primary flex items-center justify-center">
         <span className="text-khajur-cream text-sm font-bold uppercase">
           {review.user_name?.charAt(0) ?? '?'}
         </span>
       </div>
+
+      {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
           <div className="flex items-center gap-2">
@@ -206,11 +212,16 @@ const ReviewCard = ({ review }) => (
           </div>
           <StarDisplay rating={review.rating} size="sm" />
         </div>
+
         {review.title && (
-          <p className="text-sm font-semibold text-khajur-dark mb-1">{review.title}</p>
+          <p className="text-sm font-semibold text-khajur-dark mb-1">
+            {review.title}
+          </p>
         )}
         {review.comment && (
-          <p className="text-sm text-khajur-dark/70 leading-relaxed">{review.comment}</p>
+          <p className="text-sm text-khajur-dark/70 leading-relaxed">
+            {review.comment}
+          </p>
         )}
       </div>
     </div>
@@ -248,7 +259,7 @@ const ReviewForm = ({ onClose, onSubmit, submitting, formState, setFormState }) 
       {/* Body */}
       <form onSubmit={onSubmit} className="px-7 py-6 space-y-5">
 
-        {/* Star picker */}
+        {/* Star Picker */}
         <div>
           <label className="text-xs font-medium uppercase tracking-wide text-khajur-dark/50 mb-2 block">
             Your Rating <span className="text-red-500">*</span>
@@ -397,7 +408,8 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
   const handleShowForm = () => {
     setShowForm(true);
     setTimeout(() =>
-      document.getElementById('review-form')?.scrollIntoView({ behavior: 'smooth' }), 100
+      document.getElementById('review-form')
+        ?.scrollIntoView({ behavior: 'smooth' }), 100
     );
   };
 
@@ -445,7 +457,7 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
       {/* Summary Panel */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center bg-khajur-cream border border-khajur-border p-8 mb-10">
 
-        {/* Average */}
+        {/* Average Score */}
         <div className="text-center md:text-left">
           <p className="font-serif text-8xl font-bold text-khajur-primary leading-none mb-3">
             {avg}
@@ -461,14 +473,15 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
         {/* Distribution */}
         <RatingDistribution reviews={reviews} />
 
-        {/* CTA */}
+        {/* Write Review CTA */}
         <div className="flex justify-center md:justify-end">
           <button
             onClick={handleShowForm}
             className="
-              flex items-center gap-2 bg-khajur-primary text-khajur-cream
-              hover:bg-khajur-primary/90 px-7 py-3.5
-              text-xs font-bold uppercase tracking-widest transition-colors
+              flex items-center gap-2
+              bg-khajur-primary text-khajur-cream hover:bg-khajur-primary/90
+              px-7 py-3.5 text-xs font-bold uppercase tracking-widest
+              transition-colors
             "
           >
             <MessageSquare className="w-4 h-4" />
@@ -480,7 +493,7 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
       {/* Filter & Sort Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
 
-        {/* Rating Chips */}
+        {/* Rating Filter Chips */}
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => handleFilterChange(0)}
@@ -499,8 +512,8 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
               key={star}
               onClick={() => handleFilterChange(star)}
               className={`
-                flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold
-                border transition-colors
+                flex items-center gap-1 px-3.5 py-1.5
+                text-xs font-semibold border transition-colors
                 ${filterRating === star
                   ? 'bg-khajur-primary text-khajur-cream border-khajur-primary'
                   : 'border-khajur-border text-khajur-dark/60 hover:border-khajur-gold bg-white'
@@ -513,7 +526,7 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
           ))}
         </div>
 
-        {/* Sort */}
+        {/* Sort Dropdown */}
         <div className="relative">
           <select
             value={sortType}
@@ -532,7 +545,7 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
         </div>
       </div>
 
-      {/* Results count */}
+      {/* Results Count */}
       <p className="text-xs text-khajur-dark/40 mb-5">
         Showing{' '}
         <span className="font-medium text-khajur-primary">{visible.length}</span> of{' '}
@@ -542,10 +555,12 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
 
       {/* Review List */}
       {visible.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 border border-khajur-border bg-khajur-cream text-khajur-dark/30">
-          <MessageSquare className="w-10 h-10 mb-3" />
+        <div className="flex flex-col items-center justify-center py-16 border border-khajur-border bg-khajur-cream">
+          <MessageSquare className="w-10 h-10 mb-3 text-khajur-dark/20" />
           <p className="text-sm font-medium text-khajur-dark/50 mb-1">
-            {filterRating ? `No ${filterRating}-star reviews yet.` : 'No reviews yet.'}
+            {filterRating
+              ? `No ${filterRating}-star reviews yet.`
+              : 'No reviews yet.'}
           </p>
           {!filterRating && (
             <button
@@ -613,7 +628,7 @@ const ProductDetail = () => {
   const [loading, setLoading]           = useState(true);
   const [imgError, setImgError]         = useState(false);
 
-  // ── Fetching ───────────────────────────────────────────────────────────────
+  // ── Data Fetching ──────────────────────────────────────────────────────────
 
   const fetchProduct = useCallback(async () => {
     try {
@@ -646,6 +661,7 @@ const ProductDetail = () => {
     fetchAllProducts();
   }, [fetchProduct, fetchReviews, fetchAllProducts]);
 
+  // Auto-select first size
   useEffect(() => {
     if (product?.sizes?.length && !selectedSize) {
       setSelectedSize(product.sizes[0].weight);
@@ -684,7 +700,7 @@ const ProductDetail = () => {
     setTimeout(() => navigate('/cart'), 300);
   };
 
-  // ── Loading / Not Found ────────────────────────────────────────────────────
+  // ── Render States ──────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -773,11 +789,13 @@ const ProductDetail = () => {
                   size="sm"
                 />
                 <span className="text-xs text-khajur-dark/50">
-                  {calcAvg(reviews)} ({reviews.length} review{reviews.length !== 1 ? 's' : ''})
+                  {calcAvg(reviews)}{' '}
+                  ({reviews.length} review{reviews.length !== 1 ? 's' : ''})
                 </span>
               </div>
             )}
 
+            {/* Price */}
             <PriceBlock currentPrice={currentPrice} originalPrice={originalPrice} />
 
             {/* Stock */}
@@ -908,18 +926,20 @@ const ProductDetail = () => {
           )}
         </div>
 
-        {/* ── Divider before You May Also Like ─────────────────────────────── */}
-        <SectionDivider/>
+        {/* ── Single Thin Divider ───────────────────────────────────────────── */}
+        <SectionDivider />
 
+        {/* ── You May Also Like ─────────────────────────────────────────────── */}
         <RelatedProducts
           products={products}
           currentProduct={product}
           type="related"
         />
 
-        {/* ── Divider before Explore More ───────────────────────────────────── */}
-        <SectionDivider/>
+        {/* ── Single Thin Divider ───────────────────────────────────────────── */}
+        <SectionDivider />
 
+        {/* ── Explore More ──────────────────────────────────────────────────── */}
         <RelatedProducts
           products={products}
           currentProduct={product}
