@@ -753,7 +753,7 @@ const ProductDetail = () => {
                     <div className="bg-khajur-cream flex items-center justify-center p-10 border border-khajur-border">
                         {imgError ? (
                             <div className="flex flex-col items-center gap-3 text-khajur-dark/20">
-                                <ImageOff className="w-18 h-18" />
+                                <ImageOff className="w-14 h-14" />
                                 <p className="text-sm">Image unavailable</p>
                             </div>
                         ) : (
@@ -887,7 +887,7 @@ const ProductDetail = () => {
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key)}
                                 className={`
-                  px-6 py-3.5 text-sm font-medium transition-colors
+                  px-6 py-2.5 text-sm font-medium transition-colors
                   ${activeTab === tab.key
                                         ? 'border-b-2 border-khajur-gold text-khajur-primary -mb-px'
                                         : 'text-khajur-dark/50 hover:text-khajur-primary'
@@ -915,7 +915,6 @@ const ProductDetail = () => {
                             dangerouslySetInnerHTML={{ __html: product.description }}
                         />
                     )}
-
                     {/* Reviews Tab */}
                     {activeTab === 'reviews' && (
                         <ReviewsSection
@@ -942,7 +941,7 @@ const ProductDetail = () => {
                     type="explore"
                 />
                 {/* Bottom spacing */}
-                <div className="h-14" />
+                <div className="h-12" />
             </div>
         </div>
     );
