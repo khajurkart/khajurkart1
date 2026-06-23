@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import AuthModal from './AuthModal';
 
+// ─── Constants ─────────────────────────────────────────────────────────────────
+
 const NAV_LINKS = [
   { label: 'Home',        to: '/'            },
   { label: 'About Us',    to: '/about'       },
@@ -12,6 +14,8 @@ const NAV_LINKS = [
   { label: 'Bulk Orders', to: '/bulk-orders' },
   { label: 'Contact Us',  to: '/contact'     },
 ];
+
+// ─── Sub-Components ────────────────────────────────────────────────────────────
 
 const NavLink = ({ to, label, isActive, onClick, testId }) => (
   <Link
@@ -34,34 +38,57 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
   </Link>
 );
 
-const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
-  <form onSubmit={onSubmit} className={className}>
-    <div className="relative">
-      <input
-        type="text"
-        placeholder="Search…"
-        value={value}
-        onChange={onChange}
-        data-testid="search-input"
-        className="
-          w-32 bg-white/5 border border-khajur-gold/20
-          hover:border-khajur-gold/40 focus:border-khajur-gold
-          text-sm text-khajur-cream placeholder:text-khajur-cream/30
-          pl-3 pr-8 py-2 rounded-sm
-          focus:outline-none transition-colors duration-200
-        "
-      />
-      <button
-        type="submit"
-        data-testid="search-button"
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-khajur-cream/40 hover:text-khajur-gold transition-colors"
-        aria-label="Search"
-      >
-        <Search className="w-4 h-4" />
-      </button>
-    </div>
-  </form>
-);
+// ── Search — icon only, expands on focus ───────────────────────────────────────
+
+const SearchForm = ({ value, onChange, onSubmit, className = '' }) => {
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef(null);
+
+  return (
+    <form onSubmit={onSubmit} className={className}>
+      <div className="relative flex items-center">
+        {/* ✅ Icon button — clicking focuses the input */}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.focus()}
+          data-testid="search-button"
+          className="
+            w-8 h-8 flex items-center justify-center
+            text-khajur-cream/50 hover:text-khajur-gold
+            transition-colors duration-200 flex-shrink-0
+          "
+          aria-label="Search"
+        >
+          <Search className="w-[18px] h-[18px]" />
+        </button>
+
+        {/* ✅ Input expands when focused, collapses when empty & blurred */}
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Search…"
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => {
+            if (!value) setFocused(false);
+          }}
+          data-testid="search-input"
+          className={`
+            bg-white/5 border border-khajur-gold/20
+            hover:border-khajur-gold/30 focus:border-khajur-gold
+            text-sm text-khajur-cream placeholder:text-khajur-cream/30
+            pl-2 pr-2 py-1.5 rounded-sm
+            focus:outline-none transition-all duration-300
+            ${focused || value ? 'w-32 opacity-100' : 'w-0 opacity-0 border-transparent'}
+          `}
+        />
+      </div>
+    </form>
+  );
+};
+
+// ── Cart Button ────────────────────────────────────────────────────────────────
 
 const CartButton = ({ count }) => (
   <Link
@@ -87,6 +114,8 @@ const CartButton = ({ count }) => (
   </Link>
 );
 
+// ─── Main Component ────────────────────────────────────────────────────────────
+
 const Navbar = () => {
   const { user }      = useAuth();
   const { cartCount } = useCart();
@@ -99,11 +128,15 @@ const Navbar = () => {
   const [query, setQuery]       = useState('');
   const [scrolled, setScrolled] = useState(false);
 
+  // ── Scroll shadow ──────────────────────────────────────────────────────────
+
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handler, { passive: true });
     return () => window.removeEventListener('scroll', handler);
   }, []);
+
+  // ── Close menu on outside click ────────────────────────────────────────────
 
   useEffect(() => {
     const handler = (e) => {
@@ -115,9 +148,13 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
+  // ── Close menu on route change ─────────────────────────────────────────────
+
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -142,6 +179,8 @@ const Navbar = () => {
     ? [...NAV_LINKS, { label: 'My Orders', to: '/my-orders' }]
     : NAV_LINKS;
 
+  // ── Render ─────────────────────────────────────────────────────────────────
+
   return (
     <>
       <nav
@@ -157,7 +196,7 @@ const Navbar = () => {
           {/* ── Desktop Layout ── */}
           <div className="hidden md:flex items-center justify-between h-20 gap-4">
 
-            {/* ── Logo ── */}
+            {/* Logo */}
             <Link
               to="/"
               data-testid="logo-link"
@@ -173,7 +212,7 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {/* ✅ Nav links — flex-1 so it takes available space and centers naturally */}
+            {/* Nav Links — centered */}
             <div className="flex items-center justify-center flex-1 gap-5">
               {links.map((link) => (
                 <NavLink
@@ -186,8 +225,8 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* ── Actions ── */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            {/* ✅ Actions — search is now compact icon that expands on click */}
+            <div className="flex items-center gap-3 flex-shrink-0">
               <SearchForm
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -290,12 +329,29 @@ const Navbar = () => {
               </Link>
             ))}
 
-            <SearchForm
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onSubmit={handleSearch}
-              className="w-full pt-2"
-            />
+            {/* Mobile search — full width */}
+            <form onSubmit={handleSearch} className="pt-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="
+                    w-full bg-white/5 border border-khajur-gold/20
+                    focus:border-khajur-gold text-sm text-khajur-cream
+                    placeholder:text-khajur-cream/30 pl-4 pr-10 py-2.5
+                    rounded-sm focus:outline-none transition-colors
+                  "
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-khajur-cream/40 hover:text-khajur-gold"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </nav>
