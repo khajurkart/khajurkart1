@@ -111,15 +111,19 @@ const Navbar = () => {
     const [query, setQuery] = useState('');
     const [scrolled, setScrolled] = useState(false);
 
-    // ── Scroll to top on initial page load / refresh ──────────────────────────
+    // ── Scroll shadow ──────────────────────────────────────────────────────────
 
     useEffect(() => {
-        window.scrollTo({ top: 0 });
+        const handler = () => setScrolled(window.scrollY > 10);
+        window.addEventListener('scroll', handler, { passive: true });
+        return () => window.removeEventListener('scroll', handler);
     }, []);
 
-    // ── Scroll to top on route change AND refresh ──────────────────────────────
+
+    // ── Close menu on route change ─────────────────────────────────────────────
 
     useEffect(() => {
+        setMenuOpen(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [location.pathname]);
 
