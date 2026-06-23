@@ -1,3 +1,4 @@
+```jsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -78,52 +79,48 @@ const MENU_ITEMS = [
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
-// ── Quick Link Card ────────────────────────────────────────────────────────────
-
 const QuickLinkCard = ({ icon: Icon, label, description, to, testId }) => (
   <Link
     to={to}
     data-testid={testId}
     className="
-      group flex flex-col gap-5 bg-white border border-khajur-border
-      hover:border-khajur-gold/60 hover:shadow-[0_4px_20px_rgba(198,169,98,0.12)]
-      p-7 rounded-sm transition-all duration-300
+      group flex flex-col gap-6 bg-white border border-khajur-border
+      hover:border-khajur-gold/60 hover:shadow-[0_4px_24px_rgba(198,169,98,0.15)]
+      p-8 md:p-10 rounded-sm transition-all duration-300
     "
   >
-    <div className="w-12 h-12 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm">
-      <Icon className="w-5 h-5 text-khajur-primary" />
+    <div className="w-14 h-14 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm">
+      <Icon className="w-6 h-6 text-khajur-primary" />
     </div>
     <div>
-      <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50 mb-0.5">
+      <p className="text-sm uppercase tracking-widest font-medium text-khajur-dark/50 mb-1">
         {label}
       </p>
-      <p className="text-sm text-khajur-primary font-medium leading-snug">
+      <p className="text-base text-khajur-primary font-medium leading-relaxed">
         {description}
       </p>
     </div>
-    <ChevronRight className="w-4 h-4 text-khajur-gold opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 mt-auto" />
+    <ChevronRight className="w-5 h-5 text-khajur-gold opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 mt-auto" />
   </Link>
 );
-
-// ── Menu Row ───────────────────────────────────────────────────────────────────
 
 const MenuRow = ({ icon: Icon, label, description, iconClass, to, action, testId }) => {
   const inner = (
     <div className="
-      group flex items-center gap-5 bg-white border border-khajur-border
+      group flex items-center gap-6 bg-white border border-khajur-border
       hover:border-khajur-gold/60 hover:shadow-[0_4px_20px_rgba(198,169,98,0.08)]
-      px-6 py-5 rounded-sm transition-all duration-300 cursor-pointer
+      px-8 py-6 rounded-sm transition-all duration-300 cursor-pointer
     ">
-      <div className="w-10 h-10 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm flex-shrink-0">
-        <Icon className={`w-4 h-4 ${iconClass}`} />
+      <div className="w-12 h-12 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm flex-shrink-0">
+        <Icon className={`w-5 h-5 ${iconClass}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-khajur-primary uppercase tracking-wider">
+        <p className="text-base font-semibold text-khajur-primary uppercase tracking-wider">
           {label}
         </p>
-        <p className="text-xs text-khajur-dark/50 mt-0.5">{description}</p>
+        <p className="text-sm text-khajur-dark/50 mt-1">{description}</p>
       </div>
-      <ChevronRight className="w-4 h-4 text-khajur-gold/60 group-hover:text-khajur-gold group-hover:translate-x-1 transition-all duration-300 flex-shrink-0" />
+      <ChevronRight className="w-5 h-5 text-khajur-gold/60 group-hover:text-khajur-gold group-hover:translate-x-1 transition-all duration-300 flex-shrink-0" />
     </div>
   );
 
@@ -134,8 +131,6 @@ const MenuRow = ({ icon: Icon, label, description, iconClass, to, action, testId
   );
 };
 
-// ── Bottom Nav ─────────────────────────────────────────────────────────────────
-
 const BottomNav = () => {
   const NAV = [
     { icon: Home,        label: 'Home',       to: '/',         testId: 'bottom-nav-home'    },
@@ -144,7 +139,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-khajur-primary border-t border-khajur-gold/30 py-3 px-6 shadow-2xl z-40">
+    <nav className="fixed bottom-0 left-0 right-0 bg-khajur-primary border-t border-khajur-gold/30 py-4 px-6 shadow-2xl z-40">
       <div className="max-w-7xl mx-auto flex items-center justify-around">
         {NAV.map(({ icon: Icon, label, to, testId, active }) => (
           <Link
@@ -152,17 +147,17 @@ const BottomNav = () => {
             to={to}
             data-testid={testId}
             className={`
-              flex flex-col items-center gap-1.5 transition-colors
+              flex flex-col items-center gap-2 transition-colors
               ${active ? 'text-khajur-gold' : 'text-khajur-cream/60 hover:text-khajur-cream'}
             `}
           >
             <div className="relative">
-              <Icon className="w-5 h-5" />
+              <Icon className="w-6 h-6" />
               {active && (
-                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-khajur-gold" />
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-khajur-gold" />
               )}
             </div>
-            <span className="text-[10px] uppercase tracking-widest font-medium">{label}</span>
+            <span className="text-xs uppercase tracking-widest font-medium">{label}</span>
           </Link>
         ))}
       </div>
@@ -187,20 +182,20 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen bg-khajur-cream pb-28" data-testid="account-page">
-      <div className="max-w-2xl mx-auto px-6 py-12 space-y-10">
+    <div className="min-h-screen bg-khajur-cream pb-32" data-testid="account-page">
+      <div className="max-w-5xl mx-auto px-6 md:px-12 py-16 md:py-20 space-y-14">
 
         {/* ── Page Header ── */}
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-widest text-khajur-gold">
+        <div className="space-y-2 border-b border-khajur-gold/20 pb-8">
+          <p className="text-sm uppercase tracking-widest text-khajur-gold font-medium">
             My Account
           </p>
-          <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">
+          <h1 className="font-serif text-5xl md:text-6xl font-medium text-khajur-primary leading-tight">
             Hello, {user.name?.split(' ')[0] || 'there'}.
           </h1>
-          <p className="text-sm text-khajur-dark/50 pt-1">
+          <p className="text-base text-khajur-dark/60 pt-2">
             Signed in as{' '}
-            <span className="text-khajur-primary font-medium">
+            <span className="text-khajur-primary font-semibold">
               {user.phone || user.email}
             </span>
           </p>
@@ -208,10 +203,10 @@ const Account = () => {
 
         {/* ── Quick Links ── */}
         <section>
-          <p className="text-xs uppercase tracking-widest text-khajur-dark/40 mb-4">
+          <p className="text-sm uppercase tracking-widest text-khajur-dark/40 mb-6 font-medium">
             Quick Access
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {QUICK_LINKS.map((item) => (
               <QuickLinkCard key={item.to} {...item} />
             ))}
@@ -220,10 +215,10 @@ const Account = () => {
 
         {/* ── Support & Links ── */}
         <section>
-          <p className="text-xs uppercase tracking-widest text-khajur-dark/40 mb-4">
+          <p className="text-sm uppercase tracking-widest text-khajur-dark/40 mb-6 font-medium">
             Support
           </p>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {MENU_ITEMS.map((item) => (
               <MenuRow key={item.label} {...item} />
             ))}
@@ -231,24 +226,24 @@ const Account = () => {
         </section>
 
         {/* ── Logout ── */}
-        <section>
+        <section className="pt-4">
           <button
             onClick={handleLogout}
             data-testid="logout-button"
             className="
               w-full flex items-center justify-center gap-3
-              border border-red-300 hover:border-red-500
+              border-2 border-red-200 hover:border-red-500
               bg-white hover:bg-red-50
-              text-red-500 hover:text-red-600
-              px-6 py-4 rounded-sm
-              text-xs uppercase tracking-widest font-semibold
+              text-red-500 hover:text-red-700
+              px-8 py-5 rounded-sm
+              text-sm uppercase tracking-widest font-bold
               transition-all duration-300
             "
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-5 h-5" />
             Sign Out
           </button>
-          <p className="text-center text-xs text-khajur-dark/30 mt-4">
+          <p className="text-center text-sm text-khajur-dark/40 mt-5">
             You'll be redirected to the homepage after signing out.
           </p>
         </section>
@@ -261,3 +256,4 @@ const Account = () => {
 };
 
 export default Account;
+```
