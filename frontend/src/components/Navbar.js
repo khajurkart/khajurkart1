@@ -158,7 +158,7 @@ const Navbar = () => {
     return location.pathname.startsWith(to);
   };
 
-  // ✅ Links are computed dynamically — My Orders only added when logged in
+  // ✅ Links computed dynamically
   const links = user
     ? [...NAV_LINKS, { label: 'My Orders', to: '/my-orders' }]
     : NAV_LINKS;
@@ -176,28 +176,36 @@ const Navbar = () => {
         `}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="flex items-center justify-between h-20 gap-6">
 
-            {/* ── Logo ── */}
-            <Link
-              to="/"
-              data-testid="logo-link"
-              className="flex items-center gap-2 flex-shrink-0 group"
-              onClick={() => setMenuOpen(false)}
-            >
-              <img
-                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
-                alt="KhajurKart"
-                className="h-12 w-auto"
-              />
-              <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
-                KhajurKart
-              </span>
-            </Link>
+          {/*
+            ✅ 3-column grid layout:
+            - Col 1: Logo (fixed left)
+            - Col 2: Nav links (perfectly centered)
+            - Col 3: Actions (fixed right)
+            All three columns are equal width so center col is truly centered.
+          */}
+          <div className="hidden md:grid grid-cols-3 items-center h-20">
 
-            {/* ── Desktop Nav ── */}
-            {/* ✅ Removed flex-1 — nav only takes the space it needs */}
-            <div className="hidden md:flex items-center gap-7">
+            {/* ── Col 1: Logo (left) ── */}
+            <div className="flex items-center">
+              <Link
+                to="/"
+                data-testid="logo-link"
+                className="flex items-center gap-2 group flex-shrink-0"
+              >
+                <img
+                  src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
+                  alt="KhajurKart"
+                  className="h-12 w-auto"
+                />
+                <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
+                  KhajurKart
+                </span>
+              </Link>
+            </div>
+
+            {/* ── Col 2: Nav Links (perfectly centered) ── */}
+            <div className="flex items-center justify-center gap-6">
               {links.map((link) => (
                 <NavLink
                   key={link.to}
@@ -209,9 +217,8 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* ── Desktop Actions ── */}
-            {/* ✅ ml-auto pushes actions to the right regardless of nav width */}
-            <div className="hidden md:flex items-center gap-5 ml-auto">
+            {/* ── Col 3: Actions (right) ── */}
+            <div className="flex items-center justify-end gap-5">
               <SearchForm
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -238,9 +245,29 @@ const Navbar = () => {
 
               <CartButton count={cartCount} />
             </div>
+          </div>
 
-            {/* ── Mobile Actions ── */}
-            <div className="flex md:hidden items-center gap-4 ml-auto">
+          {/* ── Mobile Layout ── */}
+          <div className="flex md:hidden items-center justify-between h-20">
+
+            {/* Mobile Logo */}
+            <Link
+              to="/"
+              data-testid="logo-link"
+              className="flex items-center gap-2 group flex-shrink-0"
+            >
+              <img
+                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
+                alt="KhajurKart"
+                className="h-11 w-auto"
+              />
+              <span className="font-serif text-xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
+                KhajurKart
+              </span>
+            </Link>
+
+            {/* Mobile Actions */}
+            <div className="flex items-center gap-4">
               <button
                 onClick={handleAuthClick}
                 data-testid="account-button"
@@ -264,7 +291,6 @@ const Navbar = () => {
                 }
               </button>
             </div>
-
           </div>
         </div>
 
