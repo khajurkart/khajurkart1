@@ -32,10 +32,11 @@ const INITIAL_FORM = {
 
 const getPasswordStrength = (password) => {
   if (!password) return null;
-  if (password.length < 6) return { label: 'Weak',   color: 'bg-red-400',    text: 'text-red-500'    };
+  if (password.length < 6)
+    return { label: 'Weak',   color: 'bg-red-400',    text: 'text-red-500'   };
   if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/))
-    return              { label: 'Strong', color: 'bg-green-500',  text: 'text-green-600'  };
-  return                { label: 'Medium', color: 'bg-yellow-400', text: 'text-yellow-600' };
+    return { label: 'Strong', color: 'bg-green-500',  text: 'text-green-600' };
+  return   { label: 'Medium', color: 'bg-yellow-400', text: 'text-yellow-600'};
 };
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
@@ -75,11 +76,19 @@ const PasswordInput = ({ value, onChange, testId, placeholder = 'Enter password'
           onChange={onChange}
           placeholder={placeholder}
           data-testid={testId}
+          // ✅ Prevent any click inside input from bubbling to backdrop
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           className={`${inputBase} pr-10`}
         />
         <button
           type="button"
-          onClick={() => setShow((s) => !s)}
+          // ✅ Stop propagation on toggle button too
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShow((s) => !s);
+          }}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-khajur-dark/40 hover:text-khajur-primary transition-colors"
           tabIndex={-1}
         >
@@ -87,7 +96,7 @@ const PasswordInput = ({ value, onChange, testId, placeholder = 'Enter password'
         </button>
       </div>
 
-      {/* Password strength */}
+      {/* Password Strength Bar */}
       {strength && (
         <div className="space-y-1">
           <div className="h-1 bg-khajur-border rounded-full overflow-hidden">
@@ -109,17 +118,8 @@ const PasswordInput = ({ value, onChange, testId, placeholder = 'Enter password'
 
 // ── Modal Header ───────────────────────────────────────────────────────────────
 
-const ModalHeader = ({ title, subtitle, onClose, showClose }) => (
+const ModalHeader = ({ title, subtitle }) => (
   <div className="text-center mb-8">
-    {showClose && (
-      <button
-        onClick={onClose}
-        className="absolute top-5 right-5 text-khajur-dark/30 hover:text-khajur-primary transition-colors"
-        aria-label="Close"
-      >
-        <X className="w-5 h-5" />
-      </button>
-    )}
     <div className="inline-flex items-center justify-center w-12 h-12 bg-khajur-gold/10 rounded-full mb-4">
       <ShieldCheck className="w-5 h-5 text-khajur-gold" />
     </div>
@@ -164,9 +164,9 @@ const SubmitButton = ({ loading, label }) => (
 
 // ── OTP Screen ─────────────────────────────────────────────────────────────────
 
-const OTPScreen = ({ email, onVerify, onResend, onClose }) => {
-  const [code, setCode]         = useState('');
-  const [loading, setLoading]   = useState(false);
+const OTPScreen = ({ email, onVerify, onResend }) => {
+  const [code, setCode]           = useState('');
+  const [loading, setLoading]     = useState(false);
   const [resending, setResending] = useState(false);
 
   const handleVerify = async () => {
@@ -190,10 +190,9 @@ const OTPScreen = ({ email, onVerify, onResend, onClose }) => {
       <ModalHeader
         title="Verify Email"
         subtitle={`A 6-digit code was sent to ${email}`}
-        showClose={false}
       />
 
-      {/* Spam notice */}
+      {/* Spam Notice */}
       <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-sm px-4 py-3">
         <span className="text-amber-500 text-base mt-0.5">📬</span>
         <p className="text-xs text-amber-700 leading-relaxed">
@@ -213,6 +212,9 @@ const OTPScreen = ({ email, onVerify, onResend, onClose }) => {
           maxLength={6}
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+          // ✅ Prevent backdrop close when interacting with OTP input
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           placeholder="——————"
           className="
             w-full bg-white border border-khajur-border focus:border-khajur-gold
@@ -225,7 +227,7 @@ const OTPScreen = ({ email, onVerify, onResend, onClose }) => {
         </p>
       </div>
 
-      {/* Verify */}
+      {/* Verify Button */}
       <button
         onClick={handleVerify}
         disabled={loading || code.length < 6}
@@ -245,7 +247,7 @@ const OTPScreen = ({ email, onVerify, onResend, onClose }) => {
         }
       </button>
 
-      {/* Resend */}
+      {/* Resend Button */}
       <button
         type="button"
         onClick={handleResend}
@@ -270,11 +272,11 @@ const OTPScreen = ({ email, onVerify, onResend, onClose }) => {
 const AuthModal = ({ isOpen, onClose }) => {
   const { login, register, setAuth } = useAuth();
 
-  const [mode, setMode]                     = useState('login'); // 'login' | 'register' | 'forgot'
-  const [showOTP, setShowOTP]               = useState(false);
-  const [formData, setFormData]             = useState(INITIAL_FORM);
-  const [loading, setLoading]               = useState(false);
-  const [otpEmail, setOtpEmail]             = useState('');
+  const [mode, setMode]       = useState('login'); // 'login' | 'register' | 'forgot'
+  const [showOTP, setShowOTP] = useState(false);
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [loading, setLoading] = useState(false);
+  const [otpEmail, setOtpEmail] = useState('');
 
   if (!isOpen) return null;
 
@@ -288,7 +290,6 @@ const AuthModal = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       if (mode === 'forgot') {
         const res = await fetch(
@@ -335,13 +336,11 @@ const AuthModal = ({ isOpen, onClose }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: otpEmail, verification_code: code }),
       });
-
       if (!res.ok) {
         const err = await res.json();
         toast.error(err.detail || 'Invalid verification code.');
         return;
       }
-
       const data = await res.json();
       setAuth(data.access_token, data.user);
       toast.success('Email verified successfully!');
@@ -361,12 +360,12 @@ const AuthModal = ({ isOpen, onClose }) => {
     }
   };
 
-  // ── Mode config ────────────────────────────────────────────────────────────
+  // ── Mode Config ────────────────────────────────────────────────────────────
 
   const modeConfig = {
-    login:    { title: 'Welcome Back',    subtitle: 'Sign in to your KhajurKart account.',   btn: 'Sign In'        },
-    register: { title: 'Create Account',  subtitle: 'Join KhajurKart and shop premium dates.', btn: 'Create Account' },
-    forgot:   { title: 'Reset Password',  subtitle: 'Enter your email to receive a reset link.', btn: 'Send Reset Link' },
+    login:    { title: 'Welcome Back',   subtitle: 'Sign in to your KhajurKart account.',      btn: 'Sign In'         },
+    register: { title: 'Create Account', subtitle: 'Join KhajurKart and shop premium dates.',   btn: 'Create Account'  },
+    forgot:   { title: 'Reset Password', subtitle: 'Enter your email to receive a reset link.', btn: 'Send Reset Link' },
   };
   const cfg = modeConfig[mode];
 
@@ -376,9 +375,19 @@ const AuthModal = ({ isOpen, onClose }) => {
     <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       data-testid="auth-modal"
-      onClick={(e) => e.target === e.currentTarget && !showOTP && onClose()}
+      // ✅ Only close when mousedown starts directly on the dark backdrop
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !showOTP) {
+          onClose();
+        }
+      }}
     >
-      <div className="bg-white w-full max-w-md rounded-sm shadow-2xl border border-khajur-border relative max-h-[95vh] overflow-y-auto">
+      <div
+        className="bg-white w-full max-w-md rounded-sm shadow-2xl border border-khajur-border relative max-h-[95vh] overflow-y-auto"
+        // ✅ Prevent any click/drag inside modal from bubbling to backdrop
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="px-8 py-10">
 
           {/* ── OTP Screen ── */}
@@ -387,30 +396,25 @@ const AuthModal = ({ isOpen, onClose }) => {
               email={otpEmail}
               onVerify={handleVerifyOTP}
               onResend={handleResendOTP}
-              onClose={onClose}
             />
           ) : (
             <>
-              {/* Close */}
+              {/* ── Close Button ── */}
               <button
                 onClick={onClose}
                 className="absolute top-5 right-5 text-khajur-dark/30 hover:text-khajur-primary transition-colors"
-                aria-label="Close"
+                aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              {/* Header */}
-              <ModalHeader
-                title={cfg.title}
-                subtitle={cfg.subtitle}
-                showClose={false}
-              />
+              {/* ── Header ── */}
+              <ModalHeader title={cfg.title} subtitle={cfg.subtitle} />
 
-              {/* Form */}
+              {/* ── Form ── */}
               <form onSubmit={handleSubmit} className="space-y-5">
 
-                {/* Register-only fields */}
+                {/* Register Fields */}
                 {mode === 'register' && (
                   <>
                     <Field icon={User} label="Full Name">
@@ -420,6 +424,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         placeholder="John Doe"
                         value={formData.name}
                         onChange={set('name')}
+                        onMouseDown={(e) => e.stopPropagation()}
                         data-testid="register-name-input"
                         className={inputBase}
                       />
@@ -431,6 +436,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         placeholder="+91 98765 43210"
                         value={formData.phone}
                         onChange={set('phone')}
+                        onMouseDown={(e) => e.stopPropagation()}
                         className={inputBase}
                       />
                     </Field>
@@ -445,6 +451,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={set('email')}
+                    onMouseDown={(e) => e.stopPropagation()}
                     data-testid="auth-email-input"
                     className={inputBase}
                   />
@@ -472,16 +479,18 @@ const AuthModal = ({ isOpen, onClose }) => {
                         placeholder="Re-enter your password"
                         value={formData.confirmPassword}
                         onChange={set('confirmPassword')}
+                        onMouseDown={(e) => e.stopPropagation()}
                         className={inputBase}
                       />
-                      {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                        <p className="text-xs text-red-500">Passwords do not match.</p>
-                      )}
+                      {formData.confirmPassword &&
+                        formData.password !== formData.confirmPassword && (
+                          <p className="text-xs text-red-500">Passwords do not match.</p>
+                        )}
                     </div>
                   </Field>
                 )}
 
-                {/* Forgot password link */}
+                {/* Forgot Password Link */}
                 {mode === 'login' && (
                   <div className="text-right">
                     <button
@@ -498,7 +507,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                 <SubmitButton loading={loading} label={cfg.btn} />
               </form>
 
-              {/* Toggle / Back */}
+              {/* ── Toggle / Back ── */}
               <Divider label="or" />
 
               <div className="text-center">
@@ -518,9 +527,13 @@ const AuthModal = ({ isOpen, onClose }) => {
                     className="text-sm text-khajur-dark/60 hover:text-khajur-gold transition-colors"
                   >
                     {mode === 'login' ? (
-                      <>Don't have an account? <span className="font-semibold text-khajur-primary">Register</span></>
+                      <>Don't have an account?{' '}
+                        <span className="font-semibold text-khajur-primary">Register</span>
+                      </>
                     ) : (
-                      <>Already have an account? <span className="font-semibold text-khajur-primary">Sign In</span></>
+                      <>Already have an account?{' '}
+                        <span className="font-semibold text-khajur-primary">Sign In</span>
+                      </>
                     )}
                   </button>
                 )}
