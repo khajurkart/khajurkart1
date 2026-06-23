@@ -5,8 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import AuthModal from './AuthModal';
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
 const NAV_LINKS = [
   { label: 'Home',        to: '/'            },
   { label: 'About Us',    to: '/about'       },
@@ -14,10 +12,6 @@ const NAV_LINKS = [
   { label: 'Bulk Orders', to: '/bulk-orders' },
   { label: 'Contact Us',  to: '/contact'     },
 ];
-
-// ─── Sub-Components ────────────────────────────────────────────────────────────
-
-// ── Desktop Nav Link ───────────────────────────────────────────────────────────
 
 const NavLink = ({ to, label, isActive, onClick, testId }) => (
   <Link
@@ -40,29 +34,27 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
   </Link>
 );
 
-// ── Search Form ────────────────────────────────────────────────────────────────
-
 const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
   <form onSubmit={onSubmit} className={className}>
     <div className="relative">
       <input
         type="text"
-        placeholder="Search products…"
+        placeholder="Search…"
         value={value}
         onChange={onChange}
         data-testid="search-input"
         className="
-          w-40 bg-white/5 border border-khajur-gold/20
+          w-32 bg-white/5 border border-khajur-gold/20
           hover:border-khajur-gold/40 focus:border-khajur-gold
           text-sm text-khajur-cream placeholder:text-khajur-cream/30
-          pl-4 pr-10 py-2 rounded-sm
+          pl-3 pr-8 py-2 rounded-sm
           focus:outline-none transition-colors duration-200
         "
       />
       <button
         type="submit"
         data-testid="search-button"
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-khajur-cream/40 hover:text-khajur-gold transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-khajur-cream/40 hover:text-khajur-gold transition-colors"
         aria-label="Search"
       >
         <Search className="w-4 h-4" />
@@ -70,8 +62,6 @@ const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
     </div>
   </form>
 );
-
-// ── Cart Button ────────────────────────────────────────────────────────────────
 
 const CartButton = ({ count }) => (
   <Link
@@ -97,8 +87,6 @@ const CartButton = ({ count }) => (
   </Link>
 );
 
-// ─── Main Component ────────────────────────────────────────────────────────────
-
 const Navbar = () => {
   const { user }      = useAuth();
   const { cartCount } = useCart();
@@ -111,15 +99,11 @@ const Navbar = () => {
   const [query, setQuery]       = useState('');
   const [scrolled, setScrolled] = useState(false);
 
-  // ── Scroll shadow ──────────────────────────────────────────────────────────
-
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handler, { passive: true });
     return () => window.removeEventListener('scroll', handler);
   }, []);
-
-  // ── Close menu on outside click ────────────────────────────────────────────
 
   useEffect(() => {
     const handler = (e) => {
@@ -131,13 +115,9 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
-  // ── Close menu on route change ─────────────────────────────────────────────
-
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
-
-  // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -158,12 +138,9 @@ const Navbar = () => {
     return location.pathname.startsWith(to);
   };
 
-  // ✅ My Orders only added when logged in
   const links = user
     ? [...NAV_LINKS, { label: 'My Orders', to: '/my-orders' }]
     : NAV_LINKS;
-
-  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -177,42 +154,27 @@ const Navbar = () => {
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12">
 
-          {/*
-            ✅ Layout strategy:
-            - Logo: absolute left
-            - Nav links: absolute center (always truly centered)
-            - Actions: absolute right
-            This way nav links are ALWAYS centered regardless of how many links.
-            When My Orders is added, links stay centered and just spread a bit.
-          */}
-          <div className="hidden md:flex items-center h-20 relative">
+          {/* ── Desktop Layout ── */}
+          <div className="hidden md:flex items-center justify-between h-20 gap-4">
 
-            {/* ── Logo (absolute left) ── */}
-            <div className="flex items-center flex-shrink-0">
-              <Link
-                to="/"
-                data-testid="logo-link"
-                className="flex items-center gap-2 group"
-              >
-                <img
-                  src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
-                  alt="KhajurKart"
-                  className="h-12 w-auto"
-                />
-                <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
-                  KhajurKart
-                </span>
-              </Link>
-            </div>
+            {/* ── Logo ── */}
+            <Link
+              to="/"
+              data-testid="logo-link"
+              className="flex items-center gap-2 group flex-shrink-0"
+            >
+              <img
+                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
+                alt="KhajurKart"
+                className="h-12 w-auto"
+              />
+              <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
+                KhajurKart
+              </span>
+            </Link>
 
-            {/*
-              ✅ Nav links — absolutely centered in the full navbar width.
-              Uses absolute + left-1/2 + -translate-x-1/2 trick.
-              This means it's centered relative to the full navbar,
-              NOT relative to the space between logo and actions.
-              When My Orders appears, it shifts left naturally as links grow.
-            */}
-            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-7">
+            {/* ✅ Nav links — flex-1 so it takes available space and centers naturally */}
+            <div className="flex items-center justify-center flex-1 gap-5">
               {links.map((link) => (
                 <NavLink
                   key={link.to}
@@ -224,8 +186,8 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* ── Actions (pushed to right with ml-auto) ── */}
-            <div className="flex items-center gap-5 ml-auto flex-shrink-0">
+            {/* ── Actions ── */}
+            <div className="flex items-center gap-4 flex-shrink-0">
               <SearchForm
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -257,7 +219,6 @@ const Navbar = () => {
           {/* ── Mobile Layout ── */}
           <div className="flex md:hidden items-center justify-between h-20">
 
-            {/* Mobile Logo */}
             <Link
               to="/"
               data-testid="logo-link"
@@ -273,7 +234,6 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {/* Mobile Actions */}
             <div className="flex items-center gap-4">
               <button
                 onClick={handleAuthClick}
@@ -340,7 +300,6 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* ── Auth Modal ── */}
       <AuthModal
         isOpen={authOpen}
         onClose={() => setAuthOpen(false)}
