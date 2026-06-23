@@ -45,7 +45,6 @@ function App() {
             <CartProvider>
                 <BrowserRouter>
                     <div className="min-h-screen flex flex-col">
-                        <ScrollToTop />
                         <Navbar />
                         <main className="flex-grow">
                             <Routes>
@@ -79,6 +78,7 @@ function App() {
                         </main>
                         <Footer />
                         <FloatingButtons />
+                        <ScrollToTop />
                         <Toaster position="top-right" richColors />
                     </div>
                 </BrowserRouter>
