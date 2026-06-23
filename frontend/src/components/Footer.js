@@ -57,7 +57,7 @@ const SOCIAL_LINKS = [
       <img
         src="https://cdn-icons-png.flaticon.com/512/145/145808.png"
         alt="Pinterest"
-        className="w-4 h-4 brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity"
+        className="w-4 h-4"
       />
     ),
   },
