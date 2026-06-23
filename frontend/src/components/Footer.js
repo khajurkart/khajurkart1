@@ -2,122 +2,217 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
 
-const Footer = () => {
-    return (
-        <footer className="bg-khajur-primary text-khajur-cream" data-testid="main-footer">
-            <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-                    {/* Brand */}
-                    <div>
-                        <Link to="/" className="flex items-center space-x-2 mb-4">
-                            <img
-                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
-                                alt="KhajurKart Logo"
-                                className="h-14 w-auto -mr-1"
-                            />
-                            <span className="font-serif text-2xl font-bold text-khajur-gold">
-                                KhajurKart
-                            </span>
-                        </Link>
-                        <p className="text-sm text-khajur-cream/70 leading-relaxed">
-                            Premium destination for the world's finest dates, dry fruits, and spices.
-                        </p>
-                    </div>
+// ─── Constants ─────────────────────────────────────────────────────────────────
 
-                    {/* Quick Links */}
-                    <div>
-                        <h3 className="font-serif text-lg font-medium text-khajur-gold mb-4">Quick Links</h3>
-                        <ul className="space-y-2">
-                            <li><Link to="/" className="text-sm hover:text-khajur-gold transition-colors">Home</Link></li>
-                            <li><Link to="/about" className="text-sm hover:text-khajur-gold transition-colors">About Us</Link></li>
-                            <li><Link to="/products" className="text-sm hover:text-khajur-gold transition-colors">Products</Link></li>
-                            <li><Link to="/bulk-orders" className="text-sm hover:text-khajur-gold transition-colors">Bulk Orders</Link></li>
-                            <li><Link to="/contact" className="text-sm hover:text-khajur-gold transition-colors">Contact Us</Link></li>
-                            <li><Link to="/returns" className="text-sm hover:text-khajur-gold transition-colors">Returns & Exchange</Link></li>
-                            <li><Link to="/faq">FAQ</Link></li>
-                        </ul>
-                    </div>
+const QUICK_LINKS = [
+  { label: 'Home',               to: '/'          },
+  { label: 'About Us',           to: '/about'     },
+  { label: 'Products',           to: '/products'  },
+  { label: 'Bulk Orders',        to: '/bulk-orders' },
+  { label: 'Contact Us',         to: '/contact'   },
+  { label: 'Returns & Exchange', to: '/returns'   },
+  { label: 'FAQ',                to: '/faq'       },
+];
 
-                    {/* Categories */}
-                    <div>
-                        <h3 className="font-serif text-lg font-medium text-khajur-gold mb-4">Categories</h3>
-                        <ul className="space-y-2">
-                            <li><Link to="/products?category=dates" className="text-sm hover:text-khajur-gold transition-colors">Dates</Link></li>
-                            <li><Link to="/products?category=nuts" className="text-sm hover:text-khajur-gold transition-colors">Nuts</Link></li>
-                            <li><Link to="/products?category=dry-fruits" className="text-sm hover:text-khajur-gold transition-colors">Dry Fruits</Link></li>
-                            <li><Link to="/products?category=spices" className="text-sm hover:text-khajur-gold transition-colors">Spices</Link></li>
-                        </ul>
-                    </div>
+const CATEGORIES = [
+  { label: 'Dates',      to: '/products?category=dates'      },
+  { label: 'Nuts',       to: '/products?category=nuts'       },
+  { label: 'Dry Fruits', to: '/products?category=dry-fruits' },
+  { label: 'Spices',     to: '/products?category=spices'     },
+];
 
-                    {/* Contact Info */}
-                    <div>
-                        <h3 className="font-serif text-lg font-medium text-khajur-gold mb-4">Contact Us</h3>
-                        <ul className="space-y-3">
-                            <li className="flex items-start space-x-3">
-                                <Phone className="w-5 h-5 text-khajur-gold flex-shrink-0 mt-0.5" />
-                                <span className="text-sm">7981002137</span>
-                            </li>
-                            <li className="flex items-start space-x-3">
-                                <Mail className="w-5 h-5 text-khajur-gold flex-shrink-0 mt-0.5" />
-                                <span className="text-sm">khajurkart@gmail.com</span>
-                            </li>
-                            <li className="flex items-start space-x-3">
-                                <MapPin className="w-5 h-5 text-khajur-gold flex-shrink-0 mt-0.5" />
-                                <span className="text-sm">
-                                    10-3-313/a, AR Raheem Residency<br />
-                                    beside govt IASE college,<br />
-                                    Potti Sriramulu Nagar,<br />
-                                    Vijaya Nagar Colony,<br />
-                                    Hyderabad, Telangana 500057
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+const CONTACT_INFO = [
+  {
+    icon: Phone,
+    content: '+91 79810 02137',
+    href: 'tel:+917981002137',
+  },
+  {
+    icon: Mail,
+    content: 'khajurkart@gmail.com',
+    href: 'mailto:khajurkart@gmail.com',
+  },
+  {
+    icon: MapPin,
+    content: '10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057',
+    href: null,
+  },
+];
 
-                {/* Bottom Bar */}
-                <div className="border-t border-khajur-gold/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-                    <p className="text-sm text-khajur-cream/70 mb-4 md:mb-0">
-                        © 2026 KhajurKart. All rights reserved.
-                    </p>
-                    <div className="flex items-center space-x-5">
+const SOCIAL_LINKS = [
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com/profile.php?id=61572011713195',
+    icon: <Facebook className="w-4 h-4" />,
+  },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/_khajurkart_/',
+    icon: <Instagram className="w-4 h-4" />,
+  },
+  {
+    label: 'Pinterest',
+    href: 'https://in.pinterest.com/khajurkart/',
+    icon: (
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/145/145808.png"
+        alt="Pinterest"
+        className="w-4 h-4 brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity"
+      />
+    ),
+  },
+];
 
-                        <a
-                            href="https://www.facebook.com/profile.php?id=61572011713195"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
-                        >
-                            <Facebook className="w-5 h-5 text-khajur-cream hover:text-khajur-gold" />
-                        </a>
+// ─── Sub-Components ────────────────────────────────────────────────────────────
 
-                        <a
-                            href="https://www.instagram.com/_khajurkart_/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
-                        >
-                            <Instagram className="w-5 h-5 text-khajur-cream hover:text-khajur-gold" />
-                        </a>
+// ── Column Heading ─────────────────────────────────────────────────────────────
 
-                        <a
-                            href="https://in.pinterest.com/khajurkart/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-full border border-khajur-gold/30 hover:border-khajur-gold hover:bg-khajur-gold/10 transition-all hover:scale-110"
-                        >
-                            <img
-                                src="https://cdn-icons-png.flaticon.com/512/145/145808.png"
-                                alt="Pinterest"
-                                className="w-5 h-5"
-                            />
-                        </a>
+const ColHeading = ({ children }) => (
+  <h3 className="font-serif text-base font-medium text-khajur-gold mb-5 uppercase tracking-widest">
+    {children}
+  </h3>
+);
 
-                    </div>
-                </div>
-            </div>
-        </footer>
-    );
-};
+// ── Nav Link ───────────────────────────────────────────────────────────────────
+
+const FooterLink = ({ to, children }) => (
+  <li>
+    <Link
+      to={to}
+      className="
+        text-sm text-khajur-cream/60 hover:text-khajur-gold
+        transition-colors duration-200
+      "
+    >
+      {children}
+    </Link>
+  </li>
+);
+
+// ── Contact Row ────────────────────────────────────────────────────────────────
+
+const ContactRow = ({ icon: Icon, content, href }) => (
+  <li className="flex items-start gap-3">
+    <div className="w-8 h-8 flex items-center justify-center bg-khajur-gold/10 rounded-sm flex-shrink-0 mt-0.5">
+      <Icon className="w-3.5 h-3.5 text-khajur-gold" />
+    </div>
+    {href ? (
+      <a
+        href={href}
+        className="text-sm text-khajur-cream/60 hover:text-khajur-gold transition-colors duration-200 leading-relaxed"
+      >
+        {content}
+      </a>
+    ) : (
+      <p className="text-sm text-khajur-cream/60 leading-relaxed">{content}</p>
+    )}
+  </li>
+);
+
+// ── Social Button ──────────────────────────────────────────────────────────────
+
+const SocialButton = ({ href, label, icon }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={label}
+    className="
+      group w-9 h-9 flex items-center justify-center
+      border border-khajur-gold/20 hover:border-khajur-gold
+      bg-transparent hover:bg-khajur-gold/10
+      text-khajur-cream/60 hover:text-khajur-gold
+      rounded-sm transition-all duration-300
+    "
+  >
+    {icon}
+  </a>
+);
+
+// ─── Main Component ────────────────────────────────────────────────────────────
+
+const Footer = () => (
+  <footer
+    className="bg-khajur-primary text-khajur-cream"
+    data-testid="main-footer"
+  >
+    <div className="max-w-7xl mx-auto px-6 md:px-12">
+
+      {/* ── Main Grid ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 py-16 border-b border-khajur-gold/10">
+
+        {/* Brand */}
+        <div className="lg:col-span-1">
+          <Link to="/" className="flex items-center gap-2 mb-5 group">
+            <img
+              src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
+              alt="KhajurKart Logo"
+              className="h-12 w-auto"
+            />
+            <span className="font-serif text-xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
+              KhajurKart
+            </span>
+          </Link>
+          <p className="text-sm text-khajur-cream/50 leading-relaxed mb-6">
+            Premium destination for the world's finest dates, dry fruits, and spices — delivered to your door.
+          </p>
+
+          {/* Social */}
+          <div className="flex items-center gap-3">
+            {SOCIAL_LINKS.map((s) => (
+              <SocialButton key={s.label} {...s} />
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Links */}
+        <div>
+          <ColHeading>Quick Links</ColHeading>
+          <ul className="space-y-3">
+            {QUICK_LINKS.map((link) => (
+              <FooterLink key={link.to} to={link.to}>
+                {link.label}
+              </FooterLink>
+            ))}
+          </ul>
+        </div>
+
+        {/* Categories */}
+        <div>
+          <ColHeading>Categories</ColHeading>
+          <ul className="space-y-3">
+            {CATEGORIES.map((cat) => (
+              <FooterLink key={cat.to} to={cat.to}>
+                {cat.label}
+              </FooterLink>
+            ))}
+          </ul>
+        </div>
+
+        {/* Contact */}
+        <div>
+          <ColHeading>Contact Us</ColHeading>
+          <ul className="space-y-4">
+            {CONTACT_INFO.map(({ icon, content, href }) => (
+              <ContactRow key={content} icon={icon} content={content} href={href} />
+            ))}
+          </ul>
+        </div>
+
+      </div>
+
+      {/* ── Bottom Bar ── */}
+      <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-xs text-khajur-cream/40 tracking-wide">
+          © {new Date().getFullYear()} KhajurKart. All rights reserved.
+        </p>
+        <p className="text-xs text-khajur-cream/30">
+          Crafted with care for premium quality.
+        </p>
+      </div>
+
+    </div>
+  </footer>
+);
 
 export default Footer;
