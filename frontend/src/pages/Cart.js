@@ -2,62 +2,82 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import {
+  Trash2,
+  Plus,
+  Minus,
+  ShoppingBag,
+  Truck,
+  ArrowRight,
+  Loader2,
+  ShoppingCart,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Sub-Components ────────────────────────────────────────────────────────────
 
-const LoadingState = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <p className="text-khajur-dark/60 animate-pulse">Loading cart...</p>
+// ── Loading ────────────────────────────────────────────────────────────────────
+
+const LoadingScreen = () => (
+  <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-3 text-khajur-dark/50">
+    <Loader2 className="w-8 h-8 animate-spin" />
+    <p className="text-sm">Loading your cart…</p>
   </div>
 );
 
-const EmptyCartState = () => (
+// ── Empty State ────────────────────────────────────────────────────────────────
+
+const EmptyCart = () => (
   <div
-    className="min-h-screen flex flex-col items-center justify-center py-20 gap-4"
+    className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 px-6 text-center"
     data-testid="empty-cart"
   >
-    <ShoppingBag className="w-24 h-24 text-khajur-muted" />
-
-    <h2 className="font-serif text-3xl font-medium text-khajur-primary">
-      Your cart is empty
-    </h2>
-
-    <p className="text-khajur-dark/60">
-      Add some products to get started
-    </p>
-
+    <div className="w-20 h-20 flex items-center justify-center bg-khajur-cream rounded-full">
+      <ShoppingCart className="w-9 h-9 text-khajur-dark/25" />
+    </div>
+    <div>
+      <p className="font-serif text-3xl font-medium text-khajur-primary mb-2">
+        Your cart is empty
+      </p>
+      <p className="text-sm text-khajur-dark/50 max-w-xs">
+        Looks like you haven't added anything yet. Explore our premium collection.
+      </p>
+    </div>
     <Link
       to="/products"
-      className="mt-4 inline-flex items-center gap-2 bg-khajur-primary text-khajur-cream
-                 px-8 py-3 rounded-sm uppercase tracking-widest text-xs font-bold
-                 border border-transparent hover:bg-khajur-primary/90
-                 hover:border-khajur-gold transition-all"
       data-testid="continue-shopping-empty"
+      className="
+        flex items-center gap-2 bg-khajur-gold hover:bg-khajur-gold/90
+        hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
+        text-khajur-primary px-8 py-3 rounded-sm
+        uppercase tracking-widest text-xs font-bold transition-all duration-300
+      "
     >
-      Continue Shopping
-      <ArrowRight className="w-4 h-4" />
+      <ShoppingBag className="w-4 h-4" />
+      Browse Products
     </Link>
   </div>
 );
 
-// ─── Cart Item ─────────────────────────────────────────────────────────────────
+// ── Quantity Control ───────────────────────────────────────────────────────────
 
 const QuantityControl = ({ productId, quantity, onIncrease, onDecrease }) => (
   <div className="flex items-center gap-3">
     <button
       onClick={onDecrease}
-      aria-label="Decrease quantity"
-      className="w-8 h-8 flex items-center justify-center rounded-sm
-                 bg-khajur-cream text-khajur-primary hover:bg-khajur-accent
-                 transition-colors"
       data-testid={`decrease-cart-quantity-${productId}`}
+      className="
+        w-8 h-8 flex items-center justify-center
+        bg-khajur-cream hover:bg-khajur-gold/20
+        text-khajur-primary rounded-sm transition-colors duration-200
+      "
+      aria-label="Decrease quantity"
     >
-      <Minus className="w-4 h-4" />
+      <Minus className="w-3.5 h-3.5" />
     </button>
 
     <span
-      className="w-8 text-center text-lg font-medium"
+      className="w-8 text-center text-sm font-semibold text-khajur-primary"
       data-testid={`cart-item-quantity-${productId}`}
     >
       {quantity}
@@ -65,203 +85,255 @@ const QuantityControl = ({ productId, quantity, onIncrease, onDecrease }) => (
 
     <button
       onClick={onIncrease}
-      aria-label="Increase quantity"
-      className="w-8 h-8 flex items-center justify-center rounded-sm
-                 bg-khajur-cream text-khajur-primary hover:bg-khajur-accent
-                 transition-colors"
       data-testid={`increase-cart-quantity-${productId}`}
+      className="
+        w-8 h-8 flex items-center justify-center
+        bg-khajur-cream hover:bg-khajur-gold/20
+        text-khajur-primary rounded-sm transition-colors duration-200
+      "
+      aria-label="Increase quantity"
     >
-      <Plus className="w-4 h-4" />
+      <Plus className="w-3.5 h-3.5" />
     </button>
   </div>
 );
 
-const CartItem = ({ item, onQuantityChange, onRemove }) => {
-  const { product, product_id, quantity, size } = item;
+// ── Cart Item Card ─────────────────────────────────────────────────────────────
 
+const CartItem = ({ item, onQuantityChange, onRemove }) => {
+  const product = item.product;
   if (!product || product.price === undefined) return null;
 
+  const itemTotal = (product.price * item.quantity).toFixed(2);
+
   return (
-    <article
-      className="bg-white border border-khajur-border p-6
-                 flex flex-col sm:flex-row gap-6 transition-shadow hover:shadow-sm"
-      data-testid={`cart-item-${product_id}`}
+    <div
+      className="
+        bg-white border border-khajur-border
+        hover:border-khajur-gold/40 hover:shadow-[0_4px_20px_rgba(198,169,98,0.08)]
+        rounded-sm transition-all duration-300
+        flex flex-col sm:flex-row gap-0
+      "
+      data-testid={`cart-item-${item.product_id}`}
     >
       {/* Product Image */}
-      <img
-        src={product.image}
-        alt={product.name}
-        className="w-full sm:w-32 h-32 object-cover rounded-sm"
-      />
+      <Link
+        to={`/products/${product.id}?category=${product.category}`}
+        className="block flex-shrink-0"
+      >
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full sm:w-36 h-44 sm:h-full object-cover rounded-sm"
+        />
+      </Link>
 
       {/* Product Info */}
-      <div className="flex-1 min-w-0">
-        <Link to={`/products/${product.id}?category=${product.category}`}>
-          <h3
-            className="font-serif text-xl font-medium text-khajur-primary
-                       hover:text-khajur-gold transition-colors mb-1 truncate"
-          >
-            {product.name}
-          </h3>
-        </Link>
+      <div className="flex-1 flex flex-col justify-between p-6 gap-4">
 
-        {size && (
-          <p className="text-sm text-khajur-muted mb-2">Size: {size}</p>
-        )}
-
-        <p
-          className="font-serif text-xl text-khajur-gold font-bold"
-          data-testid={`cart-item-price-${product_id}`}
-        >
-          ₹{product.price.toFixed(2)}
-        </p>
-      </div>
-
-      {/* Controls */}
-      <div className="flex sm:flex-col items-center sm:items-end justify-between gap-4">
-        <QuantityControl
-          productId={product_id}
-          quantity={quantity}
-          onIncrease={() => onQuantityChange(product_id, quantity + 1)}
-          onDecrease={() => onQuantityChange(product_id, quantity - 1)}
-        />
-
-        <button
-          onClick={() => onRemove(product_id)}
-          aria-label={`Remove ${product.name} from cart`}
-          className="text-red-400 hover:text-red-600 transition-colors"
-          data-testid={`remove-cart-item-${product_id}`}
-        >
-          <Trash2 className="w-5 h-5" />
-        </button>
-      </div>
-    </article>
-  );
-};
-
-// ─── Order Summary ─────────────────────────────────────────────────────────────
-
-const OrderSummary = ({ cartTotal, onCheckout }) => {
-  const summaryRows = [
-    {
-      label: 'Subtotal',
-      value: `₹${(cartTotal || 0).toFixed(2)}`,
-      testId: 'cart-subtotal',
-    },
-    {
-      label: 'Delivery Charges',
-      value: 'FREE',
-      valueClassName: 'text-green-600',
-    },
-  ];
-
-  return (
-    <aside
-      className="bg-white border border-khajur-border p-8 sticky top-24 rounded-sm"
-      data-testid="order-summary"
-    >
-      <h2 className="font-serif text-2xl font-medium text-khajur-primary mb-6">
-        Order Summary
-      </h2>
-
-      {/* Line Items */}
-      <ul className="space-y-4 mb-6">
-        {summaryRows.map(({ label, value, valueClassName, testId }) => (
-          <li key={label} className="flex justify-between text-sm">
-            <span className="text-khajur-dark/70">{label}</span>
-            <span
-              className={`font-medium ${valueClassName ?? ''}`}
-              data-testid={testId}
+        {/* Top Row */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <Link to={`/products/${product.id}?category=${product.category}`}>
+              <h3 className="font-serif text-lg font-medium text-khajur-primary hover:text-khajur-gold transition-colors truncate">
+                {product.name}
+              </h3>
+            </Link>
+            {item.size && (
+              <p className="text-xs text-khajur-dark/50 mt-1 uppercase tracking-wide">
+                Weight: {item.size}
+              </p>
+            )}
+            <p
+              className="text-base font-semibold text-khajur-gold mt-2"
+              data-testid={`cart-item-price-${item.product_id}`}
             >
-              {value}
-            </span>
-          </li>
-        ))}
+              ₹{(product.price || 0).toFixed(2)}
+              <span className="text-xs text-khajur-dark/40 font-normal ml-1">/ unit</span>
+            </p>
+          </div>
 
-        {/* Total */}
-        <li className="border-t border-khajur-border pt-4 flex justify-between items-baseline">
-          <span className="font-serif font-medium text-khajur-primary text-lg">
-            Total
-          </span>
-          <span
-            className="font-serif text-2xl font-bold text-khajur-gold"
-            data-testid="cart-total"
+          {/* Remove Button */}
+          <button
+            onClick={() => onRemove(item.product_id)}
+            data-testid={`remove-cart-item-${item.product_id}`}
+            className="text-red-300 hover:text-red-500 transition-colors flex-shrink-0"
+            aria-label="Remove item"
           >
-            ₹{(cartTotal || 0).toFixed(2)}
-          </span>
-        </li>
-      </ul>
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
 
-      {/* Actions */}
-      <div className="space-y-3">
-        <button
-          onClick={onCheckout}
-          className="w-full flex items-center justify-center gap-2
-                     bg-khajur-gold text-khajur-primary rounded-sm
-                     px-8 py-4 uppercase tracking-widest text-xs font-bold
-                     hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)]
-                     transition-all"
-          data-testid="proceed-to-checkout"
-        >
-          Proceed to Checkout
-          <ArrowRight className="w-4 h-4" />
-        </button>
-
-        <Link
-          to="/products"
-          className="block text-center text-sm text-khajur-primary
-                     hover:text-khajur-gold transition-colors"
-          data-testid="continue-shopping"
-        >
-          Continue Shopping
-        </Link>
+        {/* Bottom Row */}
+        <div className="flex items-center justify-between gap-4">
+          <QuantityControl
+            productId={item.product_id}
+            quantity={item.quantity}
+            onIncrease={() => onQuantityChange(item.product_id, item.quantity + 1)}
+            onDecrease={() => onQuantityChange(item.product_id, item.quantity - 1)}
+          />
+          <p className="text-sm font-bold text-khajur-primary">
+            ₹{itemTotal}
+          </p>
+        </div>
       </div>
-    </aside>
+    </div>
   );
 };
 
-// ─── Page ──────────────────────────────────────────────────────────────────────
+// ── Order Summary Panel ────────────────────────────────────────────────────────
+
+const OrderSummaryPanel = ({ cart, cartTotal, onCheckout }) => (
+  <div
+    className="bg-white border border-khajur-border rounded-sm sticky top-28"
+    data-testid="order-summary"
+  >
+    {/* Header */}
+    <div className="flex items-center gap-3 px-7 py-5 border-b border-khajur-border">
+      <ShoppingBag className="w-4 h-4 text-khajur-gold" />
+      <h2 className="font-serif text-lg font-medium text-khajur-primary">Order Summary</h2>
+    </div>
+
+    {/* Item Breakdown */}
+    <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
+      {cart.items.map((item, i) => {
+        const product = item.product;
+        if (!product) return null;
+        return (
+          <div key={i} className="flex justify-between gap-3 text-sm">
+            <span className="text-khajur-dark/70 flex-1 truncate">
+              {product.name}
+              {item.size ? ` (${item.size})` : ''}
+              {' '}× {item.quantity}
+            </span>
+            <span className="font-medium text-khajur-primary whitespace-nowrap">
+              ₹{(product.price * item.quantity).toFixed(2)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+
+    {/* Totals */}
+    <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
+      <div className="flex justify-between text-sm">
+        <span className="text-khajur-dark/60">Subtotal</span>
+        <span
+          className="font-medium text-khajur-primary"
+          data-testid="cart-subtotal"
+        >
+          ₹{(cartTotal || 0).toFixed(2)}
+        </span>
+      </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-khajur-dark/60">Delivery</span>
+        <span className="font-semibold text-green-600 flex items-center gap-1.5">
+          <Truck className="w-3.5 h-3.5" /> Free
+        </span>
+      </div>
+    </div>
+
+    {/* Grand Total */}
+    <div className="px-7 py-5 border-b border-khajur-border">
+      <div className="flex justify-between items-center">
+        <span className="font-serif text-base font-medium text-khajur-primary">Total</span>
+        <span
+          className="font-serif text-2xl font-bold text-khajur-gold"
+          data-testid="cart-total"
+        >
+          ₹{(cartTotal || 0).toFixed(2)}
+        </span>
+      </div>
+    </div>
+
+    {/* Actions */}
+    <div className="px-7 py-6 space-y-4">
+      <button
+        onClick={onCheckout}
+        data-testid="proceed-to-checkout"
+        className="
+          w-full flex items-center justify-center gap-2
+          bg-khajur-gold hover:bg-khajur-gold/90
+          hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
+          text-khajur-primary rounded-sm px-8 py-4
+          uppercase tracking-widest text-xs font-bold
+          transition-all duration-300
+        "
+      >
+        Proceed to Checkout
+        <ArrowRight className="w-4 h-4" />
+      </button>
+
+      <Link
+        to="/products"
+        data-testid="continue-shopping"
+        className="
+          block text-center text-xs uppercase tracking-widest font-medium
+          text-khajur-dark/40 hover:text-khajur-gold transition-colors
+        "
+      >
+        Continue Shopping
+      </Link>
+    </div>
+  </div>
+);
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 const Cart = () => {
   const { cart, updateCartItem, removeFromCart, cartTotal, loading } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // ── Handlers ─────────────────────────────────────────────────────────────
+
   const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity < 1) return;
-    updateCartItem(productId, newQuantity);
+    if (newQuantity > 0) {
+      updateCartItem(productId, newQuantity);
+    }
   };
 
   const handleCheckout = () => {
     if (!user) {
-      alert('Please login to checkout');
+      toast.error('Please sign in to proceed to checkout.');
       return;
     }
     navigate('/checkout');
   };
 
-  if (loading) return <LoadingState />;
-  if (!cart.items?.length) return <EmptyCartState />;
+  // ── Guards ────────────────────────────────────────────────────────────────
+
+  if (loading) return <LoadingScreen />;
+  if (!cart.items || cart.items.length === 0) return <EmptyCart />;
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen py-20" data-testid="cart-page">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+    <div className="min-h-screen bg-white py-16 md:py-24" data-testid="cart-page">
+      <div className="max-w-6xl mx-auto px-6 md:px-12">
 
-        {/* Page Header */}
-        <header className="mb-12">
-          <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary">
-            Shopping Cart
-          </h1>
-          <p className="mt-2 text-khajur-dark/50 text-sm">
-            {cart.items.length} {cart.items.length === 1 ? 'item' : 'items'}
+        {/* ── Page Header ── */}
+        <div className="border-b border-khajur-gold/20 pb-8 mb-12">
+          <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
+            Review
           </p>
-        </header>
+          <div className="flex items-end justify-between gap-4">
+            <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">
+              Shopping Cart
+            </h1>
+            <p className="text-sm text-khajur-dark/50 mb-1">
+              <span className="font-semibold text-khajur-primary">
+                {cart.items.reduce((sum, i) => sum + i.quantity, 0)}
+              </span>{' '}
+              item{cart.items.length > 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-          {/* Cart Items */}
-          <section className="lg:col-span-2 space-y-4">
+          {/* ── Cart Items ── */}
+          <div className="lg:col-span-2 space-y-5">
             {cart.items.map((item) => (
               <CartItem
                 key={item.product_id}
@@ -270,19 +342,20 @@ const Cart = () => {
                 onRemove={removeFromCart}
               />
             ))}
-          </section>
+          </div>
 
-          {/* Order Summary */}
-          <section className="lg:col-span-1">
-            <OrderSummary
+          {/* ── Order Summary ── */}
+          <div className="lg:col-span-1">
+            <OrderSummaryPanel
+              cart={cart}
               cartTotal={cartTotal}
               onCheckout={handleCheckout}
             />
-          </section>
+          </div>
 
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 
