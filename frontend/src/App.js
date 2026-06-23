@@ -35,6 +35,9 @@ import FAQ from "./pages/FAQ";
 import ThankYou from './pages/ThankYou';
 import NotFound from './pages/NotFound';
 import ScrollToTop from "./components/ScrollToTop";
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
 
 function App() {
     return (
