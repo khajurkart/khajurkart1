@@ -44,7 +44,7 @@ const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
                 onChange={onChange}
                 data-testid="search-input"
                 className="
-          w-36 bg-white/5 border border-khajur-gold/20
+          w-40 bg-white/5 border border-khajur-gold/20
           hover:border-khajur-gold/40 focus:border-khajur-gold
           text-sm text-khajur-cream placeholder:text-khajur-cream/30
           pl-3 pr-8 py-2 rounded-sm
