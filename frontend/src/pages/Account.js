@@ -84,18 +84,18 @@ const QuickLinkCard = ({ icon: Icon, label, description, to, testId }) => (
     data-testid={testId}
     className="
       group flex flex-col gap-6 bg-white border border-khajur-border
-      hover:border-khajur-gold/60 hover:shadow-[0_4px_24px_rgba(198,169,98,0.15)]
+      hover:border-khajur-gold/60 hover:shadow-[0_4px_20px_rgba(198,169,98,0.12)]
       p-8 md:p-10 rounded-sm transition-all duration-300
     "
   >
-    <div className="w-14 h-14 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm">
-      <Icon className="w-6 h-6 text-khajur-primary" />
+    <div className="w-16 h-16 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm">
+      <Icon className="w-8 h-8 text-khajur-primary" />
     </div>
     <div>
-      <p className="text-sm uppercase tracking-widest font-medium text-khajur-dark/50 mb-1">
+      <p className="text-sm uppercase tracking-widest font-semibold text-khajur-dark/50 mb-1">
         {label}
       </p>
-      <p className="text-base text-khajur-primary font-medium leading-relaxed">
+      <p className="text-base text-khajur-primary font-medium leading-snug">
         {description}
       </p>
     </div>
@@ -110,8 +110,8 @@ const MenuRow = ({ icon: Icon, label, description, iconClass, to, action, testId
       hover:border-khajur-gold/60 hover:shadow-[0_4px_20px_rgba(198,169,98,0.08)]
       px-8 py-6 rounded-sm transition-all duration-300 cursor-pointer
     ">
-      <div className="w-12 h-12 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm flex-shrink-0">
-        <Icon className={`w-5 h-5 ${iconClass}`} />
+      <div className="w-14 h-14 flex items-center justify-center bg-khajur-cream group-hover:bg-khajur-gold/10 transition-colors duration-300 rounded-sm flex-shrink-0">
+        <Icon className={`w-6 h-6 ${iconClass}`} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-base font-semibold text-khajur-primary uppercase tracking-wider">
@@ -133,8 +133,8 @@ const MenuRow = ({ icon: Icon, label, description, iconClass, to, action, testId
 const BottomNav = () => {
   const NAV = [
     { icon: Home,        label: 'Home',       to: '/',         testId: 'bottom-nav-home'    },
-    { icon: ShoppingBag, label: 'Shop',        to: '/products', testId: 'bottom-nav-shop'    },
-    { icon: User,        label: 'My Account',  to: '/account',  testId: 'bottom-nav-account', active: true },
+    { icon: ShoppingBag, label: 'Shop',       to: '/products', testId: 'bottom-nav-shop'    },
+    { icon: User,        label: 'My Account', to: '/account',  testId: 'bottom-nav-account', active: true },
   ];
 
   return (
@@ -146,14 +146,14 @@ const BottomNav = () => {
             to={to}
             data-testid={testId}
             className={`
-              flex flex-col items-center gap-2 transition-colors
+              flex flex-col items-center gap-1.5 transition-colors
               ${active ? 'text-khajur-gold' : 'text-khajur-cream/60 hover:text-khajur-cream'}
             `}
           >
             <div className="relative">
               <Icon className="w-6 h-6" />
               {active && (
-                <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-khajur-gold" />
+                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-khajur-gold" />
               )}
             </div>
             <span className="text-xs uppercase tracking-widest font-medium">{label}</span>
@@ -182,17 +182,17 @@ const Account = () => {
 
   return (
     <div className="min-h-screen bg-khajur-cream pb-32" data-testid="account-page">
-      <div className="max-w-5xl mx-auto px-6 md:px-12 py-16 md:py-20 space-y-14">
+      <div className="max-w-5xl mx-auto px-6 md:px-12 py-16 space-y-14">
 
         {/* ── Page Header ── */}
-        <div className="space-y-2 border-b border-khajur-gold/20 pb-8">
+        <div className="space-y-2">
           <p className="text-sm uppercase tracking-widest text-khajur-gold font-medium">
             My Account
           </p>
           <h1 className="font-serif text-5xl md:text-6xl font-medium text-khajur-primary leading-tight">
             Hello, {user.name?.split(' ')[0] || 'there'}.
           </h1>
-          <p className="text-base text-khajur-dark/60 pt-2">
+          <p className="text-base text-khajur-dark/50 pt-2">
             Signed in as{' '}
             <span className="text-khajur-primary font-semibold">
               {user.phone || user.email}
@@ -202,10 +202,10 @@ const Account = () => {
 
         {/* ── Quick Links ── */}
         <section>
-          <p className="text-sm uppercase tracking-widest text-khajur-dark/40 mb-6 font-medium">
+          <p className="text-sm uppercase tracking-widest text-khajur-dark/40 font-medium mb-6">
             Quick Access
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {QUICK_LINKS.map((item) => (
               <QuickLinkCard key={item.to} {...item} />
             ))}
@@ -214,7 +214,7 @@ const Account = () => {
 
         {/* ── Support & Links ── */}
         <section>
-          <p className="text-sm uppercase tracking-widest text-khajur-dark/40 mb-6 font-medium">
+          <p className="text-sm uppercase tracking-widest text-khajur-dark/40 font-medium mb-6">
             Support
           </p>
           <div className="space-y-4">
@@ -231,9 +231,9 @@ const Account = () => {
             data-testid="logout-button"
             className="
               w-full flex items-center justify-center gap-3
-              border-2 border-red-200 hover:border-red-500
+              border-2 border-red-300 hover:border-red-500
               bg-white hover:bg-red-50
-              text-red-500 hover:text-red-700
+              text-red-500 hover:text-red-600
               px-8 py-5 rounded-sm
               text-sm uppercase tracking-widest font-bold
               transition-all duration-300
@@ -242,7 +242,7 @@ const Account = () => {
             <LogOut className="w-5 h-5" />
             Sign Out
           </button>
-          <p className="text-center text-sm text-khajur-dark/40 mt-5">
+          <p className="text-center text-sm text-khajur-dark/30 mt-5">
             You'll be redirected to the homepage after signing out.
           </p>
         </section>
