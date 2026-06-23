@@ -25,11 +25,11 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
     onClick={onClick}
     data-testid={testId}
     className={`
-      relative font-sans text-xs uppercase tracking-widest font-medium
+      relative font-sans text-sm uppercase tracking-wider font-semibold
       transition-colors duration-200 pb-0.5 whitespace-nowrap
       ${isActive
         ? 'text-khajur-gold'
-        : 'text-khajur-cream/70 hover:text-khajur-gold'
+        : 'text-khajur-cream/80 hover:text-khajur-gold'
       }
       after:absolute after:bottom-0 after:left-0 after:h-px after:bg-khajur-gold
       after:transition-all after:duration-300
@@ -52,7 +52,7 @@ const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
         onChange={onChange}
         data-testid="search-input"
         className="
-          w-44 bg-white/5 border border-khajur-gold/20
+          w-40 bg-white/5 border border-khajur-gold/20
           hover:border-khajur-gold/40 focus:border-khajur-gold
           text-sm text-khajur-cream placeholder:text-khajur-cream/30
           pl-4 pr-10 py-2 rounded-sm
@@ -158,7 +158,7 @@ const Navbar = () => {
     return location.pathname.startsWith(to);
   };
 
-  // ✅ Links computed dynamically
+  // ✅ My Orders only added when logged in
   const links = user
     ? [...NAV_LINKS, { label: 'My Orders', to: '/my-orders' }]
     : NAV_LINKS;
@@ -178,20 +178,21 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-6 md:px-12">
 
           {/*
-            ✅ 3-column grid layout:
-            - Col 1: Logo (fixed left)
-            - Col 2: Nav links (perfectly centered)
-            - Col 3: Actions (fixed right)
-            All three columns are equal width so center col is truly centered.
+            ✅ Layout strategy:
+            - Logo: absolute left
+            - Nav links: absolute center (always truly centered)
+            - Actions: absolute right
+            This way nav links are ALWAYS centered regardless of how many links.
+            When My Orders is added, links stay centered and just spread a bit.
           */}
-          <div className="hidden md:grid grid-cols-3 items-center h-20">
+          <div className="hidden md:flex items-center h-20 relative">
 
-            {/* ── Col 1: Logo (left) ── */}
-            <div className="flex items-center">
+            {/* ── Logo (absolute left) ── */}
+            <div className="flex items-center flex-shrink-0">
               <Link
                 to="/"
                 data-testid="logo-link"
-                className="flex items-center gap-2 group flex-shrink-0"
+                className="flex items-center gap-2 group"
               >
                 <img
                   src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
@@ -204,8 +205,14 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* ── Col 2: Nav Links (perfectly centered) ── */}
-            <div className="flex items-center justify-center gap-6">
+            {/*
+              ✅ Nav links — absolutely centered in the full navbar width.
+              Uses absolute + left-1/2 + -translate-x-1/2 trick.
+              This means it's centered relative to the full navbar,
+              NOT relative to the space between logo and actions.
+              When My Orders appears, it shifts left naturally as links grow.
+            */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-7">
               {links.map((link) => (
                 <NavLink
                   key={link.to}
@@ -217,8 +224,8 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* ── Col 3: Actions (right) ── */}
-            <div className="flex items-center justify-end gap-5">
+            {/* ── Actions (pushed to right with ml-auto) ── */}
+            <div className="flex items-center gap-5 ml-auto flex-shrink-0">
               <SearchForm
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -237,7 +244,7 @@ const Navbar = () => {
               >
                 <User className="w-5 h-5" />
                 {user && (
-                  <span className="text-xs font-medium hidden lg:block">
+                  <span className="text-sm font-medium hidden lg:block">
                     {user.name?.split(' ')[0]}
                   </span>
                 )}
@@ -311,11 +318,11 @@ const Navbar = () => {
                 to={link.to}
                 onClick={() => setMenuOpen(false)}
                 className={`
-                  block text-xs uppercase tracking-widest font-medium
+                  block text-sm uppercase tracking-wider font-semibold
                   transition-colors duration-200
                   ${isActive(link.to)
                     ? 'text-khajur-gold'
-                    : 'text-khajur-cream/60 hover:text-khajur-gold'
+                    : 'text-khajur-cream/70 hover:text-khajur-gold'
                   }
                 `}
               >
