@@ -111,22 +111,6 @@ const Navbar = () => {
     const [query, setQuery] = useState('');
     const [scrolled, setScrolled] = useState(false);
 
-    // ── Scroll shadow ──────────────────────────────────────────────────────────
-
-    useEffect(() => {
-        const handler = () => setScrolled(window.scrollY > 10);
-        window.addEventListener('scroll', handler, { passive: true });
-        return () => window.removeEventListener('scroll', handler);
-    }, []);
-
-
-    // ── Close menu on route change ─────────────────────────────────────────────
-
-    useEffect(() => {
-        setMenuOpen(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [location.pathname]);
-
     // ── Close menu on outside click ────────────────────────────────────────────
 
     useEffect(() => {
@@ -186,7 +170,7 @@ const Navbar = () => {
                             to="/"
                             data-testid="logo-link"
                             className="flex items-center gap-2 flex-shrink-0 group"
-                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                            onClick={() => setMenuOpen(false)}
                         >
                             <img
                                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
