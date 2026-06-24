@@ -127,10 +127,10 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto px-6 md:px-12">
 
       {/* ── Main Grid ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 py-16 border-b border-khajur-gold/10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 py-16 border-b border-khajur-gold/10">
 
         {/* ── Brand Column ── */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <Link to="/" className="flex items-center gap-2 mb-5 group">
             <img
               src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
@@ -155,7 +155,7 @@ const Footer = () => (
         </div>
 
         {/* ── Quick Links ── */}
-        <div>
+        <div className="lg:col-span-2">
           <ColHeading>Quick Links</ColHeading>
           <ul className="space-y-3">
             {QUICK_LINKS.map((link) => (
@@ -167,7 +167,7 @@ const Footer = () => (
         </div>
 
         {/* ── Categories ── */}
-        <div>
+        <div className="lg:col-span-2">
           <ColHeading>Categories</ColHeading>
           <ul className="space-y-3">
             {CATEGORIES.map((cat) => (
@@ -179,7 +179,7 @@ const Footer = () => (
         </div>
 
         {/* ── Customer Service ── */}
-        <div>
+        <div className="lg:col-span-2">
           <ColHeading>Customer Service</ColHeading>
           <ul className="space-y-3">
             {CUSTOMER_SERVICE.map((item) => (
@@ -191,7 +191,7 @@ const Footer = () => (
         </div>
 
         {/* ── Contact Info ── */}
-        <div>
+        <div className="lg:col-span-3">
           <ColHeading>Contact Us</ColHeading>
           <div className="space-y-4">
             <ContactItem
