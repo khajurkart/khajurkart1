@@ -29,7 +29,7 @@ const LoadingScreen = () => (
 
 const EmptyCart = () => (
   <div
-    className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 px-6 text-center"
+    className="min-h-screen bg-khajur-cream flex flex-col items-center justify-center gap-6 px-6 text-center"
     data-testid="empty-cart"
   >
     <div className="w-20 h-20 flex items-center justify-center bg-khajur-cream rounded-full">
