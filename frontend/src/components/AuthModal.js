@@ -227,16 +227,15 @@ const OTPScreen = ({ email, onVerify, onResend }) => {
             <button
                 onClick={handleVerify}
                 disabled={loading || code.length < 6}
-                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] disabled:opacity-60 disabled:cursor-not-allowed rounded-sm px-8 py-4 font-serif font-bold transition-all duration-300"
+                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] disabled:opacity-60 disabled:cursor-not-allowed rounded-sm px-8 py-4 font-serif font-bold transition-all duration-300 flex items-center justify-center gap-2"
                 style={{ fontSize: '16px', letterSpacing: '2px' }}
             >
                 {loading
-                    ? <span className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING…
-                    </span>
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</>
                     : <><ShieldCheck className="w-4 h-4" /> Verify &amp; Continue</>
                 }
             </button>
+
 
             {/* Resend Button */}
             <button
