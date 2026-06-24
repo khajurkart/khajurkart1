@@ -142,7 +142,7 @@ const Products = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-white py-16 md:py-24" data-testid="products-page">
+    <div className="min-h-screen bg-khajur-cream py-16 md:py-24" data-testid="products-page">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
 
         {/* ── Page Header ── */}
