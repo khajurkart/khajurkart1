@@ -74,7 +74,7 @@ const PAYMENT_METHODS = [
 // ── Not Logged In ──────────────────────────────────────────────────────────────
 
 const NotLoggedIn = () => (
-  <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 px-6 text-center">
+  <div className="min-h-screen bg-khajur-cream flex flex-col items-center justify-center gap-6 px-6 text-center">
     <div className="w-16 h-16 flex items-center justify-center bg-khajur-cream rounded-full">
       <ShoppingBag className="w-7 h-7 text-khajur-dark/30" />
     </div>
