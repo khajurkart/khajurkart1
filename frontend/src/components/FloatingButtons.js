@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Mail } from 'lucide-react';
+import { MessageCircle, Mail, Phone } from 'lucide-react';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -11,6 +11,14 @@ const BUTTONS = [
     className: 'bg-green-500 hover:bg-green-600 text-white shadow-green-500/30',
     action:    () => window.open('https://wa.me/917981002137', '_blank'),
     tooltip:   'Chat on WhatsApp',
+  },
+  {
+    label:     'Call Us',
+    icon:      Phone,
+    testId:    'phone-button',
+    className: 'bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/30',
+    action:    () => window.location.href = 'tel:+917981002137',
+    tooltip:   'Call Us',
   },
   {
     label:     'Email',
