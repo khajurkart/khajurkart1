@@ -105,7 +105,7 @@ const ThankYou = () => {
             <div className="flex items-center justify-center gap-2 bg-khajur-cream rounded-sm px-4 py-3 mb-8">
               <Truck className="w-4 h-4 text-khajur-gold flex-shrink-0" />
               <p className="text-xs text-khajur-dark/60">
-                Expected delivery within <strong className="text-khajur-primary">3–5 business days</strong>
+                Expected delivery within <strong className="text-khajur-primary">1–3 business days</strong>
               </p>
             </div>
 
