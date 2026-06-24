@@ -141,7 +141,7 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-white pt-16 md:pt-20 pb-20" data-testid="products-page">
-      <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-14">
+      <div className="max-w-[1360px] mx-auto px-5 md:px-8 lg:px-10">
 
         {/* ───────────────── Header ───────────────── */}
         <section className="border-b border-[#EEE4D6] pb-12 md:pb-14 mb-12 md:mb-14">
@@ -209,11 +209,22 @@ const Products = () => {
           />
         ) : (
           <section
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7 gap-y-8"
             data-testid="products-grid"
           >
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <div
+                key={product.id}
+                className="
+                  max-w-[320px] w-full mx-auto
+                  rounded-sm overflow-hidden
+                  border border-[#E8DDCC]
+                  bg-white
+                  shadow-[0_6px_24px_rgba(0,0,0,0.04)]
+                "
+              >
+                <ProductCard product={product} contentBg="bg-[#F8F4EC]" />
+              </div>
             ))}
           </section>
         )}
