@@ -20,30 +20,11 @@ const CATEGORIES = [
 ];
 
 const CUSTOMER_SERVICE = [
-  { label: 'FAQ',                to: '/faq'             },
-  { label: 'Returns & Refunds',  to: '/returns'         },
-  { label: 'Delivery Info',      to: '/delivery-info'   },
-  { label: 'Privacy Policy',     to: '/privacy-policy'  },
-  { label: 'Track Your Order',   to: '/track-order'     },
-];
-
-const CONTACT_INFO = [
-  {
-    icon: Phone,
-    content: '+91 79810 02137',
-    href: 'tel:+917981002137',
-  },
-  {
-    icon: Mail,
-    content: 'khajurkart@gmail.com',
-    href: 'mailto:khajurkart@gmail.com',
-  },
-  {
-    icon: MapPin,
-    content:
-      '10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057',
-    href: null,
-  },
+  { label: 'FAQ',               to: '/faq'              },
+  { label: 'Returns & Refunds', to: '/returns-refunds'  },
+  { label: 'Delivery Info',     to: '/delivery-info'    },
+  { label: 'Privacy Policy',    to: '/privacy-policy'   },
+  { label: 'Track Your Order',  to: '/track-order'      },
 ];
 
 const SOCIAL_LINKS = [
@@ -96,10 +77,10 @@ const FooterLink = ({ to, children }) => (
   </li>
 );
 
-// ── Contact Row ────────────────────────────────────────────────────────────────
+// ── Contact Item ───────────────────────────────────────────────────────────────
 
-const ContactRow = ({ icon: Icon, content, href }) => (
-  <li className="flex items-start gap-3">
+const ContactItem = ({ icon: Icon, content, href }) => (
+  <div className="flex items-start gap-3">
     <div className="w-8 h-8 flex items-center justify-center bg-khajur-gold/10 rounded-sm flex-shrink-0 mt-0.5">
       <Icon className="w-3.5 h-3.5 text-khajur-gold" />
     </div>
@@ -113,7 +94,7 @@ const ContactRow = ({ icon: Icon, content, href }) => (
     ) : (
       <p className="text-sm text-khajur-cream/60 leading-relaxed">{content}</p>
     )}
-  </li>
+  </div>
 );
 
 // ── Social Button ──────────────────────────────────────────────────────────────
@@ -213,11 +194,30 @@ const Footer = () => (
 
       {/* ── Contact Bar ── */}
       <div className="py-8 border-b border-khajur-gold/10">
-        <ul className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-6">
-          {CONTACT_INFO.map(({ icon, content, href }) => (
-            <ContactRow key={content} icon={icon} content={content} href={href} />
-          ))}
-        </ul>
+        <div className="flex flex-col gap-4 lg:items-end">
+
+          {/* ── Row 1 — Phone & Email ── */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <ContactItem
+              icon={Phone}
+              content="+91 79810 02137"
+              href="tel:+917981002137"
+            />
+            <ContactItem
+              icon={Mail}
+              content="khajurkart@gmail.com"
+              href="mailto:khajurkart@gmail.com"
+            />
+          </div>
+
+          {/* ── Row 2 — Address ── */}
+          <ContactItem
+            icon={MapPin}
+            content="10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057"
+            href={null}
+          />
+
+        </div>
       </div>
 
       {/* ── Bottom Bar ── */}
