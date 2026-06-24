@@ -13,20 +13,20 @@ const BUTTONS = [
     tooltip:   'Chat on WhatsApp',
   },
   {
-    label:     'Call Us',
-    icon:      Phone,
-    testId:    'phone-button',
-    className: 'bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/30',
-    action:    () => window.location.href = 'tel:+917981002137',
-    tooltip:   'Call Us',
-  },
-  {
     label:     'Email',
     icon:      Mail,
     testId:    'email-button',
     className: 'bg-khajur-gold hover:bg-khajur-gold/90 text-khajur-primary shadow-khajur-gold/30',
     action:    () => window.location.href = 'mailto:khajurkart@gmail.com',
     tooltip:   'Send us an Email',
+  },
+  {
+    label:     'Call Us',
+    icon:      Phone,
+    testId:    'phone-button',
+    className: 'bg-green-800 hover:bg-green-900 text-white shadow-green-800/30',
+    action:    () => window.location.href = 'tel:+917981002137',
+    tooltip:   'Call Us',
   },
 ];
 
