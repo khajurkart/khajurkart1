@@ -3,62 +3,63 @@ import { MessageCircle, Mail, X, Phone } from 'lucide-react';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
-const ACTIONS = [
+const BUTTONS = [
   {
-    icon: MessageCircle,
-    label: 'WhatsApp',
-    description: 'Chat with us',
-    onClick: () => window.open('https://wa.me/917981002137', '_blank'),
+    label:     'WhatsApp',
+    icon:      MessageCircle,
+    testId:    'whatsapp-button',
     className: 'bg-green-500 hover:bg-green-600 text-white shadow-green-500/30',
-    testId: 'whatsapp-button',
+    action:    () => window.open('https://wa.me/917981002137', '_blank'),
+    tooltip:   'Chat on WhatsApp',
   },
   {
-    icon: Mail,
-    label: 'Email',
-    description: 'Send us a mail',
-    onClick: () => window.location.href = 'mailto:khajurkart@gmail.com',
+    label:     'Email',
+    icon:      Mail,
+    testId:    'email-button',
     className: 'bg-khajur-gold hover:bg-khajur-gold/90 text-khajur-primary shadow-khajur-gold/30',
-    testId: 'email-button',
-  },
-  {
-    icon: Phone,
-    label: 'Call Us',
-    description: 'Talk to support',
-    onClick: () => window.location.href = 'tel:+917981002137',
-    className: 'bg-khajur-primary hover:bg-khajur-primary/90 text-khajur-cream shadow-khajur-primary/30',
-    testId: 'call-button',
+    action:    () => window.location.href = 'mailto:khajurkart@gmail.com',
+    tooltip:   'Send us an Email',
   },
 ];
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
-// ── Action Item ────────────────────────────────────────────────────────────────
+// ── Floating Action Button ─────────────────────────────────────────────────────
 
-const ActionItem = ({ icon: Icon, label, description, onClick, className, testId, visible }) => (
-  <div
-    className={`
-      flex items-center gap-3 justify-end
-      transition-all duration-300 ease-out
-      ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
-    `}
-  >
-    {/* Label tooltip */}
-    <div className="flex flex-col items-end">
-      <span className="text-xs font-semibold text-white bg-khajur-primary/80 backdrop-blur-sm px-2.5 py-1 rounded-sm whitespace-nowrap">
-        {label}
-      </span>
-    </div>
+const FAB = ({ icon: Icon, label, tooltip, className, action, testId, visible }) => (
+  <div className="relative group flex items-center justify-end">
 
-    {/* Icon Button */}
+    {/* Tooltip */}
+    <span className={`
+      absolute right-14 whitespace-nowrap
+      bg-khajur-primary text-khajur-cream
+      text-xs font-medium px-3 py-1.5 rounded-sm
+      shadow-lg pointer-events-none
+      transition-all duration-200
+      ${visible
+        ? 'opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0'
+        : 'opacity-0'
+      }
+    `}>
+      {tooltip}
+      {/* Tooltip arrow */}
+      <span className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-khajur-primary rotate-45" />
+    </span>
+
+    {/* Button */}
     <button
-      onClick={onClick}
-      aria-label={label}
+      onClick={action}
       data-testid={testId}
+      aria-label={label}
       className={`
         w-12 h-12 rounded-full flex items-center justify-center
         shadow-lg transition-all duration-300
         hover:scale-110 hover:shadow-xl
         ${className}
+        ${visible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-4 pointer-events-none'
+        }
       `}
     >
       <Icon className="w-5 h-5" />
@@ -73,45 +74,32 @@ const FloatingButtons = () => {
 
   return (
     <div
-      className="fixed bottom-8 right-8 z-40 flex flex-col items-end gap-3"
+      className="fixed bottom-8 right-8 flex flex-col items-end gap-3 z-40"
       data-testid="floating-buttons"
     >
-
-      {/* ── Action Items — visible when open ── */}
-      <div className="flex flex-col gap-3">
-        {ACTIONS.map((action, index) => (
-          <ActionItem
-            key={action.label}
-            {...action}
-            visible={open}
-          />
-        ))}
-      </div>
+      {/* ── Action Buttons ── */}
+      {BUTTONS.map((btn) => (
+        <FAB key={btn.label} {...btn} visible={open} />
+      ))}
 
       {/* ── Toggle Button ── */}
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Close contact options' : 'Open contact options'}
-        data-testid="floating-toggle"
         className={`
           w-14 h-14 rounded-full flex items-center justify-center
-          shadow-[0_8px_24px_rgba(0,0,0,0.2)]
+          bg-khajur-primary text-khajur-cream
+          shadow-[0_4px_20px_rgba(0,0,0,0.25)]
+          hover:shadow-[0_4px_28px_rgba(0,0,0,0.35)]
           transition-all duration-300
-          hover:scale-110 hover:shadow-[0_12px_32px_rgba(0,0,0,0.25)]
-          ${open
-            ? 'bg-red-500 hover:bg-red-600 text-white rotate-0'
-            : 'bg-khajur-gold hover:bg-khajur-gold/90 text-khajur-primary'
-          }
+          ${open ? 'rotate-45 bg-khajur-primary/90' : 'rotate-0 hover:scale-110'}
         `}
       >
-        <div className={`transition-transform duration-300 ${open ? 'rotate-0' : 'rotate-0'}`}>
-          {open
-            ? <X className="w-5 h-5" />
-            : <MessageCircle className="w-5 h-5" />
-          }
-        </div>
+        {open
+          ? <X className="w-5 h-5" />
+          : <Phone className="w-5 h-5" />
+        }
       </button>
-
     </div>
   );
 };
