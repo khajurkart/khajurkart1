@@ -29,7 +29,7 @@ const BUTTONS = [
         label: 'Call Us',
         icon: Phone,
         testId: 'phone-button',
-        className: 'bg-green-950 hover:bg-green-900 text-white shadow-green-950/30',
+        className: 'bg-khajur-primary hover:bg-khajur-primary/90 text-khajur-cream shadow-khajur-primary/30',
         action: () => window.location.href = 'tel:+917981002137',
         tooltip: 'Call Us',
     },
