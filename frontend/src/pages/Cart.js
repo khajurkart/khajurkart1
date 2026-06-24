@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 // ── Loading ────────────────────────────────────────────────────────────────────
 
 const LoadingScreen = () => (
-  <div className="min-h-screen bg-khajur-cream flex flex-col items-center justify-center gap-3 text-khajur-dark/50">
+  <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-3 text-khajur-dark/50">
     <Loader2 className="w-8 h-8 animate-spin" />
     <p className="text-sm">Loading your cart…</p>
   </div>
@@ -29,7 +29,7 @@ const LoadingScreen = () => (
 
 const EmptyCart = () => (
   <div
-    className="min-h-screen bg-khajur-cream flex flex-col items-center justify-center gap-6 px-6 text-center"
+    className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 px-6 text-center"
     data-testid="empty-cart"
   >
     <div className="w-20 h-20 flex items-center justify-center bg-khajur-cream rounded-full">
