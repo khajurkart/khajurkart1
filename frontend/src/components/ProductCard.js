@@ -117,7 +117,7 @@ const ProductCard = ({ product }) => {
 
       {/* ── Product Image ───────────────────────────────────────────────────── */}
       <Link to={productUrl} aria-label={`View ${product.name}`}>
-        <div className="aspect-square overflow-hidden bg-khajur-cream">
+        <div className="aspect-square overflow-hidden bg-white">
           {imgError ? (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-khajur-dark/20">
               <ImageOff className="w-10 h-10" />
@@ -139,7 +139,7 @@ const ProductCard = ({ product }) => {
       </Link>
 
       {/* ── Product Info ─────────────────────────────────────────────────────── */}
-      <div className="p-5 flex flex-col gap-2">
+      <div className="p-5 flex flex-col gap-2 bg-khajur-cream">
 
         {/* Category */}
         {product.category && (
