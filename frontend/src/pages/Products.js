@@ -154,13 +154,6 @@ const Products = () => {
             <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">
               Our Products
             </h1>
-            {!loading && (
-              <p className="text-sm text-khajur-dark/50 mb-1">
-                <span className="font-semibold text-khajur-primary">{products.length}</span>{' '}
-                product{products.length !== 1 ? 's' : ''}{' '}
-                {selected ? `in "${selected}"` : 'available'}
-              </p>
-            )}
           </div>
           <p className="text-sm text-khajur-dark/50 mt-3 max-w-xl leading-relaxed">
             Explore our premium collection of dates, nuts, dry fruits, and spices —
