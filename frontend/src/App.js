@@ -35,6 +35,12 @@ import FAQ from "./pages/FAQ";
 import ThankYou from './pages/ThankYou';
 import NotFound from './pages/NotFound';
 import ScrollToTop from "./components/ScrollToTop";
+
+// ── Policy Pages ───────────────────────────────────────────────────────────────
+import DeliveryInfo   from './pages/DeliveryInfo';
+import ReturnsRefunds from './pages/ReturnsRefunds';
+import PrivacyPolicy  from './pages/PrivacyPolicy';
+
 if ('scrollRestoration' in window.history) {
   window.history.scrollRestoration = 'manual';
 }
@@ -48,32 +54,46 @@ function App() {
                         <Navbar />
                         <main className="flex-grow">
                             <Routes>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/products" element={<Products />} />
-                                <Route path="/product/:id" element={<ProductDetail />} />
-                                <Route path="/bulk-orders" element={<BulkOrders />} />
-                                <Route path="/order/:id" element={<OrderDetails />} />
-                                <Route path="/cart" element={<Cart />} />
-                                <Route path="/checkout" element={<Checkout />} />
-                                <Route path="/about" element={<About />} />
-                                <Route path="/contact" element={<Contact />} />
-                                <Route path="/search" element={<Search />} />
-                                <Route path="/my-orders" element={<MyOrders />} />
-                                <Route path="/account" element={<Account />} />
-                                <Route path="/profile" element={<Profile />} />
-                                <Route path="/addresses" element={<Addresses />} />
-                                <Route path="/track-order" element={<TrackOrder />} />
+
+                                {/* ── Main Routes ───────────────────────────── */}
+                                <Route path="/"             element={<Home />}         />
+                                <Route path="/products"     element={<Products />}     />
+                                <Route path="/product/:id"  element={<ProductDetail />}/>
+                                <Route path="/bulk-orders"  element={<BulkOrders />}   />
+                                <Route path="/order/:id"    element={<OrderDetails />} />
+                                <Route path="/cart"         element={<Cart />}         />
+                                <Route path="/checkout"     element={<Checkout />}     />
+                                <Route path="/about"        element={<About />}        />
+                                <Route path="/contact"      element={<Contact />}      />
+                                <Route path="/search"       element={<Search />}       />
+                                <Route path="/my-orders"    element={<MyOrders />}     />
+                                <Route path="/account"      element={<Account />}      />
+                                <Route path="/profile"      element={<Profile />}      />
+                                <Route path="/addresses"    element={<Addresses />}    />
+                                <Route path="/track-order"  element={<TrackOrder />}   />
                                 <Route path="/reset-password" element={<ResetPassword />} />
-                                <Route path="/admin/login" element={<AdminLogin />} />
-                                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                                <Route path="/admin/products" element={<AdminProducts />} />
-                                <Route path="/admin/orders" element={<AdminOrders />} />
-                                <Route path="/admin/returns" element={<AdminReturns />} />
-                                <Route path="/admin/reviews" element={<AdminReviews />} />
-                                <Route path="/returns" element={<Returns />} />
-                                <Route path="/faq" element={<FAQ />} />
-                                <Route path="/thank-you" element={<ThankYou />} />
+
+                                {/* ── Admin Routes ──────────────────────────── */}
+                                <Route path="/admin/login"      element={<AdminLogin />}     />
+                                <Route path="/admin/dashboard"  element={<AdminDashboard />} />
+                                <Route path="/admin/products"   element={<AdminProducts />}  />
+                                <Route path="/admin/orders"     element={<AdminOrders />}    />
+                                <Route path="/admin/returns"    element={<AdminReturns />}   />
+                                <Route path="/admin/reviews"    element={<AdminReviews />}   />
+
+                                {/* ── Support Routes ────────────────────────── */}
+                                <Route path="/returns"      element={<Returns />}      />
+                                <Route path="/faq"          element={<FAQ />}          />
+                                <Route path="/thank-you"    element={<ThankYou />}     />
+
+                                {/* ── Policy Routes ─────────────────────────── */}
+                                <Route path="/delivery-info"  element={<DeliveryInfo />}   />
+                                <Route path="/returns-refunds" element={<ReturnsRefunds />} />
+                                <Route path="/privacy-policy" element={<PrivacyPolicy />}  />
+
+                                {/* ── 404 ───────────────────────────────────── */}
                                 <Route path="*" element={<NotFound />} />
+
                             </Routes>
                         </main>
                         <Footer />
