@@ -127,7 +127,7 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto px-6 md:px-12">
 
       {/* ── Main Grid ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 py-16 border-b border-khajur-gold/10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 py-16 border-b border-khajur-gold/10">
 
         {/* ── Brand Column ── */}
         <div className="lg:col-span-2">
@@ -190,14 +190,10 @@ const Footer = () => (
           </ul>
         </div>
 
-      </div>
-
-      {/* ── Contact Bar ── */}
-      <div className="py-8 border-b border-khajur-gold/10">
-        <div className="flex flex-col gap-4 lg:items-end">
-
-          {/* ── Row 1 — Phone & Email ── */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+        {/* ── Contact Info ── */}
+        <div>
+          <ColHeading>Contact Us</ColHeading>
+          <div className="space-y-4">
             <ContactItem
               icon={Phone}
               content="+91 79810 02137"
@@ -208,16 +204,14 @@ const Footer = () => (
               content="khajurkart@gmail.com"
               href="mailto:khajurkart@gmail.com"
             />
+            <ContactItem
+              icon={MapPin}
+              content="10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057"
+              href={null}
+            />
           </div>
-
-          {/* ── Row 2 — Address ── */}
-          <ContactItem
-            icon={MapPin}
-            content="10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057"
-            href={null}
-          />
-
         </div>
+
       </div>
 
       {/* ── Bottom Bar ── */}
