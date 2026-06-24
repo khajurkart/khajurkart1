@@ -117,7 +117,7 @@ const ContactForm = () => {
   };
 
   return (
-    <div className="bg-[#F8F4EC] border border-khajur-border p-8 md:p-12">
+    <div className="bg-white border border-khajur-border p-8 md:p-12">
       {/* Form Header */}
       <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
         Reach Out
@@ -218,7 +218,7 @@ const ContactForm = () => {
 // ── Contact Info Card ──────────────────────────────────────────────────────────
 
 const ContactInfoCard = ({ icon: Icon, title, details, link }) => (
-  <div className="flex items-start gap-5 p-6 bg-[#F8F4EC] border border-khajur-border hover:border-khajur-gold/40 transition-colors duration-300 group">
+  <div className="flex items-start gap-5 p-6 bg-white border border-khajur-border hover:border-khajur-gold/40 transition-colors duration-300 group">
     <div className="w-10 h-10 flex items-center justify-center bg-khajur-cream flex-shrink-0 group-hover:bg-khajur-gold/10 transition-colors duration-300">
       <Icon className="w-5 h-5 text-khajur-gold" />
     </div>
