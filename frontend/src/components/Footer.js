@@ -5,13 +5,11 @@ import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
 const QUICK_LINKS = [
-  { label: 'Home',               to: '/'          },
-  { label: 'About Us',           to: '/about'     },
-  { label: 'Products',           to: '/products'  },
-  { label: 'Bulk Orders',        to: '/bulk-orders' },
-  { label: 'Contact Us',         to: '/contact'   },
-  { label: 'Returns & Exchange', to: '/returns'   },
-  { label: 'FAQ',                to: '/faq'       },
+  { label: 'Home',        to: '/'            },
+  { label: 'About Us',    to: '/about'       },
+  { label: 'Products',    to: '/products'    },
+  { label: 'Bulk Orders', to: '/bulk-orders' },
+  { label: 'Contact Us',  to: '/contact'     },
 ];
 
 const CATEGORIES = [
@@ -19,6 +17,14 @@ const CATEGORIES = [
   { label: 'Nuts',       to: '/products?category=nuts'       },
   { label: 'Dry Fruits', to: '/products?category=dry-fruits' },
   { label: 'Spices',     to: '/products?category=spices'     },
+];
+
+const CUSTOMER_SERVICE = [
+  { label: 'FAQ',                to: '/faq'             },
+  { label: 'Returns & Refunds',  to: '/returns'         },
+  { label: 'Delivery Info',      to: '/delivery-info'   },
+  { label: 'Privacy Policy',     to: '/privacy-policy'  },
+  { label: 'Track Your Order',   to: '/track-order'     },
 ];
 
 const CONTACT_INFO = [
@@ -34,7 +40,8 @@ const CONTACT_INFO = [
   },
   {
     icon: MapPin,
-    content: '10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057',
+    content:
+      '10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057',
     href: null,
   },
 ];
@@ -73,7 +80,7 @@ const ColHeading = ({ children }) => (
   </h3>
 );
 
-// ── Nav Link ───────────────────────────────────────────────────────────────────
+// ── Footer Link ────────────────────────────────────────────────────────────────
 
 const FooterLink = ({ to, children }) => (
   <li>
@@ -139,10 +146,10 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto px-6 md:px-12">
 
       {/* ── Main Grid ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 py-16 border-b border-khajur-gold/10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 py-16 border-b border-khajur-gold/10">
 
-        {/* Brand */}
-        <div className="lg:col-span-1">
+        {/* ── Brand Column ── */}
+        <div className="lg:col-span-2">
           <Link to="/" className="flex items-center gap-2 mb-5 group">
             <img
               src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
@@ -153,8 +160,9 @@ const Footer = () => (
               KhajurKart
             </span>
           </Link>
-          <p className="text-sm text-khajur-cream/50 leading-relaxed mb-6">
-            Premium destination for the world's finest dates, dry fruits, and spices — delivered to your door.
+          <p className="text-sm text-khajur-cream/50 leading-relaxed mb-6 max-w-xs">
+            Premium destination for the world's finest dates, dry fruits, and
+            spices — delivered to your door.
           </p>
 
           {/* Social */}
@@ -165,7 +173,7 @@ const Footer = () => (
           </div>
         </div>
 
-        {/* Quick Links */}
+        {/* ── Quick Links ── */}
         <div>
           <ColHeading>Quick Links</ColHeading>
           <ul className="space-y-3">
@@ -177,7 +185,7 @@ const Footer = () => (
           </ul>
         </div>
 
-        {/* Categories */}
+        {/* ── Categories ── */}
         <div>
           <ColHeading>Categories</ColHeading>
           <ul className="space-y-3">
@@ -189,16 +197,27 @@ const Footer = () => (
           </ul>
         </div>
 
-        {/* Contact */}
+        {/* ── Customer Service ── */}
         <div>
-          <ColHeading>Contact Us</ColHeading>
-          <ul className="space-y-4">
-            {CONTACT_INFO.map(({ icon, content, href }) => (
-              <ContactRow key={content} icon={icon} content={content} href={href} />
+          <ColHeading>Customer Service</ColHeading>
+          <ul className="space-y-3">
+            {CUSTOMER_SERVICE.map((item) => (
+              <FooterLink key={item.to} to={item.to}>
+                {item.label}
+              </FooterLink>
             ))}
           </ul>
         </div>
 
+      </div>
+
+      {/* ── Contact Bar ── */}
+      <div className="py-8 border-b border-khajur-gold/10">
+        <ul className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-6">
+          {CONTACT_INFO.map(({ icon, content, href }) => (
+            <ContactRow key={content} icon={icon} content={content} href={href} />
+          ))}
+        </ul>
       </div>
 
       {/* ── Bottom Bar ── */}
