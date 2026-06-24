@@ -92,7 +92,7 @@ const ContactItem = ({ icon: Icon, content, href }) => (
         {content}
       </a>
     ) : (
-      <p className="text-sm text-khajur-cream/60 leading-relaxed">{content}</p>
+      <div className="text-sm text-khajur-cream/60 leading-relaxed">{content}</div>
     )}
   </div>
 );
@@ -206,7 +206,15 @@ const Footer = () => (
             />
             <ContactItem
               icon={MapPin}
-              content="10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057"
+              content={
+                <>
+                  10-3-313/a, AR Raheem Residency,<br />
+                  beside Govt IASE College,<br />
+                  Potti Sriramulu Nagar,<br />
+                  Vijaya Nagar Colony, Hyderabad,<br />
+                  Telangana — 500057
+                </>
+              }
               href={null}
             />
           </div>
