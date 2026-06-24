@@ -7,10 +7,19 @@ import {
   Loader2,
   PackageSearch,
   ShoppingBag,
+  ArrowUpDown,
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// ─── Constants ─────────────────────────────────────────────────────────────────
+
+const SORT_OPTIONS = [
+  { value: 'featured', label: 'Featured' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'price-high', label: 'Price: High to Low' },
+];
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
@@ -76,6 +85,41 @@ const CategoryBtn = ({ label, isActive, onClick, testId }) => (
   </button>
 );
 
+// ── Sort Dropdown ──────────────────────────────────────────────────────────────
+
+const SortDropdown = ({ value, onChange }) => (
+  <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
+      <ArrowUpDown className="w-4 h-4 text-khajur-gold" />
+      <label
+        htmlFor="sort-select"
+        className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50"
+      >
+        Sort By
+      </label>
+    </div>
+    <select
+      id="sort-select"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="
+        px-4 py-2 rounded-sm text-xs font-medium
+        border border-khajur-border bg-white text-khajur-primary
+        hover:border-khajur-primary focus:border-khajur-primary
+        focus:outline-none focus:ring-2 focus:ring-khajur-gold/20
+        transition-all duration-200 cursor-pointer
+      "
+      data-testid="sort-dropdown"
+    >
+      {SORT_OPTIONS.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const Products = () => {
@@ -89,6 +133,7 @@ const Products = () => {
   const [selected, setSelected]     = useState(
     searchParams.get('category') || ''
   );
+  const [sortBy, setSortBy]         = useState('featured');
 
   // ── Sync category from URL ─────────────────────────────────────────────────
 
@@ -133,13 +178,35 @@ const Products = () => {
     fetchProducts();
   }, [fetchProducts]);
 
+  // ── Sort Products ──────────────────────────────────────────────────────────
+
+  const sortedProducts = useCallback(() => {
+    const sorted = [...products];
+    
+    switch (sortBy) {
+      case 'price-low':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price-high':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'featured':
+      default:
+        return sorted;
+    }
+  }, [products, sortBy]);
+
   // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleCategory = (slug) => {
     navigate(slug ? `/products?category=${slug}` : '/products');
   };
 
+  const handleSort = (value) => {
+    setSortBy(value);
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
+
+  const displayProducts = sortedProducts();
 
   return (
     <div className="min-h-screen bg-white py-16 md:py-24" data-testid="products-page">
@@ -161,37 +228,49 @@ const Products = () => {
           </p>
         </div>
 
-        {/* ── Category Filter ── */}
-        <div className="mb-12" data-testid="category-filter">
-          <div className="flex items-center gap-2 mb-5">
-            <Filter className="w-4 h-4 text-khajur-gold" />
-            <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
-              Filter by Category
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <CategoryBtn
-              label="All Products"
-              isActive={selected === ''}
-              onClick={() => handleCategory('')}
-              testId="category-all"
-            />
-            {categories.map((cat) => (
+        {/* ── Filter & Sort Bar ── */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-12">
+          
+          {/* ── Category Filter ── */}
+          <div data-testid="category-filter">
+            <div className="flex items-center gap-2 mb-5">
+              <Filter className="w-4 h-4 text-khajur-gold" />
+              <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
+                Filter by Category
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
               <CategoryBtn
-                key={cat.id}
-                label={cat.name}
-                isActive={selected === cat.slug}
-                onClick={() => handleCategory(cat.slug)}
-                testId={`category-${cat.slug}`}
+                label="All Products"
+                isActive={selected === ''}
+                onClick={() => handleCategory('')}
+                testId="category-all"
               />
-            ))}
+              {categories.map((cat) => (
+                <CategoryBtn
+                  key={cat.id}
+                  label={cat.name}
+                  isActive={selected === cat.slug}
+                  onClick={() => handleCategory(cat.slug)}
+                  testId={`category-${cat.slug}`}
+                />
+              ))}
+            </div>
           </div>
+
+          {/* ── Sort Dropdown ── */}
+          {!loading && products.length > 0 && (
+            <div className="lg:ml-auto">
+              <SortDropdown value={sortBy} onChange={handleSort} />
+            </div>
+          )}
+
         </div>
 
         {/* ── Products Grid ── */}
         {loading ? (
           <LoadingState />
-        ) : products.length === 0 ? (
+        ) : displayProducts.length === 0 ? (
           <EmptyState
             category={selected}
             onReset={() => handleCategory('')}
@@ -201,7 +280,7 @@ const Products = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
             data-testid="products-grid"
           >
-            {products.map((product) => (
+            {displayProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
