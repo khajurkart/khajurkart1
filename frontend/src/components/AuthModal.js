@@ -231,7 +231,9 @@ const OTPScreen = ({ email, onVerify, onResend }) => {
                 style={{ fontSize: '16px', letterSpacing: '2px' }}
             >
                 {loading
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</>
+                    ? <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING…
+                    </span>
                     : <><ShieldCheck className="w-4 h-4" /> Verify &amp; Continue</>
                 }
             </button>
