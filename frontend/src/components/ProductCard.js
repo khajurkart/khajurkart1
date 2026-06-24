@@ -139,7 +139,7 @@ const ProductCard = ({ product }) => {
       </Link>
 
       {/* ── Product Info ─────────────────────────────────────────────────────── */}
-      <div className="p-5 flex flex-col gap-2 bg-khajur-cream">
+      <div className="p-5 flex flex-col gap-2 bg-[#fdfcfb]">
 
         {/* Category */}
         {product.category && (
