@@ -25,12 +25,12 @@ const About = () => {
         }
     ];
 
-    const stats = [
+    /*const stats = [
         { number: '500+', label: 'Happy Customers' },
         { number: '50+', label: 'Premium Products' },
         { number: '100%', label: 'Natural & Pure' },
         { number: '5★', label: 'Average Rating' },
-    ];
+    ];*/
 
     return (
         <div className="min-h-screen" data-testid="about-page">
