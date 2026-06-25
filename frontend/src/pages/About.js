@@ -106,7 +106,7 @@ const About = () => {
                             {/* Highlight boxes */}
                             <div className="grid grid-cols-2 gap-4 mt-8">
                                 <div className="bg-khajur-cream border border-khajur-border p-4">
-                                    <p className="font-serif text-2xl font-bold text-khajur-gold">2024</p>
+                                    <p className="font-serif text-2xl font-bold text-khajur-gold">2026</p>
                                     <p className="text-sm text-khajur-dark/60 mt-1">Year Founded</p>
                                 </div>
                                 <div className="bg-khajur-cream border border-khajur-border p-4">
