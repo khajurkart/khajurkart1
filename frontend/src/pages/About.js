@@ -25,12 +25,12 @@ const About = () => {
         }
     ];
 
-    /*const stats = [
+    const stats = [
         { number: '500+', label: 'Happy Customers' },
         { number: '50+', label: 'Premium Products' },
         { number: '100%', label: 'Natural & Pure' },
         { number: '5★', label: 'Average Rating' },
-    ];*/
+    ];
 
     return (
         <div className="min-h-screen" data-testid="about-page">
@@ -63,7 +63,7 @@ const About = () => {
             </section>
 
             {/* ===== STATS ===== */}
-         /*   <section className="bg-khajur-gold py-12">
+            <section className="bg-khajur-gold py-12">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         {stats.map((stat, index) => (
@@ -79,7 +79,6 @@ const About = () => {
                     </div>
                 </div>
             </section>
-            */
 
             {/* ===== STORY ===== */}
             <section className="py-20 md:py-32">
