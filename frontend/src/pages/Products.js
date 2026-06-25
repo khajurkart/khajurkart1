@@ -16,8 +16,8 @@ const API = `${BACKEND_URL}/api`;
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
 const SORT_OPTIONS = [
-  { value: 'featured', label: 'Featured' },
-  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'featured',   label: 'Featured'           },
+  { value: 'price-low',  label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
 ];
 
@@ -102,17 +102,23 @@ const SortDropdown = ({ value, onChange }) => (
       id="sort-select"
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      style={{ backgroundColor: '#F8F4EC' }}
       className="
         px-4 py-2 rounded-sm text-xs font-medium
-        border border-khajur-border bg-white text-khajur-primary
-        hover:border-khajur-primary focus:border-khajur-primary
-        focus:outline-none focus:ring-2 focus:ring-khajur-gold/20
+        border border-khajur-border text-khajur-primary
+        hover:border-khajur-primary
+        focus:border-khajur-primary focus:outline-none
+        focus:ring-2 focus:ring-khajur-primary/30
         transition-all duration-200 cursor-pointer
       "
       data-testid="sort-dropdown"
     >
       {SORT_OPTIONS.map((option) => (
-        <option key={option.value} value={option.value}>
+        <option
+          key={option.value}
+          value={option.value}
+          style={{ backgroundColor: '#F8F4EC', color: '#1a3a2a' }}
+        >
           {option.label}
         </option>
       ))}
@@ -182,7 +188,6 @@ const Products = () => {
 
   const sortedProducts = useCallback(() => {
     const sorted = [...products];
-    
     switch (sortBy) {
       case 'price-low':
         return sorted.sort((a, b) => a.price - b.price);
@@ -230,7 +235,7 @@ const Products = () => {
 
         {/* ── Filter & Sort Bar ── */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-12">
-          
+
           {/* ── Category Filter ── */}
           <div data-testid="category-filter">
             <div className="flex items-center gap-2 mb-5">
