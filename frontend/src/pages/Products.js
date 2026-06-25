@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
@@ -8,6 +8,8 @@ import {
   PackageSearch,
   ShoppingBag,
   ArrowUpDown,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -16,9 +18,11 @@ const API = `${BACKEND_URL}/api`;
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
 const SORT_OPTIONS = [
-  { value: 'featured',   label: 'Featured'           },
-  { value: 'price-low',  label: 'Price: Low to High' },
-  { value: 'price-high', label: 'Price: High to Low' },
+  { value: 'featured',    label: 'Featured'           },
+  { value: 'price-low',   label: 'Price: Low to High' },
+  { value: 'price-high',  label: 'Price: High to Low' },
+  { value: 'price-min',   label: 'Price: Low'         },
+  { value: 'price-max',   label: 'Price: High'        },
 ];
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
@@ -85,46 +89,129 @@ const CategoryBtn = ({ label, isActive, onClick, testId }) => (
   </button>
 );
 
-// ── Sort Dropdown ──────────────────────────────────────────────────────────────
+// ── Custom Sort Dropdown ───────────────────────────────────────────────────────
 
-const SortDropdown = ({ value, onChange }) => (
-  <div className="flex items-center gap-3">
-    <div className="flex items-center gap-2">
-      <ArrowUpDown className="w-4 h-4 text-khajur-gold" />
-      <label
-        htmlFor="sort-select"
-        className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50"
-      >
-        Sort By
-      </label>
-    </div>
-    <select
-      id="sort-select"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{ backgroundColor: '#F8F4EC' }}
-      className="
-        px-4 py-2 rounded-sm text-xs font-medium
-        border border-khajur-border text-khajur-primary
-        hover:border-khajur-primary
-        focus:border-khajur-primary focus:outline-none
-        focus:ring-2 focus:ring-khajur-primary/30
-        transition-all duration-200 cursor-pointer
-      "
-      data-testid="sort-dropdown"
-    >
-      {SORT_OPTIONS.map((option) => (
-        <option
-          key={option.value}
-          value={option.value}
-          style={{ backgroundColor: '#F8F4EC', color: '#1a3a2a' }}
+const SortDropdown = ({ value, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef         = useRef(null);
+
+  const selectedLabel = SORT_OPTIONS.find((o) => o.value === value)?.label ?? 'Featured';
+
+  // ── Close on outside click ─────────────────────────────────────────────────
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // ── Close on Escape key ────────────────────────────────────────────────────
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleSelect = (optionValue) => {
+    onChange(optionValue);
+    setIsOpen(false);
+  };
+
+  // ── Group divider index (after index 2) ───────────────────────────────────
+  // Renders a thin divider between "Price: High to Low" and "Price: Low"
+
+  return (
+    <div className="flex items-center gap-3">
+
+      {/* ── Label ── */}
+      <div className="flex items-center gap-2">
+        <ArrowUpDown className="w-4 h-4 text-khajur-gold" />
+        <span className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
+          Sort By
+        </span>
+      </div>
+
+      {/* ── Dropdown Wrapper ── */}
+      <div className="relative" ref={dropdownRef}>
+
+        {/* ── Trigger Button ── */}
+        <button
+          onClick={() => setIsOpen((prev) => !prev)}
+          data-testid="sort-dropdown"
+          className={`
+            flex items-center justify-between gap-8
+            min-w-[175px] px-4 py-2 rounded-sm text-xs font-medium
+            border transition-all duration-200 cursor-pointer
+            bg-[#F8F4EC] text-khajur-primary
+            ${isOpen
+              ? 'border-khajur-primary ring-2 ring-khajur-primary/20'
+              : 'border-khajur-border hover:border-khajur-primary'
+            }
+          `}
         >
-          {option.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+          <span>{selectedLabel}</span>
+          <ChevronDown
+            className={`
+              w-4 h-4 text-khajur-primary transition-transform duration-200
+              ${isOpen ? 'rotate-180' : 'rotate-0'}
+            `}
+          />
+        </button>
+
+        {/* ── Dropdown Menu ── */}
+        {isOpen && (
+          <div
+            className="
+              absolute right-0 top-full mt-1 z-50
+              min-w-[175px] bg-[#F8F4EC]
+              border border-khajur-primary/20
+              rounded-sm shadow-lg overflow-hidden
+            "
+          >
+            {SORT_OPTIONS.map((option, index) => {
+              const isActive = option.value === value;
+
+              return (
+                <React.Fragment key={option.value}>
+
+                  {/* ── Divider between group 1 (index 0–2) and group 2 (index 3–4) ── */}
+                  {index === 3 && (
+                    <div className="h-px bg-khajur-primary/10 mx-3" />
+                  )}
+
+                  <button
+                    onClick={() => handleSelect(option.value)}
+                    className={`
+                      w-full flex items-center justify-between
+                      px-4 py-3 text-xs font-medium text-left
+                      transition-all duration-150 cursor-pointer
+                      ${isActive
+                        ? 'bg-khajur-primary text-khajur-cream'
+                        : 'text-khajur-primary hover:bg-khajur-primary/10 hover:text-khajur-primary'
+                      }
+                    `}
+                  >
+                    <span>{option.label}</span>
+                    {isActive && (
+                      <Check className="w-3.5 h-3.5 text-khajur-gold flex-shrink-0" />
+                    )}
+                  </button>
+
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+};
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
@@ -189,10 +276,25 @@ const Products = () => {
   const sortedProducts = useCallback(() => {
     const sorted = [...products];
     switch (sortBy) {
+
+      // ── Price: Low to High (ascending — cheapest first) ──
       case 'price-low':
         return sorted.sort((a, b) => a.price - b.price);
+
+      // ── Price: High to Low (descending — most expensive first) ──
       case 'price-high':
         return sorted.sort((a, b) => b.price - a.price);
+
+      // ── Price: Low (show only the single lowest priced product first) ──
+      case 'price-min':
+        return sorted.sort((a, b) => a.price - b.price).slice(0, 1)
+          .concat(sorted.sort((a, b) => a.price - b.price).slice(1));
+
+      // ── Price: High (show only the single highest priced product first) ──
+      case 'price-max':
+        return sorted.sort((a, b) => b.price - a.price).slice(0, 1)
+          .concat(sorted.sort((a, b) => b.price - a.price).slice(1));
+
       case 'featured':
       default:
         return sorted;
