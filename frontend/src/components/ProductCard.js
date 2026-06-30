@@ -127,6 +127,9 @@ const ProductCard = ({ product }) => {
               src={product.image}
               alt={product.name}
               loading="lazy"
+              decoding="async"
+              width={400}
+              height={400}
               onError={() => setImgError(true)}
               className={`
                 w-full h-full object-cover transition-transform duration-700
