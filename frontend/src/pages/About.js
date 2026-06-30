@@ -2,6 +2,12 @@ import React from 'react';
 import { Award, Heart, Leaf, Users, MapPin, Phone, Mail } from 'lucide-react';
 
 const About = () => {
+    useEffect(() => {
+        document.title = 'About Us — KhajurKart';
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
+    }, []);
     const values = [
         {
             icon: Award,
