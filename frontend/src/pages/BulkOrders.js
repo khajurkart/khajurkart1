@@ -6,6 +6,12 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const BulkOrders = () => {
+    useEffect(() => {
+        document.title = 'Bulk Orders — KhajurKart';
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
+    }, []);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
