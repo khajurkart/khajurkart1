@@ -1,3 +1,13 @@
+// ── Home.jsx ──────────────────────────────────────────────────────────────────
+import SEOHead from '../components/SEOHead';
+
+// Inside return:
+<SEOHead
+    title="Premium Dates, Dry Fruits & Spices Delivered to Your Door"
+    description="Shop the world's finest dates, nuts, dry fruits and spices at KhajurKart. Free shipping above ₹999. Fresh, premium quality delivered across India."
+    canonical="/"
+/>
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from 'react-slick';
