@@ -87,6 +87,13 @@ const inputBase = `
 // ── Contact Form ───────────────────────────────────────────────────────────────
 
 const ContactForm = () => {
+    useEffect(() => {
+        document.title = 'Contact Us — KhajurKart';
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
+    }, []);
+    
     const [formData, setFormData] = useState(INITIAL_FORM);
     const [submitting, setSubmitting] = useState(false);
 
