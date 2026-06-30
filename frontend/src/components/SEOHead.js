@@ -1,4 +1,5 @@
-// ── Reusable SEO component — use on every page ─────────────────────────────
+// src/components/SEOHead.jsx
+// ── Make sure this file exists at this exact path ─────────────────────────────
 
 import { Helmet } from 'react-helmet-async';
 
