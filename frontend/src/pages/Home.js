@@ -11,7 +11,6 @@ import {
     Star,
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import SEOHead from '../components/SEOHead';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -342,14 +341,6 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-white" data-testid="home-page">
-
-            {/* ── SEO ─────────────────────────────────────────────────────────────── */}
-            <SEOHead
-                title="Premium Dates, Dry Fruits & Spices Delivered to Your Door"
-                description="Shop the world's finest dates, nuts, dry fruits and spices at KhajurKart. Free shipping above ₹999. Fresh, premium quality delivered across India."
-                canonical="/"
-            />
-
             {/* ── Hero Slider ──────────────────────────────────────────────────────── */}
             <section className="relative" data-testid="hero-slider">
                 <Slider {...HERO_SLIDER_SETTINGS}>
