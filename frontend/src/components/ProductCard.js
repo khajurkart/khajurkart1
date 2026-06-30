@@ -32,8 +32,13 @@ const getDisplayPrice = (product) => {
     const prices = product.sizes.map((s) => s.price).filter(Boolean);
     if (prices.length) return Math.min(...prices);
   }
-  return product.price ?? 0;
+  return product.price ?? null; // return null if no price
 };
+
+// In render — guard against null
+<span className="font-serif text-xl font-bold text-khajur-gold">
+  {displayPrice !== null ? `₹${displayPrice}` : 'Price on request'}
+</span>
 
 const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 
@@ -44,11 +49,11 @@ const DiscountBadge = ({ discount }) => (
   <div className="absolute top-0 right-0 z-10 flex items-center">
     <div
       style={{
-        width:        0,
-        height:       0,
-        borderTop:    '16px solid transparent',
+        width: 0,
+        height: 0,
+        borderTop: '16px solid transparent',
         borderBottom: '16px solid transparent',
-        borderRight:  '12px solid #1a3a2a', // khajur-primary
+        borderRight: '12px solid #1a3a2a', // khajur-primary
       }}
     />
     <div className="bg-khajur-primary text-khajur-gold pr-3 pl-1 h-8 flex items-center text-[10px] font-extrabold tracking-[0.12em] uppercase whitespace-nowrap">
@@ -75,15 +80,15 @@ const OutOfStockBadge = () => (
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const ProductCard = ({ product }) => {
-  const { addToCart }           = useCart();
-  const [adding, setAdding]     = useState(false);
+  const { addToCart } = useCart();
+  const [adding, setAdding] = useState(false);
   const [imgError, setImgError] = useState(false);
 
-  const discount     = calcDiscount(product);
-  const hasDiscount  = discount > 0;
+  const discount = calcDiscount(product);
+  const hasDiscount = discount > 0;
   const displayPrice = getDisplayPrice(product);
   const isOutOfStock = product.stock === 0;
-  const productUrl   = `/product/${product.id}?category=${product.category ?? ''}`;
+  const productUrl = `/product/${product.id}?category=${product.category ?? ''}`;
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -210,8 +215,8 @@ const ProductCard = ({ product }) => {
               ${isOutOfStock
                 ? 'bg-khajur-border text-khajur-dark/30 cursor-not-allowed'
                 : adding
-                ? 'bg-khajur-primary text-khajur-cream cursor-wait scale-95'
-                : 'bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary hover:scale-105'
+                  ? 'bg-khajur-primary text-khajur-cream cursor-wait scale-95'
+                  : 'bg-khajur-primary text-khajur-cream hover:bg-khajur-gold hover:text-khajur-primary hover:scale-105'
               }
             `}
             data-testid={`add-to-cart-${product.id}`}
