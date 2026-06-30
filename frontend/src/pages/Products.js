@@ -277,11 +277,11 @@ const Products = () => {
 
       // ── Price: Low to High (ascending — cheapest first) ──
       case 'price-low':
-        return sorted.sort((a, b) => a.price - b.price);
+        return arr.sort((a, b) => a.price - b.price);
 
       // ── Price: High to Low (descending — most expensive first) ──
       case 'price-high':
-        return sorted.sort((a, b) => b.price - a.price);
+        return arr.sort((a, b) => b.price - a.price);
 
       case 'featured':
       default:
