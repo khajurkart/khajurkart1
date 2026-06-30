@@ -18,9 +18,9 @@ const API = `${BACKEND_URL}/api`;
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
 const SORT_OPTIONS = [
-  { value: 'featured',    label: 'Featured'           },
-  { value: 'price-low',   label: 'Price: Low to High' },
-  { value: 'price-high',  label: 'Price: High to Low' },
+  { value: 'featured', label: 'Featured' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'price-high', label: 'Price: High to Low' },
 ];
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
@@ -91,7 +91,7 @@ const CategoryBtn = ({ label, isActive, onClick, testId }) => (
 
 const SortDropdown = ({ value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef         = useRef(null);
+  const dropdownRef = useRef(null);
 
   const selectedLabel = SORT_OPTIONS.find((o) => o.value === value)?.label ?? 'Featured';
 
@@ -214,17 +214,17 @@ const SortDropdown = ({ value, onChange }) => {
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const Products = () => {
-  const navigate            = useNavigate();
-  const location            = useLocation();
-  const [searchParams]      = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
-  const [products, setProducts]     = useState([]);
+  const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [selected, setSelected]     = useState(
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(
     searchParams.get('category') || ''
   );
-  const [sortBy, setSortBy]         = useState('featured');
+  const [sortBy, setSortBy] = useState('featured');
 
   // ── Sync category from URL ─────────────────────────────────────────────────
 
@@ -272,7 +272,7 @@ const Products = () => {
   // ── Sort Products ──────────────────────────────────────────────────────────
 
   const sortedProducts = useCallback(() => {
-    const sorted = [...products];
+    const arr = [...products];
     switch (sortBy) {
 
       // ── Price: Low to High (ascending — cheapest first) ──
@@ -283,19 +283,9 @@ const Products = () => {
       case 'price-high':
         return sorted.sort((a, b) => b.price - a.price);
 
-      // ── Price: Low (show only the single lowest priced product first) ──
-      case 'price-min':
-        return sorted.sort((a, b) => a.price - b.price).slice(0, 1)
-          .concat(sorted.sort((a, b) => a.price - b.price).slice(1));
-
-      // ── Price: High (show only the single highest priced product first) ──
-      case 'price-max':
-        return sorted.sort((a, b) => b.price - a.price).slice(0, 1)
-          .concat(sorted.sort((a, b) => b.price - a.price).slice(1));
-
       case 'featured':
       default:
-        return sorted;
+        return arr;
     }
   }, [products, sortBy]);
 
