@@ -1,11 +1,3 @@
-// ── Cart.jsx ──────────────────────────────────────────────────────────────────
-<SEOHead
-    title="Your Cart"
-    description="Review your selected items and proceed to checkout."
-    canonical="/cart"
-    noIndex={true} // ← Don't index cart/checkout pages
-/>
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
