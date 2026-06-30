@@ -423,7 +423,8 @@ def send_verification_email(to_email, name, code):
 
 
 @api_router.post("/auth/register")
-async def register(user_data: UserRegister):
+@limiter.limit("5/minute")
+async def register(request: Request, user_data: UserRegister):
     # Check if fully verified user exists
     existing_user = await db.users.find_one(
         {
@@ -491,7 +492,8 @@ async def verify(data: VerifyRequest):
 
 
 @api_router.post("/auth/resend-code")
-async def resend_code(email: str):
+@limiter.limit("5/minute")
+async def resend_code(request: Request, email: str):
     user = await db.users.find_one({"email": email})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -542,7 +544,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 
 @api_router.post("/auth/forgot-password")
-async def forgot_password(email: str):
+@limiter.limit("5/minute")
+async def forgot_password(request: Request, email: str):
     user = await db.users.find_one({"email": email})
 
     if not user:
@@ -1625,11 +1628,11 @@ async def search_products(q: str):
     return products
 
 
-@api_router.post("/products")
-async def create_product(product: Product):
-    data = product.dict()
-    await db.products.insert_one(data)
-    return data
+#@api_router.post("/products")
+#async def create_product(product: Product):
+#    data = product.dict()
+#    await db.products.insert_one(data)
+#    return data
 
 
 # ============ REVIEW ROUTES ============
@@ -1924,7 +1927,7 @@ async def cancel_order(order_id: str, current_user: dict = Depends(get_current_u
 
 
 @app.delete("/api/orders/{order_id}")
-async def delete_order(order_id: str):
+async def delete_order(order_id: str, admin: dict = Depends(get_admin_user)):
     await db.orders.delete_one({"id": order_id})
     return {"message": "Order deleted"}
 
@@ -2156,7 +2159,7 @@ async def update_order_status(
 
 
 @app.delete("/api/admin/orders/{order_id}")
-async def delete_order(order_id: str):
+async def delete_order(order_id: str, admin: dict = Depends(get_admin_user)):
     await db.orders.update_one({"id": order_id}, {"$set": {"is_deleted": True}})
     return {"message": "Order deleted"}
 
