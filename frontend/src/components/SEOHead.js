@@ -1,6 +1,5 @@
 // src/components/SEOHead.jsx
-// ── Make sure this file exists at this exact path ─────────────────────────────
-
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const SEOHead = ({
@@ -23,28 +22,28 @@ const SEOHead = ({
         <Helmet>
             {/* ── Basic ── */}
             <title>{fullTitle}</title>
-            <meta name="description" content={description} />
-            <link rel="canonical" href={fullCanonical} />
+            <meta name="description"  content={description}  />
+            <link rel="canonical"     href={fullCanonical}   />
             {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
             {/* ── Open Graph ── */}
-            <meta property="og:title" content={fullTitle} />
-            <meta property="og:description" content={description} />
-            <meta property="og:image" content={image} />
-            <meta property="og:type" content={type} />
-            <meta property="og:url" content={fullCanonical} />
-            <meta property="og:site_name" content="KhajurKart" />
-            <meta property="og:locale" content="en_IN" />
+            <meta property="og:title"       content={fullTitle}     />
+            <meta property="og:description" content={description}   />
+            <meta property="og:image"       content={image}         />
+            <meta property="og:type"        content={type}          />
+            <meta property="og:url"         content={fullCanonical} />
+            <meta property="og:site_name"   content="KhajurKart"    />
+            <meta property="og:locale"      content="en_IN"         />
 
             {/* ── Twitter Card ── */}
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={fullTitle} />
-            <meta name="twitter:description" content={description} />
-            <meta name="twitter:image" content={image} />
+            <meta name="twitter:card"        content="summary_large_image" />
+            <meta name="twitter:title"       content={fullTitle}           />
+            <meta name="twitter:description" content={description}         />
+            <meta name="twitter:image"       content={image}               />
 
             {/* ── Extra ── */}
-            <meta name="theme-color" content="#1a3a2a" />
-            <meta name="author" content="KhajurKart" />
+            <meta name="theme-color" content="#1a3a2a"    />
+            <meta name="author"      content="KhajurKart" />
         </Helmet>
     );
 };
