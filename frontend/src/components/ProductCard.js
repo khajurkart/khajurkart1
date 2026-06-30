@@ -35,13 +35,6 @@ const getDisplayPrice = (product) => {
   return product.price ?? null; // return null if no price
 };
 
-// In render — guard against null
-const displayPrice = getDisplayPrice(product);
-<span
-  className="font-serif text-xl font-bold text-khajur-gold">
-  {displayPrice !== null ? `₹${displayPrice}` : 'Price on request'}
-</span>
-
 const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 
 // ─── Discount Ribbon Badge ──────────────────────────────────────────────────────
@@ -117,6 +110,10 @@ const ProductCard = ({ product }) => {
       `}
       data-testid={`product-card-${product.id}`}
     >
+      {/* In render — guard against null*/}
+      <span className="font-serif text-xl font-bold text-khajur-gold">
+        {displayPrice !== null ? `₹${displayPrice}` : 'Price on request'}
+      </span>
 
       {/* ── Badges ─────────────────────────────────────────────────────────── */}
       {hasDiscount && !isOutOfStock && <DiscountBadge discount={discount} />}
