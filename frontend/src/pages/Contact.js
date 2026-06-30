@@ -1,3 +1,10 @@
+// ── Contact.jsx ───────────────────────────────────────────────────────────────
+<SEOHead
+    title="Contact Us | Get in Touch"
+    description="Have a question or feedback? Contact KhajurKart at +91 79810 02137 or khajurkart@gmail.com. We're here Monday to Saturday, 9AM–8PM."
+    canonical="/contact"
+/>
+
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
