@@ -44,6 +44,8 @@ const HeroSection = () => (
         <img
             src="https://images.pexels.com/photos/4198755/pexels-photo-4198755.jpeg"
             alt="Contact Us"
+            fetchpriority="high"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover opacity-25"
         />
         {/* Gradient Overlay */}
