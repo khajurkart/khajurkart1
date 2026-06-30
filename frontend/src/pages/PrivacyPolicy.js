@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // ← add useEffect here
 import { Shield, Eye, Database, Lock, UserCheck, AlertCircle, RefreshCcw, Mail } from 'lucide-react';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -157,6 +157,8 @@ const HeroSection = ({ title, subtitle, image }) => (
     <img
       src={image}
       alt={title}
+      fetchpriority="high"
+      decoding="async"
       className="absolute inset-0 w-full h-full object-cover opacity-20"
     />
     <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary/90 to-transparent" />
@@ -223,51 +225,64 @@ const LastUpdated = () => (
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-const PrivacyPolicy = () => (
-  <div className="min-h-screen bg-white" data-testid="privacy-policy-page">
+// ← Changed from () => (...) to () => { ... return (...) }
+const PrivacyPolicy = () => {
 
-    <HeroSection
-      title="Privacy Policy"
-      subtitle="Your privacy matters to us. This policy explains what data we collect, how we use it, and how we keep it safe."
-      image="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg"
-    />
+  // ── Page Title ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    document.title = 'Privacy Policy — KhajurKart';
+    return () => {
+      document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+    };
+  }, []);
 
-    <section className="py-20 md:py-28">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col gap-12">
+  return (
+    <div className="min-h-screen bg-white" data-testid="privacy-policy-page">
 
-        <LastUpdated />
+      <HeroSection
+        title="Privacy Policy"
+        subtitle="Your privacy matters to us. This policy explains what data we collect, how we use it, and how we keep it safe."
+        image="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg"
+      />
 
-        <InfoBanner text="By using the KhajurKart website and placing orders, you consent to the collection and use of your information as described in this Privacy Policy. Please read it carefully." />
+      <section className="py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col gap-12">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {PRIVACY_SECTIONS.map((section) => (
-            <SectionCard key={section.title} {...section} />
-          ))}
+          <LastUpdated />
+
+          <InfoBanner text="By using the KhajurKart website and placing orders, you consent to the collection and use of your information as described in this Privacy Policy. Please read it carefully." />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {PRIVACY_SECTIONS.map((section) => (
+              <SectionCard key={section.title} {...section} />
+            ))}
+          </div>
+
+          <div className="border-t border-khajur-border pt-8 text-center">
+            <p className="text-sm text-khajur-dark/50 leading-relaxed">
+              For privacy-related concerns, contact us at{' '}
+              <a
+                href="mailto:khajurkart@gmail.com"
+                className="text-khajur-gold hover:underline font-medium"
+              >
+                khajurkart@gmail.com
+              </a>{' '}
+              or call{' '}
+              <a
+                href="tel:+917981002137"
+                className="text-khajur-gold hover:underline font-medium"
+              >
+                +91 79810 02137
+              </a>
+            </p>
+          </div>
+
         </div>
+      </section>
 
-        <div className="border-t border-khajur-border pt-8 text-center">
-          <p className="text-sm text-khajur-dark/50 leading-relaxed">
-            For privacy-related concerns, contact us at{' '}
-            <a
-              href="mailto:khajurkart@gmail.com"
-              className="text-khajur-gold hover:underline font-medium"
-            >
-              khajurkart@gmail.com
-            </a>{' '}
-            or call{' '}
-            <a
-              href="tel:+917981002137"
-              className="text-khajur-gold hover:underline font-medium"
-            >
-              +91 79810 02137
-            </a>
-          </p>
-        </div>
+    </div>
+  );
 
-      </div>
-    </section>
-
-  </div>
-);
+};
 
 export default PrivacyPolicy;
