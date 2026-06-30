@@ -318,6 +318,11 @@ const Home = () => {
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // ── Set page title ─────────────────────────────────────────────────────────
+    useEffect(() => {
+        document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+    }, []);
+
     const fetchData = useCallback(async () => {
         try {
             const [categoriesRes, productsRes] = await Promise.all([
