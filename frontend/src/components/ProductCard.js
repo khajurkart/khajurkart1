@@ -36,7 +36,9 @@ const getDisplayPrice = (product) => {
 };
 
 // In render — guard against null
-<span className="font-serif text-xl font-bold text-khajur-gold">
+const displayPrice
+<span
+  className="font-serif text-xl font-bold text-khajur-gold">
   {displayPrice !== null ? `₹${displayPrice}` : 'Price on request'}
 </span>
 
