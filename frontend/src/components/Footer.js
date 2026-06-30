@@ -224,10 +224,10 @@ const Footer = () => (
 
       {/* ── Bottom Bar ── */}
       <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-xs text-khajur-cream/40 tracking-wide">
+        <p className="text-xs text-khajur-cream/70 tracking-wide">
           © {new Date().getFullYear()} KhajurKart. All rights reserved.
         </p>
-        <p className="text-xs text-khajur-cream/30">
+        <p className="text-xs text-khajur-cream/60">
           Crafted with care for premium quality.
         </p>
       </div>
