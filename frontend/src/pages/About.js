@@ -1,10 +1,3 @@
-// ── About.jsx ─────────────────────────────────────────────────────────────────
-<SEOHead
-    title="About Us | Our Story & Mission"
-    description="Learn about KhajurKart — our story, mission and commitment to delivering the world's finest dates, dry fruits and spices across India."
-    canonical="/about"
-/>
-
 import React from 'react';
 import { Award, Heart, Leaf, Users, MapPin, Phone, Mail } from 'lucide-react';
 
