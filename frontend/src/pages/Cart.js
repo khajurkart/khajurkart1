@@ -281,6 +281,12 @@ const OrderSummaryPanel = ({ cart, cartTotal, onCheckout }) => (
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const Cart = () => {
+    useEffect(() => {
+        document.title = 'Your Cart — KhajurKart';
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
+    }, []);
     const { cart, updateCartItem, removeFromCart, cartTotal, loading } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
