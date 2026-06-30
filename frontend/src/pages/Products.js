@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
+import { getCache, setCache } from '../utils/cache'; // ← add this import
 import {
     Filter,
     Loader2,
@@ -21,11 +22,11 @@ const SORT_OPTIONS = [
     { value: 'featured', label: 'Featured' },
     { value: 'price-low', label: 'Price: Low to High' },
     { value: 'price-high', label: 'Price: High to Low' },
+    { value: 'price-min', label: 'Price: Low' },
+    { value: 'price-max', label: 'Price: High' },
 ];
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
-
-// ── Loading ────────────────────────────────────────────────────────────────────
 
 const LoadingState = () => (
     <div className="flex flex-col items-center justify-center py-32 gap-4 text-khajur-dark/40">
@@ -33,8 +34,6 @@ const LoadingState = () => (
         <p className="text-sm">Loading products…</p>
     </div>
 );
-
-// ── Empty State ────────────────────────────────────────────────────────────────
 
 const EmptyState = ({ category, onReset }) => (
     <div className="flex flex-col items-center justify-center py-32 gap-6 text-center">
@@ -68,8 +67,6 @@ const EmptyState = ({ category, onReset }) => (
     </div>
 );
 
-// ── Category Button ────────────────────────────────────────────────────────────
-
 const CategoryBtn = ({ label, isActive, onClick, testId }) => (
     <button
         onClick={onClick}
@@ -87,15 +84,12 @@ const CategoryBtn = ({ label, isActive, onClick, testId }) => (
     </button>
 );
 
-// ── Custom Sort Dropdown ───────────────────────────────────────────────────────
-
 const SortDropdown = ({ value, onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const selectedLabel = SORT_OPTIONS.find((o) => o.value === value)?.label ?? 'Featured';
 
-    // ── Close on outside click ─────────────────────────────────────────────────
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -106,7 +100,6 @@ const SortDropdown = ({ value, onChange }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // ── Close on Escape key ────────────────────────────────────────────────────
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') setIsOpen(false);
@@ -120,24 +113,15 @@ const SortDropdown = ({ value, onChange }) => {
         setIsOpen(false);
     };
 
-    // ── Group divider index (after index 2) ───────────────────────────────────
-    // Renders a thin divider between "Price: High to Low" and "Price: Low"
-
     return (
         <div className="flex items-center gap-3">
-
-            {/* ── Label ── */}
             <div className="flex items-center gap-2">
                 <ArrowUpDown className="w-4 h-4 text-khajur-gold" />
                 <span className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
                     Sort By
                 </span>
             </div>
-
-            {/* ── Dropdown Wrapper ── */}
             <div className="relative" ref={dropdownRef}>
-
-                {/* ── Trigger Button ── */}
                 <button
                     onClick={() => setIsOpen((prev) => !prev)}
                     data-testid="sort-dropdown"
@@ -160,8 +144,6 @@ const SortDropdown = ({ value, onChange }) => {
             `}
                     />
                 </button>
-
-                {/* ── Dropdown Menu ── */}
                 {isOpen && (
                     <div
                         className="
@@ -173,15 +155,11 @@ const SortDropdown = ({ value, onChange }) => {
                     >
                         {SORT_OPTIONS.map((option, index) => {
                             const isActive = option.value === value;
-
                             return (
                                 <React.Fragment key={option.value}>
-
-                                    {/* ── Divider between group 1 (index 0–2) and group 2 (index 3–4) ── */}
                                     {index === 3 && (
                                         <div className="h-px bg-khajur-primary/10 mx-3" />
                                     )}
-
                                     <button
                                         onClick={() => handleSelect(option.value)}
                                         className={`
@@ -199,13 +177,11 @@ const SortDropdown = ({ value, onChange }) => {
                                             <Check className="w-3.5 h-3.5 text-khajur-gold flex-shrink-0" />
                                         )}
                                     </button>
-
                                 </React.Fragment>
                             );
                         })}
                     </div>
                 )}
-
             </div>
         </div>
     );
@@ -218,14 +194,6 @@ const Products = () => {
     const location = useLocation();
     const [searchParams] = useSearchParams();
 
-    useEffect(() => {
-        document.title = 'Our Products — KhajurKart';
-        return () => {
-            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
-        };
-    }, []);
-
-
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -234,18 +202,34 @@ const Products = () => {
     );
     const [sortBy, setSortBy] = useState('featured');
 
-    // ── Sync category from URL ─────────────────────────────────────────────────
+    // ── Page Title ───────────────────────────────────────────────────────────────
+    useEffect(() => {
+        document.title = 'Our Products — KhajurKart';
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
+    }, []);
 
+    // ── Sync category from URL ───────────────────────────────────────────────────
     useEffect(() => {
         const cat = new URLSearchParams(location.search).get('category') || '';
         setSelected(cat);
     }, [location.search]);
 
-    // ── Fetch Categories ───────────────────────────────────────────────────────
-
+    // ── Fetch Categories WITH CACHE ──────────────────────────────────────────────
     const fetchCategories = useCallback(async () => {
+
+        // ── Check cache first ──────────────────────────────────────────────────────
+        const cached = getCache('categories');
+        if (cached) {
+            setCategories(cached); // ← use cached data, skip API call
+            return;
+        }
+
+        // ── No cache — fetch from API ──────────────────────────────────────────────
         try {
             const { data } = await axios.get(`${API}/categories`);
+            setCache('categories', data); // ← save to cache for 5 minutes
             setCategories(data);
         } catch {
             // silent
@@ -256,8 +240,7 @@ const Products = () => {
         fetchCategories();
     }, [fetchCategories]);
 
-    // ── Fetch Products ─────────────────────────────────────────────────────────
-
+    // ── Fetch Products ───────────────────────────────────────────────────────────
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
@@ -277,28 +260,19 @@ const Products = () => {
         fetchProducts();
     }, [fetchProducts]);
 
-    // ── Sort Products ──────────────────────────────────────────────────────────
-
+    // ── Sort Products ────────────────────────────────────────────────────────────
     const sortedProducts = useCallback(() => {
         const arr = [...products];
         switch (sortBy) {
-
-            // ── Price: Low to High (ascending — cheapest first) ──
-            case 'price-low':
-                return arr.sort((a, b) => a.price - b.price);
-
-            // ── Price: High to Low (descending — most expensive first) ──
-            case 'price-high':
-                return arr.sort((a, b) => b.price - a.price);
-
-            case 'featured':
-            default:
-                return arr;
+            case 'price-low': return arr.sort((a, b) => a.price - b.price);
+            case 'price-high': return arr.sort((a, b) => b.price - a.price);
+            case 'price-min': return arr.sort((a, b) => a.price - b.price).slice(0, 1);
+            case 'price-max': return arr.sort((a, b) => b.price - a.price).slice(0, 1);
+            default: return arr;
         }
     }, [products, sortBy]);
 
-    // ── Handlers ───────────────────────────────────────────────────────────────
-
+    // ── Handlers ─────────────────────────────────────────────────────────────────
     const handleCategory = (slug) => {
         navigate(slug ? `/products?category=${slug}` : '/products');
     };
@@ -306,8 +280,6 @@ const Products = () => {
     const handleSort = (value) => {
         setSortBy(value);
     };
-
-    // ── Render ─────────────────────────────────────────────────────────────────
 
     const displayProducts = sortedProducts();
 
@@ -333,8 +305,6 @@ const Products = () => {
 
                 {/* ── Filter & Sort Bar ── */}
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-12">
-
-                    {/* ── Category Filter ── */}
                     <div data-testid="category-filter">
                         <div className="flex items-center gap-2 mb-5">
                             <Filter className="w-4 h-4 text-khajur-gold" />
@@ -360,14 +330,11 @@ const Products = () => {
                             ))}
                         </div>
                     </div>
-
-                    {/* ── Sort Dropdown ── */}
                     {!loading && products.length > 0 && (
                         <div className="lg:ml-auto">
                             <SortDropdown value={sortBy} onChange={handleSort} />
                         </div>
                     )}
-
                 </div>
 
                 {/* ── Products Grid ── */}
