@@ -34,7 +34,6 @@ const getDisplayPrice = (product) => {
   }
   return product.price ?? null;
 };
-
 const stripHtml = (html) => html?.replace(/<[^>]*>/g, '') ?? '';
 
 // ─── Discount Ribbon Badge ──────────────────────────────────────────────────────
