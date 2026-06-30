@@ -1,13 +1,3 @@
-// ── Products.jsx ──────────────────────────────────────────────────────────────
-import SEOHead from '../components/SEOHead';
-
-// Inside return:
-<SEOHead
-  title="Our Products | Dates, Nuts, Dry Fruits & Spices"
-  description="Explore our premium collection of dates, nuts, dry fruits and spices sourced from the finest origins. Shop now with free shipping above ₹999."
-  canonical="/products"
-/>
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
