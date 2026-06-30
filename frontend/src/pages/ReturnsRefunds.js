@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // ← add useEffect here
 import { RefreshCcw, XCircle, CheckCircle, CreditCard, AlertCircle, PhoneCall } from 'lucide-react';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -121,6 +121,8 @@ const HeroSection = ({ title, subtitle, image }) => (
     <img
       src={image}
       alt={title}
+      fetchpriority="high"
+      decoding="async"
       className="absolute inset-0 w-full h-full object-cover opacity-20"
     />
     <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary/90 to-transparent" />
@@ -175,49 +177,62 @@ const InfoBanner = ({ text }) => (
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-const ReturnsRefunds = () => (
-  <div className="min-h-screen bg-white" data-testid="returns-refunds-page">
+// ← Changed from () => (...) to () => { ... return (...) }
+const ReturnsRefunds = () => {
 
-    <HeroSection
-      title="Returns & Refunds"
-      subtitle="We stand behind the quality of every product we deliver. Here's everything you need to know about our returns and refund process."
-      image="https://images.pexels.com/photos/3944405/pexels-photo-3944405.jpeg"
-    />
+  // ── Page Title ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    document.title = 'Returns & Refunds — KhajurKart';
+    return () => {
+      document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+    };
+  }, []);
 
-    <section className="py-20 md:py-28">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col gap-12">
+  return (
+    <div className="min-h-screen bg-white" data-testid="returns-refunds-page">
 
-        <InfoBanner text="As our products are perishable food items, we follow strict return guidelines to ensure food safety. We urge customers to inspect their orders upon delivery and report any issues within 48 hours." />
+      <HeroSection
+        title="Returns & Refunds"
+        subtitle="We stand behind the quality of every product we deliver. Here's everything you need to know about our returns and refund process."
+        image="https://images.pexels.com/photos/3944405/pexels-photo-3944405.jpeg"
+      />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {RETURN_SECTIONS.map((section) => (
-            <SectionCard key={section.title} {...section} />
-          ))}
+      <section className="py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col gap-12">
+
+          <InfoBanner text="As our products are perishable food items, we follow strict return guidelines to ensure food safety. We urge customers to inspect their orders upon delivery and report any issues within 48 hours." />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {RETURN_SECTIONS.map((section) => (
+              <SectionCard key={section.title} {...section} />
+            ))}
+          </div>
+
+          <div className="border-t border-khajur-border pt-8 text-center">
+            <p className="text-sm text-khajur-dark/50 leading-relaxed">
+              For return and refund queries, contact us at{' '}
+              <a
+                href="mailto:khajurkart@gmail.com"
+                className="text-khajur-gold hover:underline font-medium"
+              >
+                khajurkart@gmail.com
+              </a>{' '}
+              or call{' '}
+              <a
+                href="tel:+917981002137"
+                className="text-khajur-gold hover:underline font-medium"
+              >
+                +91 79810 02137
+              </a>
+            </p>
+          </div>
+
         </div>
+      </section>
 
-        <div className="border-t border-khajur-border pt-8 text-center">
-          <p className="text-sm text-khajur-dark/50 leading-relaxed">
-            For return and refund queries, contact us at{' '}
-            <a
-              href="mailto:khajurkart@gmail.com"
-              className="text-khajur-gold hover:underline font-medium"
-            >
-              khajurkart@gmail.com
-            </a>{' '}
-            or call{' '}
-            <a
-              href="tel:+917981002137"
-              className="text-khajur-gold hover:underline font-medium"
-            >
-              +91 79810 02137
-            </a>
-          </p>
-        </div>
+    </div>
+  );
 
-      </div>
-    </section>
-
-  </div>
-);
+};
 
 export default ReturnsRefunds;
