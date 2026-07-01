@@ -1628,11 +1628,13 @@ async def search_products(q: str):
     return products
 
 
-#@api_router.post("/products")
-#async def create_product(product: Product):
-#    data = product.dict()
-#    await db.products.insert_one(data)
-#    return data
+@api_router.post("/products")
+async def create_product(
+    product: Product, admin: dict = Depends(get_admin_user)
+):  # ✅ Admin only
+    data = product.dict()
+    await db.products.insert_one(data)
+    return data
 
 
 # ============ REVIEW ROUTES ============
