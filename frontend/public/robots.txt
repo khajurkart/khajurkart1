@@ -1,4 +1,18 @@
 User-agent: *
 Allow: /
+Allow: /products
+Allow: /about
+Allow: /contact
+Allow: /bulk-orders
+Allow: /faq
 
-Sitemap: https://khajurkart.com/sitemap.xml
+Disallow: /admin
+Disallow: /checkout
+Disallow: /thank-you
+Disallow: /account
+Disallow: /cart
+Disallow: /my-orders
+Disallow: /addresses
+Disallow: /reset-password
+
+Sitemap: https://www.khajurkart.com/sitemap.xml
