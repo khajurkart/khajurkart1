@@ -17,6 +17,7 @@ import {
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
 import RelatedProducts from '../components/RelatedProducts';
+import Breadcrumb from '../components/Breadcrumb';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -612,15 +613,6 @@ const ReviewsSection = ({ productId, reviews, onRefresh }) => {
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const ProductDetail = () => {
-    // Add this inside your existing product fetch useEffect
-    useEffect(() => {
-        if (product?.name) {
-            document.title = `${product.name} — KhajurKart`;
-        }
-        return () => {
-            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
-        };
-    }, [product]);
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
@@ -675,6 +667,16 @@ const ProductDetail = () => {
         if (product?.sizes?.length && !selectedSize) {
             setSelectedSize(product.sizes[0].weight);
         }
+    }, [product, selectedSize]);
+
+    // Update document title
+    useEffect(() => {
+        if (product?.name) {
+            document.title = `${product.name} — KhajurKart`;
+        }
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
     }, [product]);
 
     // ── Derived Pricing ────────────────────────────────────────────────────────
@@ -708,6 +710,22 @@ const ProductDetail = () => {
         addToCart(product.id, quantity, selectedSize);
         setTimeout(() => navigate('/cart'), 300);
     };
+
+    // ── Breadcrumb Items ───────────────────────────────────────────────────────
+
+    const breadcrumbItems = useMemo(() => {
+        if (!product) return [];
+
+        return [
+            { label: 'Home', to: '/' },
+            { label: 'Products', to: '/products' },
+            ...(product.category
+                ? [{ label: product.category, to: `/products?category=${encodeURIComponent(product.category)}` }]
+                : []
+            ),
+            { label: product.name, to: '#' },
+        ];
+    }, [product]);
 
     // ── Render States ──────────────────────────────────────────────────────────
 
@@ -746,14 +764,19 @@ const ProductDetail = () => {
         <div className="min-h-screen py-20 bg-white" data-testid="product-detail-page">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
 
-                {/* Breadcrumb */}
+                {/* Back Button */}
                 <Link
                     to={`/products${category ? `?category=${category}` : ''}`}
-                    className="inline-flex items-center gap-1 text-sm text-khajur-primary hover:text-khajur-gold transition-colors mb-10"
+                    className="inline-flex items-center gap-1 text-sm text-khajur-primary hover:text-khajur-gold transition-colors mb-6"
                 >
                     <ChevronLeft className="w-4 h-4" />
                     Back to Products
                 </Link>
+
+                {/* Breadcrumb */}
+                <div className="mb-10">
+                    <Breadcrumb items={breadcrumbItems} />
+                </div>
 
                 {/* ── Product Hero ─────────────────────────────────────────────────── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-6">
