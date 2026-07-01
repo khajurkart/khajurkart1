@@ -39,7 +39,7 @@ const About = () => {
     ];
 
     return (
-        <div className="min-h-screen" data-testid="about-page">
+        <div id="main-content" className="min-h-screen" data-testid="about-page">
 
             {/* ===== HERO ===== */}
             <section className="relative h-[500px] bg-khajur-primary overflow-hidden">
