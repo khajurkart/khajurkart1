@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     Eye,
     EyeOff,
@@ -15,12 +15,37 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// Constants & Configuration
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
+const AUTH_MODES = {
+    LOGIN: 'login',
+    REGISTER: 'register',
+    FORGOT_PASSWORD: 'forgot',
+};
 
-const INITIAL_FORM = {
+const PASSWORD_STRENGTH = {
+    WEAK: { label: 'Weak', color: 'bg-red-400', text: 'text-red-500' },
+    MEDIUM: { label: 'Medium', color: 'bg-yellow-400', text: 'text-yellow-600' },
+    STRONG: { label: 'Strong', color: 'bg-green-500', text: 'text-green-600' },
+};
+
+const VALIDATION_RULES = {
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    phone: /^[6-9]\d{9}$/,
+    password: {
+        minLength: 6,
+        hasUpperCase: /[A-Z]/,
+        hasNumber: /[0-9]/,
+    },
+    otp: /^\d{6}$/,
+};
+
+const INITIAL_FORM_STATE = {
     name: '',
     phone: '',
     email: '',
@@ -28,21 +53,136 @@ const INITIAL_FORM = {
     confirmPassword: '',
 };
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// Utility Functions
+// ═══════════════════════════════════════════════════════════════════════════════
 
-const getPasswordStrength = (password) => {
-    if (!password) return null;
-    if (password.length < 6)
-        return { label: 'Weak', color: 'bg-red-400', text: 'text-red-500' };
-    if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/))
-        return { label: 'Strong', color: 'bg-green-500', text: 'text-green-600' };
-    return { label: 'Medium', color: 'bg-yellow-400', text: 'text-yellow-600' };
+/**
+ * Calculates password strength based on multiple criteria
+ */
+const calculatePasswordStrength = (password) => {
+    if (!password || password.length < VALIDATION_RULES.password.minLength) {
+        return PASSWORD_STRENGTH.WEAK;
+    }
+
+    const hasUpperCase = VALIDATION_RULES.password.hasUpperCase.test(password);
+    const hasNumber = VALIDATION_RULES.password.hasNumber.test(password);
+    const hasMinLength = password.length >= 8;
+
+    if (hasUpperCase && hasNumber && hasMinLength) {
+        return PASSWORD_STRENGTH.STRONG;
+    }
+
+    if ((hasUpperCase || hasNumber) && password.length >= VALIDATION_RULES.password.minLength) {
+        return PASSWORD_STRENGTH.MEDIUM;
+    }
+
+    return PASSWORD_STRENGTH.WEAK;
 };
 
-// ─── Sub-Components ────────────────────────────────────────────────────────────
+/**
+ * Validates form data based on current auth mode
+ */
+const validateFormData = (formData, mode) => {
+    const errors = {};
 
-// ── Field ──────────────────────────────────────────────────────────────────────
+    // Email validation
+    if (!formData.email?.trim()) {
+        errors.email = 'Email is required';
+    } else if (!VALIDATION_RULES.email.test(formData.email)) {
+        errors.email = 'Please enter a valid email address';
+    }
 
+    if (mode === AUTH_MODES.FORGOT_PASSWORD) {
+        return { isValid: Object.keys(errors).length === 0, errors };
+    }
+
+    // Password validation
+    if (!formData.password) {
+        errors.password = 'Password is required';
+    } else if (formData.password.length < VALIDATION_RULES.password.minLength) {
+        errors.password = `Password must be at least ${VALIDATION_RULES.password.minLength} characters`;
+    }
+
+    // Register-specific validation
+    if (mode === AUTH_MODES.REGISTER) {
+        if (!formData.name?.trim()) {
+            errors.name = 'Full name is required';
+        } else if (formData.name.trim().length < 2) {
+            errors.name = 'Name must be at least 2 characters';
+        }
+
+        if (!formData.phone?.trim()) {
+            errors.phone = 'Phone number is required';
+        } else if (!VALIDATION_RULES.phone.test(formData.phone.replace(/\D/g, ''))) {
+            errors.phone = 'Please enter a valid 10-digit phone number';
+        }
+
+        if (!formData.confirmPassword) {
+            errors.confirmPassword = 'Please confirm your password';
+        } else if (formData.password !== formData.confirmPassword) {
+            errors.confirmPassword = 'Passwords do not match';
+        }
+    }
+
+    return {
+        isValid: Object.keys(errors).length === 0,
+        errors,
+    };
+};
+
+/**
+ * Sanitizes phone number to 10 digits
+ */
+const sanitizePhoneNumber = (phone) => {
+    return phone.replace(/\D/g, '').slice(0, 10);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Custom Hooks
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Custom hook for managing modal accessibility
+ */
+const useModalAccessibility = (isOpen, onClose, canClose = true) => {
+    const modalRef = useRef(null);
+
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape' && canClose) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('keydown', handleEscape);
+            document.body.style.overflow = 'hidden';
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscape);
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen, onClose, canClose]);
+
+    return { modalRef };
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Sub-Components
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const inputBase = `
+  w-full bg-white border border-khajur-border
+  hover:border-khajur-gold/40 focus:border-khajur-gold
+  text-sm text-khajur-primary placeholder:text-khajur-dark/25
+  px-4 py-3 rounded-sm focus:outline-none transition-colors duration-200
+`;
+
+/**
+ * Field Label Component
+ */
 const Field = ({ icon: Icon, label, children }) => (
     <div className="space-y-1.5">
         <label className="flex items-center gap-2 text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
@@ -53,18 +193,18 @@ const Field = ({ icon: Icon, label, children }) => (
     </div>
 );
 
-const inputBase = `
-  w-full bg-white border border-khajur-border
-  hover:border-khajur-gold/40 focus:border-khajur-gold
-  text-sm text-khajur-primary placeholder:text-khajur-dark/25
-  px-4 py-3 rounded-sm focus:outline-none transition-colors duration-200
-`;
-
-// ── Password Input ─────────────────────────────────────────────────────────────
-
-const PasswordInput = ({ value, onChange, testId, placeholder = 'Enter password' }) => {
+/**
+ * Password Input with strength indicator
+ */
+const PasswordInput = ({ 
+    value, 
+    onChange, 
+    testId, 
+    placeholder = 'Enter password',
+    showStrength = false 
+}) => {
     const [show, setShow] = useState(false);
-    const strength = getPasswordStrength(value);
+    const strength = useMemo(() => calculatePasswordStrength(value), [value]);
 
     return (
         <div className="space-y-1.5">
@@ -76,14 +216,12 @@ const PasswordInput = ({ value, onChange, testId, placeholder = 'Enter password'
                     onChange={onChange}
                     placeholder={placeholder}
                     data-testid={testId}
-                    // ✅ Prevent any click inside input from bubbling to backdrop
                     onClick={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
                     className={`${inputBase} pr-10`}
                 />
                 <button
                     type="button"
-                    // ✅ Stop propagation on toggle button too
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
                         e.stopPropagation();
@@ -91,21 +229,23 @@ const PasswordInput = ({ value, onChange, testId, placeholder = 'Enter password'
                     }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-khajur-dark/40 hover:text-khajur-primary transition-colors"
                     tabIndex={-1}
+                    aria-label={show ? 'Hide password' : 'Show password'}
                 >
                     {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
             </div>
 
             {/* Password Strength Bar */}
-            {strength && (
+            {showStrength && strength && (
                 <div className="space-y-1">
                     <div className="h-1 bg-khajur-border rounded-full overflow-hidden">
-                        <div className={`
-              h-full rounded-full transition-all duration-300
-              ${strength.label === 'Weak' ? 'w-1/3 bg-red-400' : ''}
-              ${strength.label === 'Medium' ? 'w-2/3 bg-yellow-400' : ''}
-              ${strength.label === 'Strong' ? 'w-full bg-green-500' : ''}
-            `} />
+                        <div 
+                            className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
+                            style={{ 
+                                width: strength.label === 'Weak' ? '33%' : 
+                                       strength.label === 'Medium' ? '66%' : '100%' 
+                            }}
+                        />
                     </div>
                     <p className={`text-xs font-medium ${strength.text}`}>
                         {strength.label} password
@@ -116,62 +256,76 @@ const PasswordInput = ({ value, onChange, testId, placeholder = 'Enter password'
     );
 };
 
-// ── Modal Header ───────────────────────────────────────────────────────────────
-
+/**
+ * Modal Header Component
+ */
 const ModalHeader = ({ title, subtitle }) => (
     <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-12 h-12 bg-khajur-gold/10 rounded-full mb-4">
             <ShieldCheck className="w-5 h-5 text-khajur-gold" />
         </div>
-        <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-1">{title}</h2>
-        <p className="text-sm text-khajur-dark/50">{subtitle}</p>
+        <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-1">
+            {title}
+        </h2>
+        <p className="text-sm text-khajur-dark/50">
+            {subtitle}
+        </p>
     </div>
 );
 
-// ── Divider ────────────────────────────────────────────────────────────────────
-
+/**
+ * Divider Component
+ */
 const Divider = ({ label }) => (
     <div className="flex items-center gap-3 my-6">
         <div className="flex-1 h-px bg-khajur-border" />
-        <span className="text-xs text-khajur-dark/30 uppercase tracking-widest">{label}</span>
+        <span className="text-xs text-khajur-dark/30 uppercase tracking-widest">
+            {label}
+        </span>
         <div className="flex-1 h-px bg-khajur-border" />
     </div>
 );
 
-// ── Submit Button ──────────────────────────────────────────────────────────────
-
+/**
+ * Submit Button Component
+ */
 const SubmitButton = ({ loading, label }) => (
     <button
         type="submit"
         disabled={loading}
         data-testid="auth-submit-button"
         className="
-      w-full flex items-center justify-center gap-2
-      bg-khajur-gold hover:bg-khajur-gold/90
-      hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
-      disabled:opacity-60 disabled:cursor-not-allowed
-      text-khajur-primary rounded-sm px-8 py-4
-      uppercase tracking-widest text-xs font-bold
-      transition-all duration-300
-    "
+            w-full flex items-center justify-center gap-2
+            bg-khajur-gold hover:bg-khajur-gold/90
+            hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
+            disabled:opacity-60 disabled:cursor-not-allowed
+            text-khajur-primary rounded-sm px-8 py-4
+            uppercase tracking-widest text-xs font-bold
+            transition-all duration-300
+        "
     >
-        {loading
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Please wait…</>
-            : label
-        }
+        {loading ? (
+            <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Please wait…
+            </>
+        ) : (
+            label
+        )}
     </button>
 );
 
-// ── OTP Screen ─────────────────────────────────────────────────────────────────
-
+/**
+ * OTP Verification Screen
+ */
 const OTPScreen = ({ email, onVerify, onResend }) => {
     const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [resending, setResending] = useState(false);
 
     const handleVerify = async () => {
-        if (!code.trim()) {
-            toast.error('Please enter the verification code.');
+        if (!code.trim() || code.length !== 6) {
+            toast.error('Please enter a valid 6-digit code.');
             return;
         }
         setLoading(true);
@@ -215,7 +369,14 @@ const OTPScreen = ({ email, onVerify, onResend }) => {
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="000000"
-                    className="w-full bg-white border-2 border-khajur-primary/30 focus:border-khajur-gold text-khajur-primary px-4 py-4 rounded-sm outline-none text-center tracking-widest font-serif font-bold transition-colors duration-200"
+                    autoComplete="one-time-code"
+                    className="
+                        w-full bg-white border-2 border-khajur-primary/30 
+                        focus:border-khajur-gold text-khajur-primary 
+                        px-4 py-4 rounded-sm outline-none text-center 
+                        tracking-widest font-serif font-bold 
+                        transition-colors duration-200
+                    "
                     style={{ fontSize: '32px', letterSpacing: '12px' }}
                 />
                 <p className="text-center text-xs text-khajur-dark/40">
@@ -227,15 +388,28 @@ const OTPScreen = ({ email, onVerify, onResend }) => {
             <button
                 onClick={handleVerify}
                 disabled={loading || code.length < 6}
-                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] disabled:opacity-60 disabled:cursor-not-allowed rounded-sm px-8 py-4 font-serif font-bold transition-all duration-300 flex items-center justify-center gap-2"
+                className="
+                    w-full bg-khajur-gold text-khajur-primary 
+                    hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)]
+                    disabled:opacity-60 disabled:cursor-not-allowed 
+                    rounded-sm px-8 py-4 font-serif font-bold 
+                    transition-all duration-300 
+                    flex items-center justify-center gap-2
+                "
                 style={{ fontSize: '16px', letterSpacing: '2px' }}
             >
-                {loading
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</>
-                    : <><ShieldCheck className="w-4 h-4" /> Verify &amp; Continue</>
-                }
+                {loading ? (
+                    <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Verifying…
+                    </>
+                ) : (
+                    <>
+                        <ShieldCheck className="w-4 h-4" />
+                        Verify &amp; Continue
+                    </>
+                )}
             </button>
-
 
             {/* Resend Button */}
             <button
@@ -243,129 +417,242 @@ const OTPScreen = ({ email, onVerify, onResend }) => {
                 onClick={handleResend}
                 disabled={resending}
                 className="
-          w-full flex items-center justify-center gap-2
-          text-xs text-khajur-dark/50 hover:text-khajur-gold
-          transition-colors disabled:opacity-40
-        "
+                    w-full flex items-center justify-center gap-2
+                    text-xs text-khajur-dark/50 hover:text-khajur-gold
+                    transition-colors disabled:opacity-40
+                "
             >
-                {resending
-                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Resending…</>
-                    : <><RefreshCw className="w-3.5 h-3.5" /> Didn't receive? Resend Code</>
-                }
+                {resending ? (
+                    <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Resending…
+                    </>
+                ) : (
+                    <>
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        Didn't receive? Resend Code
+                    </>
+                )}
             </button>
         </div>
     );
 };
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// Main Component
+// ═══════════════════════════════════════════════════════════════════════════════
 
+/**
+ * AuthModal - Professional authentication modal component
+ * Handles login, registration, password reset, and email verification
+ */
 const AuthModal = ({ isOpen, onClose }) => {
-    const { login, register, setAuth } = useAuth();
+    // ─────────────────────────────────────────────────────────────────────────
+    // State Management
+    // ─────────────────────────────────────────────────────────────────────────
 
-    const [mode, setMode] = useState('login'); // 'login' | 'register' | 'forgot'
+    const [mode, setMode] = useState(AUTH_MODES.LOGIN);
     const [showOTP, setShowOTP] = useState(false);
-    const [formData, setFormData] = useState(INITIAL_FORM);
+    const [formData, setFormData] = useState(INITIAL_FORM_STATE);
     const [loading, setLoading] = useState(false);
     const [otpEmail, setOtpEmail] = useState('');
 
-    if (!isOpen) return null;
+    const { login, register, setAuth } = useAuth();
+    const { modalRef } = useModalAccessibility(isOpen, onClose, !showOTP);
 
-    const set = (field) => (e) =>
-        setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    // ─────────────────────────────────────────────────────────────────────────
+    // Reset form when modal closes
+    // ─────────────────────────────────────────────────────────────────────────
 
-    const resetForm = () => setFormData(INITIAL_FORM);
-
-    // ── Handlers ──────────────────────────────────────────────────────────────
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            if (mode === 'forgot') {
-                const res = await fetch(
-                    `${API}/auth/forgot-password?email=${formData.email}`,
-                    { method: 'POST' }
-                );
-                if (res.ok) {
-                    toast.success('Password reset link sent to your email.');
-                    setMode('login');
-                    resetForm();
-                } else {
-                    const err = await res.json();
-                    toast.error(err.detail || 'Failed to send reset link.');
-                }
-
-            } else if (mode === 'login') {
-                await login(formData.email, formData.password);
-                toast.success('Welcome back!');
-                resetForm();
-                onClose();
-
-            } else {
-                if (formData.password !== formData.confirmPassword) {
-                    toast.error('Passwords do not match.');
-                    return;
-                }
-                await register(formData.name, formData.email, formData.password, formData.phone);
-                toast.success('Verification code sent to your email.');
-                setOtpEmail(formData.email);
-                setShowOTP(true);
-                setFormData((prev) => ({ ...INITIAL_FORM, email: prev.email }));
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.detail || error.message || 'Authentication failed.');
-        } finally {
+    useEffect(() => {
+        if (!isOpen) {
+            setMode(AUTH_MODES.LOGIN);
+            setFormData(INITIAL_FORM_STATE);
+            setShowOTP(false);
             setLoading(false);
+        }
+    }, [isOpen]);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Form Handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const handleInputChange = useCallback((field) => (e) => {
+        let value = e.target.value;
+
+        // Sanitize phone number
+        if (field === 'phone') {
+            value = sanitizePhoneNumber(value);
+        }
+
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    }, []);
+
+    const resetForm = useCallback(() => {
+        setFormData(INITIAL_FORM_STATE);
+    }, []);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // API Handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const handleLogin = async () => {
+        try {
+            await login(formData.email, formData.password);
+            toast.success('Welcome back!');
+            resetForm();
+            onClose();
+        } catch (error) {
+            throw new Error(error.response?.data?.detail || 'Invalid email or password');
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            await register(formData.name, formData.email, formData.password, formData.phone);
+            toast.success('Verification code sent to your email.');
+            setOtpEmail(formData.email);
+            setShowOTP(true);
+            setFormData((prev) => ({ ...INITIAL_FORM_STATE, email: prev.email }));
+        } catch (error) {
+            throw new Error(error.response?.data?.detail || 'Registration failed. Please try again');
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        try {
+            const response = await fetch(
+                `${API}/auth/forgot-password?email=${encodeURIComponent(formData.email)}`,
+                { method: 'POST' }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to send reset email');
+            }
+
+            toast.success('Password reset link sent to your email.');
+            setMode(AUTH_MODES.LOGIN);
+            resetForm();
+        } catch (error) {
+            throw error;
         }
     };
 
     const handleVerifyOTP = async (code) => {
         try {
-            const res = await fetch(`${API}/auth/verify`, {
+            const response = await fetch(`${API}/auth/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: otpEmail, verification_code: code }),
+                body: JSON.stringify({
+                    email: otpEmail,
+                    verification_code: code,
+                }),
             });
-            if (!res.ok) {
-                const err = await res.json();
-                toast.error(err.detail || 'Invalid verification code.');
-                return;
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Invalid verification code');
             }
-            const data = await res.json();
+
+            const data = await response.json();
             setAuth(data.access_token, data.user);
+
             toast.success('Email verified successfully!');
             setShowOTP(false);
             onClose();
-        } catch {
-            toast.error('Verification failed. Please try again.');
+        } catch (error) {
+            toast.error(error.message || 'Verification failed. Please try again.');
         }
     };
 
     const handleResendOTP = async () => {
         try {
-            await fetch(`${API}/auth/resend-code?email=${otpEmail}`, { method: 'POST' });
+            await fetch(`${API}/auth/resend-code?email=${encodeURIComponent(otpEmail)}`, {
+                method: 'POST'
+            });
             toast.success('Verification code resent.');
         } catch {
             toast.error('Failed to resend code.');
         }
     };
 
-    // ── Mode Config ────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // Form Submission
+    // ─────────────────────────────────────────────────────────────────────────
 
-    const modeConfig = {
-        login: { title: 'Welcome Back', subtitle: 'Sign in to your KhajurKart account.', btn: 'Sign In' },
-        register: { title: 'Create Account', subtitle: 'Join KhajurKart and shop premium dates.', btn: 'Create Account' },
-        forgot: { title: 'Reset Password', subtitle: 'Enter your email to receive a reset link.', btn: 'Send Reset Link' },
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Validate form
+        const validation = validateFormData(formData, mode);
+        if (!validation.isValid) {
+            const firstError = Object.values(validation.errors)[0];
+            toast.error(firstError);
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            switch (mode) {
+                case AUTH_MODES.LOGIN:
+                    await handleLogin();
+                    break;
+                case AUTH_MODES.REGISTER:
+                    await handleRegister();
+                    break;
+                case AUTH_MODES.FORGOT_PASSWORD:
+                    await handleForgotPassword();
+                    break;
+                default:
+                    break;
+            }
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setLoading(false);
+        }
     };
-    const cfg = modeConfig[mode];
 
-    // ── Render ─────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // Render Guards
+    // ─────────────────────────────────────────────────────────────────────────
+
+    if (!isOpen) return null;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Modal Content Configuration
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const modalConfig = {
+        [AUTH_MODES.LOGIN]: {
+            title: 'Welcome Back',
+            subtitle: 'Sign in to your KhajurKart account.',
+            btn: 'Sign In',
+        },
+        [AUTH_MODES.REGISTER]: {
+            title: 'Create Account',
+            subtitle: 'Join KhajurKart and shop premium dates.',
+            btn: 'Create Account',
+        },
+        [AUTH_MODES.FORGOT_PASSWORD]: {
+            title: 'Reset Password',
+            subtitle: 'Enter your email to receive a reset link.',
+            btn: 'Send Reset Link',
+        },
+    };
+
+    const cfg = modalConfig[mode];
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Render
+    // ─────────────────────────────────────────────────────────────────────────
 
     return (
         <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             data-testid="auth-modal"
-            // ✅ Only close when mousedown starts directly on the dark backdrop
             onMouseDown={(e) => {
                 if (e.target === e.currentTarget && !showOTP) {
                     onClose();
@@ -373,14 +660,20 @@ const AuthModal = ({ isOpen, onClose }) => {
             }}
         >
             <div
-                className="bg-white w-full max-w-md rounded-sm shadow-2xl border border-khajur-border relative max-h-[95vh] overflow-y-auto"
-                // ✅ Prevent any click/drag inside modal from bubbling to backdrop
+                ref={modalRef}
+                className="
+                    bg-white w-full max-w-md rounded-sm shadow-2xl 
+                    border border-khajur-border relative 
+                    max-h-[95vh] overflow-y-auto
+                "
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
             >
                 <div className="px-8 py-10">
-
-                    {/* ── OTP Screen ── */}
+                    {/* OTP Screen */}
                     {showOTP ? (
                         <OTPScreen
                             email={otpEmail}
@@ -389,78 +682,89 @@ const AuthModal = ({ isOpen, onClose }) => {
                         />
                     ) : (
                         <>
-                            {/* ── Close Button ── */}
+                            {/* Close Button */}
                             <button
                                 onClick={onClose}
-                                className="absolute top-5 right-5 text-khajur-dark/30 hover:text-khajur-primary transition-colors"
+                                className="
+                                    absolute top-5 right-5 
+                                    text-khajur-dark/30 hover:text-khajur-primary 
+                                    transition-colors
+                                "
                                 aria-label="Close modal"
                             >
                                 <X className="w-5 h-5" />
                             </button>
 
-                            {/* ── Header ── */}
+                            {/* Header */}
                             <ModalHeader title={cfg.title} subtitle={cfg.subtitle} />
 
-                            {/* ── Form ── */}
-                            <form onSubmit={handleSubmit} className="space-y-5">
-
-                                {/* Register Fields */}
-                                {mode === 'register' && (
-                                    <>
-                                        <Field icon={User} label="Full Name">
-                                            <input
-                                                type="text"
-                                                required
-                                                placeholder="John Doe"
-                                                value={formData.name}
-                                                onChange={set('name')}
-                                                onMouseDown={(e) => e.stopPropagation()}
-                                                data-testid="register-name-input"
-                                                className={inputBase}
-                                            />
-                                        </Field>
-                                        <Field icon={Phone} label="Phone Number">
-                                            <input
-                                                type="tel"
-                                                required
-                                                placeholder="+91 98765 43210"
-                                                value={formData.phone}
-                                                onChange={set('phone')}
-                                                onMouseDown={(e) => e.stopPropagation()}
-                                                className={inputBase}
-                                            />
-                                        </Field>
-                                    </>
+                            {/* Form */}
+                            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                                {/* Register: Name Field */}
+                                {mode === AUTH_MODES.REGISTER && (
+                                    <Field icon={User} label="Full Name">
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="John Doe"
+                                            value={formData.name}
+                                            onChange={handleInputChange('name')}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            data-testid="register-name-input"
+                                            autoComplete="name"
+                                            className={inputBase}
+                                        />
+                                    </Field>
                                 )}
 
-                                {/* Email */}
+                                {/* Register: Phone Field */}
+                                {mode === AUTH_MODES.REGISTER && (
+                                    <Field icon={Phone} label="Phone Number">
+                                        <input
+                                            type="tel"
+                                            required
+                                            placeholder="+91 98765 43210"
+                                            value={formData.phone}
+                                            onChange={handleInputChange('phone')}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            autoComplete="tel"
+                                            inputMode="numeric"
+                                            maxLength={10}
+                                            className={inputBase}
+                                        />
+                                    </Field>
+                                )}
+
+                                {/* Email Field */}
                                 <Field icon={Mail} label="Email Address">
                                     <input
                                         type="email"
                                         required
                                         placeholder="john@example.com"
                                         value={formData.email}
-                                        onChange={set('email')}
+                                        onChange={handleInputChange('email')}
                                         onMouseDown={(e) => e.stopPropagation()}
                                         data-testid="auth-email-input"
+                                        autoComplete="email"
                                         className={inputBase}
                                     />
                                 </Field>
 
-                                {/* Password */}
-                                {mode !== 'forgot' && (
+                                {/* Password Field */}
+                                {mode !== AUTH_MODES.FORGOT_PASSWORD && (
                                     <Field icon={Lock} label="Password">
                                         <PasswordInput
                                             value={formData.password}
-                                            onChange={set('password')}
+                                            onChange={handleInputChange('password')}
                                             testId="auth-password-input"
                                             placeholder="Enter your password"
+                                            showStrength={mode === AUTH_MODES.REGISTER}
                                         />
                                     </Field>
                                 )}
 
-                                {/* Confirm Password */}
-                                {mode === 'register' && (
+                                {/* Register: Confirm Password */}
+                                {mode === AUTH_MODES.REGISTER && (
                                     <Field icon={Lock} label="Confirm Password">
                                         <div className="space-y-1">
                                             <input
@@ -468,44 +772,56 @@ const AuthModal = ({ isOpen, onClose }) => {
                                                 required
                                                 placeholder="Re-enter your password"
                                                 value={formData.confirmPassword}
-                                                onChange={set('confirmPassword')}
+                                                onChange={handleInputChange('confirmPassword')}
                                                 onMouseDown={(e) => e.stopPropagation()}
+                                                autoComplete="new-password"
                                                 className={inputBase}
                                             />
                                             {formData.confirmPassword &&
                                                 formData.password !== formData.confirmPassword && (
-                                                    <p className="text-xs text-red-500">Passwords do not match.</p>
+                                                    <p className="text-xs text-red-500">
+                                                        Passwords do not match.
+                                                    </p>
                                                 )}
                                         </div>
                                     </Field>
                                 )}
 
                                 {/* Forgot Password Link */}
-                                {mode === 'login' && (
+                                {mode === AUTH_MODES.LOGIN && (
                                     <div className="text-right">
                                         <button
                                             type="button"
-                                            onClick={() => setMode('forgot')}
+                                            onClick={() => setMode(AUTH_MODES.FORGOT_PASSWORD)}
                                             data-testid="forgot-password-link"
-                                            className="text-xs text-khajur-dark/50 hover:text-khajur-gold transition-colors font-medium"
+                                            className="
+                                                text-xs text-khajur-dark/50 
+                                                hover:text-khajur-gold transition-colors 
+                                                font-medium
+                                            "
                                         >
                                             Forgot password?
                                         </button>
                                     </div>
                                 )}
 
+                                {/* Submit Button */}
                                 <SubmitButton loading={loading} label={cfg.btn} />
                             </form>
 
-                            {/* ── Toggle / Back ── */}
+                            {/* Toggle / Back */}
                             <Divider label="or" />
 
                             <div className="text-center">
-                                {mode === 'forgot' ? (
+                                {mode === AUTH_MODES.FORGOT_PASSWORD ? (
                                     <button
                                         type="button"
-                                        onClick={() => setMode('login')}
-                                        className="flex items-center gap-1.5 text-sm text-khajur-primary hover:text-khajur-gold transition-colors mx-auto font-medium"
+                                        onClick={() => setMode(AUTH_MODES.LOGIN)}
+                                        className="
+                                            flex items-center gap-1.5 text-sm 
+                                            text-khajur-primary hover:text-khajur-gold 
+                                            transition-colors mx-auto font-medium
+                                        "
                                     >
                                         <ArrowLeft className="w-4 h-4" />
                                         Back to Sign In
@@ -513,16 +829,31 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 ) : (
                                     <button
                                         type="button"
-                                        onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-                                        className="text-sm text-khajur-dark/60 hover:text-khajur-gold transition-colors"
+                                        onClick={() =>
+                                            setMode(
+                                                mode === AUTH_MODES.LOGIN
+                                                    ? AUTH_MODES.REGISTER
+                                                    : AUTH_MODES.LOGIN
+                                            )
+                                        }
+                                        className="
+                                            text-sm text-khajur-dark/60 
+                                            hover:text-khajur-gold transition-colors
+                                        "
                                     >
-                                        {mode === 'login' ? (
-                                            <>Don't have an account?{' '}
-                                                <span className="font-semibold text-khajur-primary">Register</span>
+                                        {mode === AUTH_MODES.LOGIN ? (
+                                            <>
+                                                Don't have an account?{' '}
+                                                <span className="font-semibold text-khajur-primary">
+                                                    Register
+                                                </span>
                                             </>
                                         ) : (
-                                            <>Already have an account?{' '}
-                                                <span className="font-semibold text-khajur-primary">Sign In</span>
+                                            <>
+                                                Already have an account?{' '}
+                                                <span className="font-semibold text-khajur-primary">
+                                                    Sign In
+                                                </span>
                                             </>
                                         )}
                                     </button>
