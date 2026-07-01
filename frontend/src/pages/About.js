@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Award, Heart, Leaf, Users, MapPin, Phone, Mail } from 'lucide-react';
 
 const About = () => {
