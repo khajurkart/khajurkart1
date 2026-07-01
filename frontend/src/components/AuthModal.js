@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     Eye,
     EyeOff,
@@ -11,488 +11,1056 @@ import {
     ArrowLeft,
     ShieldCheck,
     RefreshCw,
+    AlertCircle,
+    CheckCircle,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
-const AuthModal = ({ isOpen, onClose }) => {
-    const [showPassword, setShowPassword] = useState(false);
-    const [isLogin, setIsLogin] = useState(true);
-    const [isForgotPassword, setIsForgotPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        name: '',
-        phone: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
-    const [loading, setLoading] = useState(false);
-    const [showverification_code, setShowverification_code] = useState(false);
-    const [verification_code, setverification_code] = useState("");
-    const [sentViaPhone, setSentViaPhone] = useState(false);
+// ═══════════════════════════════════════════════════════════════════════════════
+// Constants & Configuration
+// ═══════════════════════════════════════════════════════════════════════════════
 
-    const { login, register, setAuth } = useAuth();
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-    // ✅ Ref for focus trap
+const AUTH_MODES = {
+    LOGIN: 'login',
+    REGISTER: 'register',
+    FORGOT_PASSWORD: 'forgot_password',
+    VERIFY_EMAIL: 'verify_email',
+};
+
+const PASSWORD_STRENGTH = {
+    WEAK: { label: 'Weak', color: 'text-red-600', score: 0 },
+    MEDIUM: { label: 'Medium', color: 'text-yellow-600', score: 1 },
+    STRONG: { label: 'Strong', color: 'text-green-600', score: 2 },
+};
+
+const VALIDATION_RULES = {
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    phone: /^[6-9]\d{9}$/,
+    password: {
+        minLength: 6,
+        hasUpperCase: /[A-Z]/,
+        hasNumber: /[0-9]/,
+    },
+    otp: /^\d{6}$/,
+};
+
+const INITIAL_FORM_STATE = {
+    name: '',
+    phone: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Utility Functions
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Calculates password strength based on multiple criteria
+ * @param {string} password - The password to evaluate
+ * @returns {Object} Password strength object with label, color, and score
+ */
+const calculatePasswordStrength = (password) => {
+    if (!password || password.length < VALIDATION_RULES.password.minLength) {
+        return PASSWORD_STRENGTH.WEAK;
+    }
+
+    const hasUpperCase = VALIDATION_RULES.password.hasUpperCase.test(password);
+    const hasNumber = VALIDATION_RULES.password.hasNumber.test(password);
+    const hasMinLength = password.length >= 8;
+
+    if (hasUpperCase && hasNumber && hasMinLength) {
+        return PASSWORD_STRENGTH.STRONG;
+    }
+
+    if ((hasUpperCase || hasNumber) && password.length >= VALIDATION_RULES.password.minLength) {
+        return PASSWORD_STRENGTH.MEDIUM;
+    }
+
+    return PASSWORD_STRENGTH.WEAK;
+};
+
+/**
+ * Validates form data based on current auth mode
+ * @param {Object} formData - Form data to validate
+ * @param {string} mode - Current authentication mode
+ * @returns {Object} Validation result with isValid flag and errors object
+ */
+const validateFormData = (formData, mode) => {
+    const errors = {};
+
+    // Email validation
+    if (!formData.email?.trim()) {
+        errors.email = 'Email is required';
+    } else if (!VALIDATION_RULES.email.test(formData.email)) {
+        errors.email = 'Please enter a valid email address';
+    }
+
+    if (mode === AUTH_MODES.FORGOT_PASSWORD) {
+        return { isValid: Object.keys(errors).length === 0, errors };
+    }
+
+    // Password validation (login and register)
+    if (mode !== AUTH_MODES.VERIFY_EMAIL) {
+        if (!formData.password) {
+            errors.password = 'Password is required';
+        } else if (formData.password.length < VALIDATION_RULES.password.minLength) {
+            errors.password = `Password must be at least ${VALIDATION_RULES.password.minLength} characters`;
+        }
+    }
+
+    // Register-specific validation
+    if (mode === AUTH_MODES.REGISTER) {
+        if (!formData.name?.trim()) {
+            errors.name = 'Full name is required';
+        } else if (formData.name.trim().length < 2) {
+            errors.name = 'Name must be at least 2 characters';
+        }
+
+        if (!formData.phone?.trim()) {
+            errors.phone = 'Phone number is required';
+        } else if (!VALIDATION_RULES.phone.test(formData.phone.replace(/\D/g, ''))) {
+            errors.phone = 'Please enter a valid 10-digit phone number';
+        }
+
+        if (!formData.confirmPassword) {
+            errors.confirmPassword = 'Please confirm your password';
+        } else if (formData.password !== formData.confirmPassword) {
+            errors.confirmPassword = 'Passwords do not match';
+        }
+    }
+
+    return {
+        isValid: Object.keys(errors).length === 0,
+        errors,
+    };
+};
+
+/**
+ * Sanitizes phone number to 10 digits
+ * @param {string} phone - Phone number input
+ * @returns {string} Sanitized phone number
+ */
+const sanitizePhoneNumber = (phone) => {
+    return phone.replace(/\D/g, '').slice(0, 10);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Custom Hooks
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Custom hook for managing modal accessibility features
+ * @param {boolean} isOpen - Modal open state
+ * @param {Function} onClose - Close handler
+ * @param {boolean} canClose - Whether modal can be closed
+ */
+const useModalAccessibility = (isOpen, onClose, canClose = true) => {
     const modalRef = useRef(null);
-    const firstFocusableRef = useRef(null);
-    const lastFocusableRef = useRef(null);
 
-    // ✅ Escape key handler
+    // Escape key handler
     useEffect(() => {
         const handleEscape = (e) => {
-            if (e.key === 'Escape' && !showverification_code) {
+            if (e.key === 'Escape' && canClose) {
                 onClose();
             }
         };
+
         if (isOpen) {
             document.addEventListener('keydown', handleEscape);
-            // ✅ Prevent background scroll
             document.body.style.overflow = 'hidden';
         }
+
         return () => {
             document.removeEventListener('keydown', handleEscape);
             document.body.style.overflow = 'unset';
         };
-    }, [isOpen, onClose, showverification_code]);
+    }, [isOpen, onClose, canClose]);
 
-    // ✅ Focus trap — Tab key stays inside modal
+    // Focus trap
     useEffect(() => {
         const handleTabKey = (e) => {
             if (!modalRef.current) return;
 
             const focusableElements = modalRef.current.querySelectorAll(
-                'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
+                'button:not([disabled]), input:not([disabled]), select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
             );
 
             const firstElement = focusableElements[0];
             const lastElement = focusableElements[focusableElements.length - 1];
 
             if (e.key === 'Tab') {
-                if (e.shiftKey) {
-                    // Shift+Tab — going backwards
-                    if (document.activeElement === firstElement) {
-                        e.preventDefault();
-                        lastElement.focus();
-                    }
-                } else {
-                    // Tab — going forwards
-                    if (document.activeElement === lastElement) {
-                        e.preventDefault();
-                        firstElement.focus();
-                    }
+                if (e.shiftKey && document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement?.focus();
+                } else if (!e.shiftKey && document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement?.focus();
                 }
             }
         };
 
         if (isOpen) {
             document.addEventListener('keydown', handleTabKey);
-            // ✅ Auto-focus first input when modal opens
+
+            // Auto-focus first input
             setTimeout(() => {
-                const firstInput = modalRef.current?.querySelector('input, button');
-                if (firstInput) firstInput.focus();
-            }, 50);
+                const firstInput = modalRef.current?.querySelector('input:not([disabled]), button:not([disabled])');
+                firstInput?.focus();
+            }, 100);
         }
+
         return () => document.removeEventListener('keydown', handleTabKey);
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    return { modalRef };
+};
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+/**
+ * Custom hook for OTP countdown timer
+ * @param {number} initialSeconds - Initial countdown time in seconds
+ * @returns {Object} Timer state and controls
+ */
+const useOTPTimer = (initialSeconds = 600) => {
+    const [timeLeft, setTimeLeft] = useState(initialSeconds);
+    const [isActive, setIsActive] = useState(true);
+
+    useEffect(() => {
+        if (!isActive || timeLeft <= 0) return;
+
+        const interval = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    setIsActive(false);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [isActive, timeLeft]);
+
+    const reset = useCallback(() => {
+        setTimeLeft(initialSeconds);
+        setIsActive(true);
+    }, [initialSeconds]);
+
+    const formatTime = useMemo(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }, [timeLeft]);
+
+    return { timeLeft, formatTime, isExpired: timeLeft === 0, reset };
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Sub-Components
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Form Input Component with validation and accessibility
+ */
+const FormInput = ({
+    id,
+    label,
+    type = 'text',
+    value,
+    onChange,
+    error,
+    required = false,
+    autoComplete,
+    placeholder,
+    disabled = false,
+    maxLength,
+    icon: Icon,
+    testId,
+    inputMode,
+    pattern,
+}) => {
+    const [isFocused, setIsFocused] = useState(false);
+    const hasError = Boolean(error);
+
+    return (
+        <div className="space-y-2">
+            <label
+                htmlFor={id}
+                className="block text-sm font-medium text-khajur-primary"
+            >
+                {label} {required && <span className="text-khajur-gold">*</span>}
+            </label>
+
+            <div className="relative">
+                {Icon && (
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-khajur-primary/40">
+                        <Icon className="w-4 h-4" />
+                    </div>
+                )}
+
+                <input
+                    id={id}
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    disabled={disabled}
+                    required={required}
+                    autoComplete={autoComplete}
+                    placeholder={placeholder}
+                    maxLength={maxLength}
+                    inputMode={inputMode}
+                    pattern={pattern}
+                    data-testid={testId}
+                    aria-invalid={hasError}
+                    aria-describedby={hasError ? `${id}-error` : undefined}
+                    className={`
+                        w-full bg-white border-2 rounded-sm
+                        ${Icon ? 'pl-10 pr-4' : 'px-4'} py-3
+                        text-khajur-dark outline-none
+                        transition-all duration-200
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        ${hasError
+                            ? 'border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200'
+                            : isFocused
+                                ? 'border-khajur-gold focus:ring-2 focus:ring-khajur-gold/20'
+                                : 'border-khajur-primary/20 hover:border-khajur-primary/30'
+                        }
+                    `}
+                />
+
+                {hasError && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500">
+                        <AlertCircle className="w-4 h-4" />
+                    </div>
+                )}
+            </div>
+
+            {hasError && (
+                <p
+                    id={`${id}-error`}
+                    className="text-xs text-red-600 flex items-center gap-1"
+                    role="alert"
+                >
+                    <AlertCircle className="w-3 h-3" />
+                    {error}
+                </p>
+            )}
+        </div>
+    );
+};
+
+/**
+ * Password Input with strength indicator
+ */
+const PasswordInput = ({
+    id,
+    label,
+    value,
+    onChange,
+    error,
+    required = false,
+    autoComplete,
+    showStrength = false,
+    testId,
+}) => {
+    const [showPassword, setShowPassword] = useState(false);
+    const strength = useMemo(() => calculatePasswordStrength(value), [value]);
+    const hasError = Boolean(error);
+
+    return (
+        <div className="space-y-2">
+            <label
+                htmlFor={id}
+                className="block text-sm font-medium text-khajur-primary"
+            >
+                {label} {required && <span className="text-khajur-gold">*</span>}
+            </label>
+
+            <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-khajur-primary/40">
+                    <Lock className="w-4 h-4" />
+                </div>
+
+                <input
+                    id={id}
+                    type={showPassword ? 'text' : 'password'}
+                    value={value}
+                    onChange={onChange}
+                    required={required}
+                    autoComplete={autoComplete}
+                    data-testid={testId}
+                    aria-invalid={hasError}
+                    aria-describedby={hasError ? `${id}-error` : showStrength ? `${id}-strength` : undefined}
+                    className={`
+                        w-full bg-white border-2 rounded-sm
+                        pl-10 pr-12 py-3
+                        text-khajur-dark outline-none
+                        transition-all duration-200
+                        ${hasError
+                            ? 'border-red-500 focus:border-red-600'
+                            : 'border-khajur-primary/20 focus:border-khajur-gold'
+                        }
+                    `}
+                />
+
+                <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-khajur-primary/60 hover:text-khajur-primary transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+            </div>
+
+            {showStrength && value && !hasError && (
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-khajur-border rounded-full overflow-hidden">
+                            <div
+                                className={`h-full transition-all duration-300 ${strength.color.replace('text-', 'bg-')}`}
+                                style={{ width: `${((strength.score + 1) / 3) * 100}%` }}
+                            />
+                        </div>
+                        <span
+                            id={`${id}-strength`}
+                            className={`text-xs font-medium ${strength.color}`}
+                            role="status"
+                            aria-live="polite"
+                        >
+                            {strength.label}
+                        </span>
+                    </div>
+                    <p className="text-xs text-khajur-dark/50">
+                        Use 8+ characters with uppercase, numbers for strong password
+                    </p>
+                </div>
+            )}
+
+            {hasError && (
+                <p
+                    id={`${id}-error`}
+                    className="text-xs text-red-600 flex items-center gap-1"
+                    role="alert"
+                >
+                    <AlertCircle className="w-3 h-3" />
+                    {error}
+                </p>
+            )}
+        </div>
+    );
+};
+
+/**
+ * OTP Verification Screen
+ */
+const OTPVerification = ({
+    email,
+    phone,
+    sentViaPhone,
+    onVerify,
+    onResend,
+    onBack,
+    loading,
+}) => {
+    const [otp, setOTP] = useState('');
+    const { timeLeft, formatTime, isExpired, reset } = useOTPTimer(600);
+    const [resendLoading, setResendLoading] = useState(false);
+
+    const handleOTPChange = (e) => {
+        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+        setOTP(value);
+
+        // Auto-submit when 6 digits entered
+        if (value.length === 6) {
+            setTimeout(() => onVerify(value), 100);
+        }
+    };
+
+    const handleResend = async () => {
+        setResendLoading(true);
+        try {
+            await onResend();
+            reset();
+            setOTP('');
+            toast.success('New code sent successfully');
+        } catch (error) {
+            toast.error('Failed to resend code');
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center space-y-3">
+                <div className="w-16 h-16 bg-khajur-gold/10 rounded-full flex items-center justify-center mx-auto">
+                    <ShieldCheck className="w-8 h-8 text-khajur-gold" />
+                </div>
+                <div>
+                    <h3 className="font-serif text-3xl font-bold text-khajur-primary">
+                        Verify Your Account
+                    </h3>
+                    <p className="text-sm text-khajur-dark/60 mt-2">
+                        Enter the 6-digit code sent to
+                    </p>
+                    <p className="font-semibold text-khajur-primary">
+                        {sentViaPhone ? phone : email}
+                    </p>
+                </div>
+            </div>
+
+            {/* Alert Box */}
+            <div
+                className={`rounded-lg p-4 ${sentViaPhone
+                    ? 'bg-green-50 border border-green-200'
+                    : 'bg-yellow-50 border border-yellow-200'
+                    }`}
+            >
+                <p
+                    className={`text-sm text-center ${sentViaPhone ? 'text-green-800' : 'text-yellow-800'
+                        }`}
+                >
+                    {sentViaPhone ? (
+                        <>
+                            <Phone className="w-4 h-4 inline mr-1" />
+                            <strong>Code sent to your phone!</strong>
+                            <br />
+                            Check SMS on {phone}
+                        </>
+                    ) : (
+                        <>
+                            <Mail className="w-4 h-4 inline mr-1" />
+                            <strong>Check your inbox & spam folder!</strong>
+                            <br />
+                            Mark as "Not Spam" if found there
+                        </>
+                    )}
+                </p>
+            </div>
+
+            {/* OTP Input */}
+            <div className="space-y-3">
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="one-time-code"
+                    placeholder="••••••"
+                    value={otp}
+                    onChange={handleOTPChange}
+                    maxLength={6}
+                    disabled={loading}
+                    aria-label="6-digit verification code"
+                    className="
+                        w-full bg-white border-2 border-khajur-primary/30
+                        focus:border-khajur-gold rounded-sm
+                        text-center font-mono font-bold text-4xl
+                        tracking-[0.5em] px-4 py-6
+                        outline-none transition-all
+                        disabled:opacity-50
+                    "
+                    style={{ letterSpacing: '0.5em' }}
+                />
+
+                {/* Timer */}
+                <div className="flex items-center justify-between text-sm">
+                    <p className={`${isExpired ? 'text-red-600' : 'text-khajur-dark/60'}`}>
+                        {isExpired ? (
+                            <span className="flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                Code expired
+                            </span>
+                        ) : (
+                            <span>⏳ Expires in {formatTime}</span>
+                        )}
+                    </p>
+                </div>
+            </div>
+
+            {/* Resend Button */}
+            <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendLoading || (!isExpired && timeLeft > 540)}
+                className="
+                    w-full text-sm text-khajur-primary hover:text-khajur-gold
+                    transition-colors underline disabled:opacity-50
+                    disabled:cursor-not-allowed flex items-center justify-center gap-2
+                "
+            >
+                {resendLoading ? (
+                    <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending...
+                    </>
+                ) : (
+                    <>
+                        <RefreshCw className="w-4 h-4" />
+                        Resend Code
+                        {!isExpired && timeLeft > 540 && ` (in ${Math.ceil((timeLeft - 540) / 60)}m)`}
+                    </>
+                )}
+            </button>
+
+            {/* Verify Button */}
+            <button
+                type="button"
+                onClick={() => onVerify(otp)}
+                disabled={otp.length !== 6 || loading}
+                className="
+                    w-full bg-khajur-gold text-khajur-primary
+                    hover:bg-khajur-gold/90 rounded-sm px-8 py-4
+                    font-bold text-sm uppercase tracking-widest
+                    transition-all disabled:opacity-50
+                    disabled:cursor-not-allowed shadow-lg
+                    hover:shadow-xl flex items-center justify-center gap-2
+                "
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Verifying...
+                    </>
+                ) : (
+                    <>
+                        <CheckCircle className="w-4 h-4" />
+                        Verify & Continue
+                    </>
+                )}
+            </button>
+
+            {/* Back Button */}
+            <button
+                type="button"
+                onClick={onBack}
+                disabled={loading}
+                className="
+                    w-full text-sm text-khajur-dark/60 hover:text-khajur-primary
+                    transition-colors flex items-center justify-center gap-1
+                "
+            >
+                <ArrowLeft className="w-4 h-4" />
+                Back to registration
+            </button>
+        </div>
+    );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Main Component
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * AuthModal - Professional authentication modal component
+ * Handles login, registration, password reset, and email verification
+ *
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Controls modal visibility
+ * @param {Function} props.onClose - Callback when modal closes
+ */
+const AuthModal = ({ isOpen, onClose }) => {
+    // ─────────────────────────────────────────────────────────────────────────
+    // State Management
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const [mode, setMode] = useState(AUTH_MODES.LOGIN);
+    const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [verificationData, setVerificationData] = useState({
+        email: '',
+        phone: '',
+        sentViaPhone: false,
+    });
+
+    const { login, register, setAuth } = useAuth();
+    const { modalRef } = useModalAccessibility(
+        isOpen,
+        onClose,
+        mode !== AUTH_MODES.VERIFY_EMAIL
+    );
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Reset form when modal closes
+    // ─────────────────────────────────────────────────────────────────────────
+
+    useEffect(() => {
+        if (!isOpen) {
+            setMode(AUTH_MODES.LOGIN);
+            setFormData(INITIAL_FORM_STATE);
+            setErrors({});
+            setLoading(false);
+        }
+    }, [isOpen]);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Form Handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const handleInputChange = useCallback((field) => (e) => {
+        let value = e.target.value;
+
+        // Sanitize phone number
+        if (field === 'phone') {
+            value = sanitizePhoneNumber(value);
+        }
+
+        setFormData((prev) => ({ ...prev, [field]: value }));
+
+        // Clear error for this field
+        setErrors((prev) => ({ ...prev, [field]: '' }));
+    }, []);
+
+    const handleModeSwitch = useCallback((newMode) => {
+        setMode(newMode);
+        setErrors({});
+    }, []);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // API Handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const handleLogin = async () => {
+        try {
+            await login(formData.email, formData.password);
+            toast.success('Welcome back! Login successful');
+            onClose();
+        } catch (error) {
+            throw new Error(error.response?.data?.detail || 'Invalid email or password');
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            const result = await register(
+                formData.name,
+                formData.email,
+                formData.password,
+                formData.phone
+            );
+
+            setVerificationData({
+                email: formData.email,
+                phone: formData.phone,
+                sentViaPhone: result.sms_sent || false,
+            });
+
+            setMode(AUTH_MODES.VERIFY_EMAIL);
+
+            toast.success(
+                result.sms_sent
+                    ? `Verification code sent to ${formData.phone}`
+                    : 'Verification code sent to your email'
+            );
+        } catch (error) {
+            throw new Error(
+                error.response?.data?.detail || 'Registration failed. Please try again'
+            );
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        try {
+            const response = await fetch(
+                `${BACKEND_URL}/api/auth/forgot-password?email=${encodeURIComponent(formData.email)}`,
+                { method: 'POST' }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to send reset email');
+            }
+
+            toast.success('Password reset instructions sent to your email');
+            handleModeSwitch(AUTH_MODES.LOGIN);
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    const handleVerifyOTP = async (otp) => {
+        if (!VALIDATION_RULES.otp.test(otp)) {
+            toast.error('Please enter a valid 6-digit code');
+            return;
+        }
+
         setLoading(true);
         try {
-            if (isForgotPassword) {
-                const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-                const response = await fetch(
-                    `${BACKEND_URL}/api/auth/forgot-password?email=${formData.email}`,
-                    { method: 'POST' }
-                );
-                if (response.ok) {
-                    toast.success('Password reset instructions sent to your email');
-                    setIsForgotPassword(false);
-                    setIsLogin(true);
-                } else {
-                    const error = await response.json();
-                    toast.error(error.detail || 'Failed to send reset email');
-                }
-            } else if (isLogin) {
-                await login(formData.email, formData.password);
-                toast.success('Login successful');
-                onClose();
-                setFormData({ name: '', email: '', password: '', phone: '' });
-            } else {
-                if (formData.password !== formData.confirmPassword) {
-                    toast.error("Passwords do not match");
-                    setLoading(false);
-                    return;
-                }
-                const result = await register(
-                    formData.name,
-                    formData.email,
-                    formData.password,
-                    formData.phone
-                );
-                if (result.sms_sent) {
-                    toast.success(`Verification code sent to ${formData.phone}`);
-                    setSentViaPhone(true);
-                } else {
-                    toast.success('Verification code sent to your email');
-                    setSentViaPhone(false);
-                }
-                setShowverification_code(true);
-                setFormData({
-                    name: '',
-                    phone: '',
-                    email: formData.email,
-                    password: '',
-                    confirmPassword: ''
-                });
+            const response = await fetch(`${BACKEND_URL}/api/auth/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: verificationData.email,
+                    verification_code: otp,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Invalid verification code');
             }
+
+            const data = await response.json();
+            setAuth(data.access_token, data.user);
+
+            toast.success('Account verified successfully! Welcome to KhajurKart');
+            onClose();
         } catch (error) {
-            toast.error(
-                error.response?.data?.detail || error.message || 'Authentication failed'
-            );
+            toast.error(error.message);
         } finally {
             setLoading(false);
         }
     };
 
-    const verifyverification_code = async () => {
-        if (!verification_code) {
-            toast.error("Please enter verification code ❌");
+    const handleResendOTP = async () => {
+        const response = await fetch(
+            `${BACKEND_URL}/api/auth/resend-code?email=${encodeURIComponent(verificationData.email)}`,
+            { method: 'POST' }
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to resend code');
+        }
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Form Submission
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Validate form
+        const validation = validateFormData(formData, mode);
+        if (!validation.isValid) {
+            setErrors(validation.errors);
+            toast.error('Please fix the errors in the form');
             return;
         }
-        try {
-            const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-            const res = await fetch(`${BACKEND_URL}/api/auth/verify`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: formData.email,
-                    verification_code: verification_code
-                })
-            });
 
-            if (!res.ok) {
-                const err = await res.json();
-                toast.error(err.detail || "Invalid verification code ❌");
-                return;
+        setLoading(true);
+        setErrors({});
+
+        try {
+            switch (mode) {
+                case AUTH_MODES.LOGIN:
+                    await handleLogin();
+                    break;
+                case AUTH_MODES.REGISTER:
+                    await handleRegister();
+                    break;
+                case AUTH_MODES.FORGOT_PASSWORD:
+                    await handleForgotPassword();
+                    break;
+                default:
+                    break;
             }
-
-            const data = await res.json();
-            setAuth(data.access_token, data.user);
-            toast.success("Verified successfully ✅");
-            setShowverification_code(false);
-            setverification_code("");
-            onClose();
-        } catch (err) {
-            toast.error("Invalid verification code ❌");
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const resendCode = async () => {
-        try {
-            const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-            await fetch(
-                `${BACKEND_URL}/api/auth/resend-code?email=${formData.email}`,
-                { method: "POST" }
-            );
-            toast.success("Verification code resent ✅");
-        } catch (err) {
-            toast.error("Failed to resend code ❌");
-        }
+    // ─────────────────────────────────────────────────────────────────────────
+    // Render Guards
+    // ─────────────────────────────────────────────────────────────────────────
+
+    if (!isOpen) return null;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Modal Content Configuration
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const modalConfig = {
+        [AUTH_MODES.LOGIN]: {
+            title: 'Welcome Back',
+            subtitle: 'Sign in to your account',
+        },
+        [AUTH_MODES.REGISTER]: {
+            title: 'Create Account',
+            subtitle: 'Join KhajurKart today',
+        },
+        [AUTH_MODES.FORGOT_PASSWORD]: {
+            title: 'Reset Password',
+            subtitle: 'Enter your email to reset password',
+        },
+        [AUTH_MODES.VERIFY_EMAIL]: {
+            title: 'Verify Email',
+            subtitle: 'Complete your registration',
+        },
     };
 
-    const handleBackToLogin = () => {
-        setIsForgotPassword(false);
-        setIsLogin(true);
-    };
+    const currentConfig = modalConfig[mode];
 
-    const getPasswordStrength = (password) => {
-        if (password.length < 6) return "Weak";
-        if (password.match(/^(?=.*[A-Z])(?=.*[0-9])/)) return "Strong";
-        return "Medium";
-    };
+    // ─────────────────────────────────────────────────────────────────────────
+    // Render
+    // ─────────────────────────────────────────────────────────────────────────
 
     return (
-        // ✅ Backdrop click closes modal
         <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            data-testid="auth-modal"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
             onClick={(e) => {
-                if (e.target === e.currentTarget && !showverification_code) {
+                if (e.target === e.currentTarget && mode !== AUTH_MODES.VERIFY_EMAIL) {
                     onClose();
                 }
             }}
             role="presentation"
         >
-            {/* ✅ Modal with proper ARIA attributes */}
             <div
                 ref={modalRef}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="modal-title"
-                className="bg-khajur-cream max-w-md w-full rounded-sm shadow-2xl relative border-2 border-khajur-gold/30"
+                className="
+                    bg-khajur-cream max-w-md w-full rounded-lg shadow-2xl
+                    relative border-2 border-khajur-gold/30
+                    animate-slideUp
+                "
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* ✅ Close button with aria-label */}
-                {!showverification_code && (
+                {/* Close Button */}
+                {mode !== AUTH_MODES.VERIFY_EMAIL && (
                     <button
                         onClick={onClose}
-                        aria-label="Close dialog"
-                        className="absolute top-4 right-4 text-khajur-primary hover:text-khajur-gold transition-colors"
+                        aria-label="Close authentication modal"
+                        className="
+                            absolute top-4 right-4 z-10
+                            text-khajur-primary hover:text-khajur-gold
+                            transition-colors p-2 rounded-full
+                            hover:bg-khajur-primary/5
+                        "
                     >
-                        <X className="w-6 h-6" />
+                        <X className="w-5 h-5" />
                     </button>
                 )}
 
+                {/* Modal Content */}
                 <div className="p-8">
-                    {/* ✅ id="modal-title" for aria-labelledby */}
-                    <h2
-                        id="modal-title"
-                        className="font-serif text-4xl font-bold text-khajur-primary mb-2 text-center"
-                    >
-                        {isForgotPassword
-                            ? 'Reset Password'
-                            : isLogin
-                                ? 'Welcome Back'
-                                : 'Create Account'}
-                    </h2>
-                    <p className="text-center text-khajur-dark/60 mb-8 text-sm">
-                        {isForgotPassword
-                            ? 'Enter your email to reset password'
-                            : isLogin
-                                ? 'Login to your account'
-                                : 'Join KhajurKart today'}
-                    </p>
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <h2
+                            id="modal-title"
+                            className="font-serif text-4xl font-bold text-khajur-primary mb-2"
+                        >
+                            {currentConfig.title}
+                        </h2>
+                        <p className="text-khajur-dark/60 text-sm">
+                            {currentConfig.subtitle}
+                        </p>
+                    </div>
 
-                    {showverification_code ? (
-                        <div className="space-y-4">
-                            <h3 className="text-center font-serif text-3xl font-bold text-khajur-primary">
-                                Enter Verification Code
-                            </h3>
-                            <p className="text-center text-sm text-khajur-dark/60">
-                                Code sent to <strong className="text-khajur-primary">{formData.email}</strong>
-                            </p>
-
-                            {/* Spam / SMS info box */}
-                            {sentViaPhone ? (
-                                <div style={{
-                                    background: '#dcfce7',
-                                    border: '1px solid #16a34a',
-                                    borderRadius: '8px',
-                                    padding: '12px 16px',
-                                }}>
-                                    <p style={{ margin: 0, color: '#15803d', fontSize: '13px', textAlign: 'center' }}>
-                                        📱 <strong>Code sent to your phone!</strong><br />
-                                        Check your SMS on <strong>{formData.phone}</strong>
-                                    </p>
-                                </div>
-                            ) : (
-                                <div style={{
-                                    background: '#fff3cd',
-                                    border: '1px solid #ffc107',
-                                    borderRadius: '8px',
-                                    padding: '12px 16px',
-                                }}>
-                                    <p style={{ margin: 0, color: '#856404', fontSize: '13px', textAlign: 'center' }}>
-                                        📬 <strong>Check your Spam folder!</strong><br />
-                                        If in spam, mark as <strong>"Not Spam"</strong>
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* ✅ OTP input with numeric keyboard */}
-                            <input
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                autoComplete="one-time-code"
-                                placeholder="000000"
-                                value={verification_code}
-                                onChange={(e) => setverification_code(e.target.value.replace(/[^0-9]/g, ''))}
-                                className="w-full bg-white border-2 border-khajur-primary/30 focus:border-khajur-gold text-khajur-primary px-4 py-4 rounded-sm outline-none text-center font-serif font-bold"
-                                style={{ fontSize: '32px', letterSpacing: '12px' }}
-                                maxLength={6}
-                                aria-label="6-digit verification code"
-                            />
-
-                            <p className="text-center text-xs text-khajur-dark/50">
-                                ⏳ Code expires in <strong>10 minutes</strong>
-                            </p>
-
-                            <button
-                                onClick={resendCode}
-                                className="w-full text-sm text-khajur-primary hover:text-khajur-gold transition-colors underline"
-                            >
-                                {sentViaPhone
-                                    ? "Didn't receive SMS? Resend Code"
-                                    : "Didn't receive email? Resend Code"}
-                            </button>
-
-                            <button
-                                onClick={verifyverification_code}
-                                className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 rounded-sm px-8 py-4 font-serif font-bold transition-all"
-                                style={{ fontSize: '16px', letterSpacing: '2px' }}
-                            >
-                                VERIFY MY EMAIL
-                            </button>
-                        </div>
+                    {/* Forms */}
+                    {mode === AUTH_MODES.VERIFY_EMAIL ? (
+                        <OTPVerification
+                            email={verificationData.email}
+                            phone={verificationData.phone}
+                            sentViaPhone={verificationData.sentViaPhone}
+                            onVerify={handleVerifyOTP}
+                            onResend={handleResendOTP}
+                            onBack={() => handleModeSwitch(AUTH_MODES.REGISTER)}
+                            loading={loading}
+                        />
                     ) : (
                         <>
                             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                                {!isLogin && !isForgotPassword && (
-                                    <div>
-                                        {/* ✅ Proper label/id linking */}
-                                        <label
-                                            htmlFor="full-name"
-                                            className="block text-sm font-medium text-khajur-primary mb-2"
-                                        >
-                                            Full Name *
-                                        </label>
-                                        <input
-                                            id="full-name"
-                                            type="text"
-                                            required
-                                            autoComplete="name"
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
-                                            data-testid="register-name-input"
-                                        />
-                                    </div>
-                                )}
-
-                                {!isLogin && !isForgotPassword && (
-                                    <div>
-                                        <label
-                                            htmlFor="phone"
-                                            className="block text-sm font-medium text-khajur-primary mb-2"
-                                        >
-                                            Phone Number *
-                                        </label>
-                                        <input
-                                            id="phone"
-                                            type="tel"
-                                            required
-                                            autoComplete="tel"
-                                            inputMode="numeric"
-                                            value={formData.phone}
-                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                            className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm"
-                                        />
-                                    </div>
-                                )}
-
-                                <div>
-                                    <label
-                                        htmlFor="email"
-                                        className="block text-sm font-medium text-khajur-primary mb-2"
-                                    >
-                                        Email Address *
-                                    </label>
-                                    <input
-                                        id="email"
-                                        type="email"
+                                {/* Register: Name Field */}
+                                {mode === AUTH_MODES.REGISTER && (
+                                    <FormInput
+                                        id="full-name"
+                                        label="Full Name"
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={handleInputChange('name')}
+                                        error={errors.name}
                                         required
-                                        autoComplete="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 rounded-sm focus:ring-0 outline-none transition-colors"
-                                        data-testid="auth-email-input"
+                                        autoComplete="name"
+                                        placeholder="John Doe"
+                                        icon={User}
+                                        testId="register-name-input"
                                     />
-                                </div>
-
-                                {!isForgotPassword && (
-                                    <div>
-                                        <label
-                                            htmlFor="password"
-                                            className="block text-sm font-medium text-khajur-primary mb-2"
-                                        >
-                                            Password *
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="password"
-                                                type={showPassword ? "text" : "password"}
-                                                required
-                                                autoComplete={isLogin ? "current-password" : "new-password"}
-                                                value={formData.password}
-                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm focus:ring-0 outline-none transition-colors"
-                                                data-testid="auth-password-input"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                aria-label={showPassword ? "Hide password" : "Show password"}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
-                                            >
-                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
-                                            {formData.password && (
-                                                <p
-                                                    className={`text-sm mt-1 ${getPasswordStrength(formData.password) === "Strong"
-                                                        ? "text-green-600"
-                                                        : getPasswordStrength(formData.password) === "Medium"
-                                                            ? "text-yellow-600"
-                                                            : "text-red-600"
-                                                        }`}
-                                                    role="status"
-                                                    aria-live="polite"
-                                                >
-                                                    Password Strength: {getPasswordStrength(formData.password)}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
                                 )}
 
-                                {!isLogin && !isForgotPassword && (
-                                    <div>
-                                        <label
-                                            htmlFor="confirm-password"
-                                            className="block text-sm font-medium text-khajur-primary mb-2"
-                                        >
-                                            Confirm Password *
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="confirm-password"
-                                                type={showPassword ? "text" : "password"}
-                                                required
-                                                autoComplete="new-password"
-                                                value={formData.confirmPassword || ""}
-                                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                                className="w-full bg-white border-2 border-khajur-primary/20 focus:border-khajur-gold text-khajur-dark px-4 py-3 pr-10 rounded-sm"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                aria-label={showPassword ? "Hide password" : "Show password"}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-khajur-primary"
-                                            >
-                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
-                                        </div>
-                                        {formData.confirmPassword &&
-                                            formData.password !== formData.confirmPassword && (
-                                                <p
-                                                    className="text-red-500 text-sm mt-1"
-                                                    role="alert"
-                                                >
-                                                    Passwords do not match
-                                                </p>
-                                            )}
-                                    </div>
+                                {/* Register: Phone Field */}
+                                {mode === AUTH_MODES.REGISTER && (
+                                    <FormInput
+                                        id="phone"
+                                        label="Phone Number"
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={handleInputChange('phone')}
+                                        error={errors.phone}
+                                        required
+                                        autoComplete="tel"
+                                        placeholder="9876543210"
+                                        maxLength={10}
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        icon={Phone}
+                                        testId="register-phone-input"
+                                    />
                                 )}
 
-                                {isLogin && !isForgotPassword && (
+                                {/* Email Field */}
+                                <FormInput
+                                    id="email"
+                                    label="Email Address"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange('email')}
+                                    error={errors.email}
+                                    required
+                                    autoComplete="email"
+                                    placeholder="john@example.com"
+                                    icon={Mail}
+                                    testId="auth-email-input"
+                                />
+
+                                {/* Password Field */}
+                                {mode !== AUTH_MODES.FORGOT_PASSWORD && (
+                                    <PasswordInput
+                                        id="password"
+                                        label="Password"
+                                        value={formData.password}
+                                        onChange={handleInputChange('password')}
+                                        error={errors.password}
+                                        required
+                                        autoComplete={mode === AUTH_MODES.LOGIN ? 'current-password' : 'new-password'}
+                                        showStrength={mode === AUTH_MODES.REGISTER}
+                                        testId="auth-password-input"
+                                    />
+                                )}
+
+                                {/* Register: Confirm Password */}
+                                {mode === AUTH_MODES.REGISTER && (
+                                    <PasswordInput
+                                        id="confirm-password"
+                                        label="Confirm Password"
+                                        value={formData.confirmPassword}
+                                        onChange={handleInputChange('confirmPassword')}
+                                        error={errors.confirmPassword}
+                                        required
+                                        autoComplete="new-password"
+                                        testId="register-confirm-password-input"
+                                    />
+                                )}
+
+                                {/* Forgot Password Link */}
+                                {mode === AUTH_MODES.LOGIN && (
                                     <div className="text-right">
                                         <button
                                             type="button"
-                                            onClick={() => setIsForgotPassword(true)}
+                                            onClick={() => handleModeSwitch(AUTH_MODES.FORGOT_PASSWORD)}
                                             className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors font-medium"
                                             data-testid="forgot-password-link"
                                         >
@@ -501,40 +1069,80 @@ const AuthModal = ({ isOpen, onClose }) => {
                                     </div>
                                 )}
 
+                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={loading}
                                     aria-busy={loading}
-                                    className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-[0_0_15px_rgba(198,169,98,0.4)] rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all mt-6 disabled:opacity-50"
+                                    className="
+                                        w-full bg-khajur-gold text-khajur-primary
+                                        hover:bg-khajur-gold/90 rounded-sm px-8 py-4
+                                        uppercase tracking-widest text-xs font-bold
+                                        transition-all shadow-lg hover:shadow-xl
+                                        disabled:opacity-50 disabled:cursor-not-allowed
+                                        flex items-center justify-center gap-2
+                                    "
                                     data-testid="auth-submit-button"
                                 >
-                                    {loading
-                                        ? 'Please wait...'
-                                        : isForgotPassword
-                                            ? 'Send Reset Link'
-                                            : isLogin ? 'Login' : 'Register'}
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Please wait...
+                                        </>
+                                    ) : mode === AUTH_MODES.FORGOT_PASSWORD ? (
+                                        'Send Reset Link'
+                                    ) : mode === AUTH_MODES.REGISTER ? (
+                                        'Create Account'
+                                    ) : (
+                                        'Sign In'
+                                    )}
                                 </button>
                             </form>
 
+                            {/* Mode Switcher */}
                             <div className="mt-6 text-center">
-                                {isForgotPassword ? (
+                                {mode === AUTH_MODES.FORGOT_PASSWORD ? (
                                     <button
-                                        onClick={handleBackToLogin}
-                                        className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors"
+                                        type="button"
+                                        onClick={() => handleModeSwitch(AUTH_MODES.LOGIN)}
+                                        className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors inline-flex items-center gap-1"
                                     >
-                                        ← Back to Login
+                                        <ArrowLeft className="w-4 h-4" />
+                                        Back to Login
                                     </button>
                                 ) : (
                                     <button
-                                        onClick={() => setIsLogin(!isLogin)}
+                                        type="button"
+                                        onClick={() =>
+                                            handleModeSwitch(
+                                                mode === AUTH_MODES.LOGIN
+                                                    ? AUTH_MODES.REGISTER
+                                                    : AUTH_MODES.LOGIN
+                                            )
+                                        }
                                         className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors"
+                                        data-testid="mode-switch-button"
                                     >
-                                        {isLogin
-                                            ? "Don't have an account? Register"
-                                            : 'Already have an account? Login'}
+                                        {mode === AUTH_MODES.LOGIN
+                                            ? "Don't have an account? Create one"
+                                            : 'Already have an account? Sign in'}
                                     </button>
                                 )}
                             </div>
+
+                            {/* Terms & Privacy */}
+                            {mode === AUTH_MODES.REGISTER && (
+                                <p className="text-xs text-khajur-dark/40 text-center mt-6">
+                                    By creating an account, you agree to our{' '}
+                                    <a href="/terms" className="text-khajur-primary hover:text-khajur-gold underline">
+                                        Terms of Service
+                                    </a>{' '}
+                                    and{' '}
+                                    <a href="/privacy-policy" className="text-khajur-primary hover:text-khajur-gold underline">
+                                        Privacy Policy
+                                    </a>
+                                </p>
+                            )}
                         </>
                     )}
                 </div>
