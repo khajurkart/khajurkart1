@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -101,8 +101,15 @@ const FormTextarea = ({ label, required = false, ...props }) => (
     </div>
 );
 
+// Custom Business Type Dropdown Component
 const BusinessTypeSelect = ({ value, onChange, required = true }) => {
+    const [isOpen, setIsOpen] = useState(false);
     const selectedBusiness = BUSINESS_TYPES.find(b => b.value === value);
+
+    const handleSelect = (businessValue) => {
+        onChange({ target: { value: businessValue } });
+        setIsOpen(false);
+    };
 
     return (
         <div>
@@ -110,35 +117,98 @@ const BusinessTypeSelect = ({ value, onChange, required = true }) => {
                 Business Type {required && <span className="text-khajur-gold">*</span>}
             </label>
             <div className="relative">
+                {/* Selected Value Display */}
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="
+                        w-full bg-transparent
+                        border-b border-khajur-primary/20 
+                        focus:border-khajur-gold
+                        px-0 py-3 pr-8
+                        text-left outline-none 
+                        transition-colors duration-200
+                        text-khajur-primary
+                    "
+                >
+                    {selectedBusiness ? (
+                        <span className="flex items-center gap-2">
+                            <span>{selectedBusiness.icon}</span>
+                            <span>{selectedBusiness.label}</span>
+                        </span>
+                    ) : (
+                        <span className="text-khajur-dark/30">Select your business type</span>
+                    )}
+                </button>
+
+                <ChevronDown 
+                    className={`
+                        absolute right-0 top-1/2 -translate-y-1/2 
+                        w-4 h-4 text-khajur-primary/40 
+                        pointer-events-none
+                        transition-transform duration-200
+                        ${isOpen ? 'rotate-180' : ''}
+                    `}
+                />
+
+                {/* Dropdown List */}
+                {isOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <div 
+                            className="fixed inset-0 z-10"
+                            onClick={() => setIsOpen(false)}
+                        />
+
+                        {/* Options */}
+                        <div className="
+                            absolute z-20 left-0 right-0 top-full mt-2
+                            bg-khajur-cream border border-khajur-border
+                            rounded-sm shadow-lg max-h-64 overflow-y-auto
+                        ">
+                            {BUSINESS_TYPES.map((type) => (
+                                <button
+                                    key={type.value}
+                                    type="button"
+                                    onClick={() => handleSelect(type.value)}
+                                    className={`
+                                        w-full text-left px-4 py-3
+                                        flex items-center justify-between gap-3
+                                        transition-all duration-200
+                                        ${value === type.value 
+                                            ? 'bg-green-100 text-green-800 font-medium' 
+                                            : 'hover:bg-green-50 text-khajur-primary'
+                                        }
+                                    `}
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <span className="text-lg">{type.icon}</span>
+                                        <span className="text-sm">{type.label}</span>
+                                    </span>
+                                    {value === type.value && (
+                                        <Check className="w-4 h-4 text-green-600" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* Hidden select for form validation */}
                 <select
                     required={required}
                     value={value}
                     onChange={onChange}
-                    className="
-                        w-full bg-transparent appearance-none
-                        border-b border-khajur-primary/20 
-                        focus:border-khajur-gold
-                        px-0 py-3 pr-8 outline-none 
-                        transition-colors duration-200
-                        text-khajur-primary
-                        cursor-pointer
-                    "
-                    style={{
-                        backgroundImage: 'none',
-                    }}
+                    className="sr-only"
+                    tabIndex={-1}
                 >
-                    <option value="" disabled>Select your business type</option>
+                    <option value="">Select business type</option>
                     {BUSINESS_TYPES.map((type) => (
                         <option key={type.value} value={type.value}>
-                            {type.icon} {type.label}
+                            {type.label}
                         </option>
                     ))}
                 </select>
-                <ChevronDown className="
-                    absolute right-0 top-1/2 -translate-y-1/2 
-                    w-4 h-4 text-khajur-primary/40 
-                    pointer-events-none
-                " />
             </div>
         </div>
     );
