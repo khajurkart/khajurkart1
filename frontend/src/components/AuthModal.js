@@ -196,15 +196,18 @@ const Field = ({ icon: Icon, label, children }) => (
 /**
  * Password Input with strength indicator
  */
-const PasswordInput = ({ 
-    value, 
-    onChange, 
-    testId, 
+const PasswordInput = ({
+    value,
+    onChange,
+    testId,
     placeholder = 'Enter password',
-    showStrength = false 
+    showStrength = false
 }) => {
     const [show, setShow] = useState(false);
     const strength = useMemo(() => calculatePasswordStrength(value), [value]);
+
+    // ✅ Only show strength bar when user has typed something
+    const shouldShowStrength = showStrength && value && value.length > 0;
 
     return (
         <div className="space-y-1.5">
@@ -235,15 +238,15 @@ const PasswordInput = ({
                 </button>
             </div>
 
-            {/* Password Strength Bar */}
-            {showStrength && strength && (
+            {/* ✅ Password Strength Bar - only renders when user has typed */}
+            {shouldShowStrength && (
                 <div className="space-y-1">
                     <div className="h-1 bg-khajur-border rounded-full overflow-hidden">
-                        <div 
+                        <div
                             className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
-                            style={{ 
-                                width: strength.label === 'Weak' ? '33%' : 
-                                       strength.label === 'Medium' ? '66%' : '100%' 
+                            style={{
+                                width: strength.label === 'Weak' ? '33%' :
+                                    strength.label === 'Medium' ? '66%' : '100%'
                             }}
                         />
                     </div>
