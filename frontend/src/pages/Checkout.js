@@ -17,6 +17,7 @@ import {
     Banknote,
     Smartphone,
 } from 'lucide-react';
+import Breadcrumb from '../components/Breadcrumb';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -89,10 +90,10 @@ const NotLoggedIn = () => (
         <Link
             to="/"
             className="
-        bg-khajur-gold hover:bg-khajur-gold/90
-        text-khajur-primary px-8 py-3 rounded-sm
-        uppercase tracking-widest text-xs font-bold transition-all duration-300
-      "
+                bg-khajur-gold hover:bg-khajur-gold/90
+                text-khajur-primary px-8 py-3 rounded-sm
+                uppercase tracking-widest text-xs font-bold transition-all duration-300
+            "
         >
             Go to Home
         </Link>
@@ -120,12 +121,12 @@ const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
     <div
         onClick={() => onSelect(index, addr)}
         className={`
-      relative p-5 border rounded-sm cursor-pointer transition-all duration-200
-      ${selected
+            relative p-5 border rounded-sm cursor-pointer transition-all duration-200
+            ${selected
                 ? 'border-khajur-gold bg-khajur-gold/5 shadow-[0_0_12px_rgba(198,169,98,0.2)]'
                 : 'border-khajur-border hover:border-khajur-gold/40'
             }
-    `}
+        `}
     >
         {selected && (
             <div className="absolute top-3 right-3 w-5 h-5 bg-khajur-gold rounded-full flex items-center justify-center">
@@ -206,14 +207,14 @@ const OrderSummary = ({ cart, cartTotal, finalTotal, loading }) => (
                 disabled={loading}
                 data-testid="place-order-button"
                 className="
-          w-full flex items-center justify-center gap-2
-          bg-khajur-gold hover:bg-khajur-gold/90
-          hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
-          disabled:opacity-60 disabled:cursor-not-allowed
-          text-khajur-primary rounded-sm px-8 py-4
-          uppercase tracking-widest text-xs font-bold
-          transition-all duration-300
-        "
+                    w-full flex items-center justify-center gap-2
+                    bg-khajur-gold hover:bg-khajur-gold/90
+                    hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
+                    disabled:opacity-60 disabled:cursor-not-allowed
+                    text-khajur-primary rounded-sm px-8 py-4
+                    uppercase tracking-widest text-xs font-bold
+                    transition-all duration-300
+                "
             >
                 {loading
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
@@ -230,12 +231,6 @@ const OrderSummary = ({ cart, cartTotal, finalTotal, loading }) => (
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const Checkout = () => {
-    useEffect(() => {
-        document.title = 'Checkout — KhajurKart';
-        return () => {
-            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
-        };
-    }, []);
     const { cart, cartTotal, clearCart } = useCart();
     const { user, token } = useAuth();
     const navigate = useNavigate();
@@ -252,6 +247,13 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
 
     const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
+
+    useEffect(() => {
+        document.title = 'Checkout — KhajurKart';
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
+    }, []);
 
     // ── Fetch Saved Addresses ──────────────────────────────────────────────────
 
@@ -420,6 +422,17 @@ const Checkout = () => {
         <div className="min-h-screen bg-white py-16 md:py-24" data-testid="checkout-page">
             <div className="max-w-6xl mx-auto px-6 md:px-12">
 
+                {/* ── Breadcrumb ── */}
+                <div className="mb-10">
+                    <Breadcrumb
+                        items={[
+                            { label: 'Home', to: '/' },
+                            { label: 'Cart', to: '/cart' },
+                            { label: 'Checkout', to: '#' },
+                        ]}
+                    />
+                </div>
+
                 {/* ── Page Header ── */}
                 <div className="flex items-center gap-4 border-b border-khajur-gold/20 pb-8 mb-12">
                     <button
@@ -575,13 +588,13 @@ const Checkout = () => {
                                         <label
                                             key={value}
                                             className={`
-                        flex items-start gap-4 p-5 border rounded-sm cursor-pointer
-                        transition-all duration-200
-                        ${formData.paymentMethod === value
+                                                flex items-start gap-4 p-5 border rounded-sm cursor-pointer
+                                                transition-all duration-200
+                                                ${formData.paymentMethod === value
                                                     ? 'border-khajur-gold bg-khajur-gold/5'
                                                     : 'border-khajur-border hover:border-khajur-gold/40'
                                                 }
-                      `}
+                                            `}
                                         >
                                             <input
                                                 type="radio"
