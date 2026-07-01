@@ -135,7 +135,7 @@ const ContactForm = () => {
     };
 
     return (
-        <div className="bg-white border border-khajur-border p-8 md:p-12">
+        <div id="main-content" className="bg-white border border-khajur-border p-8 md:p-12">
             {/* Form Header */}
             <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
                 Reach Out
