@@ -343,7 +343,7 @@ const Home = () => {
     }, [fetchData]);
 
     return (
-        <div className="min-h-screen bg-white" data-testid="home-page">
+        <div id="main-content" className="min-h-screen bg-white" data-testid="home-page">
 
             {/* ── Hero Slider ─────────────────────────────────────────────────────── */}
             <section className="relative" data-testid="hero-slider">
