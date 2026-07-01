@@ -179,7 +179,7 @@ const BulkOrders = () => {
 
         if (!formData.name.trim()) newErrors.name = 'Name is required';
         if (!formData.business_name.trim()) newErrors.business_name = 'Business name is required';
-
+        
         if (!formData.email.trim()) {
             newErrors.email = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -214,7 +214,7 @@ const BulkOrders = () => {
         }
 
         setFormData(prev => ({ ...prev, [field]: value }));
-
+        
         // Clear error for this field
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
@@ -233,7 +233,7 @@ const BulkOrders = () => {
 
         try {
             const businessType = BUSINESS_TYPES.find(b => b.value === formData.business_type);
-
+            
             await axios.post(`${API}/contact`, {
                 name: formData.name,
                 email: formData.email,
@@ -253,7 +253,7 @@ const BulkOrders = () => {
             });
 
             toast.success('Bulk order enquiry sent successfully! We will contact you within 24 hours.');
-
+            
             // Reset form
             setFormData({
                 name: '',
@@ -304,8 +304,8 @@ const BulkOrders = () => {
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                         {DISCOUNT_TIERS.map((tier, index) => (
-                            <div
-                                key={index}
+                            <div 
+                                key={index} 
                                 className="
                                     bg-khajur-cream p-6 
                                     border border-khajur-border
@@ -570,8 +570,8 @@ const BulkOrders = () => {
                                 </h3>
                                 <ul className="space-y-3">
                                     {BULK_BENEFITS.map((benefit, index) => (
-                                        <li
-                                            key={index}
+                                        <li 
+                                            key={index} 
                                             className="flex items-start gap-3 text-khajur-cream/80 text-sm"
                                         >
                                             <span className="text-khajur-gold mt-0.5">✓</span>
