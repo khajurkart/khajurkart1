@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,7 @@ import {
     ShoppingCart,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Breadcrumb from '../components/Breadcrumb';
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
@@ -28,34 +29,46 @@ const LoadingScreen = () => (
 // ── Empty State ────────────────────────────────────────────────────────────────
 
 const EmptyCart = () => (
-    <div
-        className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 px-6 text-center"
-        data-testid="empty-cart"
-    >
-        <div className="w-20 h-20 flex items-center justify-center bg-khajur-cream rounded-full">
-            <ShoppingCart className="w-9 h-9 text-khajur-dark/25" />
+    <div className="min-h-screen bg-white" data-testid="empty-cart">
+        <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
+            {/* Breadcrumb for Empty Cart */}
+            <div className="mb-10">
+                <Breadcrumb
+                    items={[
+                        { label: 'Home', to: '/' },
+                        { label: 'Products', to: '/products' },
+                        { label: 'Cart', to: '#' },
+                    ]}
+                />
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-6 px-6 text-center min-h-[60vh]">
+                <div className="w-20 h-20 flex items-center justify-center bg-khajur-cream rounded-full">
+                    <ShoppingCart className="w-9 h-9 text-khajur-dark/25" />
+                </div>
+                <div>
+                    <p className="font-serif text-3xl font-medium text-khajur-primary mb-2">
+                        Your cart is empty
+                    </p>
+                    <p className="text-sm text-khajur-dark/50 max-w-xs">
+                        Looks like you haven't added anything yet. Explore our premium collection.
+                    </p>
+                </div>
+                <Link
+                    to="/products"
+                    data-testid="continue-shopping-empty"
+                    className="
+                        flex items-center gap-2 bg-khajur-gold hover:bg-khajur-gold/90
+                        hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
+                        text-khajur-primary px-8 py-3 rounded-sm
+                        uppercase tracking-widest text-xs font-bold transition-all duration-300
+                    "
+                >
+                    <ShoppingBag className="w-4 h-4" />
+                    Browse Products
+                </Link>
+            </div>
         </div>
-        <div>
-            <p className="font-serif text-3xl font-medium text-khajur-primary mb-2">
-                Your cart is empty
-            </p>
-            <p className="text-sm text-khajur-dark/50 max-w-xs">
-                Looks like you haven't added anything yet. Explore our premium collection.
-            </p>
-        </div>
-        <Link
-            to="/products"
-            data-testid="continue-shopping-empty"
-            className="
-        flex items-center gap-2 bg-khajur-gold hover:bg-khajur-gold/90
-        hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
-        text-khajur-primary px-8 py-3 rounded-sm
-        uppercase tracking-widest text-xs font-bold transition-all duration-300
-      "
-        >
-            <ShoppingBag className="w-4 h-4" />
-            Browse Products
-        </Link>
     </div>
 );
 
@@ -67,10 +80,10 @@ const QuantityControl = ({ productId, quantity, onIncrease, onDecrease }) => (
             onClick={onDecrease}
             data-testid={`decrease-cart-quantity-${productId}`}
             className="
-        w-8 h-8 flex items-center justify-center
-        bg-khajur-cream hover:bg-khajur-gold/20
-        text-khajur-primary rounded-sm transition-colors duration-200
-      "
+                w-8 h-8 flex items-center justify-center
+                bg-khajur-cream hover:bg-khajur-gold/20
+                text-khajur-primary rounded-sm transition-colors duration-200
+            "
             aria-label="Decrease quantity"
         >
             <Minus className="w-3.5 h-3.5" />
@@ -87,10 +100,10 @@ const QuantityControl = ({ productId, quantity, onIncrease, onDecrease }) => (
             onClick={onIncrease}
             data-testid={`increase-cart-quantity-${productId}`}
             className="
-        w-8 h-8 flex items-center justify-center
-        bg-khajur-cream hover:bg-khajur-gold/20
-        text-khajur-primary rounded-sm transition-colors duration-200
-      "
+                w-8 h-8 flex items-center justify-center
+                bg-khajur-cream hover:bg-khajur-gold/20
+                text-khajur-primary rounded-sm transition-colors duration-200
+            "
             aria-label="Increase quantity"
         >
             <Plus className="w-3.5 h-3.5" />
@@ -109,11 +122,11 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
     return (
         <div
             className="
-        bg-white border border-khajur-border
-        hover:border-khajur-gold/40 hover:shadow-[0_4px_20px_rgba(198,169,98,0.08)]
-        rounded-sm transition-all duration-300
-        flex flex-col sm:flex-row gap-0
-      "
+                bg-white border border-khajur-border
+                hover:border-khajur-gold/40 hover:shadow-[0_4px_20px_rgba(198,169,98,0.08)]
+                rounded-sm transition-all duration-300
+                flex flex-col sm:flex-row gap-0
+            "
             data-testid={`cart-item-${item.product_id}`}
         >
             {/* Product Image */}
@@ -252,13 +265,13 @@ const OrderSummaryPanel = ({ cart, cartTotal, onCheckout }) => (
                 onClick={onCheckout}
                 data-testid="proceed-to-checkout"
                 className="
-          w-full flex items-center justify-center gap-2
-          bg-khajur-gold hover:bg-khajur-gold/90
-          hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
-          text-khajur-primary rounded-sm px-8 py-4
-          uppercase tracking-widest text-xs font-bold
-          transition-all duration-300
-        "
+                    w-full flex items-center justify-center gap-2
+                    bg-khajur-gold hover:bg-khajur-gold/90
+                    hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
+                    text-khajur-primary rounded-sm px-8 py-4
+                    uppercase tracking-widest text-xs font-bold
+                    transition-all duration-300
+                "
             >
                 Proceed to Checkout
                 <ArrowRight className="w-4 h-4" />
@@ -268,9 +281,9 @@ const OrderSummaryPanel = ({ cart, cartTotal, onCheckout }) => (
                 to="/products"
                 data-testid="continue-shopping"
                 className="
-          block text-center text-xs uppercase tracking-widest font-medium
-          text-khajur-dark/40 hover:text-khajur-gold transition-colors
-        "
+                    block text-center text-xs uppercase tracking-widest font-medium
+                    text-khajur-dark/40 hover:text-khajur-gold transition-colors
+                "
             >
                 Continue Shopping
             </Link>
@@ -281,15 +294,16 @@ const OrderSummaryPanel = ({ cart, cartTotal, onCheckout }) => (
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const Cart = () => {
+    const { cart, updateCartItem, removeFromCart, cartTotal, loading } = useCart();
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
     useEffect(() => {
         document.title = 'Your Cart — KhajurKart';
         return () => {
             document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
         };
     }, []);
-    const { cart, updateCartItem, removeFromCart, cartTotal, loading } = useCart();
-    const { user } = useAuth();
-    const navigate = useNavigate();
 
     // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -317,6 +331,17 @@ const Cart = () => {
     return (
         <div className="min-h-screen bg-white py-16 md:py-24" data-testid="cart-page">
             <div className="max-w-6xl mx-auto px-6 md:px-12">
+
+                {/* ── Breadcrumb ── */}
+                <div className="mb-10">
+                    <Breadcrumb
+                        items={[
+                            { label: 'Home', to: '/' },
+                            { label: 'Products', to: '/products' },
+                            { label: 'Cart', to: '#' },
+                        ]}
+                    />
+                </div>
 
                 {/* ── Page Header ── */}
                 <div className="border-b border-khajur-gold/20 pb-8 mb-12">
