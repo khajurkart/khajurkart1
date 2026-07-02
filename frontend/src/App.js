@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 
 // ── Eagerly loaded components (always needed) ──────────────────────────────────
 import Navbar from './components/Navbar';
@@ -112,11 +113,46 @@ function App() {
 
                                         {/* ── Admin Routes ──────────────────────────── */}
                                         <Route path="/admin/login" element={<AdminLogin />} />
-                                        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                                        <Route path="/admin/products" element={<AdminProducts />} />
-                                        <Route path="/admin/orders" element={<AdminOrders />} />
-                                        <Route path="/admin/returns" element={<AdminReturns />} />
-                                        <Route path="/admin/reviews" element={<AdminReviews />} />
+                                        <Route
+                                            path="/admin/dashboard"
+                                            element={
+                                                <AdminProtectedRoute>
+                                                    <AdminDashboard />
+                                                </AdminProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/admin/products"
+                                            element={
+                                                <AdminProtectedRoute>
+                                                    <AdminProducts />
+                                                </AdminProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/admin/orders"
+                                            element={
+                                                <AdminProtectedRoute>
+                                                    <AdminOrders />
+                                                </AdminProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/admin/returns"
+                                            element={
+                                                <AdminProtectedRoute>
+                                                    <AdminReturns />
+                                                </AdminProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/admin/reviews"
+                                            element={
+                                                <AdminProtectedRoute>
+                                                    <AdminReviews />
+                                                </AdminProtectedRoute>
+                                            }
+                                        />
 
                                         {/* ── Support Routes ────────────────────────── */}
                                         <Route path="/returns" element={<Returns />} />
