@@ -4,10 +4,6 @@ import { Loader2, ShieldCheck, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
-const ADMIN_EMAILS = ["admin@khajurkart.com", "khajurkart@gmail.com"];
-
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
 const InputField = ({
@@ -67,7 +63,7 @@ const ErrorBanner = ({ message }) => (
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const { login, user } = useAuth();
+  const { login, user, isAdmin, ADMIN_EMAILS } = useAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -77,18 +73,17 @@ const AdminLogin = () => {
   // ── Check if already logged in as admin ────────────────────────────────────
 
   useEffect(() => {
-    // Set page title
     document.title = 'Admin Login — KhajurKart';
     
-    // Check if user is already logged in as admin
-    if (user && ADMIN_EMAILS.includes(user.email)) {
+    // Redirect if already logged in as admin
+    if (user && isAdmin()) {
       navigate('/admin/dashboard', { replace: true });
     }
 
     return () => {
       document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
     };
-  }, [user, navigate]);
+  }, [user, isAdmin, navigate]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
@@ -101,14 +96,14 @@ const AdminLogin = () => {
     e.preventDefault();
     setError("");
 
-    // Validate email
+    // Validate inputs
     if (!formData.email.trim() || !formData.password.trim()) {
       setError("Please enter both email and password.");
       return;
     }
 
-    // Pre-check if email is an admin email
-    if (!ADMIN_EMAILS.includes(formData.email.toLowerCase())) {
+    // Pre-check if email is authorized for admin
+    if (!ADMIN_EMAILS.includes(formData.email.toLowerCase().trim())) {
       setError("This email is not authorized for admin access.");
       return;
     }
@@ -117,10 +112,13 @@ const AdminLogin = () => {
 
     try {
       // Use the AuthContext login method
-      await login(formData.email, formData.password);
+      const userData = await login(formData.email, formData.password);
 
-      // Store admin flag in localStorage
-      localStorage.setItem("isAdmin", "true");
+      // Double-check admin status (should already be set by login)
+      if (!ADMIN_EMAILS.includes(userData.email)) {
+        setError("This account does not have administrator privileges.");
+        return;
+      }
 
       // Success notification
       toast.success("Welcome back, Admin!");
@@ -136,6 +134,8 @@ const AdminLogin = () => {
         setError("Invalid email or password. Please try again.");
       } else if (err.response?.status === 403) {
         setError("This account does not have administrator privileges.");
+      } else if (err.response?.data?.detail) {
+        setError(err.response.data.detail);
       } else if (err.message) {
         setError(err.message);
       } else {
