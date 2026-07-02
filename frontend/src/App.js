@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -85,12 +86,22 @@ function App() {
                                 <Route path="/reset-password" element={<ResetPassword />} />
 
                                 {/* ── Admin Routes ──────────────────────────── */}
-                                <Route path="/admin/login" element={<AdminLogin />} />
-                                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                                <Route path="/admin/products" element={<AdminProducts />} />
-                                <Route path="/admin/orders" element={<AdminOrders />} />
-                                <Route path="/admin/returns" element={<AdminReturns />} />
-                                <Route path="/admin/reviews" element={<AdminReviews />} />
+                                // Replace admin routes with:
+                                <Route path="/admin/dashboard" element={
+                                    <ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>
+                                } />
+                                <Route path="/admin/products" element={
+                                    <ProtectedAdminRoute><AdminProducts /></ProtectedAdminRoute>
+                                } />
+                                <Route path="/admin/orders" element={
+                                    <ProtectedAdminRoute><AdminOrders /></ProtectedAdminRoute>
+                                } />
+                                <Route path="/admin/returns" element={
+                                    <ProtectedAdminRoute><AdminReturns /></ProtectedAdminRoute>
+                                } />
+                                <Route path="/admin/reviews" element={
+                                    <ProtectedAdminRoute><AdminReviews /></ProtectedAdminRoute>
+                                } />
 
                                 {/* ── Support Routes ────────────────────────── */}
                                 <Route path="/returns" element={<Returns />} />
