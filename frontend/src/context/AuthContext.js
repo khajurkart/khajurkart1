@@ -3,6 +3,13 @@ import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// ─── Admin Configuration ───────────────────────────────────────────────────────
+
+const ADMIN_EMAILS = ["admin@khajurkart.com", "khajurkart@gmail.com"];
+
+// ─── Context ───────────────────────────────────────────────────────────────────
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -12,6 +19,8 @@ export const useAuth = () => {
     }
     return context;
 };
+
+// ─── Provider ──────────────────────────────────────────────────────────────────
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -23,16 +32,27 @@ export const AuthProvider = ({ children }) => {
     });
     const [loading, setLoading] = useState(true);
 
+    // ── Logout ─────────────────────────────────────────────────────────────────
+
     const logout = useCallback(() => {
         localStorage.removeItem('token');
+        localStorage.removeItem('isAdmin');
         setToken(null);
         setUser(null);
     }, []);
 
+    // ── Fetch User ─────────────────────────────────────────────────────────────
+
     const fetchUser = useCallback(async () => {
         try {
             const savedToken = localStorage.getItem("token");
-            const res = await axios.get(`${BACKEND_URL}/api/auth/me`, {
+            
+            if (!savedToken) {
+                setLoading(false);
+                return;
+            }
+
+            const res = await axios.get(`${API}/auth/me`, {
                 headers: { Authorization: `Bearer ${savedToken}` }
             });
 
@@ -43,12 +63,23 @@ export const AuthProvider = ({ children }) => {
             }
 
             setUser(res.data);
+
+            // ✅ Check and set admin status
+            if (ADMIN_EMAILS.includes(res.data.email)) {
+                localStorage.setItem('isAdmin', 'true');
+            } else {
+                localStorage.removeItem('isAdmin');
+            }
+
         } catch (error) {
+            console.error('Fetch user error:', error);
             logout();
         } finally {
             setLoading(false);
         }
     }, [logout]);
+
+    // ── Initialize ─────────────────────────────────────────────────────────────
 
     useEffect(() => {
         if (token) {
@@ -58,42 +89,103 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token, fetchUser]);
 
-    // ✅ Normal login with email/password
+    // ── Login ──────────────────────────────────────────────────────────────────
+
     const login = async (email, password) => {
-        const response = await axios.post(`${API}/login`, { email, password });
-        const { access_token, user: userData } = response.data;
-        localStorage.setItem('token', access_token);
-        setToken(access_token);
-        setUser(userData);
-        return userData;
+        try {
+            const response = await axios.post(`${API}/login`, { 
+                email, 
+                password 
+            });
+
+            const { access_token, user: userData } = response.data;
+
+            // Store token
+            localStorage.setItem('token', access_token);
+            setToken(access_token);
+            setUser(userData);
+
+            // ✅ Check if admin
+            if (ADMIN_EMAILS.includes(userData.email)) {
+                localStorage.setItem('isAdmin', 'true');
+            } else {
+                localStorage.removeItem('isAdmin');
+            }
+
+            return userData;
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
+        }
     };
 
-    // ✅ Register - NO token saved
+    // ── Register ───────────────────────────────────────────────────────────────
+
     const register = async (name, email, password, phone) => {
-        const response = await axios.post(`${API}/auth/register`, {
-            name, email, password, phone
-        });
-        return response.data;
+        try {
+            const response = await axios.post(`${API}/auth/register`, {
+                name, 
+                email, 
+                password, 
+                phone
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Register error:', error);
+            throw error;
+        }
     };
 
-    // ✅ NEW - Set auth directly after email verification
+    // ── Set Auth (after email verification) ───────────────────────────────────
+
     const setAuth = (access_token, userData) => {
         localStorage.setItem('token', access_token);
         setToken(access_token);
         setUser(userData);
+
+        // ✅ Check if admin
+        if (ADMIN_EMAILS.includes(userData.email)) {
+            localStorage.setItem('isAdmin', 'true');
+        } else {
+            localStorage.removeItem('isAdmin');
+        }
+    };
+
+    // ── Check if current user is admin ────────────────────────────────────────
+
+    const isAdmin = useCallback(() => {
+        if (!user) return false;
+        return ADMIN_EMAILS.includes(user.email);
+    }, [user]);
+
+    // ── Get admin status from localStorage ────────────────────────────────────
+
+    const getAdminStatus = () => {
+        return localStorage.getItem('isAdmin') === 'true';
+    };
+
+    // ── Context Value ──────────────────────────────────────────────────────────
+
+    const value = {
+        user,
+        token,
+        loading,
+        login,
+        register,
+        logout,
+        setAuth,
+        isAdmin,
+        getAdminStatus,
+        ADMIN_EMAILS, // Export for use in components
     };
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            token,
-            login,
-            register,
-            logout,
-            loading,
-            setAuth  // ✅ exported
-        }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
 };
+
+// ─── Export Context ────────────────────────────────────────────────────────────
+
+export default AuthContext;
