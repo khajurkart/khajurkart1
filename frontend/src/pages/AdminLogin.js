@@ -210,20 +210,6 @@ const AdminLogin = () => {
               }
             />
 
-            {/* Authorized Emails Info */}
-            <div className="bg-khajur-cream/50 border border-khajur-border px-4 py-3 rounded-sm">
-              <p className="text-xs text-khajur-dark/60 leading-relaxed">
-                <strong className="font-medium text-khajur-primary">Authorized emails:</strong>
-                <br />
-                {ADMIN_EMAILS.map((email, index) => (
-                  <span key={email}>
-                    {email}
-                    {index < ADMIN_EMAILS.length - 1 && <br />}
-                  </span>
-                ))}
-              </p>
-            </div>
-
             {/* Submit */}
             <button
               type="submit"
