@@ -179,7 +179,7 @@ const AdminLogin = () => {
               type="email"
               value={formData.email}
               onChange={handleChange("email")}
-              placeholder="admin@khajurkart.com"
+              placeholder="Admin Email"
               autoComplete="username"
               disabled={loading}
             />
