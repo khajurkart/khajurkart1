@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, ShieldCheck, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import { useAuth } from "../context/AuthContext";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -69,11 +67,28 @@ const ErrorBanner = ({ message }) => (
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const { login, user } = useAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // ── Check if already logged in as admin ────────────────────────────────────
+
+  useEffect(() => {
+    // Set page title
+    document.title = 'Admin Login — KhajurKart';
+    
+    // Check if user is already logged in as admin
+    if (user && ADMIN_EMAILS.includes(user.email)) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+
+    return () => {
+      document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+    };
+  }, [user, navigate]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
@@ -85,39 +100,47 @@ const AdminLogin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Validate email
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    // Pre-check if email is an admin email
+    if (!ADMIN_EMAILS.includes(formData.email.toLowerCase())) {
+      setError("This email is not authorized for admin access.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch(`${API}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      // Use the AuthContext login method
+      await login(formData.email, formData.password);
 
-      const data = await res.json();
+      // Store admin flag in localStorage
+      localStorage.setItem("isAdmin", "true");
 
-      if (!res.ok) {
-        setError(data.detail || "Invalid credentials. Please try again.");
-        return;
-      }
-
-      if (!ADMIN_EMAILS.includes(data.user?.email)) {
-        setError("This account does not have administrator privileges.");
-        return;
-      }
-
-      // Persist session
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("admin", "true");
-
+      // Success notification
       toast.success("Welcome back, Admin!");
-      navigate("/admin/dashboard");
+
+      // Redirect to admin dashboard
+      navigate("/admin/dashboard", { replace: true });
+
     } catch (err) {
       console.error("Admin login error:", err);
-      setError("Unable to reach the server. Please check your connection.");
+      
+      // Handle different error types
+      if (err.response?.status === 401) {
+        setError("Invalid email or password. Please try again.");
+      } else if (err.response?.status === 403) {
+        setError("This account does not have administrator privileges.");
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError("Unable to sign in. Please check your credentials and try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -126,11 +149,11 @@ const AdminLogin = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-khajur-cream flex items-center justify-center px-4">
+    <div className="min-h-screen bg-khajur-cream flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
 
         {/* Card */}
-        <div className="bg-white border border-khajur-border shadow-sm">
+        <div className="bg-white border border-khajur-border shadow-lg">
 
           {/* Header */}
           <div className="bg-khajur-primary px-8 py-10 text-center">
@@ -151,19 +174,19 @@ const AdminLogin = () => {
 
             {/* Email */}
             <InputField
-              id="email"
+              id="admin-email"
               label="Email Address"
               type="email"
               value={formData.email}
               onChange={handleChange("email")}
               placeholder="admin@khajurkart.com"
-              autoComplete="email"
+              autoComplete="username"
               disabled={loading}
             />
 
             {/* Password */}
             <InputField
-              id="password"
+              id="admin-password"
               label="Password"
               type={showPassword ? "text" : "password"}
               value={formData.password}
@@ -175,6 +198,7 @@ const AdminLogin = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={-1}
                   className="text-khajur-dark/40 hover:text-khajur-primary transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -185,6 +209,20 @@ const AdminLogin = () => {
                 </button>
               }
             />
+
+            {/* Authorized Emails Info */}
+            <div className="bg-khajur-cream/50 border border-khajur-border px-4 py-3 rounded-sm">
+              <p className="text-xs text-khajur-dark/60 leading-relaxed">
+                <strong className="font-medium text-khajur-primary">Authorized emails:</strong>
+                <br />
+                {ADMIN_EMAILS.map((email, index) => (
+                  <span key={email}>
+                    {email}
+                    {index < ADMIN_EMAILS.length - 1 && <br />}
+                  </span>
+                ))}
+              </p>
+            </div>
 
             {/* Submit */}
             <button
@@ -205,14 +243,26 @@ const AdminLogin = () => {
                   Signing in…
                 </>
               ) : (
-                "Sign In"
+                <>
+                  <ShieldCheck className="w-4 h-4" />
+                  Sign In as Admin
+                </>
               )}
             </button>
           </form>
 
           {/* Footer */}
-          <div className="px-8 pb-6 text-center">
-            <p className="text-xs text-khajur-dark/40">
+          <div className="px-8 pb-6 space-y-3">
+            <div className="border-t border-khajur-border pt-4">
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="text-xs text-khajur-primary hover:text-khajur-gold transition-colors underline underline-offset-2"
+              >
+                ← Back to main site
+              </button>
+            </div>
+            <p className="text-xs text-khajur-dark/40 text-center">
               Access is logged and monitored. Unauthorised use is prohibited.
             </p>
           </div>
