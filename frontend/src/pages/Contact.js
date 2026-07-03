@@ -67,9 +67,12 @@ const HeroSection = () => (
 
 // ── Field ──────────────────────────────────────────────────────────────────────
 
-const Field = ({ label, required, children }) => (
+const Field = ({ label, required, children, htmlFor }) => (
     <div className="space-y-2">
-        <label className="block text-xs font-medium uppercase tracking-widest text-khajur-dark/60">
+        <label
+            htmlFor={htmlFor}
+            className="block text-xs font-medium uppercase tracking-widest text-khajur-dark/60"
+        >
             {label}
             {required && <span className="text-khajur-gold ml-1">*</span>}
         </label>
@@ -93,7 +96,7 @@ const ContactForm = () => {
             document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
         };
     }, []);
-    
+
     const [formData, setFormData] = useState(INITIAL_FORM);
     const [submitting, setSubmitting] = useState(false);
 
@@ -135,7 +138,7 @@ const ContactForm = () => {
     };
 
     return (
-        <div id="main-content" className="bg-white border border-khajur-border p-8 md:p-12">
+        <div className="bg-white border border-khajur-border p-8 md:p-12">
             {/* Form Header */}
             <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
                 Reach Out
@@ -149,10 +152,13 @@ const ContactForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-8" data-testid="contact-form">
 
-                {/* Name & Email — side by side on larger screens */}
+                {/* Name & Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                    <Field label="Your Name" required>
+
+                    {/* ✅ Add htmlFor to Field, id to input */}
+                    <Field label="Your Name" required htmlFor="contact-name">
                         <input
+                            id="contact-name"
                             type="text"
                             required
                             placeholder="John Doe"
@@ -160,10 +166,14 @@ const ContactForm = () => {
                             onChange={set('name')}
                             className={inputBase}
                             data-testid="contact-name"
+                            autoComplete="name"
                         />
                     </Field>
-                    <Field label="Email Address" required>
+
+                    {/* ✅ */}
+                    <Field label="Email Address" required htmlFor="contact-email">
                         <input
+                            id="contact-email"
                             type="email"
                             required
                             placeholder="john@example.com"
@@ -171,33 +181,40 @@ const ContactForm = () => {
                             onChange={set('email')}
                             className={inputBase}
                             data-testid="contact-email"
+                            autoComplete="email"
                         />
                     </Field>
+
                 </div>
 
-                <Field label="Phone Number">
+                {/* ✅ */}
+                <Field label="Phone Number" htmlFor="contact-phone">
                     <input
+                        id="contact-phone"
                         type="tel"
                         placeholder="+91 98765 43210"
                         value={formData.phone}
                         onChange={set('phone')}
                         className={inputBase}
                         data-testid="contact-phone"
+                        autoComplete="tel"
                     />
                 </Field>
 
-                <Field label="Message" required>
+                {/* ✅ */}
+                <Field label="Message" required htmlFor="contact-message">
                     <textarea
+                        id="contact-message"
                         required
                         rows={5}
                         placeholder="Tell us how we can help you…"
                         value={formData.message}
                         onChange={set('message')}
                         className={`
-              w-full bg-transparent border border-khajur-primary/20
-              focus:border-khajur-gold px-4 py-3 rounded-sm
-              text-sm text-khajur-primary placeholder:text-khajur-dark/25
-              focus:outline-none transition-colors duration-200 resize-none
+                w-full bg-transparent border border-khajur-primary/20
+                focus:border-khajur-gold px-4 py-3 rounded-sm
+                text-sm text-khajur-primary placeholder:text-khajur-dark/25
+                focus:outline-none transition-colors duration-200 resize-none
             `}
                         data-testid="contact-message"
                     />
@@ -206,28 +223,12 @@ const ContactForm = () => {
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="
-            flex items-center justify-center gap-2
-            w-full bg-khajur-gold text-khajur-primary
-            hover:bg-khajur-gold/90 hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
-            disabled:opacity-60 disabled:cursor-not-allowed
-            rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold
-            transition-all duration-300
-          "
-                    data-testid="submit-contact-form"
+                    aria-label="Send contact message"
+                    className="..."
                 >
-                    {submitting ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Sending…
-                        </>
-                    ) : (
-                        <>
-                            <Send className="w-4 h-4" />
-                            Send Message
-                        </>
-                    )}
+                    {/* ... */}
                 </button>
+
             </form>
         </div>
     );
