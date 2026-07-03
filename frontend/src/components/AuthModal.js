@@ -476,6 +476,18 @@ const AuthModal = ({ isOpen, onClose }) => {
         }
     }, [isOpen]);
 
+    // Add this useEffect
+    useEffect(() => {
+        if (isOpen) {
+            // Save previously focused element
+            const previouslyFocused = document.activeElement;
+            return () => {
+                // Restore focus when modal closes
+                previouslyFocused?.focus();
+            };
+        }
+    }, [isOpen]);
+
     // ─────────────────────────────────────────────────────────────────────────
     // Form Handlers
     // ─────────────────────────────────────────────────────────────────────────
