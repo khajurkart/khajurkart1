@@ -37,12 +37,17 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
 const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
     <form onSubmit={onSubmit} className={className}>
         <div className="relative">
+            <label htmlFor="search-input" className="sr-only">
+                Search products
+            </label>
             <input
+                id="search-input"
                 type="text"
-                placeholder="Search…"
+                placeholder="Search products..."
                 value={value}
                 onChange={onChange}
                 data-testid="search-input"
+                aria-label="Search products"
                 className="
           w-40 bg-white/5 border border-khajur-gold/20
           hover:border-khajur-gold/40 focus:border-khajur-gold
