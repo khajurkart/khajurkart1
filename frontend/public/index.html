@@ -63,37 +63,65 @@
     </script>
 
     <!-- ── Organization Schema ── -->
+    <!-- Script 1: Organization -->
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "KhajurKart",
-            "url": "https://www.khajurkart.com",
-            "logo": "https://www.khajurkart.com/Logo.png",
-            "description": "Premium destination for the world's finest dates, dry fruits, nuts and spices delivered across India.",
-            "contactPoint": {
-                "@type": "ContactPoint",
-                "telephone": "+91-79810-02137",
-                "contactType": "Customer Service",
-                "email": "khajurkart@gmail.com",
-                "availableLanguage": ["English", "Hindi"],
-                "hoursAvailable": "Mo-Sa 09:00-20:00"
-            },
-            "address": {
-                "@type": "PostalAddress",
-                "streetAddress": "10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar",
-                "addressLocality": "Hyderabad",
-                "addressRegion": "Telangana",
-                "postalCode": "500057",
-                "addressCountry": "IN"
-            },
-            "sameAs": [
-                "https://www.facebook.com/profile.php?id=61572011713195",
-                "https://www.instagram.com/_khajurkart_/",
-                "https://in.pinterest.com/khajurkart/"
-            ]
-        }
-        </script>
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "KhajurKart",
+      "url": "https://www.khajurkart.com",
+      "logo": "https://www.khajurkart.com/Logo.png",
+      "telephone": "+91-7981002137",
+      "email": "khajurkart@gmail.com",
+      "sameAs": [
+        "https://www.instagram.com/_khajurkart_",
+        "https://www.facebook.com/khajurkart"
+      ]
+    }
+    </script>
+
+    <!-- Script 2: LocalBusiness -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "KhajurKart",
+      "image": "https://www.khajurkart.com/Logo.png",
+      "url": "https://www.khajurkart.com",
+      "telephone": "+91-7981002137",
+      "email": "khajurkart@gmail.com",
+      "priceRange": "₹50 - ₹5000",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "10-3-313/a, AR Raheem Residency",
+        "addressLocality": "Hyderabad",
+        "addressRegion": "Telangana",
+        "postalCode": "500057",
+        "addressCountry": "IN"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "opens": "09:00",
+        "closes": "20:00"
+      }
+    }
+    </script>
+
+    <!-- Script 3: WebSite with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://www.khajurkart.com",
+      "name": "KhajurKart",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.khajurkart.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
 
     <!-- ── WebSite Schema (enables Google Sitelinks Search) ── -->
     <script type="application/ld+json">
