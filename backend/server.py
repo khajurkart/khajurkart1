@@ -1,6 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi import Request
+from fastapi import Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -1530,8 +1531,15 @@ def generate_invoice(order):
 # ============ CATEGORY ROUTES ============
 
 
-@api_router.get("/categories", response_model=List[Category])
-async def get_categories():
+# @api_router.get("/categories", response_model=List[Category])
+# async def get_categories():
+#    categories = await db.categories.find({}, {"_id": 0}).to_list(100)
+#    return categories
+
+
+@api_router.get("/categories")
+async def get_categories(response: Response):
+    response.headers["Cache-Control"] = "public, max-age=3600"  # 1 hour cache
     categories = await db.categories.find({}, {"_id": 0}).to_list(100)
     return categories
 
@@ -1550,8 +1558,13 @@ def serialize(product):
     return product
 
 
-@api_router.get("/products", response_model=List[Product])
-async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
+# @api_router.get("/products", response_model=List[Product])
+# async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
+@api_router.get("/products")
+async def get_products(
+    response: Response, category: Optional[str] = None, featured: Optional[bool] = None
+):
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min cache
     try:
         query = {}
         if category:
