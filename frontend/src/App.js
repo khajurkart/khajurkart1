@@ -90,7 +90,14 @@ function App() {
                             <Navbar />
 
                             <main id="main-content" className="flex-grow">
-                                <Suspense fallback={<PageLoader />}>
+                                <Suspense fallback={
+                                    <div className="min-h-screen flex items-center justify-center bg-khajur-cream">
+                                        <div className="text-center">
+                                            <div className="w-12 h-12 border-4 border-khajur-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                            <p className="text-khajur-primary font-serif">Loading...</p>
+                                        </div>
+                                    </div>
+                                }>
                                     <Routes>
 
                                         {/* ── Main Routes ───────────────────────────── */}
