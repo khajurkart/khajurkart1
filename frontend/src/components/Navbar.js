@@ -166,6 +166,8 @@ const Navbar = () => {
                             <img
                                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
                                 alt="KhajurKart"
+                                fetchPriority="high"    // ✅ ADD THIS
+                                loading="eager"          // ✅ ADD THIS for logo
                                 className="h-12 w-auto"
                             />
                             <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
