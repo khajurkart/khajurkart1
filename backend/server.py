@@ -1947,11 +1947,14 @@ async def create_order(
 async def get_orders(current_user: dict = Depends(get_current_user)):
     try:
         orders = await db.orders.find(
-            {"user_id": current_user["id"]}, {"_id": 0}
+            {
+                "user_id": current_user["id"],
+                "hidden_by_user": {"$ne": True},  # ✅ hide soft deleted
+            },
+            {"_id": 0},
         ).to_list(100)
         return orders
     except Exception as e:
-        print("ERROR:", str(e))  # ✅ DEBUG
         raise HTTPException(500, str(e))
 
 
@@ -1988,10 +1991,30 @@ async def cancel_order(order_id: str, current_user: dict = Depends(get_current_u
     return {"message": "Order cancelled"}
 
 
-@app.delete("/api/orders/{order_id}")
-async def delete_order(order_id: str, admin: dict = Depends(get_admin_user)):
+# ✅ Customer can hide their own order (soft delete)
+@api_router.delete("/orders/{order_id}")
+async def delete_order_user(
+    order_id: str, current_user: dict = Depends(get_current_user)
+):
+    # Make sure order belongs to this user
+    order = await db.orders.find_one({"id": order_id, "user_id": current_user["id"]})
+    if not order:
+        raise HTTPException(404, "Order not found")
+
+    # Only allow hiding cancelled orders
+    if order["status"] not in ["cancelled", "delivered"]:
+        raise HTTPException(400, "You can only delete cancelled or delivered orders")
+
+    # Soft delete — hide from user view
+    await db.orders.update_one({"id": order_id}, {"$set": {"hidden_by_user": True}})
+    return {"message": "Order removed from your list"}
+
+
+# ✅ Admin can hard delete any order
+@api_router.delete("/admin/orders/{order_id}/delete")
+async def delete_order_admin(order_id: str, admin: dict = Depends(get_admin_user)):
     await db.orders.delete_one({"id": order_id})
-    return {"message": "Order deleted"}
+    return {"message": "Order permanently deleted"}
 
 
 # ============ INVOICE ROUTES ============
