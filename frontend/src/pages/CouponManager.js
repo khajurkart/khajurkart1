@@ -12,15 +12,12 @@ import {
     XCircle,
     Gift,
     Loader2,
-    AlertTriangle,
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
-
-// ── Field Label ────────────────────────────────────────────────────────────────
 
 const FieldLabel = ({ children, required }) => (
     <label className="block text-xs uppercase tracking-widest font-medium text-khajur-dark/50 mb-1.5">
@@ -51,8 +48,8 @@ const SystemToggleCard = ({ enabled, onToggle }) => (
                 </p>
                 <p className={`text-sm mt-0.5 ${enabled ? 'text-green-600' : 'text-khajur-dark/50'}`}>
                     {enabled
-                        ? 'Customers can apply coupons at checkout'
-                        : 'Coupon input is hidden from all customers'
+                        ? '✅ Customers can apply coupons at checkout'
+                        : '❌ Coupon input is hidden from all customers'
                     }
                 </p>
             </div>
@@ -91,7 +88,6 @@ const CouponCard = ({ coupon, onToggle, onDelete }) => (
     `}>
         {/* Left — Info */}
         <div className="flex items-start gap-4 flex-1 min-w-0">
-            {/* Icon */}
             <div className={`
                 w-10 h-10 rounded-sm flex items-center justify-center flex-shrink-0
                 ${coupon.is_welcome ? 'bg-yellow-50' : 'bg-khajur-cream'}
@@ -102,7 +98,6 @@ const CouponCard = ({ coupon, onToggle, onDelete }) => (
                 }
             </div>
 
-            {/* Details */}
             <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className="font-mono font-bold text-khajur-primary text-base tracking-wider">
@@ -190,20 +185,23 @@ const CouponCard = ({ coupon, onToggle, onDelete }) => (
 
 // ── Create Coupon Form ─────────────────────────────────────────────────────────
 
+const EMPTY_FORM = {
+    code: '',
+    discount_type: 'percent',
+    discount_percent: '',
+    discount_amount: '',
+    min_order: '',
+    max_uses: '100',
+    expiry: '',
+    description: '',
+    is_active: true,
+    is_welcome: false,
+};
+
 const CreateCouponForm = ({ onSubmit, onCancel }) => {
-    const [form, setForm] = useState({
-        code: '',
-        discount_type: 'percent',
-        discount_percent: '',
-        discount_amount: '',
-        min_order: 0,
-        max_uses: 100,
-        expiry: '',
-        description: '',
-        is_active: true,
-        is_welcome: false,
-    });
+    const [form, setForm] = useState(EMPTY_FORM);
     const [submitting, setSubmitting] = useState(false);
+    const [errors, setErrors] = useState({});
 
     const set = (field) => (e) =>
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -211,11 +209,65 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
     const setCheck = (field) => (e) =>
         setForm((prev) => ({ ...prev, [field]: e.target.checked }));
 
+    // ── Validate ───────────────────────────────────────────────────────────────
+    const validate = () => {
+        const errs = {};
+        if (!form.code.trim()) errs.code = 'Coupon code is required';
+        if (form.discount_type === 'percent') {
+            const pct = Number(form.discount_percent);
+            if (!form.discount_percent || isNaN(pct) || pct < 1 || pct > 100)
+                errs.discount_percent = 'Enter a percentage between 1 and 100';
+        } else {
+            const amt = Number(form.discount_amount);
+            if (!form.discount_amount || isNaN(amt) || amt < 1)
+                errs.discount_amount = 'Enter a valid amount';
+        }
+        if (form.max_uses && Number(form.max_uses) < 1)
+            errs.max_uses = 'Must be at least 1';
+        return errs;
+    };
+
+    // ── Build clean payload ────────────────────────────────────────────────────
+    const buildPayload = () => {
+        const payload = {
+            code: form.code.trim().toUpperCase(),
+            discount_type: form.discount_type,
+            min_order: form.min_order === '' ? 0 : Number(form.min_order),
+            max_uses: form.max_uses === '' ? 100 : Number(form.max_uses),
+            description: form.description.trim() || null,
+            is_active: Boolean(form.is_active),
+            is_welcome: Boolean(form.is_welcome),
+            expiry: form.expiry || null,
+        };
+
+        // Only send the relevant discount field — send null for the other
+        if (form.discount_type === 'percent') {
+            payload.discount_percent = Number(form.discount_percent);
+            payload.discount_amount = null;
+        } else {
+            payload.discount_amount = Number(form.discount_amount);
+            payload.discount_percent = null;
+        }
+
+        return payload;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const errs = validate();
+        if (Object.keys(errs).length > 0) {
+            setErrors(errs);
+            return;
+        }
+        setErrors({});
         setSubmitting(true);
-        await onSubmit(form);
-        setSubmitting(false);
+        try {
+            await onSubmit(buildPayload());
+        } catch {
+            // error already toasted in parent
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -240,28 +292,45 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                 </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                    {/* Code */}
+                    {/* ── Code ── */}
                     <div>
                         <FieldLabel required>Coupon Code</FieldLabel>
                         <input
-                            required
                             type="text"
                             value={form.code}
-                            onChange={(e) => setForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
+                            onChange={(e) =>
+                                setForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))
+                            }
                             placeholder="e.g. WELCOME10"
-                            className={`${inputCls} font-mono uppercase tracking-widest`}
+                            className={`${inputCls} font-mono tracking-widest ${errors.code ? 'border-red-400' : ''}`}
+                            data-testid="coupon-code-input"
                         />
+                        {errors.code && (
+                            <p className="text-xs text-red-500 mt-1">{errors.code}</p>
+                        )}
                     </div>
 
-                    {/* Discount Type */}
+                    {/* ── Discount Type ── */}
                     <div>
                         <FieldLabel required>Discount Type</FieldLabel>
                         <select
                             value={form.discount_type}
-                            onChange={set('discount_type')}
+                            onChange={(e) => {
+                                setForm((p) => ({
+                                    ...p,
+                                    discount_type: e.target.value,
+                                    discount_percent: '',
+                                    discount_amount: '',
+                                }));
+                                setErrors((p) => ({
+                                    ...p,
+                                    discount_percent: undefined,
+                                    discount_amount: undefined,
+                                }));
+                            }}
                             className={inputCls}
                         >
                             <option value="percent">Percentage (%)</option>
@@ -269,39 +338,45 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                         </select>
                     </div>
 
-                    {/* Discount Value */}
+                    {/* ── Discount Value ── */}
                     {form.discount_type === 'percent' ? (
                         <div>
-                            <FieldLabel required>Discount Percentage</FieldLabel>
+                            <FieldLabel required>Discount Percentage (%)</FieldLabel>
                             <input
-                                required
                                 type="number"
                                 min="1"
                                 max="100"
                                 value={form.discount_percent}
                                 onChange={set('discount_percent')}
                                 placeholder="e.g. 10"
-                                className={inputCls}
+                                className={`${inputCls} ${errors.discount_percent ? 'border-red-400' : ''}`}
+                                data-testid="coupon-discount-percent"
                             />
+                            {errors.discount_percent && (
+                                <p className="text-xs text-red-500 mt-1">{errors.discount_percent}</p>
+                            )}
                         </div>
                     ) : (
                         <div>
                             <FieldLabel required>Discount Amount (₹)</FieldLabel>
                             <input
-                                required
                                 type="number"
                                 min="1"
                                 value={form.discount_amount}
                                 onChange={set('discount_amount')}
                                 placeholder="e.g. 50"
-                                className={inputCls}
+                                className={`${inputCls} ${errors.discount_amount ? 'border-red-400' : ''}`}
+                                data-testid="coupon-discount-amount"
                             />
+                            {errors.discount_amount && (
+                                <p className="text-xs text-red-500 mt-1">{errors.discount_amount}</p>
+                            )}
                         </div>
                     )}
 
-                    {/* Min Order */}
+                    {/* ── Min Order ── */}
                     <div>
-                        <FieldLabel>Minimum Order (₹)</FieldLabel>
+                        <FieldLabel>Minimum Order Amount (₹)</FieldLabel>
                         <input
                             type="number"
                             min="0"
@@ -312,7 +387,7 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                         />
                     </div>
 
-                    {/* Max Uses */}
+                    {/* ── Max Uses ── */}
                     <div>
                         <FieldLabel>Maximum Uses</FieldLabel>
                         <input
@@ -320,22 +395,27 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                             min="1"
                             value={form.max_uses}
                             onChange={set('max_uses')}
-                            className={inputCls}
+                            placeholder="100"
+                            className={`${inputCls} ${errors.max_uses ? 'border-red-400' : ''}`}
                         />
+                        {errors.max_uses && (
+                            <p className="text-xs text-red-500 mt-1">{errors.max_uses}</p>
+                        )}
                     </div>
 
-                    {/* Expiry */}
+                    {/* ── Expiry ── */}
                     <div>
-                        <FieldLabel>Expiry Date</FieldLabel>
+                        <FieldLabel>Expiry Date (optional)</FieldLabel>
                         <input
                             type="date"
                             value={form.expiry}
                             onChange={set('expiry')}
+                            min={new Date().toISOString().split('T')[0]}
                             className={inputCls}
                         />
                     </div>
 
-                    {/* Description */}
+                    {/* ── Description ── */}
                     <div className="md:col-span-2">
                         <FieldLabel>Description (shown to customer)</FieldLabel>
                         <input
@@ -347,7 +427,7 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                         />
                     </div>
 
-                    {/* Checkboxes */}
+                    {/* ── Checkboxes ── */}
                     <div className="md:col-span-2 flex flex-wrap gap-6 pt-1">
                         <label className="flex items-center gap-2.5 cursor-pointer group">
                             <input
@@ -360,6 +440,7 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                                 Active immediately
                             </span>
                         </label>
+
                         <label className="flex items-center gap-2.5 cursor-pointer group">
                             <input
                                 type="checkbox"
@@ -375,7 +456,28 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                     </div>
                 </div>
 
-                {/* Submit */}
+                {/* ── Preview ── */}
+                {form.code && (
+                    <div className="bg-khajur-cream border border-khajur-border rounded-sm px-4 py-3 flex items-center gap-3">
+                        <Tag className="w-4 h-4 text-khajur-gold flex-shrink-0" />
+                        <div className="text-xs text-khajur-dark/70">
+                            <span className="font-mono font-bold text-khajur-primary mr-2">
+                                {form.code}
+                            </span>
+                            {form.discount_type === 'percent' && form.discount_percent
+                                ? `${form.discount_percent}% off`
+                                : form.discount_amount
+                                ? `₹${form.discount_amount} off`
+                                : '—'
+                            }
+                            {form.min_order > 0 && ` · Min ₹${form.min_order}`}
+                            {form.max_uses && ` · Max ${form.max_uses} uses`}
+                            {form.is_welcome && ' · 🎉 Welcome'}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Submit ── */}
                 <div className="flex items-center gap-3 pt-2 border-t border-khajur-border">
                     <button
                         type="submit"
@@ -424,15 +526,19 @@ const CouponManager = ({ token }) => {
     useEffect(() => {
         fetchCoupons();
         fetchSystemStatus();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchCoupons = async () => {
         setLoadingCoupons(true);
         try {
             const res = await axios.get(`${API}/admin/coupons`, { headers });
-            setCoupons(res.data);
-        } catch {
+            // ── Guard: ensure we always set an array ──────────────────────────
+            setCoupons(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            console.error('Fetch coupons error:', err.response?.data || err.message);
             toast.error('Failed to load coupons');
+            setCoupons([]);
         } finally {
             setLoadingCoupons(false);
         }
@@ -441,7 +547,7 @@ const CouponManager = ({ token }) => {
     const fetchSystemStatus = async () => {
         try {
             const res = await axios.get(`${API}/coupon-system/status`);
-            setSystemEnabled(res.data.enabled);
+            setSystemEnabled(Boolean(res.data.enabled));
         } catch {
             // silent
         }
@@ -455,21 +561,31 @@ const CouponManager = ({ token }) => {
                 { headers }
             );
             setSystemEnabled(!systemEnabled);
-            toast.success(res.data.message);
-        } catch {
+            toast.success(res.data.message || 'Coupon system updated');
+        } catch (err) {
+            console.error('Toggle system error:', err.response?.data || err.message);
             toast.error('Failed to toggle coupon system');
         }
     };
 
-    const handleCreateCoupon = async (form) => {
+    const handleCreateCoupon = async (payload) => {
+        console.log('Submitting coupon payload:', JSON.stringify(payload, null, 2));
         try {
-            await axios.post(`${API}/admin/coupons`, form, { headers });
-            toast.success(`Coupon "${form.code}" created successfully!`);
+            await axios.post(`${API}/admin/coupons`, payload, { headers });
+            toast.success(`Coupon "${payload.code}" created successfully!`);
             setShowForm(false);
             fetchCoupons();
         } catch (err) {
-            toast.error(err.response?.data?.detail || 'Failed to create coupon');
-            throw err; // keep form open on error
+            const detail = err.response?.data?.detail;
+            console.error('Create coupon error:', err.response?.data);
+            // FastAPI validation errors come as an array
+            if (Array.isArray(detail)) {
+                const messages = detail.map((d) => `${d.loc?.join(' → ')}: ${d.msg}`).join('\n');
+                toast.error(`Validation error:\n${messages}`);
+            } else {
+                toast.error(detail || 'Failed to create coupon');
+            }
+            throw err;
         }
     };
 
@@ -480,9 +596,10 @@ const CouponManager = ({ token }) => {
                 {},
                 { headers }
             );
-            toast.success(res.data.message);
+            toast.success(res.data.message || 'Coupon updated');
             fetchCoupons();
-        } catch {
+        } catch (err) {
+            console.error('Toggle coupon error:', err.response?.data);
             toast.error('Failed to toggle coupon');
         }
     };
@@ -493,15 +610,17 @@ const CouponManager = ({ token }) => {
             await axios.delete(`${API}/admin/coupons/${couponId}`, { headers });
             toast.success(`Coupon "${code}" deleted.`);
             fetchCoupons();
-        } catch {
+        } catch (err) {
+            console.error('Delete coupon error:', err.response?.data);
             toast.error('Failed to delete coupon');
         }
     };
 
-    // Derived
+    // ── Derived ────────────────────────────────────────────────────────────────
     const activeCoupons = coupons.filter((c) => c.is_active);
     const welcomeCoupons = coupons.filter((c) => c.is_welcome);
 
+    // ── Render ─────────────────────────────────────────────────────────────────
     return (
         <div className="space-y-6">
 
@@ -546,7 +665,8 @@ const CouponManager = ({ token }) => {
                         flex items-center gap-2
                         bg-khajur-gold text-khajur-primary
                         px-6 py-3 rounded-sm font-bold text-xs uppercase tracking-widest
-                        hover:bg-khajur-gold/90 hover:shadow-[0_0_16px_rgba(198,169,98,0.3)]
+                        hover:bg-khajur-gold/90
+                        hover:shadow-[0_0_16px_rgba(198,169,98,0.3)]
                         transition-all duration-200
                     "
                 >
