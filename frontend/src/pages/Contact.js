@@ -24,7 +24,7 @@ const CONTACT_INFO = [
         icon: MapPin,
         title: 'Address',
         details:
-            '10-3-313/a, AR Raheem Residency, beside Govt IASE College, Potti Sriramulu Nagar, Vijaya Nagar Colony, Hyderabad, Telangana — 500057',
+            '10-3-313/a, AR Raheem Residency, Hyderabad, Telangana — 500057',
         link: null,
     },
     {
@@ -46,9 +46,7 @@ const HeroSection = () => (
             alt="Contact Us"
             className="absolute inset-0 w-full h-full object-cover opacity-25"
         />
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary/80 to-transparent" />
-
         <div className="relative h-full flex items-center">
             <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
                 <p className="text-xs uppercase tracking-widest text-khajur-gold mb-3">
@@ -65,8 +63,6 @@ const HeroSection = () => (
     </section>
 );
 
-// ── Field ──────────────────────────────────────────────────────────────────────
-
 const Field = ({ label, required, children, htmlFor }) => (
     <div className="space-y-2">
         <label
@@ -81,7 +77,7 @@ const Field = ({ label, required, children, htmlFor }) => (
 );
 
 const inputBase = `
-  w-full bg-transparent border-b border-khajur-primary/20
+  w-full bg-transparent border-b border-khajur-primary/10
   focus:border-khajur-gold px-0 py-3
   text-sm text-khajur-primary placeholder:text-khajur-dark/25
   focus:outline-none transition-colors duration-200
@@ -108,7 +104,6 @@ const ContactForm = () => {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return 'Valid email required';
         if (formData.phone && !/^[\d\s\+\-]{7,15}$/.test(formData.phone)) return 'Valid phone required';
         if (formData.message.trim().length < 10) return 'Message must be at least 10 characters';
-        if (formData.message.length > 1000) return 'Message too long (max 1000 chars)';
         return null;
     };
 
@@ -125,37 +120,32 @@ const ContactForm = () => {
             });
 
             if (res.ok) {
-                toast.success('Message sent successfully! We\'ll get back to you soon.');
+                toast.success('Message sent successfully!');
                 setFormData(INITIAL_FORM);
             } else {
-                toast.error('Failed to send message. Please try again.');
+                toast.error('Failed to send message.');
             }
         } catch {
-            toast.error('Something went wrong. Please try again later.');
+            toast.error('Something went wrong.');
         } finally {
             setSubmitting(false);
         }
     };
 
     return (
-        <div className="bg-white border border-khajur-border p-8 md:p-12">
-            {/* Form Header */}
+        <div className="bg-white border border-khajur-border p-8 md:p-16">
             <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
                 Reach Out
             </p>
-            <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-2">
+            <h2 className="font-serif text-4xl font-medium text-khajur-primary mb-2">
                 Send Us a Message
             </h2>
-            <p className="text-sm text-khajur-dark/50 mb-10 leading-relaxed">
+            <p className="text-sm text-khajur-dark/40 mb-12">
                 Fill out the form below and our team will respond within 24 hours.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-8" data-testid="contact-form">
-
-                {/* Name & Email */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-
-                    {/* ✅ Add htmlFor to Field, id to input */}
+            <form onSubmit={handleSubmit} className="space-y-10" noValidate>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                     <Field label="Your Name" required htmlFor="contact-name">
                         <input
                             id="contact-name"
@@ -165,12 +155,9 @@ const ContactForm = () => {
                             value={formData.name}
                             onChange={set('name')}
                             className={inputBase}
-                            data-testid="contact-name"
-                            autoComplete="name"
                         />
                     </Field>
 
-                    {/* ✅ */}
                     <Field label="Email Address" required htmlFor="contact-email">
                         <input
                             id="contact-email"
@@ -180,14 +167,10 @@ const ContactForm = () => {
                             value={formData.email}
                             onChange={set('email')}
                             className={inputBase}
-                            data-testid="contact-email"
-                            autoComplete="email"
                         />
                     </Field>
-
                 </div>
 
-                {/* ✅ */}
                 <Field label="Phone Number" htmlFor="contact-phone">
                     <input
                         id="contact-phone"
@@ -196,39 +179,38 @@ const ContactForm = () => {
                         value={formData.phone}
                         onChange={set('phone')}
                         className={inputBase}
-                        data-testid="contact-phone"
-                        autoComplete="tel"
                     />
                 </Field>
 
-                {/* ✅ */}
                 <Field label="Message" required htmlFor="contact-message">
                     <textarea
                         id="contact-message"
                         required
-                        rows={5}
+                        rows={6}
                         placeholder="Tell us how we can help you…"
                         value={formData.message}
                         onChange={set('message')}
-                        className={`
-                w-full bg-transparent border border-khajur-primary/20
-                focus:border-khajur-gold px-4 py-3 rounded-sm
-                text-sm text-khajur-primary placeholder:text-khajur-dark/25
-                focus:outline-none transition-colors duration-200 resize-none
-            `}
-                        data-testid="contact-message"
+                        className="w-full bg-transparent border border-khajur-primary/10 focus:border-khajur-gold px-4 py-4 rounded-sm text-sm text-khajur-primary placeholder:text-khajur-dark/25 focus:outline-none transition-colors duration-200 resize-none"
                     />
                 </Field>
 
                 <button
                     type="submit"
                     disabled={submitting}
-                    aria-label="Send contact message"
-                    className="..."
+                    className="w-full flex items-center justify-center gap-2 bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 disabled:opacity-60 rounded-sm px-8 py-5 uppercase tracking-widest text-xs font-bold transition-all duration-300"
                 >
-                    {/* ... */}
+                    {submitting ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Sending…
+                        </>
+                    ) : (
+                        <>
+                            <Send className="w-4 h-4" />
+                            Send Message
+                        </>
+                    )}
                 </button>
-
             </form>
         </div>
     );
@@ -246,14 +228,11 @@ const ContactInfoCard = ({ icon: Icon, title, details, link }) => (
                 {title}
             </h3>
             {link ? (
-                <a
-                    href={link}
-                    className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors leading-relaxed"
-                >
+                <a href={link} className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors">
                     {details}
                 </a>
             ) : (
-                <p className="text-sm text-khajur-primary leading-relaxed">{details}</p>
+                <p className="text-sm text-khajur-primary">{details}</p>
             )}
         </div>
     </div>
@@ -270,22 +249,18 @@ const InfoPanel = () => (
             <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-2">
                 Get in Touch
             </h2>
-            <p className="text-sm text-khajur-dark/50 leading-relaxed">
+            <p className="text-sm text-khajur-dark/50">
                 We're available across multiple channels. Choose what's most convenient for you.
             </p>
         </div>
-
         <div className="space-y-4">
             {CONTACT_INFO.map((info) => (
                 <ContactInfoCard key={info.title} {...info} />
             ))}
         </div>
-
-        {/* Divider with note */}
         <div className="border-t border-khajur-border pt-6">
             <p className="text-xs text-khajur-dark/40 leading-relaxed">
-                For bulk orders or wholesale inquiries, please reach out via email with your
-                requirements and we'll get back to you with a custom quote.
+                For bulk orders or wholesale inquiries, please reach out via email for a custom quote.
             </p>
         </div>
     </div>
@@ -295,9 +270,7 @@ const InfoPanel = () => (
 
 const Contact = () => (
     <div className="min-h-screen bg-white" data-testid="contact-page">
-
         <HeroSection />
-
         <section className="py-20 md:py-32">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
@@ -306,7 +279,6 @@ const Contact = () => (
                 </div>
             </div>
         </section>
-
     </div>
 );
 
