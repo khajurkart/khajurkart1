@@ -2527,26 +2527,78 @@ async def get_welcome_coupon(current_user: dict = Depends(get_current_user)):
 
 
 # ── PUBLIC: Get all active coupons to display to users ──
-@api_router.get("/coupons/active")
-async def get_active_coupons():
-    setting = await db.settings.find_one({"key": "coupon_system"})
-    if not setting or not setting.get("enabled", False):
+# ── USER: Get active coupons (auth required) ──
+@api_router.get("/active-coupons")
+async def get_active_coupons_auth(current_user: dict = Depends(get_current_user)):
+    try:
+        # Check if coupon system is enabled
+        setting = await db.settings.find_one({"key": "coupon_system"})
+        if not setting or not setting.get("enabled", False):
+            return []
+
+        # Check if user already used each coupon — filter out used ones
+        coupons = await db.coupons.find(
+            {"is_active": True},
+            {
+                "_id": 0,
+                "id": 1,
+                "code": 1,
+                "discount_type": 1,
+                "discount_percent": 1,
+                "discount_amount": 1,
+                "min_order": 1,
+                "description": 1,
+                "is_welcome": 1,
+                "expiry": 1,
+                "uses": 1,
+                "max_uses": 1,
+            },
+        ).to_list(50)
+
+        # Filter out expired and maxed-out coupons
+        now = datetime.now(timezone.utc)
+        valid_coupons = []
+
+        for coupon in coupons:
+            # Check expiry
+            if coupon.get("expiry"):
+                try:
+                    expiry_date = datetime.fromisoformat(
+                        coupon["expiry"].replace("Z", "+00:00")
+                    )
+                    if expiry_date.tzinfo is None:
+                        expiry_date = expiry_date.replace(tzinfo=timezone.utc)
+                    if now > expiry_date:
+                        continue  # skip expired
+                except Exception:
+                    pass
+
+            # Check max uses
+            if coupon.get("uses", 0) >= coupon.get("max_uses", 999):
+                continue  # skip maxed out
+
+            # Check if user already used this coupon
+            already_used = await db.coupon_usage.find_one(
+                {"coupon_id": coupon["id"], "user_id": current_user["id"]}
+            )
+            if already_used:
+                continue  # skip already used
+
+            # For welcome coupons — only show to users with no orders
+            if coupon.get("is_welcome"):
+                user_orders = await db.orders.count_documents(
+                    {"user_id": current_user["id"]}
+                )
+                if user_orders > 0:
+                    continue  # skip welcome coupon for returning users
+
+            valid_coupons.append(coupon)
+
+        return valid_coupons
+
+    except Exception as e:
+        print(f"❌ Active coupons error: {str(e)}")
         return []
-    coupons = await db.coupons.find(
-        {"is_active": True},
-        {
-            "_id": 0,
-            "code": 1,
-            "discount_type": 1,
-            "discount_percent": 1,
-            "discount_amount": 1,
-            "min_order": 1,
-            "description": 1,
-            "is_welcome": 1,
-            "expiry": 1,
-        },
-    ).to_list(50)
-    return coupons
 
 
 # ============ RETURN/EXCHANGE ROUTES ============
