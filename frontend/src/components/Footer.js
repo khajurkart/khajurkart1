@@ -2,8 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
 const QUICK_LINKS = [
     { label: 'Home', to: '/' },
     { label: 'About Us', to: '/about' },
@@ -51,53 +49,40 @@ const SOCIAL_LINKS = [
     },
 ];
 
-// ─── Sub-Components ────────────────────────────────────────────────────────────
-
-// ── Column Heading ─────────────────────────────────────────────────────────────
-
 const ColHeading = ({ children }) => (
     <h3 className="font-serif text-base font-medium text-khajur-gold mb-5 uppercase tracking-widest">
         {children}
     </h3>
 );
 
-// ── Footer Link ────────────────────────────────────────────────────────────────
-
 const FooterLink = ({ to, children }) => (
     <li>
         <Link
             to={to}
-            className="
-        text-sm text-khajur-cream/60 hover:text-khajur-gold
-        transition-colors duration-200
-      "
+            className="text-sm text-khajur-cream/70 hover:text-white transition-colors duration-200"
         >
             {children}
         </Link>
     </li>
 );
 
-// ── Contact Item ───────────────────────────────────────────────────────────────
-
 const ContactItem = ({ icon: Icon, content, href }) => (
     <div className="flex items-start gap-3">
-        <div className="w-8 h-8 flex items-center justify-center bg-khajur-gold/10 rounded-sm flex-shrink-0 mt-0.5">
+        <div className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-sm flex-shrink-0 mt-0.5">
             <Icon className="w-3.5 h-3.5 text-khajur-gold" />
         </div>
         {href ? (
             <a
                 href={href}
-                className="text-sm text-khajur-cream/60 hover:text-khajur-gold transition-colors duration-200 leading-relaxed"
+                className="text-sm text-khajur-cream/70 hover:text-white transition-colors duration-200 leading-relaxed"
             >
                 {content}
             </a>
         ) : (
-            <div className="text-sm text-khajur-cream/60 leading-relaxed">{content}</div>
+            <div className="text-sm text-khajur-cream/70 leading-relaxed">{content}</div>
         )}
     </div>
 );
-
-// ── Social Button ──────────────────────────────────────────────────────────────
 
 const SocialButton = ({ href, label, icon }) => (
     <a
@@ -107,9 +92,9 @@ const SocialButton = ({ href, label, icon }) => (
         aria-label={label}
         className="
       group w-9 h-9 flex items-center justify-center
-      border border-khajur-gold/20 hover:border-khajur-gold
-      bg-transparent hover:bg-khajur-gold/10
-      text-khajur-cream/60 hover:text-khajur-gold
+      border border-white/10 hover:border-white/40
+      bg-transparent hover:bg-white/5
+      text-khajur-cream/60 hover:text-white
       rounded-sm transition-all duration-300
     "
     >
@@ -117,19 +102,10 @@ const SocialButton = ({ href, label, icon }) => (
     </a>
 );
 
-// ─── Main Component ────────────────────────────────────────────────────────────
-
 const Footer = () => (
-    <footer
-        className="bg-khajur-primary text-khajur-cream"
-        data-testid="main-footer"
-    >
+    <footer className="bg-khajur-primary text-khajur-cream" data-testid="main-footer">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-
-            {/* ── Main Grid ── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 py-16 border-b border-khajur-gold/10">
-
-                {/* ── Brand Column ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 py-16 border-b border-white/5">
                 <div className="lg:col-span-3">
                     <Link to="/" className="flex items-center gap-2 mb-5 group">
                         <img
@@ -141,12 +117,9 @@ const Footer = () => (
                             KhajurKart
                         </span>
                     </Link>
-                    <p className="text-sm text-khajur-cream/50 leading-relaxed mb-6 max-w-xs">
-                        Premium destination for the world's finest dates, dry fruits, and
-                        spices — delivered to your door.
+                    <p className="text-sm text-khajur-cream/70 leading-relaxed mb-6 max-w-xs">
+                        Premium destination for the world's finest dates, dry fruits, and spices — delivered to your door.
                     </p>
-
-                    {/* Social */}
                     <div className="flex items-center gap-3">
                         {SOCIAL_LINKS.map((s) => (
                             <SocialButton key={s.label} {...s} />
@@ -154,7 +127,6 @@ const Footer = () => (
                     </div>
                 </div>
 
-                {/* ── Quick Links ── */}
                 <div className="lg:col-span-2">
                     <ColHeading>Quick Links</ColHeading>
                     <ul className="space-y-3">
@@ -166,7 +138,6 @@ const Footer = () => (
                     </ul>
                 </div>
 
-                {/* ── Categories ── */}
                 <div className="lg:col-span-2">
                     <ColHeading>Categories</ColHeading>
                     <ul className="space-y-3">
@@ -178,7 +149,6 @@ const Footer = () => (
                     </ul>
                 </div>
 
-                {/* ── Customer Service ── */}
                 <div className="lg:col-span-2">
                     <ColHeading>Customer Service</ColHeading>
                     <ul className="space-y-3">
@@ -190,48 +160,28 @@ const Footer = () => (
                     </ul>
                 </div>
 
-                {/* ── Contact Info ── */}
                 <div className="lg:col-span-3">
                     <ColHeading>Contact Us</ColHeading>
                     <div className="space-y-4">
-                        <ContactItem
-                            icon={Phone}
-                            content="+91 79810 02137"
-                            href="tel:+917981002137"
-                        />
-                        <ContactItem
-                            icon={Mail}
-                            content="khajurkart@gmail.com"
-                            href="mailto:khajurkart@gmail.com"
-                        />
+                        <ContactItem icon={Phone} content="+91 79810 02137" href="tel:+917981002137" />
+                        <ContactItem icon={Mail} content="khajurkart@gmail.com" href="mailto:khajurkart@gmail.com" />
                         <ContactItem
                             icon={MapPin}
-                            content={
-                                <>
-                                    10-3-313/a, AR Raheem Residency,<br />
-                                    beside Govt IASE College,<br />
-                                    Potti Sriramulu Nagar,<br />
-                                    Vijaya Nagar Colony, Hyderabad,<br />
-                                    Telangana — 500057
-                                </>
-                            }
+                            content={<>10-3-313/a, AR Raheem Residency, Hyderabad, Telangana — 500057</>}
                             href={null}
                         />
                     </div>
                 </div>
-
             </div>
 
-            {/* ── Bottom Bar ── */}
             <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-xs text-khajur-cream/70 tracking-wide">
+                <p className="text-xs text-khajur-cream/50 tracking-wide">
                     © {new Date().getFullYear()} KhajurKart. All rights reserved.
                 </p>
-                <p className="text-xs text-khajur-cream/80">
-                    Crafted with care for premium quality.
+                <p className="text-xs text-khajur-cream/50 uppercase tracking-widest font-medium">
+                    Crafted with care
                 </p>
             </div>
-
         </div>
     </footer>
 );
