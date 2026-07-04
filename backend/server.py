@@ -2526,6 +2526,29 @@ async def get_welcome_coupon(current_user: dict = Depends(get_current_user)):
     }
 
 
+# ── PUBLIC: Get all active coupons to display to users ──
+@api_router.get("/coupons/active")
+async def get_active_coupons():
+    setting = await db.settings.find_one({"key": "coupon_system"})
+    if not setting or not setting.get("enabled", False):
+        return []
+    coupons = await db.coupons.find(
+        {"is_active": True},
+        {
+            "_id": 0,
+            "code": 1,
+            "discount_type": 1,
+            "discount_percent": 1,
+            "discount_amount": 1,
+            "min_order": 1,
+            "description": 1,
+            "is_welcome": 1,
+            "expiry": 1,
+        },
+    ).to_list(50)
+    return coupons
+
+
 # ============ RETURN/EXCHANGE ROUTES ============
 
 
