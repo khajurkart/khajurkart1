@@ -2001,9 +2001,9 @@ async def delete_order_user(
     if not order:
         raise HTTPException(404, "Order not found")
 
-    # Only allow hiding cancelled orders
-    if order["status"] not in ["cancelled", "delivered"]:
-        raise HTTPException(400, "You can only delete cancelled or delivered orders")
+    # ✅ Allow hiding any order except active ones being processed
+    if order["status"] in ["processing", "shipped"]:
+        raise HTTPException(400, "Cannot delete order that is being processed or shipped")
 
     # Soft delete — hide from user view
     await db.orders.update_one({"id": order_id}, {"$set": {"hidden_by_user": True}})
