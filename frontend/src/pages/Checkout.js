@@ -16,6 +16,8 @@ import {
     Plus,
     Banknote,
     Smartphone,
+    Tag,
+    X,
 } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
 
@@ -145,7 +147,22 @@ const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
 
 // ── Order Summary ──────────────────────────────────────────────────────────────
 
-const OrderSummary = ({ cart, cartTotal, finalTotal, loading }) => (
+const OrderSummary = ({
+    cart,
+    cartTotal,
+    finalTotal,
+    loading,
+    // coupon props
+    couponSystemEnabled,
+    couponCode,
+    setCouponCode,
+    couponData,
+    couponLoading,
+    couponError,
+    applyCoupon,
+    removeCoupon,
+    discountAmount,
+}) => (
     <div
         className="bg-white border border-khajur-border rounded-sm sticky top-28"
         data-testid="checkout-summary"
@@ -175,10 +192,128 @@ const OrderSummary = ({ cart, cartTotal, finalTotal, loading }) => (
 
         {/* Totals */}
         <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
+
+            {/* ===== COUPON SECTION ===== */}
+            {couponSystemEnabled && (
+                <div className="mb-4">
+                    <div className="flex items-center gap-1.5 mb-2">
+                        <Tag className="w-3.5 h-3.5 text-khajur-gold" />
+                        <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
+                            Have a coupon?
+                        </p>
+                    </div>
+
+                    {!couponData ? (
+                        <>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), applyCoupon())}
+                                    placeholder="ENTER CODE"
+                                    className="
+                                        flex-1 border border-khajur-border rounded-sm
+                                        px-3 py-2 text-xs tracking-widest font-medium
+                                        text-khajur-primary placeholder:text-khajur-dark/25
+                                        focus:outline-none focus:border-khajur-gold
+                                        uppercase transition-colors duration-200
+                                    "
+                                    data-testid="coupon-input"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={applyCoupon}
+                                    disabled={couponLoading || !couponCode.trim()}
+                                    data-testid="coupon-apply-button"
+                                    className="
+                                        bg-khajur-primary text-khajur-cream
+                                        px-4 py-2 text-xs font-bold tracking-widest uppercase
+                                        rounded-sm hover:bg-khajur-primary/90
+                                        transition-colors duration-200
+                                        disabled:opacity-40 disabled:cursor-not-allowed
+                                        flex items-center gap-1.5 whitespace-nowrap
+                                    "
+                                >
+                                    {couponLoading
+                                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                                        : 'Apply'
+                                    }
+                                </button>
+                            </div>
+
+                            {/* Coupon Error */}
+                            {couponError && (
+                                <div className="flex items-center gap-1.5 mt-2">
+                                    <X className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                    <p
+                                        className="text-xs text-red-500"
+                                        data-testid="coupon-error"
+                                    >
+                                        {couponError}
+                                    </p>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        /* Coupon Applied State */
+                        <div
+                            className="
+                                flex items-center justify-between
+                                bg-green-50 border border-green-200
+                                px-3 py-2.5 rounded-sm
+                            "
+                            data-testid="coupon-applied-banner"
+                        >
+                            <div className="flex items-start gap-2">
+                                <Check className="w-3.5 h-3.5 text-green-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-xs font-bold text-green-700 tracking-wide">
+                                        {couponData.code} applied!
+                                    </p>
+                                    <p className="text-xs text-green-600 mt-0.5">
+                                        You save ₹{couponData.discount_amount.toFixed(2)}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={removeCoupon}
+                                data-testid="coupon-remove-button"
+                                className="
+                                    text-red-400 hover:text-red-600
+                                    transition-colors duration-200 ml-2 flex-shrink-0
+                                "
+                                aria-label="Remove coupon"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Subtotal */}
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Subtotal</span>
                 <span className="text-khajur-primary font-medium">₹{cartTotal.toFixed(2)}</span>
             </div>
+
+            {/* Discount Row — only if coupon applied */}
+            {couponData && (
+                <div
+                    className="flex justify-between text-sm text-green-600 font-medium"
+                    data-testid="coupon-discount-row"
+                >
+                    <span className="flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        Discount ({couponData.code})
+                    </span>
+                    <span>− ₹{discountAmount.toFixed(2)}</span>
+                </div>
+            )}
+
+            {/* Delivery */}
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Delivery</span>
                 <span className="text-green-600 font-semibold flex items-center gap-1">
@@ -246,13 +381,37 @@ const Checkout = () => {
     });
     const [loading, setLoading] = useState(false);
 
+    // ── Coupon State ───────────────────────────────────────────────────────────
+    const [couponCode, setCouponCode] = useState('');
+    const [couponData, setCouponData] = useState(null);
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponError, setCouponError] = useState('');
+    const [couponSystemEnabled, setCouponSystemEnabled] = useState(false);
+
     const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
+
+    // ── Derived Totals ─────────────────────────────────────────────────────────
+    const discountAmount = couponData ? couponData.discount_amount : 0;
+    const finalTotal = cartTotal - discountAmount;
 
     useEffect(() => {
         document.title = 'Checkout — KhajurKart';
         return () => {
             document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
         };
+    }, []);
+
+    // ── Check Coupon System Status ─────────────────────────────────────────────
+    useEffect(() => {
+        const checkCouponSystem = async () => {
+            try {
+                const res = await axios.get(`${API}/coupon-system/status`);
+                setCouponSystemEnabled(res.data.enabled);
+            } catch {
+                setCouponSystemEnabled(false);
+            }
+        };
+        checkCouponSystem();
     }, []);
 
     // ── Fetch Saved Addresses ──────────────────────────────────────────────────
@@ -288,6 +447,40 @@ const Checkout = () => {
         }));
     };
 
+    // ── Coupon Handlers ────────────────────────────────────────────────────────
+
+    const applyCoupon = async () => {
+        if (!couponCode.trim()) return;
+        setCouponLoading(true);
+        setCouponError('');
+        setCouponData(null);
+        try {
+            const res = await axios.post(
+                `${API}/apply-coupon`,
+                {
+                    code: couponCode.toUpperCase(),
+                    order_amount: cartTotal,
+                },
+                authHeaders
+            );
+            setCouponData(res.data);
+            toast.success(`Coupon "${res.data.code}" applied! You save ₹${res.data.discount_amount}`);
+        } catch (err) {
+            setCouponError(err.response?.data?.detail || 'Invalid coupon code');
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    const removeCoupon = () => {
+        setCouponData(null);
+        setCouponCode('');
+        setCouponError('');
+        toast.info('Coupon removed.');
+    };
+
+    // ── Build Order Payload ────────────────────────────────────────────────────
+
     const buildOrderPayload = () => ({
         items: cart.items.map((item) => ({
             product_id: item.product.id,
@@ -307,6 +500,10 @@ const Checkout = () => {
             state: formData.state,
             pincode: formData.pincode,
         },
+        // ── Coupon fields ──────────────────────────────────────────────────────
+        coupon_code: couponData?.code || null,
+        discount_amount: couponData?.discount_amount || 0,
+        coupon_id: couponData?.coupon_id || null,
     });
 
     // ── COD ────────────────────────────────────────────────────────────────────
@@ -413,8 +610,6 @@ const Checkout = () => {
     // ── Guards ─────────────────────────────────────────────────────────────────
 
     if (!user) return <NotLoggedIn />;
-
-    const finalTotal = cartTotal;
 
     // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -625,6 +820,15 @@ const Checkout = () => {
                                 cartTotal={cartTotal}
                                 finalTotal={finalTotal}
                                 loading={loading}
+                                couponSystemEnabled={couponSystemEnabled}
+                                couponCode={couponCode}
+                                setCouponCode={setCouponCode}
+                                couponData={couponData}
+                                couponLoading={couponLoading}
+                                couponError={couponError}
+                                applyCoupon={applyCoupon}
+                                removeCoupon={removeCoupon}
+                                discountAmount={discountAmount}
                             />
                         </div>
 
