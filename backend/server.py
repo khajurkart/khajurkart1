@@ -1946,13 +1946,17 @@ async def create_order(
 @api_router.get("/orders")
 async def get_orders(current_user: dict = Depends(get_current_user)):
     try:
-        orders = await db.orders.find(
-            {
-                "user_id": current_user["id"],
-                "hidden_by_user": {"$ne": True},  # ✅ hide soft deleted
-            },
-            {"_id": 0},
-        ).to_list(100)
+        orders = (
+            await db.orders.find(
+                {
+                    "user_id": current_user["id"],
+                    "hidden_by_user": {"$ne": True},  # ✅ hide soft deleted
+                },
+                {"_id": 0},
+            )
+            .sort("created_at", -1)
+            .to_list(100)
+        )
         return orders
     except Exception as e:
         raise HTTPException(500, str(e))
@@ -1996,16 +2000,16 @@ async def cancel_order(order_id: str, current_user: dict = Depends(get_current_u
 async def delete_order_user(
     order_id: str, current_user: dict = Depends(get_current_user)
 ):
-    # Make sure order belongs to this user
+    # ✅ Find order belonging to this user
     order = await db.orders.find_one({"id": order_id, "user_id": current_user["id"]})
     if not order:
         raise HTTPException(404, "Order not found")
 
-    # ✅ Allow hiding any order except active ones being processed
-    if order["status"] in ["processing", "shipped"]:
-        raise HTTPException(400, "Cannot delete order that is being processed or shipped")
+    # ✅ Block only shipped orders (everything else can be deleted)
+    if order["status"] == "shipped":
+        raise HTTPException(400, "Cannot delete order that is currently being shipped")
 
-    # Soft delete — hide from user view
+    # ✅ Soft delete — hide from user
     await db.orders.update_one({"id": order_id}, {"$set": {"hidden_by_user": True}})
     return {"message": "Order removed from your list"}
 
