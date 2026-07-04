@@ -90,11 +90,10 @@ const inputBase = `
 const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
     <div
         onClick={() => onSelect(index, addr)}
-        className={`relative p-5 border rounded-sm cursor-pointer transition-all duration-200 ${
-            selected
+        className={`relative p-5 border rounded-sm cursor-pointer transition-all duration-200 ${selected
                 ? 'border-khajur-gold bg-khajur-gold/5 shadow-[0_0_12px_rgba(198,169,98,0.2)]'
                 : 'border-khajur-border hover:border-khajur-gold/40'
-        }`}
+            }`}
     >
         {selected && (
             <div className="absolute top-3 right-3 w-5 h-5 bg-khajur-gold rounded-full flex items-center justify-center">
@@ -493,36 +492,44 @@ const Checkout = () => {
     }, []);
 
     // ── Init: check coupon system + fetch active coupons ──────────────────────
+    // ── Init: check coupon system + fetch active coupons ──────────────────────
     useEffect(() => {
         const initCoupons = async () => {
             try {
                 // Step 1: Check system status
                 const statusRes = await axios.get(`${API}/coupon-system/status`);
                 const enabled = Boolean(statusRes.data.enabled);
-                console.log('Coupon system enabled:', enabled);
+                console.log('✅ Coupon system enabled:', enabled);
                 setCouponSystemEnabled(enabled);
 
-                if (!enabled || !token) return;
+                if (!enabled || !token) {
+                    console.log('⚠️ Coupon system disabled or no token');
+                    return;
+                }
 
-                // Step 2: Fetch active coupons
+                // Step 2: Fetch active coupons for this user
                 try {
-                    const res = await axios.get(`${API}/active-coupons`, authHeaders);
-                    console.log('Active coupons response:', res.data);
+                    const res = await axios.get(`${API}/active-coupons`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    console.log('✅ Active coupons:', res.data);
                     const coupons = Array.isArray(res.data) ? res.data : [];
-                    console.log('Available coupons count:', coupons.length);
                     setAvailableCoupons(coupons);
                 } catch (err) {
-                    console.error('Failed to fetch active coupons:', err.response?.status, err.response?.data);
+                    console.error('❌ Failed to fetch active coupons:',
+                        err.response?.status,
+                        err.response?.data
+                    );
                     setAvailableCoupons([]);
                 }
             } catch (err) {
-                console.error('Coupon system status error:', err);
+                console.error('❌ Coupon system status error:', err);
                 setCouponSystemEnabled(false);
             }
         };
 
         if (token) initCoupons();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     // ── Fetch Saved Addresses ──────────────────────────────────────────────────
