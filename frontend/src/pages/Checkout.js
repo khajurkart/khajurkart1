@@ -19,6 +19,8 @@ import {
     Tag,
     X,
     Gift,
+    ChevronDown,
+    ChevronUp,
 } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
 
@@ -40,70 +42,37 @@ const INITIAL_FORM = {
 
 const SHIPPING_FIELDS = [
     [
-        { name: 'fullName', label: 'Full Name', type: 'text', placeholder: 'John Doe', testId: 'checkout-fullname', half: true },
-        { name: 'email', label: 'Email Address', type: 'email', placeholder: 'john@example.com', testId: 'checkout-email', half: true },
+        { name: 'fullName', label: 'Full Name', type: 'text', placeholder: 'John Doe', testId: 'checkout-fullname' },
+        { name: 'email', label: 'Email Address', type: 'email', placeholder: 'john@example.com', testId: 'checkout-email' },
     ],
+    [{ name: 'phone', label: 'Phone Number', type: 'tel', placeholder: '+91 98765 43210', testId: 'checkout-phone' }],
+    [{ name: 'address', label: 'Street Address', type: 'text', placeholder: '123, MG Road…', testId: 'checkout-address' }],
     [
-        { name: 'phone', label: 'Phone Number', type: 'tel', placeholder: '+91 98765 43210', testId: 'checkout-phone', half: false },
-    ],
-    [
-        { name: 'address', label: 'Street Address', type: 'text', placeholder: '123, MG Road…', testId: 'checkout-address', half: false },
-    ],
-    [
-        { name: 'city', label: 'City', type: 'text', placeholder: 'Hyderabad', testId: 'checkout-city', half: true },
-        { name: 'state', label: 'State', type: 'text', placeholder: 'Telangana', testId: 'checkout-state', half: true },
-        { name: 'pincode', label: 'Pincode', type: 'text', placeholder: '500001', testId: 'checkout-pincode', half: true },
+        { name: 'city', label: 'City', type: 'text', placeholder: 'Hyderabad', testId: 'checkout-city' },
+        { name: 'state', label: 'State', type: 'text', placeholder: 'Telangana', testId: 'checkout-state' },
+        { name: 'pincode', label: 'Pincode', type: 'text', placeholder: '500001', testId: 'checkout-pincode' },
     ],
 ];
 
 const PAYMENT_METHODS = [
-    {
-        value: 'cod',
-        label: 'Cash on Delivery',
-        description: 'Pay when your order arrives.',
-        icon: Banknote,
-        testId: 'payment-cod',
-    },
-    {
-        value: 'razorpay',
-        label: 'Pay Online',
-        description: 'UPI, Cards, Net Banking via Razorpay.',
-        icon: Smartphone,
-        testId: 'payment-razorpay',
-    },
+    { value: 'cod', label: 'Cash on Delivery', description: 'Pay when your order arrives.', icon: Banknote, testId: 'payment-cod' },
+    { value: 'razorpay', label: 'Pay Online', description: 'UPI, Cards, Net Banking via Razorpay.', icon: Smartphone, testId: 'payment-razorpay' },
 ];
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
-// ── Not Logged In ──────────────────────────────────────────────────────────────
-
 const NotLoggedIn = () => (
     <div className="min-h-screen bg-khajur-cream flex flex-col items-center justify-center gap-6 px-6 text-center">
-        <div className="w-16 h-16 flex items-center justify-center bg-khajur-cream rounded-full">
-            <ShoppingBag className="w-7 h-7 text-khajur-dark/30" />
-        </div>
+        <ShoppingBag className="w-7 h-7 text-khajur-dark/30" />
         <div>
-            <p className="font-serif text-2xl font-medium text-khajur-primary mb-2">
-                Please sign in to checkout
-            </p>
-            <p className="text-sm text-khajur-dark/50">
-                You need an account to place an order.
-            </p>
+            <p className="font-serif text-2xl font-medium text-khajur-primary mb-2">Please sign in to checkout</p>
+            <p className="text-sm text-khajur-dark/50">You need an account to place an order.</p>
         </div>
-        <Link
-            to="/"
-            className="
-                bg-khajur-gold hover:bg-khajur-gold/90
-                text-khajur-primary px-8 py-3 rounded-sm
-                uppercase tracking-widest text-xs font-bold transition-all duration-300
-            "
-        >
+        <Link to="/" className="bg-khajur-gold hover:bg-khajur-gold/90 text-khajur-primary px-8 py-3 rounded-sm uppercase tracking-widest text-xs font-bold transition-all duration-300">
             Go to Home
         </Link>
     </div>
 );
-
-// ── Field Label ────────────────────────────────────────────────────────────────
 
 const FieldLabel = ({ label }) => (
     <label className="block text-xs uppercase tracking-widest font-medium text-khajur-dark/50 mb-2">
@@ -112,24 +81,20 @@ const FieldLabel = ({ label }) => (
 );
 
 const inputBase = `
-  w-full bg-transparent border-b border-khajur-primary/20
-  focus:border-khajur-gold px-0 py-3
-  text-sm text-khajur-primary placeholder:text-khajur-dark/20
-  focus:outline-none transition-colors duration-200
+    w-full bg-transparent border-b border-khajur-primary/20
+    focus:border-khajur-gold px-0 py-3
+    text-sm text-khajur-primary placeholder:text-khajur-dark/20
+    focus:outline-none transition-colors duration-200
 `;
-
-// ── Saved Address Card ─────────────────────────────────────────────────────────
 
 const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
     <div
         onClick={() => onSelect(index, addr)}
-        className={`
-            relative p-5 border rounded-sm cursor-pointer transition-all duration-200
-            ${selected
+        className={`relative p-5 border rounded-sm cursor-pointer transition-all duration-200 ${
+            selected
                 ? 'border-khajur-gold bg-khajur-gold/5 shadow-[0_0_12px_rgba(198,169,98,0.2)]'
                 : 'border-khajur-border hover:border-khajur-gold/40'
-            }
-        `}
+        }`}
     >
         {selected && (
             <div className="absolute top-3 right-3 w-5 h-5 bg-khajur-gold rounded-full flex items-center justify-center">
@@ -139,70 +104,222 @@ const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
         <p className="text-sm font-semibold text-khajur-primary mb-1">{addr.name}</p>
         <p className="text-xs text-khajur-dark/50">{addr.phone}</p>
         <p className="text-xs text-khajur-dark/70 mt-1 leading-relaxed">
-            {addr.address}{addr.city ? `, ${addr.city}` : ''}
-            {addr.state ? `, ${addr.state}` : ''}
-            {addr.pincode ? ` — ${addr.pincode}` : ''}
+            {addr.address}{addr.city ? `, ${addr.city}` : ''}{addr.state ? `, ${addr.state}` : ''}{addr.pincode ? ` — ${addr.pincode}` : ''}
         </p>
     </div>
 );
 
-// ── Available Coupons List ─────────────────────────────────────────────────────
+// ── Available Coupon Card ──────────────────────────────────────────────────────
 
-const AvailableCoupons = ({ coupons, onSelect, cartTotal }) => {
-    if (!coupons.length) return null;
+const AvailableCouponCard = ({ coupon, cartTotal, onApply }) => {
+    const isEligible = cartTotal >= (coupon.min_order || 0);
+    const discountText = coupon.discount_type === 'percent'
+        ? `${coupon.discount_percent}% off`
+        : `₹${coupon.discount_amount} off`;
 
     return (
-        <div className="mt-3 space-y-2">
-            <p className="text-xs text-khajur-dark/40 uppercase tracking-widest font-medium">
-                Available Coupons
-            </p>
-            {coupons.map((coupon) => {
-                const isEligible = cartTotal >= (coupon.min_order || 0);
-                return (
-                    <div
-                        key={coupon.id}
-                        className={`
-                            flex items-center justify-between
-                            border rounded-sm px-3 py-2.5
-                            transition-all duration-200
-                            ${isEligible
-                                ? 'border-khajur-border hover:border-khajur-gold/50 cursor-pointer bg-white'
-                                : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
-                            }
-                        `}
-                        onClick={() => isEligible && onSelect(coupon.code)}
-                    >
-                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                            {coupon.is_welcome
-                                ? <Gift className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0" />
-                                : <Tag className="w-3.5 h-3.5 text-khajur-gold flex-shrink-0" />
-                            }
-                            <div className="min-w-0">
-                                <p className="font-mono font-bold text-xs text-khajur-primary tracking-wider">
-                                    {coupon.code}
-                                </p>
-                                <p className="text-xs text-khajur-dark/50 truncate">
-                                    {coupon.discount_type === 'percent'
-                                        ? `${coupon.discount_percent}% off`
-                                        : `₹${coupon.discount_amount} off`
-                                    }
-                                    {coupon.min_order > 0 && ` · Min ₹${coupon.min_order}`}
-                                </p>
-                                {!isEligible && (
-                                    <p className="text-xs text-red-400 mt-0.5">
-                                        Add ₹{(coupon.min_order - cartTotal).toFixed(0)} more to use
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                        {isEligible && (
-                            <span className="text-xs font-bold text-khajur-gold uppercase tracking-wider ml-2 flex-shrink-0">
-                                Apply
+        <div className={`
+            border rounded-sm p-3 transition-all duration-200
+            ${isEligible
+                ? 'border-khajur-border bg-white hover:border-khajur-gold/50 cursor-pointer'
+                : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+            }
+        `}>
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    {coupon.is_welcome
+                        ? <Gift className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                        : <Tag className="w-4 h-4 text-khajur-gold flex-shrink-0" />
+                    }
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-mono font-bold text-xs text-khajur-primary tracking-wider">
+                                {coupon.code}
                             </span>
+                            {coupon.is_welcome && (
+                                <span className="bg-yellow-100 text-yellow-700 text-xs px-1.5 py-0.5 rounded-full font-medium">
+                                    Welcome
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-xs text-khajur-dark/60 mt-0.5">
+                            {discountText}
+                            {coupon.min_order > 0 && ` · Min ₹${coupon.min_order}`}
+                        </p>
+                        {coupon.description && (
+                            <p className="text-xs text-khajur-dark/40 mt-0.5 italic truncate">
+                                {coupon.description}
+                            </p>
+                        )}
+                        {!isEligible && coupon.min_order > 0 && (
+                            <p className="text-xs text-red-400 mt-0.5">
+                                Add ₹{(coupon.min_order - cartTotal).toFixed(0)} more to unlock
+                            </p>
                         )}
                     </div>
-                );
-            })}
+                </div>
+
+                {isEligible && (
+                    <button
+                        type="button"
+                        onClick={() => onApply(coupon.code)}
+                        className="
+                            flex-shrink-0 text-xs font-bold uppercase tracking-widest
+                            text-khajur-gold border border-khajur-gold/40
+                            hover:bg-khajur-gold hover:text-khajur-primary
+                            px-3 py-1.5 rounded-sm transition-all duration-200
+                        "
+                    >
+                        Apply
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// ── Coupon Section (inside Order Summary) ─────────────────────────────────────
+
+const CouponSection = ({
+    couponSystemEnabled,
+    couponCode,
+    setCouponCode,
+    couponData,
+    couponLoading,
+    couponError,
+    applyCoupon,
+    removeCoupon,
+    availableCoupons,
+    onApplyCoupon,
+    cartTotal,
+}) => {
+    const [showList, setShowList] = useState(false);
+
+    if (!couponSystemEnabled) return null;
+
+    return (
+        <div className="mb-1">
+            {/* ── Label row ── */}
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-khajur-gold" />
+                    <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
+                        Coupon Code
+                    </p>
+                </div>
+
+                {/* Show available count if any — only when no coupon applied */}
+                {!couponData && availableCoupons.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => setShowList((p) => !p)}
+                        className="flex items-center gap-1 text-xs font-semibold text-khajur-gold hover:text-khajur-gold/70 transition-colors"
+                    >
+                        {showList ? (
+                            <><ChevronUp className="w-3.5 h-3.5" /> Hide</>
+                        ) : (
+                            <><ChevronDown className="w-3.5 h-3.5" /> {availableCoupons.length} coupon{availableCoupons.length > 1 ? 's' : ''} available</>
+                        )}
+                    </button>
+                )}
+            </div>
+
+            {/* ── Already applied ── */}
+            {couponData ? (
+                <div
+                    className="flex items-center justify-between bg-green-50 border border-green-200 px-3 py-2.5 rounded-sm"
+                    data-testid="coupon-applied-banner"
+                >
+                    <div className="flex items-start gap-2">
+                        <Check className="w-3.5 h-3.5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                            <p className="text-xs font-bold text-green-700 tracking-wide">
+                                {couponData.code} applied!
+                            </p>
+                            <p className="text-xs text-green-600 mt-0.5">
+                                You save ₹{Number(couponData.discount_amount).toFixed(2)}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={removeCoupon}
+                        data-testid="coupon-remove-button"
+                        className="text-red-400 hover:text-red-600 transition-colors duration-200 ml-2 flex-shrink-0"
+                        aria-label="Remove coupon"
+                    >
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            ) : (
+                <>
+                    {/* ── Input row ── */}
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), applyCoupon())}
+                            placeholder="ENTER CODE"
+                            className="
+                                flex-1 border border-khajur-border rounded-sm
+                                px-3 py-2 text-xs tracking-widest font-medium
+                                text-khajur-primary bg-white
+                                placeholder:text-khajur-dark/25
+                                focus:outline-none focus:border-khajur-gold
+                                transition-colors duration-200
+                            "
+                            data-testid="coupon-input"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => applyCoupon()}
+                            disabled={couponLoading || !couponCode.trim()}
+                            data-testid="coupon-apply-button"
+                            className="
+                                bg-khajur-primary text-khajur-cream
+                                px-4 py-2 text-xs font-bold tracking-widest uppercase
+                                rounded-sm hover:bg-khajur-primary/90
+                                transition-colors duration-200
+                                disabled:opacity-40 disabled:cursor-not-allowed
+                                flex items-center gap-1.5 whitespace-nowrap
+                            "
+                        >
+                            {couponLoading
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : 'Apply'
+                            }
+                        </button>
+                    </div>
+
+                    {/* Error */}
+                    {couponError && (
+                        <div className="flex items-center gap-1.5 mt-2">
+                            <X className="w-3 h-3 text-red-500 flex-shrink-0" />
+                            <p className="text-xs text-red-500" data-testid="coupon-error">
+                                {couponError}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* ── Available Coupons List ── */}
+                    {showList && availableCoupons.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                            <p className="text-xs text-khajur-dark/40 uppercase tracking-widest font-medium mb-2">
+                                Available Coupons
+                            </p>
+                            {availableCoupons.map((coupon) => (
+                                <AvailableCouponCard
+                                    key={coupon.id || coupon.code}
+                                    coupon={coupon}
+                                    cartTotal={cartTotal}
+                                    onApply={onApplyCoupon}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </>
+            )}
         </div>
     );
 };
@@ -214,7 +331,6 @@ const OrderSummary = ({
     cartTotal,
     finalTotal,
     loading,
-    // coupon props
     couponSystemEnabled,
     couponCode,
     setCouponCode,
@@ -225,14 +341,10 @@ const OrderSummary = ({
     removeCoupon,
     discountAmount,
     availableCoupons,
-    onSelectCoupon,
-    showCouponList,
-    setShowCouponList,
+    onApplyCoupon,
 }) => (
-    <div
-        className="bg-white border border-khajur-border rounded-sm sticky top-28"
-        data-testid="checkout-summary"
-    >
+    <div className="bg-white border border-khajur-border rounded-sm sticky top-28" data-testid="checkout-summary">
+
         {/* Header */}
         <div className="flex items-center gap-3 px-7 py-5 border-b border-khajur-border">
             <ShoppingBag className="w-4 h-4 text-khajur-gold" />
@@ -256,147 +368,38 @@ const OrderSummary = ({
             ))}
         </div>
 
-        {/* Totals + Coupon */}
+        {/* Coupon + Totals */}
         <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
 
-            {/* ═══════════════ COUPON SECTION ═══════════════ */}
+            {/* Coupon Section */}
+            <CouponSection
+                couponSystemEnabled={couponSystemEnabled}
+                couponCode={couponCode}
+                setCouponCode={setCouponCode}
+                couponData={couponData}
+                couponLoading={couponLoading}
+                couponError={couponError}
+                applyCoupon={applyCoupon}
+                removeCoupon={removeCoupon}
+                availableCoupons={availableCoupons}
+                onApplyCoupon={onApplyCoupon}
+                cartTotal={cartTotal}
+            />
+
+            {/* Divider between coupon and totals */}
             {couponSystemEnabled && (
-                <div className="mb-4 pb-4 border-b border-khajur-border/60">
-
-                    {/* Label row */}
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1.5">
-                            <Tag className="w-3.5 h-3.5 text-khajur-gold" />
-                            <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
-                                Coupon Code
-                            </p>
-                        </div>
-                        {/* Toggle available coupons */}
-                        {availableCoupons.length > 0 && !couponData && (
-                            <button
-                                type="button"
-                                onClick={() => setShowCouponList((p) => !p)}
-                                className="text-xs text-khajur-gold hover:text-khajur-gold/70 font-semibold transition-colors"
-                            >
-                                {showCouponList ? 'Hide' : `${availableCoupons.length} available`}
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Input row — hidden once coupon applied */}
-                    {!couponData ? (
-                        <>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={couponCode}
-                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                    onKeyDown={(e) =>
-                                        e.key === 'Enter' && (e.preventDefault(), applyCoupon())
-                                    }
-                                    placeholder="ENTER CODE"
-                                    className="
-                                        flex-1 border border-khajur-border rounded-sm
-                                        px-3 py-2 text-xs tracking-widest font-medium
-                                        text-khajur-primary bg-white
-                                        placeholder:text-khajur-dark/25
-                                        focus:outline-none focus:border-khajur-gold
-                                        transition-colors duration-200
-                                    "
-                                    data-testid="coupon-input"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={applyCoupon}
-                                    disabled={couponLoading || !couponCode.trim()}
-                                    data-testid="coupon-apply-button"
-                                    className="
-                                        bg-khajur-primary text-khajur-cream
-                                        px-4 py-2 text-xs font-bold tracking-widest uppercase
-                                        rounded-sm hover:bg-khajur-primary/90
-                                        transition-colors duration-200
-                                        disabled:opacity-40 disabled:cursor-not-allowed
-                                        flex items-center gap-1.5 whitespace-nowrap
-                                    "
-                                >
-                                    {couponLoading
-                                        ? <Loader2 className="w-3 h-3 animate-spin" />
-                                        : 'Apply'
-                                    }
-                                </button>
-                            </div>
-
-                            {/* Error */}
-                            {couponError && (
-                                <div className="flex items-center gap-1.5 mt-2">
-                                    <X className="w-3 h-3 text-red-500 flex-shrink-0" />
-                                    <p className="text-xs text-red-500" data-testid="coupon-error">
-                                        {couponError}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Available coupons dropdown */}
-                            {showCouponList && (
-                                <AvailableCoupons
-                                    coupons={availableCoupons}
-                                    onSelect={onSelectCoupon}
-                                    cartTotal={cartTotal}
-                                />
-                            )}
-                        </>
-                    ) : (
-                        /* ── Applied State ── */
-                        <div
-                            className="
-                                flex items-center justify-between
-                                bg-green-50 border border-green-200
-                                px-3 py-2.5 rounded-sm
-                            "
-                            data-testid="coupon-applied-banner"
-                        >
-                            <div className="flex items-start gap-2">
-                                <Check className="w-3.5 h-3.5 text-green-600 mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="text-xs font-bold text-green-700 tracking-wide">
-                                        {couponData.code} applied!
-                                    </p>
-                                    <p className="text-xs text-green-600 mt-0.5">
-                                        You save ₹{Number(couponData.discount_amount).toFixed(2)}
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={removeCoupon}
-                                data-testid="coupon-remove-button"
-                                className="
-                                    text-red-400 hover:text-red-600
-                                    transition-colors duration-200 ml-2 flex-shrink-0
-                                "
-                                aria-label="Remove coupon"
-                            >
-                                <X className="w-3.5 h-3.5" />
-                            </button>
-                        </div>
-                    )}
-                </div>
+                <div className="border-t border-khajur-border/60 pt-3" />
             )}
 
             {/* Subtotal */}
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Subtotal</span>
-                <span className="text-khajur-primary font-medium">
-                    ₹{cartTotal.toFixed(2)}
-                </span>
+                <span className="text-khajur-primary font-medium">₹{cartTotal.toFixed(2)}</span>
             </div>
 
-            {/* Discount Row */}
+            {/* Discount */}
             {couponData && discountAmount > 0 && (
-                <div
-                    className="flex justify-between text-sm text-green-600 font-medium"
-                    data-testid="coupon-discount-row"
-                >
+                <div className="flex justify-between text-sm text-green-600 font-medium" data-testid="coupon-discount-row">
                     <span className="flex items-center gap-1">
                         <Tag className="w-3 h-3" />
                         Discount ({couponData.code})
@@ -417,13 +420,8 @@ const OrderSummary = ({
         {/* Grand Total */}
         <div className="px-7 py-5 border-b border-khajur-border">
             <div className="flex justify-between items-center">
-                <span className="font-serif text-base font-medium text-khajur-primary">
-                    Total
-                </span>
-                <span
-                    className="font-serif text-2xl font-bold text-khajur-gold"
-                    data-testid="checkout-total"
-                >
+                <span className="font-serif text-base font-medium text-khajur-primary">Total</span>
+                <span className="font-serif text-2xl font-bold text-khajur-gold" data-testid="checkout-total">
                     ₹{Number(finalTotal).toFixed(2)}
                 </span>
             </div>
@@ -482,7 +480,6 @@ const Checkout = () => {
     const [couponError, setCouponError] = useState('');
     const [couponSystemEnabled, setCouponSystemEnabled] = useState(false);
     const [availableCoupons, setAvailableCoupons] = useState([]);
-    const [showCouponList, setShowCouponList] = useState(false);
 
     const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -492,52 +489,49 @@ const Checkout = () => {
 
     useEffect(() => {
         document.title = 'Checkout — KhajurKart';
-        return () => {
-            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
-        };
+        return () => { document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices'; };
     }, []);
 
-    // ── Check Coupon System + Fetch Active Coupons ─────────────────────────────
+    // ── Init: check coupon system + fetch active coupons ──────────────────────
     useEffect(() => {
         const initCoupons = async () => {
             try {
-                // 1. Check if system is enabled
+                // Step 1: Check system status
                 const statusRes = await axios.get(`${API}/coupon-system/status`);
-                const enabled = statusRes.data.enabled;
+                const enabled = Boolean(statusRes.data.enabled);
+                console.log('Coupon system enabled:', enabled);
                 setCouponSystemEnabled(enabled);
 
-                // 2. If enabled + user logged in, fetch available coupons
-                if (enabled && token) {
-                    try {
-                        const couponsRes = await axios.get(
-                            `${API}/active-coupons`,
-                            authHeaders
-                        );
-                        const data = couponsRes.data;
-                        setAvailableCoupons(Array.isArray(data) ? data : []);
-                    } catch {
-                        // fallback — no coupons shown but system still works
-                        setAvailableCoupons([]);
-                    }
+                if (!enabled || !token) return;
+
+                // Step 2: Fetch active coupons
+                try {
+                    const res = await axios.get(`${API}/active-coupons`, authHeaders);
+                    console.log('Active coupons response:', res.data);
+                    const coupons = Array.isArray(res.data) ? res.data : [];
+                    console.log('Available coupons count:', coupons.length);
+                    setAvailableCoupons(coupons);
+                } catch (err) {
+                    console.error('Failed to fetch active coupons:', err.response?.status, err.response?.data);
+                    setAvailableCoupons([]);
                 }
-            } catch {
+            } catch (err) {
+                console.error('Coupon system status error:', err);
                 setCouponSystemEnabled(false);
-                setAvailableCoupons([]);
             }
         };
 
-        initCoupons();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (token) initCoupons();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     // ── Fetch Saved Addresses ──────────────────────────────────────────────────
-
     const fetchAddresses = useCallback(async () => {
         try {
             const { data } = await axios.get(`${API}/user/address`, authHeaders);
             setAddresses(data);
         } catch {
-            // silent — saved addresses are optional
+            // silent
         }
     }, [token]);
 
@@ -546,7 +540,6 @@ const Checkout = () => {
     }, [token, fetchAddresses]);
 
     // ── Handlers ───────────────────────────────────────────────────────────────
-
     const set = (name) => (e) =>
         setFormData((prev) => ({ ...prev, [name]: e.target.value }));
 
@@ -564,7 +557,6 @@ const Checkout = () => {
     };
 
     // ── Coupon Handlers ────────────────────────────────────────────────────────
-
     const applyCoupon = async (codeOverride) => {
         const code = (codeOverride || couponCode).trim().toUpperCase();
         if (!code) return;
@@ -574,36 +566,27 @@ const Checkout = () => {
         setCouponData(null);
 
         try {
-            console.log('Applying coupon:', code, 'for amount:', cartTotal);
+            console.log('Applying coupon:', code, 'order_amount:', cartTotal);
             const res = await axios.post(
                 `${API}/apply-coupon`,
-                {
-                    code,
-                    order_amount: cartTotal,
-                },
+                { code, order_amount: cartTotal },
                 authHeaders
             );
+            console.log('Apply coupon response:', res.data);
 
-            console.log('Coupon response:', res.data);
-
-            // Normalise response — handle different field name conventions
             const d = res.data;
             const normalised = {
                 code: d.code || code,
-                discount_amount: Number(d.discount_amount || d.discountAmount || 0),
-                coupon_id: d.coupon_id || d.id || null,
-                discount_type: d.discount_type || d.discountType || 'percent',
-                discount_percent: d.discount_percent || d.discountPercent || null,
+                discount_amount: Number(d.discount_amount ?? d.discountAmount ?? 0),
+                coupon_id: d.coupon_id ?? d.id ?? null,
+                discount_type: d.discount_type ?? 'percent',
             };
 
             setCouponData(normalised);
             setCouponCode(normalised.code);
-            setShowCouponList(false);
-            toast.success(
-                `Coupon "${normalised.code}" applied! You save ₹${normalised.discount_amount.toFixed(2)}`
-            );
+            toast.success(`Coupon "${normalised.code}" applied! You save ₹${normalised.discount_amount.toFixed(2)}`);
         } catch (err) {
-            console.error('Coupon error:', err.response?.data);
+            console.error('Apply coupon error:', err.response?.data);
             const detail = err.response?.data?.detail;
             setCouponError(
                 Array.isArray(detail)
@@ -615,8 +598,7 @@ const Checkout = () => {
         }
     };
 
-    // Called when user clicks "Apply" on an available coupon card
-    const handleSelectCoupon = (code) => {
+    const handleApplyFromList = (code) => {
         setCouponCode(code);
         applyCoupon(code);
     };
@@ -629,7 +611,6 @@ const Checkout = () => {
     };
 
     // ── Build Order Payload ────────────────────────────────────────────────────
-
     const buildOrderPayload = () => ({
         items: cart.items.map((item) => ({
             product_id: item.product.id,
@@ -655,15 +636,10 @@ const Checkout = () => {
     });
 
     // ── COD ────────────────────────────────────────────────────────────────────
-
     const handleCODOrder = async () => {
         setLoading(true);
         try {
-            await axios.post(
-                `${API}/orders`,
-                { ...buildOrderPayload(), payment_method: 'cod' },
-                authHeaders
-            );
+            await axios.post(`${API}/orders`, { ...buildOrderPayload(), payment_method: 'cod' }, authHeaders);
             toast.success('Order placed successfully!');
             await clearCart();
             navigate('/thank-you');
@@ -675,7 +651,6 @@ const Checkout = () => {
     };
 
     // ── Razorpay ───────────────────────────────────────────────────────────────
-
     const handleRazorpayPayment = async () => {
         setLoading(true);
         try {
@@ -701,11 +676,7 @@ const Checkout = () => {
                 name: 'KhajurKart',
                 description: 'Premium Dry Fruits & Spices',
                 image: 'https://customer-assets.emergentagent.com/job_premium-spice-cart/artifacts/p1zf2opj_WhatsApp%20Image%202026-02-23%20at%204.12.54%20PM.jpeg',
-                prefill: {
-                    name: formData.fullName,
-                    email: formData.email,
-                    contact: formData.phone,
-                },
+                prefill: { name: formData.fullName, email: formData.email, contact: formData.phone },
                 theme: { color: '#0F3D2E' },
                 handler: async (response) => {
                     try {
@@ -727,10 +698,7 @@ const Checkout = () => {
                     }
                 },
                 modal: {
-                    ondismiss: () => {
-                        setLoading(false);
-                        toast.error('Payment cancelled.');
-                    },
+                    ondismiss: () => { setLoading(false); toast.error('Payment cancelled.'); },
                 },
             };
 
@@ -743,7 +711,6 @@ const Checkout = () => {
     };
 
     // ── Submit ─────────────────────────────────────────────────────────────────
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!cart.items || cart.items.length === 0) {
@@ -755,50 +722,34 @@ const Checkout = () => {
             : await handleCODOrder();
     };
 
-    // ── Guards ─────────────────────────────────────────────────────────────────
-
     if (!user) return <NotLoggedIn />;
-
-    // ── Render ─────────────────────────────────────────────────────────────────
 
     return (
         <div className="min-h-screen bg-white py-16 md:py-24" data-testid="checkout-page">
             <div className="max-w-6xl mx-auto px-6 md:px-12">
 
-                {/* Breadcrumb */}
                 <div className="mb-10">
-                    <Breadcrumb
-                        items={[
-                            { label: 'Home', to: '/' },
-                            { label: 'Cart', to: '/cart' },
-                            { label: 'Checkout', to: '#' },
-                        ]}
-                    />
+                    <Breadcrumb items={[
+                        { label: 'Home', to: '/' },
+                        { label: 'Cart', to: '/cart' },
+                        { label: 'Checkout', to: '#' },
+                    ]} />
                 </div>
 
-                {/* Page Header */}
                 <div className="flex items-center gap-4 border-b border-khajur-gold/20 pb-8 mb-12">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="text-khajur-primary hover:text-khajur-gold transition-colors"
-                        aria-label="Go back"
-                    >
+                    <button onClick={() => navigate(-1)} className="text-khajur-primary hover:text-khajur-gold transition-colors" aria-label="Go back">
                         <ChevronLeft className="w-6 h-6" />
                     </button>
                     <div>
-                        <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
-                            Secure Checkout
-                        </p>
-                        <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">
-                            Checkout
-                        </h1>
+                        <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">Secure Checkout</p>
+                        <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">Checkout</h1>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-                        {/* ── Left Column ── */}
+                        {/* Left Column */}
                         <div className="lg:col-span-2 space-y-8">
 
                             {/* Saved Addresses */}
@@ -807,28 +758,15 @@ const Checkout = () => {
                                     <div className="flex items-center justify-between px-8 py-5 border-b border-khajur-border">
                                         <div className="flex items-center gap-3">
                                             <MapPin className="w-4 h-4 text-khajur-gold" />
-                                            <h2 className="font-serif text-lg font-medium text-khajur-primary">
-                                                Saved Addresses
-                                            </h2>
+                                            <h2 className="font-serif text-lg font-medium text-khajur-primary">Saved Addresses</h2>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => navigate('/addresses')}
-                                            className="flex items-center gap-1.5 text-xs text-khajur-gold hover:text-khajur-gold/70 font-medium transition-colors"
-                                        >
-                                            <Plus className="w-3.5 h-3.5" />
-                                            Manage
+                                        <button type="button" onClick={() => navigate('/addresses')} className="flex items-center gap-1.5 text-xs text-khajur-gold hover:text-khajur-gold/70 font-medium transition-colors">
+                                            <Plus className="w-3.5 h-3.5" /> Manage
                                         </button>
                                     </div>
                                     <div className="px-8 py-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {addresses.map((addr, index) => (
-                                            <SavedAddressCard
-                                                key={index}
-                                                addr={addr}
-                                                index={index}
-                                                selected={selectedAddress === index}
-                                                onSelect={handleSelectAddress}
-                                            />
+                                            <SavedAddressCard key={index} addr={addr} index={index} selected={selectedAddress === index} onSelect={handleSelectAddress} />
                                         ))}
                                     </div>
                                 </div>
@@ -838,62 +776,25 @@ const Checkout = () => {
                             <div className="bg-white border border-khajur-border rounded-sm">
                                 <div className="flex items-center gap-3 px-8 py-5 border-b border-khajur-border">
                                     <Truck className="w-4 h-4 text-khajur-gold" />
-                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">
-                                        Shipping Information
-                                    </h2>
+                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">Shipping Information</h2>
                                 </div>
-
                                 <div className="px-8 py-8 space-y-8">
-                                    {/* Row 1: Name + Email */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         {SHIPPING_FIELDS[0].map((field) => (
                                             <div key={field.name}>
                                                 <FieldLabel label={field.label} />
-                                                <input
-                                                    type={field.type}
-                                                    name={field.name}
-                                                    required
-                                                    placeholder={field.placeholder}
-                                                    value={formData[field.name]}
-                                                    onChange={set(field.name)}
-                                                    className={inputBase}
-                                                    data-testid={field.testId}
-                                                />
+                                                <input type={field.type} name={field.name} required placeholder={field.placeholder} value={formData[field.name]} onChange={set(field.name)} className={inputBase} data-testid={field.testId} />
                                             </div>
                                         ))}
                                     </div>
-
-                                    {/* Row 2: Phone */}
                                     <div>
                                         <FieldLabel label="Phone Number" />
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            required
-                                            placeholder="+91 98765 43210"
-                                            value={formData.phone}
-                                            onChange={set('phone')}
-                                            className={inputBase}
-                                            data-testid="checkout-phone"
-                                        />
+                                        <input type="tel" name="phone" required placeholder="+91 98765 43210" value={formData.phone} onChange={set('phone')} className={inputBase} data-testid="checkout-phone" />
                                     </div>
-
-                                    {/* Row 3: Address */}
                                     <div>
                                         <FieldLabel label="Street Address" />
-                                        <input
-                                            type="text"
-                                            name="address"
-                                            required
-                                            placeholder="123, MG Road, Near City Mall…"
-                                            value={formData.address}
-                                            onChange={set('address')}
-                                            className={inputBase}
-                                            data-testid="checkout-address"
-                                        />
+                                        <input type="text" name="address" required placeholder="123, MG Road, Near City Mall…" value={formData.address} onChange={set('address')} className={inputBase} data-testid="checkout-address" />
                                     </div>
-
-                                    {/* Row 4: City + State + Pincode */}
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                                         {[
                                             { name: 'city', label: 'City', placeholder: 'Hyderabad', testId: 'checkout-city' },
@@ -902,16 +803,7 @@ const Checkout = () => {
                                         ].map((field) => (
                                             <div key={field.name}>
                                                 <FieldLabel label={field.label} />
-                                                <input
-                                                    type="text"
-                                                    name={field.name}
-                                                    required
-                                                    placeholder={field.placeholder}
-                                                    value={formData[field.name]}
-                                                    onChange={set(field.name)}
-                                                    className={inputBase}
-                                                    data-testid={field.testId}
-                                                />
+                                                <input type="text" name={field.name} required placeholder={field.placeholder} value={formData[field.name]} onChange={set(field.name)} className={inputBase} data-testid={field.testId} />
                                             </div>
                                         ))}
                                     </div>
@@ -922,32 +814,12 @@ const Checkout = () => {
                             <div className="bg-white border border-khajur-border rounded-sm">
                                 <div className="flex items-center gap-3 px-8 py-5 border-b border-khajur-border">
                                     <CreditCard className="w-4 h-4 text-khajur-gold" />
-                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">
-                                        Payment Method
-                                    </h2>
+                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">Payment Method</h2>
                                 </div>
                                 <div className="px-8 py-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {PAYMENT_METHODS.map(({ value, label, description, icon: Icon, testId }) => (
-                                        <label
-                                            key={value}
-                                            className={`
-                                                flex items-start gap-4 p-5 border rounded-sm cursor-pointer
-                                                transition-all duration-200
-                                                ${formData.paymentMethod === value
-                                                    ? 'border-khajur-gold bg-khajur-gold/5'
-                                                    : 'border-khajur-border hover:border-khajur-gold/40'
-                                                }
-                                            `}
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="paymentMethod"
-                                                value={value}
-                                                checked={formData.paymentMethod === value}
-                                                onChange={set('paymentMethod')}
-                                                className="accent-khajur-gold mt-1 flex-shrink-0"
-                                                data-testid={testId}
-                                            />
+                                        <label key={value} className={`flex items-start gap-4 p-5 border rounded-sm cursor-pointer transition-all duration-200 ${formData.paymentMethod === value ? 'border-khajur-gold bg-khajur-gold/5' : 'border-khajur-border hover:border-khajur-gold/40'}`}>
+                                            <input type="radio" name="paymentMethod" value={value} checked={formData.paymentMethod === value} onChange={set('paymentMethod')} className="accent-khajur-gold mt-1 flex-shrink-0" data-testid={testId} />
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <Icon className="w-4 h-4 text-khajur-gold" />
@@ -961,7 +833,7 @@ const Checkout = () => {
                             </div>
                         </div>
 
-                        {/* ── Right Column: Order Summary ── */}
+                        {/* Right Column */}
                         <div className="lg:col-span-1">
                             <OrderSummary
                                 cart={cart}
@@ -978,9 +850,7 @@ const Checkout = () => {
                                 removeCoupon={removeCoupon}
                                 discountAmount={discountAmount}
                                 availableCoupons={availableCoupons}
-                                onSelectCoupon={handleSelectCoupon}
-                                showCouponList={showCouponList}
-                                setShowCouponList={setShowCouponList}
+                                onApplyCoupon={handleApplyFromList}
                             />
                         </div>
 
