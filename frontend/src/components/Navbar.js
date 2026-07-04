@@ -23,7 +23,7 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
       transition-colors duration-200 pb-0.5 whitespace-nowrap
       ${isActive
                 ? 'text-khajur-gold'
-                : 'text-khajur-cream/80 hover:text-khajur-gold'
+                : 'text-khajur-cream/80 hover:text-white'
             }
       after:absolute after:bottom-0 after:left-0 after:h-px after:bg-khajur-gold
       after:transition-all after:duration-300
@@ -37,31 +37,16 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
 const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
     <form onSubmit={onSubmit} className={className}>
         <div className="relative">
-            <label htmlFor="search-input" className="sr-only">
-                Search products
-            </label>
+            <label htmlFor="search-input" className="sr-only">Search products</label>
             <input
                 id="search-input"
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search..."
                 value={value}
                 onChange={onChange}
-                data-testid="search-input"
-                aria-label="Search products"
-                className="
-          w-40 bg-white/5 border border-khajur-gold/20
-          hover:border-khajur-gold/40 focus:border-khajur-gold
-          text-sm text-khajur-cream placeholder:text-khajur-cream/30
-          pl-3 pr-8 py-2 rounded-sm
-          focus:outline-none transition-colors duration-200
-        "
+                className="w-40 bg-white/5 border border-white/10 hover:border-white/40 focus:border-khajur-gold text-sm text-khajur-cream placeholder:text-khajur-cream/30 pl-3 pr-8 py-2 rounded-sm focus:outline-none transition-colors"
             />
-            <button
-                type="submit"
-                data-testid="search-button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-khajur-cream/40 hover:text-khajur-gold transition-colors"
-                aria-label="Search"
-            >
+            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-khajur-cream/40 hover:text-white transition-colors">
                 <Search className="w-4 h-4" />
             </button>
         </div>
@@ -71,21 +56,12 @@ const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
 const CartButton = ({ count }) => (
     <Link
         to="/cart"
-        data-testid="cart-button"
-        className="relative text-khajur-cream/70 hover:text-khajur-gold transition-colors duration-200"
+        className="relative text-khajur-cream/70 hover:text-white transition-colors duration-200"
         aria-label="Shopping cart"
     >
         <ShoppingCart className="w-5 h-5" />
         {count > 0 && (
-            <span
-                data-testid="cart-count"
-                className="
-          absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1
-          bg-khajur-gold text-khajur-primary
-          text-[10px] font-bold rounded-full
-          flex items-center justify-center
-        "
-            >
+            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 bg-khajur-gold text-khajur-primary text-[10px] font-bold rounded-full flex items-center justify-center">
                 {count > 99 ? '99+' : count}
             </span>
         )}
@@ -110,20 +86,6 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handler);
     }, []);
 
-    useEffect(() => {
-        const handler = (e) => {
-            if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
-                setMenuOpen(false);
-            }
-        };
-        if (menuOpen) document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [menuOpen]);
-
-    useEffect(() => {
-        setMenuOpen(false);
-    }, [location.pathname]);
-
     const handleSearch = (e) => {
         e.preventDefault();
         if (query.trim()) {
@@ -138,181 +100,52 @@ const Navbar = () => {
         else setAuthOpen(true);
     };
 
-    const isActive = (to) => {
-        if (to === '/') return location.pathname === '/';
-        return location.pathname.startsWith(to);
-    };
-
-    const links = user
-        ? [...NAV_LINKS, { label: 'My Orders', to: '/my-orders' }]
-        : NAV_LINKS;
+    const links = user ? [...NAV_LINKS, { label: 'My Orders', to: '/my-orders' }] : NAV_LINKS;
 
     return (
         <>
-            <nav
-                data-testid="main-navbar"
-                className={`
-          bg-khajur-primary sticky top-0 z-50
-          transition-shadow duration-300
-          ${scrolled ? 'shadow-[0_4px_24px_rgba(0,0,0,0.3)]' : ''}
-        `}
-            >
+            <nav className={`bg-khajur-primary sticky top-0 z-50 transition-shadow duration-300 ${scrolled ? 'shadow-[0_4px_24px_rgba(0,0,0,0.3)]' : ''}`}>
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-
-                    {/* ── Desktop Layout ── */}
-                    <div className="hidden md:flex items-center justify-between h-20 gap-4">
-
-                        {/* ── Logo ── */}
-                        <Link
-                            to="/"
-                            data-testid="logo-link"
-                            className="flex items-center gap-2 group flex-shrink-0"
-                        >
-                            <img
-                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
-                                alt="KhajurKart"
-                                fetchPriority="high"    // ✅ ADD THIS
-                                loading="eager"          // ✅ ADD THIS for logo
-                                className="h-12 w-auto"
-                            />
+                    <div className="flex items-center justify-between h-20">
+                        <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+                            <img src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png" alt="KhajurKart" className="h-12 w-auto" />
                             <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
                                 KhajurKart
                             </span>
                         </Link>
 
-                        {/* ✅ Nav links — flex-1 so it takes available space and centers naturally */}
-                        <div className="flex items-center justify-center flex-1 gap-5">
+                        <div className="hidden md:flex items-center justify-center flex-1 gap-6">
                             {links.map((link) => (
-                                <NavLink
-                                    key={link.to}
-                                    to={link.to}
-                                    label={link.label}
-                                    isActive={isActive(link.to)}
-                                    testId={`nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                                />
+                                <NavLink key={link.to} to={link.to} label={link.label} isActive={location.pathname === link.to} />
                             ))}
                         </div>
 
-                        {/* ── Actions ── */}
-                        <div className="flex items-center gap-4 flex-shrink-0">
-                            <SearchForm
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onSubmit={handleSearch}
-                            />
-
-                            <button
-                                onClick={handleAuthClick}
-                                data-testid="account-button"
-                                aria-label={user ? 'Go to account' : 'Sign in'}
-                                className="
-                  flex items-center gap-1.5
-                  text-khajur-cream/70 hover:text-khajur-gold
-                  transition-colors duration-200
-                "
-                            >
-                                <User className="w-5 h-5" />
-                                {user && (
-                                    <span className="text-sm font-medium hidden lg:block">
-                                        {user.name?.split(' ')[0]}
-                                    </span>
-                                )}
-                            </button>
-
-                            <CartButton count={cartCount} />
-                        </div>
-                    </div>
-
-                    {/* ── Mobile Layout ── */}
-                    <div className="flex md:hidden items-center justify-between h-20">
-
-                        <Link
-                            to="/"
-                            data-testid="logo-link"
-                            className="flex items-center gap-2 group flex-shrink-0"
-                        >
-                            <img
-                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
-                                alt="KhajurKart"
-                                fetchPriority="high"    // ✅ ADD THIS
-                                loading="eager"          // ✅ ADD THIS for logo
-                                className="h-11 w-auto"
-                            />
-                            <span className="font-serif text-xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
-                                KhajurKart
-                            </span>
-                        </Link>
-
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={handleAuthClick}
-                                data-testid="account-button"
-                                aria-label="Account"
-                                className="text-khajur-cream/70 hover:text-khajur-gold transition-colors"
-                            >
+                        <div className="flex items-center gap-5 flex-shrink-0">
+                            <div className="hidden lg:block">
+                                <SearchForm value={query} onChange={(e) => setQuery(e.target.value)} onSubmit={handleSearch} />
+                            </div>
+                            <button onClick={handleAuthClick} className="text-khajur-cream/70 hover:text-white transition-colors">
                                 <User className="w-5 h-5" />
                             </button>
-
                             <CartButton count={cartCount} />
-
-                            <button
-                                onClick={() => setMenuOpen((o) => !o)}
-                                data-testid="mobile-menu-toggle"
-                                aria-label="Toggle menu"
-                                className="text-khajur-cream/70 hover:text-khajur-gold transition-colors"
-                            >
-                                {menuOpen
-                                    ? <X className="w-5 h-5" />
-                                    : <Menu className="w-5 h-5" />
-                                }
+                            <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-khajur-cream/70 hover:text-white transition-colors">
+                                {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* ── Mobile Menu ── */}
-                <div
-                    ref={mobileMenuRef}
-                    data-testid="mobile-menu"
-                    className={`
-            md:hidden overflow-hidden transition-all duration-300 ease-in-out
-            border-t border-khajur-gold/10
-            ${menuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}
-          `}
-                >
-                    <div className="px-6 py-6 space-y-5 bg-khajur-primary">
+                <div ref={mobileMenuRef} className={`md:hidden bg-khajur-primary border-t border-white/5 transition-all duration-300 overflow-hidden ${menuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <div className="px-6 py-8 space-y-6">
                         {links.map((link) => (
-                            <Link
-                                key={link.to}
-                                to={link.to}
-                                onClick={() => setMenuOpen(false)}
-                                className={`
-                  block text-sm uppercase tracking-wider font-semibold
-                  transition-colors duration-200
-                  ${isActive(link.to)
-                                        ? 'text-khajur-gold'
-                                        : 'text-khajur-cream/70 hover:text-khajur-gold'
-                                    }
-                `}
-                            >
+                            <Link key={link.to} to={link.to} onClick={() => setMenuOpen(false)} className={`block text-sm uppercase tracking-wider font-semibold ${location.pathname === link.to ? 'text-khajur-gold' : 'text-khajur-cream/80 hover:text-white'}`}>
                                 {link.label}
                             </Link>
                         ))}
-
-                        <SearchForm
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            onSubmit={handleSearch}
-                            className="w-full pt-2"
-                        />
                     </div>
                 </div>
             </nav>
-
-            <AuthModal
-                isOpen={authOpen}
-                onClose={() => setAuthOpen(false)}
-            />
+            <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
         </>
     );
 };
