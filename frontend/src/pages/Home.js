@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from 'react-slick';
 import axios from 'axios';
+import { toast } from 'sonner';
 import {
     ChevronRight,
     Award,
@@ -9,8 +10,8 @@ import {
     Shield,
     CreditCard,
     Star,
-    Loader2,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -109,29 +110,64 @@ const HERO_SLIDER_SETTINGS = {
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
+// ── Welcome Coupon Banner ──────────────────────────────────────────────────────
+
+const WelcomeCouponBanner = ({ welcomeCoupon }) => {
+    if (!welcomeCoupon) return null;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(welcomeCoupon.code);
+        toast.success('Coupon code copied! 🎉');
+    };
+
+    return (
+        <div
+            className="bg-khajur-gold py-3 px-6 text-center"
+            data-testid="welcome-coupon-banner"
+        >
+            <p className="text-khajur-primary font-bold text-sm">
+                🎉 Welcome to KhajurKart! Use code{' '}
+                <span
+                    onClick={handleCopy}
+                    className="
+                        bg-khajur-primary text-khajur-gold
+                        px-2 py-0.5 rounded
+                        cursor-pointer font-mono
+                        hover:bg-khajur-primary/80
+                        transition-colors duration-200
+                    "
+                    data-testid="welcome-coupon-code"
+                    title="Click to copy"
+                >
+                    {welcomeCoupon.code}
+                </span>
+                {' '}for {welcomeCoupon.discount_percent}% off your first order!{' '}
+                <span className="text-xs opacity-75">(Click code to copy)</span>
+            </p>
+        </div>
+    );
+};
+
 // ── Section Header ─────────────────────────────────────────────────────────────
 
 const SectionHeader = ({ eyebrow, title, subtitle, light = false }) => (
     <div className="text-center mb-10">
         {eyebrow && (
-            <p className={`
-        text-xs uppercase tracking-widest font-semibold mb-3
-        ${light ? 'text-khajur-gold' : 'text-khajur-gold'}
-      `}>
+            <p className="text-xs uppercase tracking-widest font-semibold mb-3 text-khajur-gold">
                 {eyebrow}
             </p>
         )}
         <h2 className={`
-      font-serif text-3xl md:text-5xl font-medium mb-4
-      ${light ? 'text-khajur-cream' : 'text-khajur-primary'}
-    `}>
+            font-serif text-3xl md:text-5xl font-medium mb-4
+            ${light ? 'text-khajur-cream' : 'text-khajur-primary'}
+        `}>
             {title}
         </h2>
         {subtitle && (
             <p className={`
-        text-base max-w-2xl mx-auto leading-relaxed
-        ${light ? 'text-khajur-cream/70' : 'text-khajur-dark/60'}
-      `}>
+                text-base max-w-2xl mx-auto leading-relaxed
+                ${light ? 'text-khajur-cream/70' : 'text-khajur-dark/60'}
+            `}>
                 {subtitle}
             </p>
         )}
@@ -190,13 +226,13 @@ const HeroSlide = ({ slide, index }) => (
                     <Link
                         to={`/products?category=${slide.category}`}
                         className="
-              inline-flex items-center gap-2
-              bg-khajur-gold text-khajur-primary
-              hover:bg-khajur-gold/90
-              px-8 py-3.5 text-xs font-bold uppercase tracking-widest
-              transition-all duration-300
-              hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
-            "
+                            inline-flex items-center gap-2
+                            bg-khajur-gold text-khajur-primary
+                            hover:bg-khajur-gold/90
+                            px-8 py-3.5 text-xs font-bold uppercase tracking-widest
+                            transition-all duration-300
+                            hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
+                        "
                         data-testid="hero-shop-now-button"
                     >
                         Shop Now
@@ -250,11 +286,11 @@ const FeatureCard = ({ feature, index }) => {
     return (
         <div
             className="
-        group flex flex-col items-center text-center
-        p-8 border border-khajur-border bg-khajur-cream
-        hover:bg-white hover:border-khajur-gold hover:shadow-lg
-        transition-all duration-300
-      "
+                group flex flex-col items-center text-center
+                p-8 border border-khajur-border bg-khajur-cream
+                hover:bg-white hover:border-khajur-gold hover:shadow-lg
+                transition-all duration-300
+            "
             data-testid={`status-feature-${index}`}
         >
             <div className="w-14 h-14 bg-khajur-primary/5 flex items-center justify-center mb-5 group-hover:bg-khajur-gold/10 transition-colors">
@@ -314,15 +350,37 @@ const ReviewCard = ({ review, index }) => (
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const Home = () => {
+    const { user, token } = useAuth();
     const [categories, setCategories] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [welcomeCoupon, setWelcomeCoupon] = useState(null);
 
     // ── Set page title ─────────────────────────────────────────────────────────
     useEffect(() => {
         document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
     }, []);
 
+    // ── Check for welcome coupon ───────────────────────────────────────────────
+    useEffect(() => {
+        if (user && token) {
+            const checkWelcome = async () => {
+                try {
+                    const res = await axios.get(`${API}/welcome-coupon`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.data.available) {
+                        setWelcomeCoupon(res.data);
+                    }
+                } catch {
+                    // silent fail — welcome coupon is optional
+                }
+            };
+            checkWelcome();
+        }
+    }, [user, token]);
+
+    // ── Fetch categories & featured products ───────────────────────────────────
     const fetchData = useCallback(async () => {
         try {
             const [categoriesRes, productsRes] = await Promise.all([
@@ -345,7 +403,10 @@ const Home = () => {
     return (
         <div id="main-content" className="min-h-screen bg-white" data-testid="home-page">
 
-            {/* ── Hero Slider ─────────────────────────────────────────────────────── */}
+            {/* ── Welcome Coupon Banner ────────────────────────────────────────────── */}
+            <WelcomeCouponBanner welcomeCoupon={welcomeCoupon} />
+
+            {/* ── Hero Slider ──────────────────────────────────────────────────────── */}
             <section className="relative" data-testid="hero-slider">
                 <Slider {...HERO_SLIDER_SETTINGS}>
                     {HERO_SLIDES.map((slide, index) => (
@@ -404,13 +465,13 @@ const Home = () => {
                             <Link
                                 to="/products"
                                 className="
-                  inline-flex items-center gap-2
-                  bg-khajur-primary text-khajur-cream
-                  hover:bg-khajur-primary/90
-                  px-8 py-3.5 text-xs font-bold uppercase tracking-widest
-                  transition-all duration-300
-                  border border-transparent hover:border-khajur-gold
-                "
+                                    inline-flex items-center gap-2
+                                    bg-khajur-primary text-khajur-cream
+                                    hover:bg-khajur-primary/90
+                                    px-8 py-3.5 text-xs font-bold uppercase tracking-widest
+                                    transition-all duration-300
+                                    border border-transparent hover:border-khajur-gold
+                                "
                                 data-testid="view-all-products-button"
                             >
                                 View All Products
@@ -446,13 +507,13 @@ const Home = () => {
                         <Link
                             to="/bulk-orders"
                             className="
-                flex-shrink-0 inline-flex items-center gap-2
-                bg-khajur-gold text-khajur-primary
-                hover:bg-khajur-gold/90
-                px-10 py-4 text-xs font-bold uppercase tracking-widest
-                transition-all duration-300
-                hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
-              "
+                                flex-shrink-0 inline-flex items-center gap-2
+                                bg-khajur-gold text-khajur-primary
+                                hover:bg-khajur-gold/90
+                                px-10 py-4 text-xs font-bold uppercase tracking-widest
+                                transition-all duration-300
+                                hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
+                            "
                         >
                             Get a Bulk Quote
                             <ChevronRight className="w-4 h-4" />
@@ -513,13 +574,13 @@ const Home = () => {
                     <Link
                         to="/products"
                         className="
-              inline-flex items-center gap-2
-              bg-khajur-primary text-khajur-cream
-              hover:bg-khajur-primary/90
-              px-10 py-4 text-xs font-bold uppercase tracking-widest
-              transition-all duration-300
-              border border-transparent hover:border-khajur-gold
-            "
+                            inline-flex items-center gap-2
+                            bg-khajur-primary text-khajur-cream
+                            hover:bg-khajur-primary/90
+                            px-10 py-4 text-xs font-bold uppercase tracking-widest
+                            transition-all duration-300
+                            border border-transparent hover:border-khajur-gold
+                        "
                     >
                         Shop All Products
                         <ChevronRight className="w-4 h-4" />
