@@ -27,8 +27,6 @@ import Breadcrumb from '../components/Breadcrumb';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
 const INITIAL_FORM = {
     fullName: '',
     email: '',
@@ -58,8 +56,6 @@ const PAYMENT_METHODS = [
     { value: 'cod', label: 'Cash on Delivery', description: 'Pay when your order arrives.', icon: Banknote, testId: 'payment-cod' },
     { value: 'razorpay', label: 'Pay Online', description: 'UPI, Cards, Net Banking via Razorpay.', icon: Smartphone, testId: 'payment-razorpay' },
 ];
-
-// ─── Sub-Components ────────────────────────────────────────────────────────────
 
 const NotLoggedIn = () => (
     <div className="min-h-screen bg-khajur-cream flex flex-col items-center justify-center gap-6 px-6 text-center">
@@ -91,8 +87,8 @@ const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
     <div
         onClick={() => onSelect(index, addr)}
         className={`relative p-5 border rounded-sm cursor-pointer transition-all duration-200 ${selected
-                ? 'border-khajur-gold bg-khajur-gold/5 shadow-[0_0_12px_rgba(198,169,98,0.2)]'
-                : 'border-khajur-border hover:border-khajur-gold/40'
+            ? 'border-khajur-gold bg-khajur-gold/5 shadow-[0_0_12px_rgba(198,169,98,0.2)]'
+            : 'border-khajur-border hover:border-khajur-gold/40'
             }`}
     >
         {selected && (
@@ -108,14 +104,11 @@ const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
     </div>
 );
 
-// ── Available Coupon Card ──────────────────────────────────────────────────────
-
 const AvailableCouponCard = ({ coupon, cartTotal, onApply }) => {
     const isEligible = cartTotal >= (coupon.min_order || 0);
     const discountText = coupon.discount_type === 'percent'
         ? `${coupon.discount_percent}% off`
         : `₹${coupon.discount_amount} off`;
-
     return (
         <div className={`
             border rounded-sm p-3 transition-all duration-200
@@ -157,7 +150,6 @@ const AvailableCouponCard = ({ coupon, cartTotal, onApply }) => {
                         )}
                     </div>
                 </div>
-
                 {isEligible && (
                     <button
                         type="button"
@@ -177,8 +169,6 @@ const AvailableCouponCard = ({ coupon, cartTotal, onApply }) => {
     );
 };
 
-// ── Coupon Section (inside Order Summary) ─────────────────────────────────────
-
 const CouponSection = ({
     couponSystemEnabled,
     couponCode,
@@ -193,12 +183,9 @@ const CouponSection = ({
     cartTotal,
 }) => {
     const [showList, setShowList] = useState(false);
-
     if (!couponSystemEnabled) return null;
-
     return (
         <div className="mb-1">
-            {/* ── Label row ── */}
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5">
                     <Tag className="w-3.5 h-3.5 text-khajur-gold" />
@@ -206,8 +193,6 @@ const CouponSection = ({
                         Coupon Code
                     </p>
                 </div>
-
-                {/* Show available count if any — only when no coupon applied */}
                 {!couponData && availableCoupons.length > 0 && (
                     <button
                         type="button"
@@ -222,8 +207,6 @@ const CouponSection = ({
                     </button>
                 )}
             </div>
-
-            {/* ── Already applied ── */}
             {couponData ? (
                 <div
                     className="flex items-center justify-between bg-green-50 border border-green-200 px-3 py-2.5 rounded-sm"
@@ -252,7 +235,6 @@ const CouponSection = ({
                 </div>
             ) : (
                 <>
-                    {/* ── Input row ── */}
                     <div className="flex gap-2">
                         <input
                             type="text"
@@ -290,8 +272,6 @@ const CouponSection = ({
                             }
                         </button>
                     </div>
-
-                    {/* Error */}
                     {couponError && (
                         <div className="flex items-center gap-1.5 mt-2">
                             <X className="w-3 h-3 text-red-500 flex-shrink-0" />
@@ -300,8 +280,6 @@ const CouponSection = ({
                             </p>
                         </div>
                     )}
-
-                    {/* ── Available Coupons List ── */}
                     {showList && availableCoupons.length > 0 && (
                         <div className="mt-3 space-y-2">
                             <p className="text-xs text-khajur-dark/40 uppercase tracking-widest font-medium mb-2">
@@ -323,8 +301,6 @@ const CouponSection = ({
     );
 };
 
-// ── Order Summary ──────────────────────────────────────────────────────────────
-
 const OrderSummary = ({
     cart,
     cartTotal,
@@ -343,14 +319,10 @@ const OrderSummary = ({
     onApplyCoupon,
 }) => (
     <div className="bg-white border border-khajur-border rounded-sm sticky top-28" data-testid="checkout-summary">
-
-        {/* Header */}
         <div className="flex items-center gap-3 px-7 py-5 border-b border-khajur-border">
             <ShoppingBag className="w-4 h-4 text-khajur-gold" />
             <h2 className="font-serif text-lg font-medium text-khajur-primary">Order Summary</h2>
         </div>
-
-        {/* Items */}
         <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
             {cart.items.map((item, i) => (
                 <div key={i} className="flex items-start justify-between gap-3">
@@ -366,11 +338,7 @@ const OrderSummary = ({
                 </div>
             ))}
         </div>
-
-        {/* Coupon + Totals */}
         <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
-
-            {/* Coupon Section */}
             <CouponSection
                 couponSystemEnabled={couponSystemEnabled}
                 couponCode={couponCode}
@@ -384,19 +352,13 @@ const OrderSummary = ({
                 onApplyCoupon={onApplyCoupon}
                 cartTotal={cartTotal}
             />
-
-            {/* Divider between coupon and totals */}
             {couponSystemEnabled && (
                 <div className="border-t border-khajur-border/60 pt-3" />
             )}
-
-            {/* Subtotal */}
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Subtotal</span>
                 <span className="text-khajur-primary font-medium">₹{cartTotal.toFixed(2)}</span>
             </div>
-
-            {/* Discount */}
             {couponData && discountAmount > 0 && (
                 <div className="flex justify-between text-sm text-green-600 font-medium" data-testid="coupon-discount-row">
                     <span className="flex items-center gap-1">
@@ -406,8 +368,6 @@ const OrderSummary = ({
                     <span>− ₹{Number(discountAmount).toFixed(2)}</span>
                 </div>
             )}
-
-            {/* Delivery */}
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Delivery</span>
                 <span className="text-green-600 font-semibold flex items-center gap-1">
@@ -415,8 +375,6 @@ const OrderSummary = ({
                 </span>
             </div>
         </div>
-
-        {/* Grand Total */}
         <div className="px-7 py-5 border-b border-khajur-border">
             <div className="flex justify-between items-center">
                 <span className="font-serif text-base font-medium text-khajur-primary">Total</span>
@@ -425,8 +383,6 @@ const OrderSummary = ({
                 </span>
             </div>
         </div>
-
-        {/* CTA */}
         <div className="px-7 py-5">
             <button
                 type="submit"
@@ -454,8 +410,6 @@ const OrderSummary = ({
     </div>
 );
 
-// ─── Main Component ────────────────────────────────────────────────────────────
-
 const Checkout = () => {
     const { cart, cartTotal, clearCart } = useCart();
     const { user, token } = useAuth();
@@ -482,7 +436,6 @@ const Checkout = () => {
 
     const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
-    // ── Derived Totals ─────────────────────────────────────────────────────────
     const discountAmount = couponData ? Number(couponData.discount_amount) : 0;
     const finalTotal = Math.max(0, cartTotal - discountAmount);
 
@@ -491,48 +444,29 @@ const Checkout = () => {
         return () => { document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices'; };
     }, []);
 
-    // ── Init: check coupon system + fetch active coupons ──────────────────────
-    // ── Init: check coupon system + fetch active coupons ──────────────────────
+    // ✅ FIXED: correct API URL + removed all console.logs
     useEffect(() => {
         const initCoupons = async () => {
             try {
-                // Step 1: Check system status
                 const statusRes = await axios.get(`${API}/coupon-system/status`);
                 const enabled = Boolean(statusRes.data.enabled);
-                console.log('✅ Coupon system enabled:', enabled);
                 setCouponSystemEnabled(enabled);
 
-                if (!enabled || !token) {
-                    console.log('⚠️ Coupon system disabled or no token');
-                    return;
-                }
+                if (!enabled) return;
 
-                // Step 2: Fetch active coupons for this user
-                try {
-                    const res = await axios.get(`${API}/active-coupons`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    console.log('✅ Active coupons:', res.data);
-                    const coupons = Array.isArray(res.data) ? res.data : [];
-                    setAvailableCoupons(coupons);
-                } catch (err) {
-                    console.error('❌ Failed to fetch active coupons:',
-                        err.response?.status,
-                        err.response?.data
-                    );
-                    setAvailableCoupons([]);
-                }
+                // ✅ FIXED: was /active-coupons → now /coupons/active
+                const res = await axios.get(`${API}/coupons/active`);
+                const coupons = Array.isArray(res.data) ? res.data : [];
+                setAvailableCoupons(coupons);
+
             } catch (err) {
-                console.error('❌ Coupon system status error:', err);
                 setCouponSystemEnabled(false);
             }
         };
 
-        if (token) initCoupons();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        initCoupons();
     }, [token]);
 
-    // ── Fetch Saved Addresses ──────────────────────────────────────────────────
     const fetchAddresses = useCallback(async () => {
         try {
             const { data } = await axios.get(`${API}/user/address`, authHeaders);
@@ -546,7 +480,6 @@ const Checkout = () => {
         if (token) fetchAddresses();
     }, [token, fetchAddresses]);
 
-    // ── Handlers ───────────────────────────────────────────────────────────────
     const set = (name) => (e) =>
         setFormData((prev) => ({ ...prev, [name]: e.target.value }));
 
@@ -567,20 +500,15 @@ const Checkout = () => {
     const applyCoupon = async (codeOverride) => {
         const code = (codeOverride || couponCode).trim().toUpperCase();
         if (!code) return;
-
         setCouponLoading(true);
         setCouponError('');
         setCouponData(null);
-
         try {
-            console.log('Applying coupon:', code, 'order_amount:', cartTotal);
             const res = await axios.post(
                 `${API}/apply-coupon`,
                 { code, order_amount: cartTotal },
                 authHeaders
             );
-            console.log('Apply coupon response:', res.data);
-
             const d = res.data;
             const normalised = {
                 code: d.code || code,
@@ -588,12 +516,10 @@ const Checkout = () => {
                 coupon_id: d.coupon_id ?? d.id ?? null,
                 discount_type: d.discount_type ?? 'percent',
             };
-
             setCouponData(normalised);
             setCouponCode(normalised.code);
             toast.success(`Coupon "${normalised.code}" applied! You save ₹${normalised.discount_amount.toFixed(2)}`);
         } catch (err) {
-            console.error('Apply coupon error:', err.response?.data);
             const detail = err.response?.data?.detail;
             setCouponError(
                 Array.isArray(detail)
@@ -617,7 +543,6 @@ const Checkout = () => {
         toast.info('Coupon removed.');
     };
 
-    // ── Build Order Payload ────────────────────────────────────────────────────
     const buildOrderPayload = () => ({
         items: cart.items.map((item) => ({
             product_id: item.product.id,
@@ -642,7 +567,6 @@ const Checkout = () => {
         coupon_id: couponData?.coupon_id || null,
     });
 
-    // ── COD ────────────────────────────────────────────────────────────────────
     const handleCODOrder = async () => {
         setLoading(true);
         try {
@@ -657,7 +581,6 @@ const Checkout = () => {
         }
     };
 
-    // ── Razorpay ───────────────────────────────────────────────────────────────
     const handleRazorpayPayment = async () => {
         setLoading(true);
         try {
@@ -667,14 +590,12 @@ const Checkout = () => {
                 authHeaders
             );
             const orderId = orderRes.data.order_id;
-
             const rzpOrderRes = await axios.post(
                 `${API}/razorpay/create-order`,
                 { amount: finalTotal, currency: 'INR' },
                 authHeaders
             );
             const rzpOrder = rzpOrderRes.data;
-
             const options = {
                 key: rzpOrder.key_id,
                 amount: rzpOrder.amount,
@@ -708,7 +629,6 @@ const Checkout = () => {
                     ondismiss: () => { setLoading(false); toast.error('Payment cancelled.'); },
                 },
             };
-
             const rzpInstance = new Razorpay(options);
             rzpInstance.open();
         } catch (error) {
@@ -717,7 +637,6 @@ const Checkout = () => {
         }
     };
 
-    // ── Submit ─────────────────────────────────────────────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!cart.items || cart.items.length === 0) {
@@ -734,7 +653,6 @@ const Checkout = () => {
     return (
         <div className="min-h-screen bg-white py-16 md:py-24" data-testid="checkout-page">
             <div className="max-w-6xl mx-auto px-6 md:px-12">
-
                 <div className="mb-10">
                     <Breadcrumb items={[
                         { label: 'Home', to: '/' },
@@ -742,7 +660,6 @@ const Checkout = () => {
                         { label: 'Checkout', to: '#' },
                     ]} />
                 </div>
-
                 <div className="flex items-center gap-4 border-b border-khajur-gold/20 pb-8 mb-12">
                     <button onClick={() => navigate(-1)} className="text-khajur-primary hover:text-khajur-gold transition-colors" aria-label="Go back">
                         <ChevronLeft className="w-6 h-6" />
@@ -752,14 +669,10 @@ const Checkout = () => {
                         <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">Checkout</h1>
                     </div>
                 </div>
-
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
                         {/* Left Column */}
                         <div className="lg:col-span-2 space-y-8">
-
-                            {/* Saved Addresses */}
                             {addresses.length > 0 && (
                                 <div className="bg-white border border-khajur-border rounded-sm">
                                     <div className="flex items-center justify-between px-8 py-5 border-b border-khajur-border">
@@ -778,8 +691,6 @@ const Checkout = () => {
                                     </div>
                                 </div>
                             )}
-
-                            {/* Shipping Information */}
                             <div className="bg-white border border-khajur-border rounded-sm">
                                 <div className="flex items-center gap-3 px-8 py-5 border-b border-khajur-border">
                                     <Truck className="w-4 h-4 text-khajur-gold" />
@@ -816,8 +727,6 @@ const Checkout = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Payment Method */}
                             <div className="bg-white border border-khajur-border rounded-sm">
                                 <div className="flex items-center gap-3 px-8 py-5 border-b border-khajur-border">
                                     <CreditCard className="w-4 h-4 text-khajur-gold" />
@@ -839,7 +748,6 @@ const Checkout = () => {
                                 </div>
                             </div>
                         </div>
-
                         {/* Right Column */}
                         <div className="lg:col-span-1">
                             <OrderSummary
@@ -860,7 +768,6 @@ const Checkout = () => {
                                 onApplyCoupon={handleApplyFromList}
                             />
                         </div>
-
                     </div>
                 </form>
             </div>
