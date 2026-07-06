@@ -182,32 +182,20 @@ const CouponSection = ({
     onApplyCoupon,
     cartTotal,
 }) => {
-    const [showList, setShowList] = useState(false);
     if (!couponSystemEnabled) return null;
+
     return (
         <div className="mb-1">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5">
-                    <Tag className="w-3.5 h-3.5 text-khajur-gold" />
-                    <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
-                        Coupon Code
-                    </p>
-                </div>
-                {!couponData && availableCoupons.length > 0 && (
-                    <button
-                        type="button"
-                        onClick={() => setShowList((p) => !p)}
-                        className="flex items-center gap-1 text-xs font-semibold text-khajur-gold hover:text-khajur-gold/70 transition-colors"
-                    >
-                        {showList ? (
-                            <><ChevronUp className="w-3.5 h-3.5" /> Hide</>
-                        ) : (
-                            <><ChevronDown className="w-3.5 h-3.5" /> {availableCoupons.length} coupon{availableCoupons.length > 1 ? 's' : ''} available</>
-                        )}
-                    </button>
-                )}
+            {/* Label row — no toggle button */}
+            <div className="flex items-center gap-1.5 mb-2">
+                <Tag className="w-3.5 h-3.5 text-khajur-gold" />
+                <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
+                    Coupon Code
+                </p>
             </div>
+
             {couponData ? (
+                /* ── Applied State ── */
                 <div
                     className="flex items-center justify-between bg-green-50 border border-green-200 px-3 py-2.5 rounded-sm"
                     data-testid="coupon-applied-banner"
@@ -235,12 +223,15 @@ const CouponSection = ({
                 </div>
             ) : (
                 <>
+                    {/* ── Input row ── */}
                     <div className="flex gap-2">
                         <input
                             type="text"
                             value={couponCode}
                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), applyCoupon())}
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && (e.preventDefault(), applyCoupon())
+                            }
                             placeholder="ENTER CODE"
                             className="
                                 flex-1 border border-khajur-border rounded-sm
@@ -272,6 +263,8 @@ const CouponSection = ({
                             }
                         </button>
                     </div>
+
+                    {/* Error */}
                     {couponError && (
                         <div className="flex items-center gap-1.5 mt-2">
                             <X className="w-3 h-3 text-red-500 flex-shrink-0" />
@@ -280,7 +273,9 @@ const CouponSection = ({
                             </p>
                         </div>
                     )}
-                    {showList && availableCoupons.length > 0 && (
+
+                    {/* ── Available Coupons — always visible, no toggle ── */}
+                    {availableCoupons.length > 0 && (
                         <div className="mt-3 space-y-2">
                             <p className="text-xs text-khajur-dark/40 uppercase tracking-widest font-medium mb-2">
                                 Available Coupons
@@ -300,7 +295,6 @@ const CouponSection = ({
         </div>
     );
 };
-
 const OrderSummary = ({
     cart,
     cartTotal,
