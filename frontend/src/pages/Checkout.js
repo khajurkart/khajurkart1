@@ -19,13 +19,33 @@ import {
     Tag,
     X,
     Gift,
-    ChevronDown,
-    ChevronUp,
 } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// ─── Coupon Helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Returns true if the coupon's expiry date has passed.
+ * Treats the expiry day itself as still valid (cuts off at end of day).
+ */
+const isExpired = (coupon) => {
+    if (!coupon.expiry) return false;
+    return new Date(`${coupon.expiry}T23:59:59`) < new Date();
+};
+
+/**
+ * Returns true only if the coupon should be visible & usable by a customer.
+ * Guards: active flag + not expired + usage limit not hit.
+ */
+const isCouponAvailableToUser = (coupon) =>
+    coupon.is_active &&
+    !isExpired(coupon) &&
+    (coupon.max_uses == null || (coupon.uses || 0) < coupon.max_uses);
+
+// ─── Constants ─────────────────────────────────────────────────────────────────
 
 const INITIAL_FORM = {
     fullName: '',
@@ -57,14 +77,23 @@ const PAYMENT_METHODS = [
     { value: 'razorpay', label: 'Pay Online', description: 'UPI, Cards, Net Banking via Razorpay.', icon: Smartphone, testId: 'payment-razorpay' },
 ];
 
+// ─── Sub-Components ────────────────────────────────────────────────────────────
+
 const NotLoggedIn = () => (
     <div className="min-h-screen bg-khajur-cream flex flex-col items-center justify-center gap-6 px-6 text-center">
         <ShoppingBag className="w-7 h-7 text-khajur-dark/30" />
         <div>
-            <p className="font-serif text-2xl font-medium text-khajur-primary mb-2">Please sign in to checkout</p>
-            <p className="text-sm text-khajur-dark/50">You need an account to place an order.</p>
+            <p className="font-serif text-2xl font-medium text-khajur-primary mb-2">
+                Please sign in to checkout
+            </p>
+            <p className="text-sm text-khajur-dark/50">
+                You need an account to place an order.
+            </p>
         </div>
-        <Link to="/" className="bg-khajur-gold hover:bg-khajur-gold/90 text-khajur-primary px-8 py-3 rounded-sm uppercase tracking-widest text-xs font-bold transition-all duration-300">
+        <Link
+            to="/"
+            className="bg-khajur-gold hover:bg-khajur-gold/90 text-khajur-primary px-8 py-3 rounded-sm uppercase tracking-widest text-xs font-bold transition-all duration-300"
+        >
             Go to Home
         </Link>
     </div>
@@ -83,13 +112,18 @@ const inputBase = `
     focus:outline-none transition-colors duration-200
 `;
 
+// ── Saved Address Card ─────────────────────────────────────────────────────────
+
 const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
     <div
         onClick={() => onSelect(index, addr)}
-        className={`relative p-5 border rounded-sm cursor-pointer transition-all duration-200 ${selected
-            ? 'border-khajur-gold bg-khajur-gold/5 shadow-[0_0_12px_rgba(198,169,98,0.2)]'
-            : 'border-khajur-border hover:border-khajur-gold/40'
-            }`}
+        className={`
+            relative p-5 border rounded-sm cursor-pointer transition-all duration-200
+            ${selected
+                ? 'border-khajur-gold bg-khajur-gold/5 shadow-[0_0_12px_rgba(198,169,98,0.2)]'
+                : 'border-khajur-border hover:border-khajur-gold/40'
+            }
+        `}
     >
         {selected && (
             <div className="absolute top-3 right-3 w-5 h-5 bg-khajur-gold rounded-full flex items-center justify-center">
@@ -99,16 +133,23 @@ const SavedAddressCard = ({ addr, index, selected, onSelect }) => (
         <p className="text-sm font-semibold text-khajur-primary mb-1">{addr.name}</p>
         <p className="text-xs text-khajur-dark/50">{addr.phone}</p>
         <p className="text-xs text-khajur-dark/70 mt-1 leading-relaxed">
-            {addr.address}{addr.city ? `, ${addr.city}` : ''}{addr.state ? `, ${addr.state}` : ''}{addr.pincode ? ` — ${addr.pincode}` : ''}
+            {addr.address}
+            {addr.city ? `, ${addr.city}` : ''}
+            {addr.state ? `, ${addr.state}` : ''}
+            {addr.pincode ? ` — ${addr.pincode}` : ''}
         </p>
     </div>
 );
 
+// ── Available Coupon Card ──────────────────────────────────────────────────────
+
 const AvailableCouponCard = ({ coupon, cartTotal, onApply }) => {
     const isEligible = cartTotal >= (coupon.min_order || 0);
+
     const discountText = coupon.discount_type === 'percent'
         ? `${coupon.discount_percent}% off`
         : `₹${coupon.discount_amount} off`;
+
     return (
         <div className={`
             border rounded-sm p-3 transition-all duration-200
@@ -150,6 +191,7 @@ const AvailableCouponCard = ({ coupon, cartTotal, onApply }) => {
                         )}
                     </div>
                 </div>
+
                 {isEligible && (
                     <button
                         type="button"
@@ -169,6 +211,8 @@ const AvailableCouponCard = ({ coupon, cartTotal, onApply }) => {
     );
 };
 
+// ── Coupon Section ─────────────────────────────────────────────────────────────
+
 const CouponSection = ({
     couponSystemEnabled,
     couponCode,
@@ -182,11 +226,12 @@ const CouponSection = ({
     onApplyCoupon,
     cartTotal,
 }) => {
+    // If the entire coupon system is OFF, render nothing
     if (!couponSystemEnabled) return null;
 
     return (
         <div className="mb-1">
-            {/* Label row — no toggle button */}
+            {/* Section label */}
             <div className="flex items-center gap-1.5 mb-2">
                 <Tag className="w-3.5 h-3.5 text-khajur-gold" />
                 <p className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50">
@@ -223,7 +268,7 @@ const CouponSection = ({
                 </div>
             ) : (
                 <>
-                    {/* ── Input row ── */}
+                    {/* ── Input + Apply button ── */}
                     <div className="flex gap-2">
                         <input
                             type="text"
@@ -264,7 +309,7 @@ const CouponSection = ({
                         </button>
                     </div>
 
-                    {/* Error */}
+                    {/* Error message */}
                     {couponError && (
                         <div className="flex items-center gap-1.5 mt-2">
                             <X className="w-3 h-3 text-red-500 flex-shrink-0" />
@@ -274,7 +319,9 @@ const CouponSection = ({
                         </div>
                     )}
 
-                    {/* ── Available Coupons — always visible, no toggle ── */}
+                    {/* ── Available Coupons list ──
+                        Only coupons that passed isCouponAvailableToUser() are in
+                        this array, so expired coupons will never appear here. ── */}
                     {availableCoupons.length > 0 && (
                         <div className="mt-3 space-y-2">
                             <p className="text-xs text-khajur-dark/40 uppercase tracking-widest font-medium mb-2">
@@ -295,6 +342,9 @@ const CouponSection = ({
         </div>
     );
 };
+
+// ── Order Summary ──────────────────────────────────────────────────────────────
+
 const OrderSummary = ({
     cart,
     cartTotal,
@@ -312,16 +362,26 @@ const OrderSummary = ({
     availableCoupons,
     onApplyCoupon,
 }) => (
-    <div className="bg-white border border-khajur-border rounded-sm sticky top-28" data-testid="checkout-summary">
+    <div
+        className="bg-white border border-khajur-border rounded-sm sticky top-28"
+        data-testid="checkout-summary"
+    >
+        {/* Header */}
         <div className="flex items-center gap-3 px-7 py-5 border-b border-khajur-border">
             <ShoppingBag className="w-4 h-4 text-khajur-gold" />
-            <h2 className="font-serif text-lg font-medium text-khajur-primary">Order Summary</h2>
+            <h2 className="font-serif text-lg font-medium text-khajur-primary">
+                Order Summary
+            </h2>
         </div>
+
+        {/* Cart items */}
         <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
             {cart.items.map((item, i) => (
                 <div key={i} className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm text-khajur-dark/80 truncate">{item.product?.name}</p>
+                        <p className="text-sm text-khajur-dark/80 truncate">
+                            {item.product?.name}
+                        </p>
                         <p className="text-xs text-khajur-dark/40 mt-0.5">
                             {item.size ? `${item.size} · ` : ''}Qty: {item.quantity}
                         </p>
@@ -332,6 +392,8 @@ const OrderSummary = ({
                 </div>
             ))}
         </div>
+
+        {/* Coupon + Totals */}
         <div className="px-7 py-5 space-y-3 border-b border-khajur-border">
             <CouponSection
                 couponSystemEnabled={couponSystemEnabled}
@@ -346,15 +408,23 @@ const OrderSummary = ({
                 onApplyCoupon={onApplyCoupon}
                 cartTotal={cartTotal}
             />
+
             {couponSystemEnabled && (
                 <div className="border-t border-khajur-border/60 pt-3" />
             )}
+
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Subtotal</span>
-                <span className="text-khajur-primary font-medium">₹{cartTotal.toFixed(2)}</span>
+                <span className="text-khajur-primary font-medium">
+                    ₹{cartTotal.toFixed(2)}
+                </span>
             </div>
+
             {couponData && discountAmount > 0 && (
-                <div className="flex justify-between text-sm text-green-600 font-medium" data-testid="coupon-discount-row">
+                <div
+                    className="flex justify-between text-sm text-green-600 font-medium"
+                    data-testid="coupon-discount-row"
+                >
                     <span className="flex items-center gap-1">
                         <Tag className="w-3 h-3" />
                         Discount ({couponData.code})
@@ -362,6 +432,7 @@ const OrderSummary = ({
                     <span>− ₹{Number(discountAmount).toFixed(2)}</span>
                 </div>
             )}
+
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Delivery</span>
                 <span className="text-green-600 font-semibold flex items-center gap-1">
@@ -369,14 +440,23 @@ const OrderSummary = ({
                 </span>
             </div>
         </div>
+
+        {/* Grand Total */}
         <div className="px-7 py-5 border-b border-khajur-border">
             <div className="flex justify-between items-center">
-                <span className="font-serif text-base font-medium text-khajur-primary">Total</span>
-                <span className="font-serif text-2xl font-bold text-khajur-gold" data-testid="checkout-total">
+                <span className="font-serif text-base font-medium text-khajur-primary">
+                    Total
+                </span>
+                <span
+                    className="font-serif text-2xl font-bold text-khajur-gold"
+                    data-testid="checkout-total"
+                >
                     ₹{Number(finalTotal).toFixed(2)}
                 </span>
             </div>
         </div>
+
+        {/* Place Order */}
         <div className="px-7 py-5">
             <button
                 type="submit"
@@ -404,6 +484,8 @@ const OrderSummary = ({
     </div>
 );
 
+// ─── Main Checkout Component ───────────────────────────────────────────────────
+
 const Checkout = () => {
     const { cart, cartTotal, clearCart } = useCart();
     const { user, token } = useAuth();
@@ -420,7 +502,7 @@ const Checkout = () => {
     });
     const [loading, setLoading] = useState(false);
 
-    // ── Coupon State ───────────────────────────────────────────────────────────
+    // ── Coupon state ───────────────────────────────────────────────────────────
     const [couponCode, setCouponCode] = useState('');
     const [couponData, setCouponData] = useState(null);
     const [couponLoading, setCouponLoading] = useState(false);
@@ -433,40 +515,53 @@ const Checkout = () => {
     const discountAmount = couponData ? Number(couponData.discount_amount) : 0;
     const finalTotal = Math.max(0, cartTotal - discountAmount);
 
+    // ── Page title ─────────────────────────────────────────────────────────────
     useEffect(() => {
         document.title = 'Checkout — KhajurKart';
-        return () => { document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices'; };
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
     }, []);
 
-    // ✅ FIXED: correct API URL + removed all console.logs
+    // ── Fetch coupon system status + available coupons ─────────────────────────
     useEffect(() => {
         const initCoupons = async () => {
             try {
+                // 1. Check if the coupon system is enabled at all
                 const statusRes = await axios.get(`${API}/coupon-system/status`);
                 const enabled = Boolean(statusRes.data.enabled);
                 setCouponSystemEnabled(enabled);
 
+                // If system is OFF, don't bother fetching coupons
                 if (!enabled) return;
 
-                // ✅ FIXED: was /active-coupons → now /coupons/active
+                // 2. Fetch all "active" coupons the backend knows about
                 const res = await axios.get(`${API}/coupons/active`);
-                const coupons = Array.isArray(res.data) ? res.data : [];
-                setAvailableCoupons(coupons);
+                const raw = Array.isArray(res.data) ? res.data : [];
 
-            } catch (err) {
+                // ✅ KEY FIX: filter client-side so expired / exhausted coupons
+                //    are NEVER shown in the "Available Coupons" list, even if
+                //    the backend mistakenly returns them.
+                const usable = raw.filter(isCouponAvailableToUser);
+                setAvailableCoupons(usable);
+
+            } catch {
+                // If anything fails, disable the coupon UI gracefully
                 setCouponSystemEnabled(false);
+                setAvailableCoupons([]);
             }
         };
 
         initCoupons();
     }, [token]);
 
+    // ── Fetch saved addresses ──────────────────────────────────────────────────
     const fetchAddresses = useCallback(async () => {
         try {
             const { data } = await axios.get(`${API}/user/address`, authHeaders);
             setAddresses(data);
         } catch {
-            // silent
+            // silent — not critical
         }
     }, [token]);
 
@@ -474,6 +569,7 @@ const Checkout = () => {
         if (token) fetchAddresses();
     }, [token, fetchAddresses]);
 
+    // ── Form helpers ───────────────────────────────────────────────────────────
     const set = (name) => (e) =>
         setFormData((prev) => ({ ...prev, [name]: e.target.value }));
 
@@ -490,13 +586,24 @@ const Checkout = () => {
         }));
     };
 
-    // ── Coupon Handlers ────────────────────────────────────────────────────────
+    // ── Coupon handlers ────────────────────────────────────────────────────────
+
     const applyCoupon = async (codeOverride) => {
         const code = (codeOverride || couponCode).trim().toUpperCase();
         if (!code) return;
+
+        // ✅ Client-side expiry guard — gives instant, clear feedback before
+        //    even hitting the network.
+        const matchedInList = availableCoupons.find((c) => c.code === code);
+        if (!matchedInList) {
+            // The code is either not in our filtered list (expired / inactive /
+            // doesn't exist).  Let the backend decide the exact message.
+        }
+
         setCouponLoading(true);
         setCouponError('');
         setCouponData(null);
+
         try {
             const res = await axios.post(
                 `${API}/apply-coupon`,
@@ -512,9 +619,12 @@ const Checkout = () => {
             };
             setCouponData(normalised);
             setCouponCode(normalised.code);
-            toast.success(`Coupon "${normalised.code}" applied! You save ₹${normalised.discount_amount.toFixed(2)}`);
+            toast.success(
+                `Coupon "${normalised.code}" applied! You save ₹${normalised.discount_amount.toFixed(2)}`
+            );
         } catch (err) {
             const detail = err.response?.data?.detail;
+            // Show a clean, human-readable error — never expose raw server text
             setCouponError(
                 Array.isArray(detail)
                     ? detail.map((d) => d.msg).join(', ')
@@ -525,6 +635,7 @@ const Checkout = () => {
         }
     };
 
+    // Called when user clicks "Apply" on a card in the Available Coupons list
     const handleApplyFromList = (code) => {
         setCouponCode(code);
         applyCoupon(code);
@@ -537,6 +648,7 @@ const Checkout = () => {
         toast.info('Coupon removed.');
     };
 
+    // ── Order payload ──────────────────────────────────────────────────────────
     const buildOrderPayload = () => ({
         items: cart.items.map((item) => ({
             product_id: item.product.id,
@@ -561,10 +673,15 @@ const Checkout = () => {
         coupon_id: couponData?.coupon_id || null,
     });
 
+    // ── COD ────────────────────────────────────────────────────────────────────
     const handleCODOrder = async () => {
         setLoading(true);
         try {
-            await axios.post(`${API}/orders`, { ...buildOrderPayload(), payment_method: 'cod' }, authHeaders);
+            await axios.post(
+                `${API}/orders`,
+                { ...buildOrderPayload(), payment_method: 'cod' },
+                authHeaders
+            );
             toast.success('Order placed successfully!');
             await clearCart();
             navigate('/thank-you');
@@ -575,6 +692,7 @@ const Checkout = () => {
         }
     };
 
+    // ── Razorpay ───────────────────────────────────────────────────────────────
     const handleRazorpayPayment = async () => {
         setLoading(true);
         try {
@@ -584,12 +702,14 @@ const Checkout = () => {
                 authHeaders
             );
             const orderId = orderRes.data.order_id;
+
             const rzpOrderRes = await axios.post(
                 `${API}/razorpay/create-order`,
                 { amount: finalTotal, currency: 'INR' },
                 authHeaders
             );
             const rzpOrder = rzpOrderRes.data;
+
             const options = {
                 key: rzpOrder.key_id,
                 amount: rzpOrder.amount,
@@ -598,7 +718,11 @@ const Checkout = () => {
                 name: 'KhajurKart',
                 description: 'Premium Dry Fruits & Spices',
                 image: 'https://customer-assets.emergentagent.com/job_premium-spice-cart/artifacts/p1zf2opj_WhatsApp%20Image%202026-02-23%20at%204.12.54%20PM.jpeg',
-                prefill: { name: formData.fullName, email: formData.email, contact: formData.phone },
+                prefill: {
+                    name: formData.fullName,
+                    email: formData.email,
+                    contact: formData.phone,
+                },
                 theme: { color: '#0F3D2E' },
                 handler: async (response) => {
                     try {
@@ -620,9 +744,13 @@ const Checkout = () => {
                     }
                 },
                 modal: {
-                    ondismiss: () => { setLoading(false); toast.error('Payment cancelled.'); },
+                    ondismiss: () => {
+                        setLoading(false);
+                        toast.error('Payment cancelled.');
+                    },
                 },
             };
+
             const rzpInstance = new Razorpay(options);
             rzpInstance.open();
         } catch (error) {
@@ -631,6 +759,7 @@ const Checkout = () => {
         }
     };
 
+    // ── Form submit ────────────────────────────────────────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!cart.items || cart.items.length === 0) {
@@ -642,11 +771,15 @@ const Checkout = () => {
             : await handleCODOrder();
     };
 
+    // ── Guard ──────────────────────────────────────────────────────────────────
     if (!user) return <NotLoggedIn />;
 
+    // ── Render ─────────────────────────────────────────────────────────────────
     return (
         <div className="min-h-screen bg-white py-16 md:py-24" data-testid="checkout-page">
             <div className="max-w-6xl mx-auto px-6 md:px-12">
+
+                {/* Breadcrumb */}
                 <div className="mb-10">
                     <Breadcrumb items={[
                         { label: 'Home', to: '/' },
@@ -654,59 +787,123 @@ const Checkout = () => {
                         { label: 'Checkout', to: '#' },
                     ]} />
                 </div>
+
+                {/* Page heading */}
                 <div className="flex items-center gap-4 border-b border-khajur-gold/20 pb-8 mb-12">
-                    <button onClick={() => navigate(-1)} className="text-khajur-primary hover:text-khajur-gold transition-colors" aria-label="Go back">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-khajur-primary hover:text-khajur-gold transition-colors"
+                        aria-label="Go back"
+                    >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
                     <div>
-                        <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">Secure Checkout</p>
-                        <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">Checkout</h1>
+                        <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
+                            Secure Checkout
+                        </p>
+                        <h1 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary leading-tight">
+                            Checkout
+                        </h1>
                     </div>
                 </div>
+
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        {/* Left Column */}
+
+                        {/* ── Left column ── */}
                         <div className="lg:col-span-2 space-y-8">
+
+                            {/* Saved Addresses */}
                             {addresses.length > 0 && (
                                 <div className="bg-white border border-khajur-border rounded-sm">
                                     <div className="flex items-center justify-between px-8 py-5 border-b border-khajur-border">
                                         <div className="flex items-center gap-3">
                                             <MapPin className="w-4 h-4 text-khajur-gold" />
-                                            <h2 className="font-serif text-lg font-medium text-khajur-primary">Saved Addresses</h2>
+                                            <h2 className="font-serif text-lg font-medium text-khajur-primary">
+                                                Saved Addresses
+                                            </h2>
                                         </div>
-                                        <button type="button" onClick={() => navigate('/addresses')} className="flex items-center gap-1.5 text-xs text-khajur-gold hover:text-khajur-gold/70 font-medium transition-colors">
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate('/addresses')}
+                                            className="flex items-center gap-1.5 text-xs text-khajur-gold hover:text-khajur-gold/70 font-medium transition-colors"
+                                        >
                                             <Plus className="w-3.5 h-3.5" /> Manage
                                         </button>
                                     </div>
                                     <div className="px-8 py-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {addresses.map((addr, index) => (
-                                            <SavedAddressCard key={index} addr={addr} index={index} selected={selectedAddress === index} onSelect={handleSelectAddress} />
+                                            <SavedAddressCard
+                                                key={index}
+                                                addr={addr}
+                                                index={index}
+                                                selected={selectedAddress === index}
+                                                onSelect={handleSelectAddress}
+                                            />
                                         ))}
                                     </div>
                                 </div>
                             )}
+
+                            {/* Shipping Information */}
                             <div className="bg-white border border-khajur-border rounded-sm">
                                 <div className="flex items-center gap-3 px-8 py-5 border-b border-khajur-border">
                                     <Truck className="w-4 h-4 text-khajur-gold" />
-                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">Shipping Information</h2>
+                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">
+                                        Shipping Information
+                                    </h2>
                                 </div>
                                 <div className="px-8 py-8 space-y-8">
+                                    {/* Full Name + Email */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         {SHIPPING_FIELDS[0].map((field) => (
                                             <div key={field.name}>
                                                 <FieldLabel label={field.label} />
-                                                <input type={field.type} name={field.name} required placeholder={field.placeholder} value={formData[field.name]} onChange={set(field.name)} className={inputBase} data-testid={field.testId} />
+                                                <input
+                                                    type={field.type}
+                                                    name={field.name}
+                                                    required
+                                                    placeholder={field.placeholder}
+                                                    value={formData[field.name]}
+                                                    onChange={set(field.name)}
+                                                    className={inputBase}
+                                                    data-testid={field.testId}
+                                                />
                                             </div>
                                         ))}
                                     </div>
+
+                                    {/* Phone */}
                                     <div>
                                         <FieldLabel label="Phone Number" />
-                                        <input type="tel" name="phone" required placeholder="+91 98765 43210" value={formData.phone} onChange={set('phone')} className={inputBase} data-testid="checkout-phone" />
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            required
+                                            placeholder="+91 98765 43210"
+                                            value={formData.phone}
+                                            onChange={set('phone')}
+                                            className={inputBase}
+                                            data-testid="checkout-phone"
+                                        />
                                     </div>
+
+                                    {/* Street Address */}
                                     <div>
                                         <FieldLabel label="Street Address" />
-                                        <input type="text" name="address" required placeholder="123, MG Road, Near City Mall…" value={formData.address} onChange={set('address')} className={inputBase} data-testid="checkout-address" />
+                                        <input
+                                            type="text"
+                                            name="address"
+                                            required
+                                            placeholder="123, MG Road, Near City Mall…"
+                                            value={formData.address}
+                                            onChange={set('address')}
+                                            className={inputBase}
+                                            data-testid="checkout-address"
+                                        />
                                     </div>
+
+                                    {/* City / State / Pincode */}
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                                         {[
                                             { name: 'city', label: 'City', placeholder: 'Hyderabad', testId: 'checkout-city' },
@@ -715,25 +912,58 @@ const Checkout = () => {
                                         ].map((field) => (
                                             <div key={field.name}>
                                                 <FieldLabel label={field.label} />
-                                                <input type="text" name={field.name} required placeholder={field.placeholder} value={formData[field.name]} onChange={set(field.name)} className={inputBase} data-testid={field.testId} />
+                                                <input
+                                                    type="text"
+                                                    name={field.name}
+                                                    required
+                                                    placeholder={field.placeholder}
+                                                    value={formData[field.name]}
+                                                    onChange={set(field.name)}
+                                                    className={inputBase}
+                                                    data-testid={field.testId}
+                                                />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Payment Method */}
                             <div className="bg-white border border-khajur-border rounded-sm">
                                 <div className="flex items-center gap-3 px-8 py-5 border-b border-khajur-border">
                                     <CreditCard className="w-4 h-4 text-khajur-gold" />
-                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">Payment Method</h2>
+                                    <h2 className="font-serif text-lg font-medium text-khajur-primary">
+                                        Payment Method
+                                    </h2>
                                 </div>
                                 <div className="px-8 py-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {PAYMENT_METHODS.map(({ value, label, description, icon: Icon, testId }) => (
-                                        <label key={value} className={`flex items-start gap-4 p-5 border rounded-sm cursor-pointer transition-all duration-200 ${formData.paymentMethod === value ? 'border-khajur-gold bg-khajur-gold/5' : 'border-khajur-border hover:border-khajur-gold/40'}`}>
-                                            <input type="radio" name="paymentMethod" value={value} checked={formData.paymentMethod === value} onChange={set('paymentMethod')} className="accent-khajur-gold mt-1 flex-shrink-0" data-testid={testId} />
+                                        <label
+                                            key={value}
+                                            className={`
+                                                flex items-start gap-4 p-5 border rounded-sm cursor-pointer
+                                                transition-all duration-200
+                                                ${formData.paymentMethod === value
+                                                    ? 'border-khajur-gold bg-khajur-gold/5'
+                                                    : 'border-khajur-border hover:border-khajur-gold/40'
+                                                }
+                                            `}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value={value}
+                                                checked={formData.paymentMethod === value}
+                                                onChange={set('paymentMethod')}
+                                                className="accent-khajur-gold mt-1 flex-shrink-0"
+                                                data-testid={testId}
+                                            />
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <Icon className="w-4 h-4 text-khajur-gold" />
-                                                    <p className="text-sm font-semibold text-khajur-primary">{label}</p>
+                                                    <p className="text-sm font-semibold text-khajur-primary">
+                                                        {label}
+                                                    </p>
                                                 </div>
                                                 <p className="text-xs text-khajur-dark/50">{description}</p>
                                             </div>
@@ -742,7 +972,8 @@ const Checkout = () => {
                                 </div>
                             </div>
                         </div>
-                        {/* Right Column */}
+
+                        {/* ── Right column — Order Summary ── */}
                         <div className="lg:col-span-1">
                             <OrderSummary
                                 cart={cart}
