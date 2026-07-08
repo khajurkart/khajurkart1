@@ -10,7 +10,7 @@ const API = `${BACKEND_URL}/api`;
 const CONTACT_INFO = [
     {
         icon: Phone,
-        title: 'WhatsApp / Call',
+        title: 'Phone',
         details: '+91 79810 02137',
         link: 'tel:+917981002137',
     },
@@ -36,21 +36,12 @@ const CONTACT_INFO = [
 
 const INITIAL_FORM = { name: '', email: '', phone: '', message: '' };
 
-const BULK_BENEFITS = [
-    'Minimum order ₹5,000',
-    'Free delivery in Hyderabad',
-    'Up to 20% discount',
-    'Custom packaging available',
-    'COD & online payment accepted',
-    'Dedicated account manager',
-];
-
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
 // ── Hero ───────────────────────────────────────────────────────────────────────
 
 const HeroSection = () => (
-    <section className="relative h-[360px] md:h-[420px] bg-khajur-primary overflow-hidden">
+    <section className="relative h-[380px] md:h-[440px] bg-khajur-primary overflow-hidden">
         <img
             src="https://images.pexels.com/photos/4198755/pexels-photo-4198755.jpeg"
             alt="Contact Us"
@@ -65,7 +56,7 @@ const HeroSection = () => (
                 <h1 className="font-serif text-5xl md:text-7xl font-medium text-khajur-cream mb-5 leading-tight">
                     Contact Us
                 </h1>
-                <p className="text-base text-khajur-cream/60 max-w-lg leading-relaxed">
+                <p className="text-base md:text-lg text-khajur-cream/65 max-w-lg leading-relaxed">
                     Have a question, feedback or just want to say hello?
                     We're here and ready to help.
                 </p>
@@ -74,30 +65,25 @@ const HeroSection = () => (
     </section>
 );
 
-// ── Field label — serif style matching reference image ─────────────────────────
+// ── Field wrapper ──────────────────────────────────────────────────────────────
 
-const FieldLabel = ({ htmlFor, children, required }) => (
-    <label
-        htmlFor={htmlFor}
-        className="block font-serif text-base font-medium text-khajur-primary mb-1"
-    >
+const Field = ({ label, required, children, htmlFor }) => (
+    <div className="space-y-2">
+        <label
+            htmlFor={htmlFor}
+            className="block text-xs font-semibold uppercase tracking-widest text-khajur-dark/50"
+        >
+            {label}
+            {required && <span className="text-khajur-gold ml-1">*</span>}
+        </label>
         {children}
-        {required && (
-            <span className="text-khajur-gold ml-1 font-serif">*</span>
-        )}
-    </label>
+    </div>
 );
 
-// ── Input styles — thin underline, large placeholder ──────────────────────────
-
-const inputCls = `
-    w-full bg-transparent
-    border-b border-khajur-primary/20
-    hover:border-khajur-primary/40
-    focus:border-khajur-gold
-    px-0 py-3
-    font-sans text-sm text-khajur-primary
-    placeholder:text-khajur-dark/30 placeholder:font-sans
+const inputBase = `
+    w-full bg-transparent border-b border-khajur-primary/15
+    focus:border-khajur-gold px-0 py-3
+    text-sm text-khajur-primary placeholder:text-khajur-dark/25
     focus:outline-none transition-colors duration-200
 `;
 
@@ -147,26 +133,22 @@ const ContactForm = () => {
 
     return (
         <div className="bg-white border border-khajur-border p-8 md:p-14">
-
             {/* Form Header */}
-            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-3">
+            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-2">
                 Reach Out
             </p>
-            <h2 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-3 leading-tight">
+            <h2 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-2 leading-tight">
                 Send Us a Message
             </h2>
-            <p className="font-sans text-sm text-khajur-dark/40 mb-12 leading-relaxed">
+            <p className="text-sm text-khajur-dark/40 mb-12 leading-relaxed">
                 Fill out the form below and our team will respond within 24 hours.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+            <form onSubmit={handleSubmit} className="space-y-10" noValidate>
 
                 {/* Row 1: Name + Email */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                    <div>
-                        <FieldLabel htmlFor="contact-name" required>
-                            Your Name
-                        </FieldLabel>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                    <Field label="Your Name" required htmlFor="contact-name">
                         <input
                             id="contact-name"
                             type="text"
@@ -174,13 +156,10 @@ const ContactForm = () => {
                             placeholder="John Doe"
                             value={formData.name}
                             onChange={set('name')}
-                            className={inputCls}
+                            className={inputBase}
                         />
-                    </div>
-                    <div>
-                        <FieldLabel htmlFor="contact-email" required>
-                            Email Address
-                        </FieldLabel>
+                    </Field>
+                    <Field label="Email Address" required htmlFor="contact-email">
                         <input
                             id="contact-email"
                             type="email"
@@ -188,31 +167,25 @@ const ContactForm = () => {
                             placeholder="john@example.com"
                             value={formData.email}
                             onChange={set('email')}
-                            className={inputCls}
+                            className={inputBase}
                         />
-                    </div>
+                    </Field>
                 </div>
 
                 {/* Phone */}
-                <div>
-                    <FieldLabel htmlFor="contact-phone">
-                        Phone Number
-                    </FieldLabel>
+                <Field label="Phone Number" htmlFor="contact-phone">
                     <input
                         id="contact-phone"
                         type="tel"
                         placeholder="+91 98765 43210"
                         value={formData.phone}
                         onChange={set('phone')}
-                        className={inputCls}
+                        className={inputBase}
                     />
-                </div>
+                </Field>
 
                 {/* Message */}
-                <div>
-                    <FieldLabel htmlFor="contact-message" required>
-                        Message
-                    </FieldLabel>
+                <Field label="Message" required htmlFor="contact-message">
                     <textarea
                         id="contact-message"
                         required
@@ -222,17 +195,17 @@ const ContactForm = () => {
                         onChange={set('message')}
                         className="
                             w-full bg-transparent
-                            border border-khajur-primary/15
-                            hover:border-khajur-primary/30
+                            border border-khajur-primary/10
+                            hover:border-khajur-primary/20
                             focus:border-khajur-gold
                             px-4 py-4 rounded-sm
-                            font-sans text-sm text-khajur-primary
+                            text-sm text-khajur-primary
                             placeholder:text-khajur-dark/25
                             focus:outline-none transition-colors duration-200
                             resize-none
                         "
                     />
-                </div>
+                </Field>
 
                 {/* Submit */}
                 <button
@@ -241,7 +214,7 @@ const ContactForm = () => {
                     className="
                         w-full flex items-center justify-center gap-2
                         bg-khajur-gold hover:bg-khajur-gold/90
-                        hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
+                        hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
                         disabled:opacity-60 disabled:cursor-not-allowed
                         text-khajur-primary rounded-sm px-8 py-4
                         uppercase tracking-widest text-xs font-bold
@@ -263,25 +236,43 @@ const ContactForm = () => {
 
 const ContactInfoCard = ({ icon: Icon, title, details, link }) => (
     <div className="
+        flex items-start gap-5 p-5
         bg-khajur-cream border border-khajur-border
-        hover:border-khajur-gold/30
-        px-6 py-5 transition-all duration-300
+        hover:border-khajur-gold/40
+        transition-all duration-300 group
     ">
-        <p className="text-xs uppercase tracking-widest font-semibold text-khajur-dark/40 mb-2">
-            {title}
-        </p>
-        {link ? (
-            <a
-                href={link}
-                className="font-serif text-xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors duration-200"
-            >
-                {details}
-            </a>
-        ) : (
-            <p className="font-serif text-xl font-medium text-khajur-primary leading-snug">
-                {details}
+        {/* Icon box */}
+        <div className="
+            w-10 h-10 flex items-center justify-center
+            bg-white border border-khajur-border
+            flex-shrink-0
+            group-hover:border-khajur-gold/30
+            transition-colors duration-300
+        ">
+            <Icon className="w-4 h-4 text-khajur-gold" />
+        </div>
+
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-dark/40 mb-1">
+                {title}
             </p>
-        )}
+            {link ? (
+                <a
+                    href={link}
+                    className="
+                        text-sm font-medium text-khajur-primary
+                        hover:text-khajur-gold transition-colors duration-200
+                    "
+                >
+                    {details}
+                </a>
+            ) : (
+                <p className="text-sm font-medium text-khajur-primary leading-relaxed">
+                    {details}
+                </p>
+            )}
+        </div>
     </div>
 );
 
@@ -292,15 +283,19 @@ const InfoPanel = () => (
 
         {/* Header */}
         <div>
-            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-3">
-                Quick Contact
+            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-2">
+                Our Details
             </p>
             <h2 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-3 leading-tight">
-                Or Contact Us Directly
+                Get in Touch
             </h2>
+            <p className="text-sm text-khajur-dark/50 leading-relaxed">
+                We're available across multiple channels.
+                Choose what's most convenient for you.
+            </p>
         </div>
 
-        {/* Contact Cards — large serif value like reference image */}
+        {/* Contact Cards */}
         <div className="space-y-3">
             {CONTACT_INFO.map((info) => (
                 <ContactInfoCard key={info.title} {...info} />
@@ -325,23 +320,25 @@ const InfoPanel = () => (
             WhatsApp Us Now
         </a>
 
-        {/* Bulk Order Benefits — dark green panel matching reference */}
-        <div className="bg-khajur-primary rounded-sm p-8">
-            <h3 className="font-serif text-2xl font-medium text-khajur-cream mb-5">
-                Bulk Order Benefits
-            </h3>
-            <ul className="space-y-3">
-                {BULK_BENEFITS.map((benefit) => (
-                    <li key={benefit} className="flex items-center gap-3">
-                        <span className="text-khajur-gold font-bold text-sm flex-shrink-0">
-                            ✓
-                        </span>
-                        <span className="text-sm text-khajur-cream/80 font-sans">
-                            {benefit}
-                        </span>
-                    </li>
-                ))}
-            </ul>
+        {/* Response time chip */}
+        <div className="flex items-center gap-3 bg-khajur-cream border border-khajur-border px-5 py-4">
+            <Zap className="w-4 h-4 text-khajur-gold flex-shrink-0" />
+            <div>
+                <p className="text-xs uppercase tracking-widest font-semibold text-khajur-dark/40 mb-0.5">
+                    Response Time
+                </p>
+                <p className="text-sm font-semibold text-khajur-primary">
+                    We reply within 24 hours
+                </p>
+            </div>
+        </div>
+
+        {/* Footer note */}
+        <div className="border-t border-khajur-border pt-5">
+            <p className="text-xs text-khajur-dark/40 leading-relaxed">
+                For bulk orders or wholesale inquiries, please reach out via
+                email or WhatsApp for a custom quote.
+            </p>
         </div>
     </div>
 );
@@ -362,13 +359,46 @@ const Contact = () => {
             {/* Hero */}
             <HeroSection />
 
-            {/* Main Content */}
+            {/* Main Section */}
             <section className="py-20 md:py-28 bg-white">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
                         <ContactForm />
                         <InfoPanel />
                     </div>
+                </div>
+            </section>
+
+            {/* Bottom CTA strip */}
+            <section className="bg-khajur-primary py-14">
+                <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-1">
+                            Bulk Orders
+                        </p>
+                        <h3 className="font-serif text-2xl md:text-3xl font-medium text-khajur-cream">
+                            Need large quantities?
+                        </h3>
+                        <p className="text-sm text-khajur-cream/60 mt-1">
+                            Special pricing for businesses, hotels & events.
+                        </p>
+                    </div>
+                    <a
+                        href="https://wa.me/917981002137"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="
+                            flex-shrink-0 flex items-center gap-2
+                            bg-khajur-gold hover:bg-khajur-gold/90
+                            text-khajur-primary px-8 py-4 rounded-sm
+                            uppercase tracking-widest text-xs font-bold
+                            transition-all duration-300
+                            hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
+                        "
+                    >
+                        <MessageCircle className="w-4 h-4" />
+                        Get Bulk Quote
+                    </a>
                 </div>
             </section>
 
