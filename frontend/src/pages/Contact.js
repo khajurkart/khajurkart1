@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, Loader2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, Loader2, MessageCircle, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -23,8 +23,7 @@ const CONTACT_INFO = [
     {
         icon: MapPin,
         title: 'Address',
-        details:
-            '10-3-313/a, AR Raheem Residency, Hyderabad, Telangana — 500057',
+        details: '10-3-313/a, AR Raheem Residency, Hyderabad, Telangana — 500057',
         link: null,
     },
     {
@@ -39,35 +38,40 @@ const INITIAL_FORM = { name: '', email: '', phone: '', message: '' };
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
+// ── Hero ───────────────────────────────────────────────────────────────────────
+
 const HeroSection = () => (
-    <section className="relative h-[420px] bg-khajur-primary overflow-hidden">
+    <section className="relative h-[380px] md:h-[440px] bg-khajur-primary overflow-hidden">
         <img
             src="https://images.pexels.com/photos/4198755/pexels-photo-4198755.jpeg"
             alt="Contact Us"
-            className="absolute inset-0 w-full h-full object-cover opacity-25"
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary via-khajur-primary/80 to-transparent" />
         <div className="relative h-full flex items-center">
             <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-                <p className="text-xs uppercase tracking-widest text-khajur-gold mb-3">
+                <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-4">
                     We'd love to hear from you
                 </p>
-                <h1 className="font-serif text-5xl md:text-7xl font-medium text-khajur-cream mb-4 leading-tight">
+                <h1 className="font-serif text-5xl md:text-7xl font-medium text-khajur-cream mb-5 leading-tight">
                     Contact Us
                 </h1>
-                <p className="font-sans text-base md:text-lg text-khajur-cream/70 max-w-xl leading-relaxed">
-                    Have a question, feedback or just want to say hello? We're here and ready to help.
+                <p className="text-base md:text-lg text-khajur-cream/65 max-w-lg leading-relaxed">
+                    Have a question, feedback or just want to say hello?
+                    We're here and ready to help.
                 </p>
             </div>
         </div>
     </section>
 );
 
+// ── Field wrapper ──────────────────────────────────────────────────────────────
+
 const Field = ({ label, required, children, htmlFor }) => (
     <div className="space-y-2">
         <label
             htmlFor={htmlFor}
-            className="block text-xs font-medium uppercase tracking-widest text-khajur-dark/60"
+            className="block text-xs font-semibold uppercase tracking-widest text-khajur-dark/50"
         >
             {label}
             {required && <span className="text-khajur-gold ml-1">*</span>}
@@ -77,22 +81,15 @@ const Field = ({ label, required, children, htmlFor }) => (
 );
 
 const inputBase = `
-  w-full bg-transparent border-b border-khajur-primary/10
-  focus:border-khajur-gold px-0 py-3
-  text-sm text-khajur-primary placeholder:text-khajur-dark/25
-  focus:outline-none transition-colors duration-200
+    w-full bg-transparent border-b border-khajur-primary/15
+    focus:border-khajur-gold px-0 py-3
+    text-sm text-khajur-primary placeholder:text-khajur-dark/25
+    focus:outline-none transition-colors duration-200
 `;
 
 // ── Contact Form ───────────────────────────────────────────────────────────────
 
 const ContactForm = () => {
-    useEffect(() => {
-        document.title = 'Contact Us — KhajurKart';
-        return () => {
-            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
-        };
-    }, []);
-
     const [formData, setFormData] = useState(INITIAL_FORM);
     const [submitting, setSubmitting] = useState(false);
 
@@ -101,9 +98,12 @@ const ContactForm = () => {
 
     const validate = () => {
         if (!formData.name.trim()) return 'Name is required';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return 'Valid email required';
-        if (formData.phone && !/^[\d\s\+\-]{7,15}$/.test(formData.phone)) return 'Valid phone required';
-        if (formData.message.trim().length < 10) return 'Message must be at least 10 characters';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+            return 'Valid email required';
+        if (formData.phone && !/^[\d\s+\-]{7,15}$/.test(formData.phone))
+            return 'Valid phone required';
+        if (formData.message.trim().length < 10)
+            return 'Message must be at least 10 characters';
         return null;
     };
 
@@ -118,7 +118,6 @@ const ContactForm = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
-
             if (res.ok) {
                 toast.success('Message sent successfully!');
                 setFormData(INITIAL_FORM);
@@ -133,18 +132,21 @@ const ContactForm = () => {
     };
 
     return (
-        <div className="bg-white border border-khajur-border p-8 md:p-16">
-            <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
+        <div className="bg-white border border-khajur-border p-8 md:p-14">
+            {/* Form Header */}
+            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-2">
                 Reach Out
             </p>
-            <h2 className="font-serif text-4xl font-medium text-khajur-primary mb-2">
+            <h2 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-2 leading-tight">
                 Send Us a Message
             </h2>
-            <p className="text-sm text-khajur-dark/40 mb-12">
+            <p className="text-sm text-khajur-dark/40 mb-12 leading-relaxed">
                 Fill out the form below and our team will respond within 24 hours.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-10" noValidate>
+
+                {/* Row 1: Name + Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                     <Field label="Your Name" required htmlFor="contact-name">
                         <input
@@ -157,7 +159,6 @@ const ContactForm = () => {
                             className={inputBase}
                         />
                     </Field>
-
                     <Field label="Email Address" required htmlFor="contact-email">
                         <input
                             id="contact-email"
@@ -171,6 +172,7 @@ const ContactForm = () => {
                     </Field>
                 </div>
 
+                {/* Phone */}
                 <Field label="Phone Number" htmlFor="contact-phone">
                     <input
                         id="contact-phone"
@@ -182,6 +184,7 @@ const ContactForm = () => {
                     />
                 </Field>
 
+                {/* Message */}
                 <Field label="Message" required htmlFor="contact-message">
                     <textarea
                         id="contact-message"
@@ -190,25 +193,38 @@ const ContactForm = () => {
                         placeholder="Tell us how we can help you…"
                         value={formData.message}
                         onChange={set('message')}
-                        className="w-full bg-transparent border border-khajur-primary/10 focus:border-khajur-gold px-4 py-4 rounded-sm text-sm text-khajur-primary placeholder:text-khajur-dark/25 focus:outline-none transition-colors duration-200 resize-none"
+                        className="
+                            w-full bg-transparent
+                            border border-khajur-primary/10
+                            hover:border-khajur-primary/20
+                            focus:border-khajur-gold
+                            px-4 py-4 rounded-sm
+                            text-sm text-khajur-primary
+                            placeholder:text-khajur-dark/25
+                            focus:outline-none transition-colors duration-200
+                            resize-none
+                        "
                     />
                 </Field>
 
+                {/* Submit */}
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full flex items-center justify-center gap-2 bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 disabled:opacity-60 rounded-sm px-8 py-5 uppercase tracking-widest text-xs font-bold transition-all duration-300"
+                    className="
+                        w-full flex items-center justify-center gap-2
+                        bg-khajur-gold hover:bg-khajur-gold/90
+                        hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
+                        disabled:opacity-60 disabled:cursor-not-allowed
+                        text-khajur-primary rounded-sm px-8 py-4
+                        uppercase tracking-widest text-xs font-bold
+                        transition-all duration-300
+                    "
                 >
                     {submitting ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Sending…
-                        </>
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
                     ) : (
-                        <>
-                            <Send className="w-4 h-4" />
-                            Send Message
-                        </>
+                        <><Send className="w-4 h-4" /> Send Message</>
                     )}
                 </button>
             </form>
@@ -219,20 +235,42 @@ const ContactForm = () => {
 // ── Contact Info Card ──────────────────────────────────────────────────────────
 
 const ContactInfoCard = ({ icon: Icon, title, details, link }) => (
-    <div className="flex items-start gap-5 p-6 bg-white border border-khajur-border hover:border-khajur-gold/40 transition-colors duration-300 group">
-        <div className="w-10 h-10 flex items-center justify-center bg-khajur-cream flex-shrink-0 group-hover:bg-khajur-gold/10 transition-colors duration-300">
-            <Icon className="w-5 h-5 text-khajur-gold" />
+    <div className="
+        flex items-start gap-5 p-5
+        bg-khajur-cream border border-khajur-border
+        hover:border-khajur-gold/40
+        transition-all duration-300 group
+    ">
+        {/* Icon box */}
+        <div className="
+            w-10 h-10 flex items-center justify-center
+            bg-white border border-khajur-border
+            flex-shrink-0
+            group-hover:border-khajur-gold/30
+            transition-colors duration-300
+        ">
+            <Icon className="w-4 h-4 text-khajur-gold" />
         </div>
-        <div>
-            <h3 className="text-xs uppercase tracking-widest font-medium text-khajur-dark/50 mb-1">
+
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-dark/40 mb-1">
                 {title}
-            </h3>
+            </p>
             {link ? (
-                <a href={link} className="text-sm text-khajur-primary hover:text-khajur-gold transition-colors">
+                <a
+                    href={link}
+                    className="
+                        text-sm font-medium text-khajur-primary
+                        hover:text-khajur-gold transition-colors duration-200
+                    "
+                >
                     {details}
                 </a>
             ) : (
-                <p className="text-sm text-khajur-primary">{details}</p>
+                <p className="text-sm font-medium text-khajur-primary leading-relaxed">
+                    {details}
+                </p>
             )}
         </div>
     </div>
@@ -242,25 +280,64 @@ const ContactInfoCard = ({ icon: Icon, title, details, link }) => (
 
 const InfoPanel = () => (
     <div className="flex flex-col gap-8">
+
+        {/* Header */}
         <div>
-            <p className="text-xs uppercase tracking-widest text-khajur-gold mb-1">
+            <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-2">
                 Our Details
             </p>
-            <h2 className="font-serif text-3xl font-medium text-khajur-primary mb-2">
+            <h2 className="font-serif text-4xl md:text-5xl font-medium text-khajur-primary mb-3 leading-tight">
                 Get in Touch
             </h2>
-            <p className="text-sm text-khajur-dark/50">
-                We're available across multiple channels. Choose what's most convenient for you.
+            <p className="text-sm text-khajur-dark/50 leading-relaxed">
+                We're available across multiple channels.
+                Choose what's most convenient for you.
             </p>
         </div>
-        <div className="space-y-4">
+
+        {/* Contact Cards */}
+        <div className="space-y-3">
             {CONTACT_INFO.map((info) => (
                 <ContactInfoCard key={info.title} {...info} />
             ))}
         </div>
-        <div className="border-t border-khajur-border pt-6">
+
+        {/* WhatsApp CTA */}
+        <a
+            href="https://wa.me/917981002137"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+                flex items-center justify-center gap-3
+                bg-green-500 hover:bg-green-600
+                text-white rounded-sm px-8 py-4
+                uppercase tracking-widest text-xs font-bold
+                transition-all duration-300
+                hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]
+            "
+        >
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp Us Now
+        </a>
+
+        {/* Response time chip */}
+        <div className="flex items-center gap-3 bg-khajur-cream border border-khajur-border px-5 py-4">
+            <Zap className="w-4 h-4 text-khajur-gold flex-shrink-0" />
+            <div>
+                <p className="text-xs uppercase tracking-widest font-semibold text-khajur-dark/40 mb-0.5">
+                    Response Time
+                </p>
+                <p className="text-sm font-semibold text-khajur-primary">
+                    We reply within 24 hours
+                </p>
+            </div>
+        </div>
+
+        {/* Footer note */}
+        <div className="border-t border-khajur-border pt-5">
             <p className="text-xs text-khajur-dark/40 leading-relaxed">
-                For bulk orders or wholesale inquiries, please reach out via email for a custom quote.
+                For bulk orders or wholesale inquiries, please reach out via
+                email or WhatsApp for a custom quote.
             </p>
         </div>
     </div>
@@ -268,18 +345,65 @@ const InfoPanel = () => (
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-const Contact = () => (
-    <div className="min-h-screen bg-white" data-testid="contact-page">
-        <HeroSection />
-        <section className="py-20 md:py-32">
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
-                    <ContactForm />
-                    <InfoPanel />
+const Contact = () => {
+    useEffect(() => {
+        document.title = 'Contact Us — KhajurKart';
+        return () => {
+            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        };
+    }, []);
+
+    return (
+        <div className="min-h-screen bg-white" data-testid="contact-page">
+
+            {/* Hero */}
+            <HeroSection />
+
+            {/* Main Section */}
+            <section className="py-20 md:py-28 bg-white">
+                <div className="max-w-7xl mx-auto px-6 md:px-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
+                        <ContactForm />
+                        <InfoPanel />
+                    </div>
                 </div>
-            </div>
-        </section>
-    </div>
-);
+            </section>
+
+            {/* Bottom CTA strip */}
+            <section className="bg-khajur-primary py-14">
+                <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <p className="text-xs uppercase tracking-widest font-semibold text-khajur-gold mb-1">
+                            Bulk Orders
+                        </p>
+                        <h3 className="font-serif text-2xl md:text-3xl font-medium text-khajur-cream">
+                            Need large quantities?
+                        </h3>
+                        <p className="text-sm text-khajur-cream/60 mt-1">
+                            Special pricing for businesses, hotels & events.
+                        </p>
+                    </div>
+                    <a
+                        href="https://wa.me/917981002137"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="
+                            flex-shrink-0 flex items-center gap-2
+                            bg-khajur-gold hover:bg-khajur-gold/90
+                            text-khajur-primary px-8 py-4 rounded-sm
+                            uppercase tracking-widest text-xs font-bold
+                            transition-all duration-300
+                            hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
+                        "
+                    >
+                        <MessageCircle className="w-4 h-4" />
+                        Get Bulk Quote
+                    </a>
+                </div>
+            </section>
+
+        </div>
+    );
+};
 
 export default Contact;
