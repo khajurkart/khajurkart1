@@ -12,10 +12,35 @@ import {
     XCircle,
     Gift,
     Loader2,
+    Clock, // ← new
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Returns true if the coupon has a non-null expiry date that is in the past.
+ */
+const isExpired = (coupon) => {
+    if (!coupon.expiry) return false;
+    // Compare date strings — expiry is "YYYY-MM-DD", so append T23:59:59
+    // to treat the expiry day as the last valid day (inclusive).
+    return new Date(`${coupon.expiry}T23:59:59`) < new Date();
+};
+
+/**
+ * Returns true if a coupon should be visible to customers:
+ *  - system must be enabled (checked upstream)
+ *  - coupon must be active
+ *  - coupon must not be expired
+ *  - coupon must not have hit max_uses
+ */
+export const isCouponAvailableToUser = (coupon) =>
+    coupon.is_active &&
+    !isExpired(coupon) &&
+    (coupon.max_uses == null || (coupon.uses || 0) < coupon.max_uses);
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
@@ -74,114 +99,168 @@ const SystemToggleCard = ({ enabled, onToggle }) => (
     </div>
 );
 
+// ── Expired Badge ──────────────────────────────────────────────────────────────
+
+const ExpiredBadge = () => (
+    <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-semibold">
+        <Clock className="w-3 h-3" />
+        Expired
+    </span>
+);
+
 // ── Coupon Card ────────────────────────────────────────────────────────────────
 
-const CouponCard = ({ coupon, onToggle, onDelete }) => (
-    <div className={`
-        bg-white border rounded-sm p-5
-        flex flex-col md:flex-row md:items-center justify-between gap-4
-        transition-all duration-200
-        ${coupon.is_active
-            ? 'border-khajur-border hover:border-khajur-gold/40 hover:shadow-sm'
-            : 'border-gray-100 bg-gray-50/50 opacity-60'
-        }
-    `}>
-        {/* Left — Info */}
-        <div className="flex items-start gap-4 flex-1 min-w-0">
-            <div className={`
-                w-10 h-10 rounded-sm flex items-center justify-center flex-shrink-0
-                ${coupon.is_welcome ? 'bg-yellow-50' : 'bg-khajur-cream'}
-            `}>
-                {coupon.is_welcome
-                    ? <Gift className="w-5 h-5 text-yellow-600" />
-                    : <Tag className="w-5 h-5 text-khajur-gold" />
-                }
-            </div>
+const CouponCard = ({ coupon, onToggle, onDelete }) => {
+    // Derive expiry state once so we use it consistently throughout the card
+    const expired = isExpired(coupon);
 
-            <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="font-mono font-bold text-khajur-primary text-base tracking-wider">
-                        {coupon.code}
-                    </span>
-                    {coupon.is_welcome && (
-                        <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-semibold">
-                            Welcome
-                        </span>
-                    )}
-                    {coupon.is_active ? (
-                        <span className="flex items-center gap-1 bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">
-                            <CheckCircle className="w-3 h-3" /> Active
-                        </span>
-                    ) : (
-                        <span className="flex items-center gap-1 bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full font-semibold">
-                            <XCircle className="w-3 h-3" /> Inactive
-                        </span>
-                    )}
+    // A coupon is "effectively inactive" if it's toggled off OR has expired
+    const effectivelyInactive = !coupon.is_active || expired;
+
+    return (
+        <div className={`
+            bg-white border rounded-sm p-5
+            flex flex-col md:flex-row md:items-center justify-between gap-4
+            transition-all duration-200
+            ${effectivelyInactive
+                ? 'border-gray-100 bg-gray-50/50 opacity-60'
+                : 'border-khajur-border hover:border-khajur-gold/40 hover:shadow-sm'
+            }
+        `}>
+            {/* Left — Info */}
+            <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className={`
+                    w-10 h-10 rounded-sm flex items-center justify-center flex-shrink-0
+                    ${expired
+                        ? 'bg-orange-50'
+                        : coupon.is_welcome
+                            ? 'bg-yellow-50'
+                            : 'bg-khajur-cream'
+                    }
+                `}>
+                    {expired
+                        ? <Clock className="w-5 h-5 text-orange-400" />
+                        : coupon.is_welcome
+                            ? <Gift className="w-5 h-5 text-yellow-600" />
+                            : <Tag className="w-5 h-5 text-khajur-gold" />
+                    }
                 </div>
 
-                <p className="text-sm text-khajur-dark/60">
-                    <span className="font-semibold text-khajur-primary">
-                        {coupon.discount_type === 'percent'
-                            ? `${coupon.discount_percent}% off`
-                            : `₹${coupon.discount_amount} off`
-                        }
-                    </span>
-                    {coupon.min_order > 0 && (
-                        <span className="before:content-['·'] before:mx-2">
-                            Min ₹{coupon.min_order}
+                <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="font-mono font-bold text-khajur-primary text-base tracking-wider">
+                            {coupon.code}
                         </span>
-                    )}
-                    <span className="before:content-['·'] before:mx-2">
-                        {coupon.uses || 0}/{coupon.max_uses} used
-                    </span>
-                    {coupon.expiry && (
-                        <span className="before:content-['·'] before:mx-2">
-                            Expires {new Date(coupon.expiry).toLocaleDateString('en-IN', {
-                                day: '2-digit', month: 'short', year: 'numeric',
-                            })}
-                        </span>
-                    )}
-                </p>
 
-                {coupon.description && (
-                    <p className="text-xs text-khajur-dark/40 mt-1 italic">
-                        {coupon.description}
+                        {/* ── Status badges — order matters: expired takes priority ── */}
+                        {expired ? (
+                            // Always show Expired badge when past expiry date,
+                            // regardless of the is_active flag
+                            <ExpiredBadge />
+                        ) : coupon.is_active ? (
+                            <span className="flex items-center gap-1 bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">
+                                <CheckCircle className="w-3 h-3" /> Active
+                            </span>
+                        ) : (
+                            <span className="flex items-center gap-1 bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full font-semibold">
+                                <XCircle className="w-3 h-3" /> Inactive
+                            </span>
+                        )}
+
+                        {coupon.is_welcome && !expired && (
+                            <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-semibold">
+                                Welcome
+                            </span>
+                        )}
+
+                        {/* Max uses exhausted badge */}
+                        {!expired &&
+                            coupon.max_uses != null &&
+                            (coupon.uses || 0) >= coupon.max_uses && (
+                            <span className="bg-red-100 text-red-500 text-xs px-2 py-0.5 rounded-full font-semibold">
+                                Limit Reached
+                            </span>
+                        )}
+                    </div>
+
+                    <p className="text-sm text-khajur-dark/60">
+                        <span className="font-semibold text-khajur-primary">
+                            {coupon.discount_type === 'percent'
+                                ? `${coupon.discount_percent}% off`
+                                : `₹${coupon.discount_amount} off`
+                            }
+                        </span>
+                        {coupon.min_order > 0 && (
+                            <span className="before:content-['·'] before:mx-2">
+                                Min ₹{coupon.min_order}
+                            </span>
+                        )}
+                        <span className="before:content-['·'] before:mx-2">
+                            {coupon.uses || 0}/{coupon.max_uses} used
+                        </span>
+                        {coupon.expiry && (
+                            <span className={`before:content-['·'] before:mx-2 ${expired ? 'text-orange-500 font-semibold' : ''}`}>
+                                {expired ? 'Expired' : 'Expires'}{' '}
+                                {new Date(coupon.expiry).toLocaleDateString('en-IN', {
+                                    day: '2-digit', month: 'short', year: 'numeric',
+                                })}
+                            </span>
+                        )}
                     </p>
+
+                    {coupon.description && (
+                        <p className="text-xs text-khajur-dark/40 mt-1 italic">
+                            {coupon.description}
+                        </p>
+                    )}
+
+                    {/* ── Expired notice for admin clarity ── */}
+                    {expired && (
+                        <p className="text-xs text-orange-500 mt-1.5 font-medium">
+                            ⚠️ This coupon is hidden from customers — it has expired.
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {/* Right — Actions */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Hide the activate/deactivate toggle for expired coupons —
+                    toggling an expired coupon's is_active flag has no
+                    customer-facing effect, so we only show Delete. */}
+                {!expired && (
+                    <button
+                        onClick={() => onToggle(coupon.id)}
+                        className={`
+                            text-xs px-4 py-2 rounded-sm font-bold uppercase tracking-widest
+                            transition-all duration-200
+                            ${coupon.is_active
+                                ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100'
+                                : 'bg-green-50 text-green-600 hover:bg-green-100 border border-green-100'
+                            }
+                        `}
+                    >
+                        {coupon.is_active ? 'Deactivate' : 'Activate'}
+                    </button>
                 )}
+
+                <button
+                    onClick={() => onDelete(coupon.id, coupon.code)}
+                    className="
+                        flex items-center gap-1.5 text-xs px-4 py-2 rounded-sm
+                        font-bold uppercase tracking-widest
+                        bg-gray-50 text-gray-400 border border-gray-100
+                        hover:bg-red-50 hover:text-red-500 hover:border-red-100
+                        transition-all duration-200
+                    "
+                >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete
+                </button>
             </div>
         </div>
-
-        {/* Right — Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-                onClick={() => onToggle(coupon.id)}
-                className={`
-                    text-xs px-4 py-2 rounded-sm font-bold uppercase tracking-widest
-                    transition-all duration-200
-                    ${coupon.is_active
-                        ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100'
-                        : 'bg-green-50 text-green-600 hover:bg-green-100 border border-green-100'
-                    }
-                `}
-            >
-                {coupon.is_active ? 'Deactivate' : 'Activate'}
-            </button>
-            <button
-                onClick={() => onDelete(coupon.id, coupon.code)}
-                className="
-                    flex items-center gap-1.5 text-xs px-4 py-2 rounded-sm
-                    font-bold uppercase tracking-widest
-                    bg-gray-50 text-gray-400 border border-gray-100
-                    hover:bg-red-50 hover:text-red-500 hover:border-red-100
-                    transition-all duration-200
-                "
-            >
-                <Trash2 className="w-3.5 h-3.5" />
-                Delete
-            </button>
-        </div>
-    </div>
-);
+    );
+};
 
 // ── Create Coupon Form ─────────────────────────────────────────────────────────
 
@@ -209,7 +288,6 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
     const setCheck = (field) => (e) =>
         setForm((prev) => ({ ...prev, [field]: e.target.checked }));
 
-    // ── Validate ───────────────────────────────────────────────────────────────
     const validate = () => {
         const errs = {};
         if (!form.code.trim()) errs.code = 'Coupon code is required';
@@ -227,7 +305,6 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
         return errs;
     };
 
-    // ── Build clean payload ────────────────────────────────────────────────────
     const buildPayload = () => {
         const payload = {
             code: form.code.trim().toUpperCase(),
@@ -240,7 +317,6 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
             expiry: form.expiry || null,
         };
 
-        // Only send the relevant discount field — send null for the other
         if (form.discount_type === 'percent') {
             payload.discount_percent = Number(form.discount_percent);
             payload.discount_amount = null;
@@ -306,7 +382,6 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                             }
                             placeholder="e.g. WELCOME10"
                             className={`${inputCls} font-mono tracking-widest ${errors.code ? 'border-red-400' : ''}`}
-                            data-testid="coupon-code-input"
                         />
                         {errors.code && (
                             <p className="text-xs text-red-500 mt-1">{errors.code}</p>
@@ -350,7 +425,6 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                                 onChange={set('discount_percent')}
                                 placeholder="e.g. 10"
                                 className={`${inputCls} ${errors.discount_percent ? 'border-red-400' : ''}`}
-                                data-testid="coupon-discount-percent"
                             />
                             {errors.discount_percent && (
                                 <p className="text-xs text-red-500 mt-1">{errors.discount_percent}</p>
@@ -366,7 +440,6 @@ const CreateCouponForm = ({ onSubmit, onCancel }) => {
                                 onChange={set('discount_amount')}
                                 placeholder="e.g. 50"
                                 className={`${inputCls} ${errors.discount_amount ? 'border-red-400' : ''}`}
-                                data-testid="coupon-discount-amount"
                             />
                             {errors.discount_amount && (
                                 <p className="text-xs text-red-500 mt-1">{errors.discount_amount}</p>
@@ -533,7 +606,6 @@ const CouponManager = ({ token }) => {
         setLoadingCoupons(true);
         try {
             const res = await axios.get(`${API}/admin/coupons`, { headers });
-            // ── Guard: ensure we always set an array ──────────────────────────
             setCoupons(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Fetch coupons error:', err.response?.data || err.message);
@@ -569,7 +641,6 @@ const CouponManager = ({ token }) => {
     };
 
     const handleCreateCoupon = async (payload) => {
-        console.log('Submitting coupon payload:', JSON.stringify(payload, null, 2));
         try {
             await axios.post(`${API}/admin/coupons`, payload, { headers });
             toast.success(`Coupon "${payload.code}" created successfully!`);
@@ -578,7 +649,6 @@ const CouponManager = ({ token }) => {
         } catch (err) {
             const detail = err.response?.data?.detail;
             console.error('Create coupon error:', err.response?.data);
-            // FastAPI validation errors come as an array
             if (Array.isArray(detail)) {
                 const messages = detail.map((d) => `${d.loc?.join(' → ')}: ${d.msg}`).join('\n');
                 toast.error(`Validation error:\n${messages}`);
@@ -616,9 +686,12 @@ const CouponManager = ({ token }) => {
         }
     };
 
-    // ── Derived ────────────────────────────────────────────────────────────────
-    const activeCoupons = coupons.filter((c) => c.is_active);
-    const welcomeCoupons = coupons.filter((c) => c.is_welcome);
+    // ── Derived — split into valid vs expired for the admin view ───────────────
+    const validCoupons   = coupons.filter((c) => !isExpired(c));
+    const expiredCoupons = coupons.filter((c) =>  isExpired(c));
+
+    const activeCoupons  = validCoupons.filter((c) => c.is_active);
+    const welcomeCoupons = validCoupons.filter((c) => c.is_welcome);
 
     // ── Render ─────────────────────────────────────────────────────────────────
     return (
@@ -635,10 +708,10 @@ const CouponManager = ({ token }) => {
                     </h2>
                 </div>
 
-                {/* Quick Stats */}
+                {/* Quick Stats — only count non-expired coupons for customer-facing numbers */}
                 <div className="hidden sm:flex items-center gap-6 text-center">
                     <div>
-                        <p className="font-bold text-xl text-khajur-primary">{coupons.length}</p>
+                        <p className="font-bold text-xl text-khajur-primary">{validCoupons.length}</p>
                         <p className="text-xs text-khajur-dark/50 uppercase tracking-widest">Total</p>
                     </div>
                     <div className="w-px h-8 bg-khajur-border" />
@@ -651,6 +724,15 @@ const CouponManager = ({ token }) => {
                         <p className="font-bold text-xl text-yellow-600">{welcomeCoupons.length}</p>
                         <p className="text-xs text-khajur-dark/50 uppercase tracking-widest">Welcome</p>
                     </div>
+                    {expiredCoupons.length > 0 && (
+                        <>
+                            <div className="w-px h-8 bg-khajur-border" />
+                            <div>
+                                <p className="font-bold text-xl text-orange-500">{expiredCoupons.length}</p>
+                                <p className="text-xs text-khajur-dark/50 uppercase tracking-widest">Expired</p>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -683,13 +765,12 @@ const CouponManager = ({ token }) => {
                 />
             )}
 
-            {/* ── Divider ── */}
             <div className="border-t border-khajur-border" />
 
-            {/* ── Coupons List ── */}
+            {/* ── Active / Valid Coupons ── */}
             <div>
                 <h3 className="text-xs uppercase tracking-widest font-semibold text-khajur-dark/40 mb-4">
-                    All Coupons ({coupons.length})
+                    Active Coupons ({validCoupons.length})
                 </h3>
 
                 {loadingCoupons ? (
@@ -697,18 +778,18 @@ const CouponManager = ({ token }) => {
                         <Loader2 className="w-5 h-5 animate-spin" />
                         <span className="text-sm">Loading coupons…</span>
                     </div>
-                ) : coupons.length === 0 ? (
+                ) : validCoupons.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
                         <div className="w-12 h-12 bg-khajur-cream rounded-sm flex items-center justify-center">
                             <Tag className="w-6 h-6 text-khajur-dark/20" />
                         </div>
                         <p className="text-khajur-dark/50 text-sm">
-                            No coupons yet. Create your first one above!
+                            No active coupons yet. Create your first one above!
                         </p>
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        {coupons.map((coupon) => (
+                        {validCoupons.map((coupon) => (
                             <CouponCard
                                 key={coupon.id}
                                 coupon={coupon}
@@ -719,6 +800,55 @@ const CouponManager = ({ token }) => {
                     </div>
                 )}
             </div>
+
+            {/* ── Expired Coupons — collapsible section ── */}
+            {!loadingCoupons && expiredCoupons.length > 0 && (
+                <ExpiredSection
+                    coupons={expiredCoupons}
+                    onDelete={deleteCoupon}
+                />
+            )}
+        </div>
+    );
+};
+
+// ── Expired Coupons Collapsible Section ────────────────────────────────────────
+
+const ExpiredSection = ({ coupons, onDelete }) => {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <div className="border border-orange-100 rounded-sm overflow-hidden">
+            {/* Toggle header */}
+            <button
+                onClick={() => setOpen((v) => !v)}
+                className="
+                    w-full flex items-center justify-between
+                    px-5 py-3.5 bg-orange-50
+                    text-xs font-bold uppercase tracking-widest text-orange-600
+                    hover:bg-orange-100 transition-colors duration-200
+                "
+            >
+                <span className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Expired Coupons ({coupons.length}) — hidden from customers
+                </span>
+                <span>{open ? '▲ Hide' : '▼ Show'}</span>
+            </button>
+
+            {open && (
+                <div className="p-4 space-y-3 bg-white">
+                    {coupons.map((coupon) => (
+                        // Pass a no-op for onToggle — expired coupons can only be deleted
+                        <CouponCard
+                            key={coupon.id}
+                            coupon={coupon}
+                            onToggle={() => {}}
+                            onDelete={onDelete}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
