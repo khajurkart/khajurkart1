@@ -2532,8 +2532,18 @@ async def get_active_coupons():
     setting = await db.settings.find_one({"key": "coupon_system"})
     if not setting or not setting.get("enabled", False):
         return []
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
     coupons = await db.coupons.find(
-        {"is_active": True},
+        {
+            "is_active": True,
+            "$or": [
+                {"expiry": None},  # ✅ no expiry = never expires
+                {"expiry": ""},  # ✅ empty string = never expires
+                {"expiry": {"$gt": today}},  # ✅ expiry date is in the future
+            ],
+        },
         {
             "_id": 0,
             "code": 1,
