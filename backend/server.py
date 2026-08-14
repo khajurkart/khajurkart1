@@ -465,7 +465,7 @@ def send_verification_email(to_email, name, code):
 
 
 @api_router.post("/auth/register")
-@limiter.limit("5/minute")
+@limiter.limit("3/minute")
 async def register(request: Request, user_data: UserRegister):
     # Check if fully verified user exists
     existing_user = await db.users.find_one(
@@ -534,7 +534,7 @@ async def verify(data: VerifyRequest):
 
 
 @api_router.post("/auth/resend-code")
-@limiter.limit("5/minute")
+@limiter.limit("2/minute")
 async def resend_code(request: Request, email: str):
     user = await db.users.find_one({"email": email})
     if not user:
@@ -586,7 +586,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 
 @api_router.post("/auth/forgot-password")
-@limiter.limit("5/minute")
+@limiter.limit("3/minute")
 async def forgot_password(request: Request, email: str):
     user = await db.users.find_one({"email": email})
 
