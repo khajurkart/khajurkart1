@@ -88,17 +88,17 @@ async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
 
     # ----------------------------
-    # Prevent Clickjacking
+    # Clickjacking Protection
     # ----------------------------
     response.headers["X-Frame-Options"] = "DENY"
 
     # ----------------------------
-    # Prevent MIME Type Sniffing
+    # MIME Sniffing Protection
     # ----------------------------
     response.headers["X-Content-Type-Options"] = "nosniff"
 
     # ----------------------------
-    # XSS Protection (Legacy browsers)
+    # Legacy XSS Protection
     # ----------------------------
     response.headers["X-XSS-Protection"] = "1; mode=block"
 
@@ -108,14 +108,14 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # ----------------------------
-    # Force HTTPS
+    # HTTPS Enforcement
     # ----------------------------
     response.headers["Strict-Transport-Security"] = (
         "max-age=31536000; includeSubDomains; preload"
     )
 
     # ----------------------------
-    # Disable Browser Features
+    # Browser Feature Restrictions
     # ----------------------------
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
@@ -123,17 +123,15 @@ async def add_security_headers(request: Request, call_next):
     # Cross-Origin Protection
     # ----------------------------
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
-
-    # Better than same-origin for www + root domain
     response.headers["Cross-Origin-Resource-Policy"] = "same-site"
 
     # ----------------------------
-    # Adobe Cross Domain Policy
+    # Adobe Cross-Domain Policy
     # ----------------------------
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
 
     # ----------------------------
-    # Prevent Sensitive Data Caching
+    # Cache Control
     # ----------------------------
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
@@ -142,8 +140,7 @@ async def add_security_headers(request: Request, call_next):
     # ----------------------------
     # Remove Server Header (if present)
     # ----------------------------
-    if "server" in response.headers:
-        del response.headers["server"]
+    response.headers.pop("server", None)
 
     # ----------------------------
     # Content Security Policy
