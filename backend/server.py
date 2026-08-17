@@ -140,7 +140,8 @@ async def add_security_headers(request: Request, call_next):
     # ----------------------------
     # Remove Server Header (if present)
     # ----------------------------
-    response.headers.pop("server", None)
+    #if "server" in response.headers:
+     #   del response.headers["server"]
 
     # ----------------------------
     # Content Security Policy
