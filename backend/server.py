@@ -117,7 +117,7 @@ async def add_security_headers(request: Request, call_next):
         "connect-src 'self' "
         "https://api.razorpay.com "
         "https://www.google-analytics.com "
-        "https://*.onrender.com "
+        "https://khajurkart1.onrender.com "
         "https://khajurkart.com "
         "https://www.khajurkart.com; "
         "frame-src 'self' https://checkout.razorpay.com; "
