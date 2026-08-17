@@ -88,17 +88,29 @@ async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
 
     # ----------------------------
+<<<<<<< HEAD
     # Clickjacking Protection
+=======
+    # Prevent Clickjacking
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
     # ----------------------------
     response.headers["X-Frame-Options"] = "DENY"
 
     # ----------------------------
+<<<<<<< HEAD
     # MIME Sniffing Protection
+=======
+    # Prevent MIME Type Sniffing
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
     # ----------------------------
     response.headers["X-Content-Type-Options"] = "nosniff"
 
     # ----------------------------
+<<<<<<< HEAD
     # Legacy XSS Protection
+=======
+    # XSS Protection (Legacy browsers)
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
     # ----------------------------
     response.headers["X-XSS-Protection"] = "1; mode=block"
 
@@ -108,14 +120,22 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # ----------------------------
+<<<<<<< HEAD
     # HTTPS Enforcement
+=======
+    # Force HTTPS
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
     # ----------------------------
     response.headers["Strict-Transport-Security"] = (
         "max-age=31536000; includeSubDomains; preload"
     )
 
     # ----------------------------
+<<<<<<< HEAD
     # Browser Feature Restrictions
+=======
+    # Disable Browser Features
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
     # ----------------------------
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
@@ -123,15 +143,28 @@ async def add_security_headers(request: Request, call_next):
     # Cross-Origin Protection
     # ----------------------------
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+<<<<<<< HEAD
     response.headers["Cross-Origin-Resource-Policy"] = "same-site"
 
     # ----------------------------
     # Adobe Cross-Domain Policy
+=======
+
+    # Better than same-origin for www + root domain
+    response.headers["Cross-Origin-Resource-Policy"] = "same-site"
+
+    # ----------------------------
+    # Adobe Cross Domain Policy
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
     # ----------------------------
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
 
     # ----------------------------
+<<<<<<< HEAD
     # Cache Control
+=======
+    # Prevent Sensitive Data Caching
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
     # ----------------------------
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
@@ -140,8 +173,13 @@ async def add_security_headers(request: Request, call_next):
     # ----------------------------
     # Remove Server Header (if present)
     # ----------------------------
+<<<<<<< HEAD
     #if "server" in response.headers:
      #   del response.headers["server"]
+=======
+    if "server" in response.headers:
+        del response.headers["server"]
+>>>>>>> 704431d (Fix security headers, fonts, and Vercel configuration)
 
     # ----------------------------
     # Content Security Policy
