@@ -87,43 +87,98 @@ app.add_middleware(
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
 
+    # ----------------------------
     # Prevent Clickjacking
+    # ----------------------------
     response.headers["X-Frame-Options"] = "DENY"
 
-    # Prevent MIME type sniffing
+    # ----------------------------
+    # Prevent MIME Type Sniffing
+    # ----------------------------
     response.headers["X-Content-Type-Options"] = "nosniff"
 
-    # Control referrer information
+    # ----------------------------
+    # XSS Protection (Legacy browsers)
+    # ----------------------------
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+
+    # ----------------------------
+    # Referrer Policy
+    # ----------------------------
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
+    # ----------------------------
     # Force HTTPS
+    # ----------------------------
     response.headers["Strict-Transport-Security"] = (
         "max-age=31536000; includeSubDomains; preload"
     )
 
-    # Disable browser features you don't use
+    # ----------------------------
+    # Disable Browser Features
+    # ----------------------------
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
+    # ----------------------------
+    # Cross-Origin Protection
+    # ----------------------------
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+
+    # Better than same-origin for www + root domain
+    response.headers["Cross-Origin-Resource-Policy"] = "same-site"
+
+    # ----------------------------
+    # Adobe Cross Domain Policy
+    # ----------------------------
+    response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
+
+    # ----------------------------
+    # Prevent Sensitive Data Caching
+    # ----------------------------
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    # ----------------------------
+    # Remove Server Header (if present)
+    # ----------------------------
+    if "server" in response.headers:
+        del response.headers["server"]
+
+    # ----------------------------
     # Content Security Policy
+    # ----------------------------
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+        "script-src 'self' "
+        "'unsafe-inline' "
+        "'unsafe-eval' "
         "https://checkout.razorpay.com "
         "https://www.googletagmanager.com "
         "https://www.google-analytics.com; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-        "font-src 'self' https://fonts.gstatic.com data:; "
-        "img-src 'self' data: https: blob:; "
+        "style-src 'self' "
+        "'unsafe-inline' "
+        "https://fonts.googleapis.com; "
+        "font-src 'self' "
+        "https://fonts.gstatic.com "
+        "data:; "
+        "img-src 'self' "
+        "data: "
+        "blob: "
+        "https:; "
         "connect-src 'self' "
         "https://api.razorpay.com "
         "https://www.google-analytics.com "
         "https://khajurkart1.onrender.com "
         "https://khajurkart.com "
         "https://www.khajurkart.com; "
-        "frame-src 'self' https://checkout.razorpay.com; "
+        "frame-src 'self' "
+        "https://checkout.razorpay.com; "
         "object-src 'none'; "
         "base-uri 'self'; "
-        "form-action 'self';"
+        "form-action 'self'; "
+        "frame-ancestors 'none'; "
+        "upgrade-insecure-requests;"
     )
 
     return response
