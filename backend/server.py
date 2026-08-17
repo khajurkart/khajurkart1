@@ -66,6 +66,7 @@ origins = [
     "https://www.khajurkart.com",
     "https://khajurkart1.vercel.app",
     "https://khajurkart1.onrender.com",
+    "https://khajurkart1-ho0847ugh-khajurkart.vercel.app",
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -74,6 +75,62 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ================= middleware =================
+
+
+# =========================
+# SECURITY HEADERS
+# =========================
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+
+    # Prevent Clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+
+    # Prevent MIME type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+
+    # Control referrer information
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    # Force HTTPS
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains; preload"
+    )
+
+    # Disable browser features you don't use
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
+    # Content Security Policy
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+        "https://checkout.razorpay.com "
+        "https://www.googletagmanager.com "
+        "https://www.google-analytics.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "img-src 'self' data: https: blob:; "
+        "connect-src 'self' "
+        "https://api.razorpay.com "
+        "https://www.google-analytics.com "
+        "https://*.onrender.com "
+        "https://khajurkart.com "
+        "https://www.khajurkart.com; "
+        "frame-src 'self' https://checkout.razorpay.com; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self';"
+    )
+
+    return response
+
+
+# ================= END =================
+
 api_router = APIRouter(prefix="/api")
 
 
@@ -2680,20 +2737,20 @@ async def update_return_status(
 
 # Include router
 app.include_router(api_router)
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://khajurkart1-ho0847ugh-khajurkart.vercel.app",
-        "https://khajurkart1.vercel.app",
-        "https://khajurkart.com",
-        "https://www.khajurkart.com",
-        "https://khajurkart1.onrender.com",
-    ],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#    CORSMiddleware,
+#    allow_credentials=True,
+#    allow_origins=[
+#        "http://localhost:3000",
+#        "https://khajurkart1-ho0847ugh-khajurkart.vercel.app",
+#        "https://khajurkart1.vercel.app",
+#        "https://khajurkart.com",
+#        "https://www.khajurkart.com",
+#        "https://khajurkart1.onrender.com",
+#    ],
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+# )
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
