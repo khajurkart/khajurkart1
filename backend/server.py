@@ -147,6 +147,7 @@ async def add_security_headers(request: Request, call_next):
     # Content Security Policy
     # ----------------------------
     response.headers["Content-Security-Policy"] = (
+        # Default
         "default-src 'self'; "
     
         # JavaScript
@@ -154,16 +155,16 @@ async def add_security_headers(request: Request, call_next):
         "'unsafe-inline' "
         "'unsafe-eval' "
         "blob: "
-        "https://checkout.razorpay.com "
         "https://www.googletagmanager.com "
-        "https://www.google-analytics.com "
         "https://accounts.google.com "
+        "https://checkout.razorpay.com "
+        "https://www.google-analytics.com "
         "https://us-assets.i.posthog.com; "
     
-        # Workers (PostHog needs this)
+        # Workers (Required for PostHog)
         "worker-src 'self' blob:; "
     
-        # CSS
+        # Styles
         "style-src 'self' "
         "'unsafe-inline' "
         "https://fonts.googleapis.com; "
@@ -179,7 +180,7 @@ async def add_security_headers(request: Request, call_next):
         "blob: "
         "https:; "
     
-        # API calls
+        # AJAX / Fetch / WebSocket
         "connect-src 'self' "
         "https://khajurkart1.onrender.com "
         "https://khajurkart.com "
@@ -192,15 +193,20 @@ async def add_security_headers(request: Request, call_next):
         "https://us.i.posthog.com "
         "https://us-assets.i.posthog.com; "
     
-        # Google Login & Razorpay
+        # Frames
         "frame-src 'self' "
         "https://accounts.google.com "
         "https://checkout.razorpay.com; "
     
+        # Form submission
         "form-action 'self'; "
+    
+        # Security
         "frame-ancestors 'none'; "
         "object-src 'none'; "
         "base-uri 'self'; "
+    
+        # HTTPS only
         "upgrade-insecure-requests;"
     )
 
