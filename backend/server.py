@@ -146,55 +146,55 @@ async def add_security_headers(request: Request, call_next):
     # ----------------------------
     # Content Security Policy
     # ----------------------------
-    response.headers["Content-Security-Policy"] = (
-        # Default
-        "default-src 'self'; "
-        # JavaScript
-        "script-src 'self' "
-        "'unsafe-inline' "
-        "'unsafe-eval' "
-        "https://checkout.razorpay.com "
-        "https://www.googletagmanager.com "
-        "https://www.google-analytics.com "
-        "https://accounts.google.com "
-        "https://us-assets.i.posthog.com; "
-        # CSS
-        "style-src 'self' "
-        "'unsafe-inline' "
-        "https://fonts.googleapis.com; "
-        # Fonts
-        "font-src 'self' "
-        "https://fonts.gstatic.com "
-        "data:; "
-        # Images
-        "img-src 'self' "
-        "data: "
-        "blob: "
-        "https:; "
-        # AJAX / Fetch / WebSocket
-        "connect-src 'self' "
-        "https://khajurkart1.onrender.com "
-        "https://khajurkart.com "
-        "https://www.khajurkart.com "
-        "https://api.razorpay.com "
-        "https://www.google-analytics.com "
-        "https://analytics.google.com "
-        "https://www.google.com "
-        "https://accounts.google.com "
-        "https://us.i.posthog.com; "
-        # Frames
-        "frame-src 'self' "
-        "https://checkout.razorpay.com "
-        "https://accounts.google.com; "
-        # Form submission
-        "form-action 'self'; "
-        # Prevent embedding
-        "frame-ancestors 'none'; "
-        # Other protections
-        "object-src 'none'; "
-        "base-uri 'self'; "
-        "upgrade-insecure-requests;"
-    )
+#    response.headers["Content-Security-Policy"] = (
+#        # Default
+#        "default-src 'self'; "
+#        # JavaScript
+#        "script-src 'self' "
+#        "'unsafe-inline' "
+#        "'unsafe-eval' "
+#        "https://checkout.razorpay.com "
+#        "https://www.googletagmanager.com "
+#        "https://www.google-analytics.com "
+#        "https://accounts.google.com "
+#        "https://us-assets.i.posthog.com; "
+#        # CSS
+#        "style-src 'self' "
+#        "'unsafe-inline' "
+#        "https://fonts.googleapis.com; "
+#        # Fonts
+#        "font-src 'self' "
+#        "https://fonts.gstatic.com "
+#        "data:; "
+#        # Images
+#        "img-src 'self' "
+#        "data: "
+#        "blob: "
+#        "https:; "
+#        # AJAX / Fetch / WebSocket
+#        "connect-src 'self' "
+#        "https://khajurkart1.onrender.com "
+#        "https://khajurkart.com "
+#        "https://www.khajurkart.com "
+#        "https://api.razorpay.com "
+#        "https://www.google-analytics.com "
+#        "https://analytics.google.com "
+#        "https://www.google.com "
+#        "https://accounts.google.com "
+#        "https://us.i.posthog.com; "
+#        # Frames
+#        "frame-src 'self' "
+#        "https://checkout.razorpay.com "
+#        "https://accounts.google.com; "
+#        # Form submission
+#        "form-action 'self'; "
+#        # Prevent embedding
+#        "frame-ancestors 'none'; "
+#        # Other protections
+#        "object-src 'none'; "
+#        "base-uri 'self'; "
+#        "upgrade-insecure-requests;"
+#    )
 
     return response
 
