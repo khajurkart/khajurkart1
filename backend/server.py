@@ -87,75 +87,112 @@ app.add_middleware(
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
 
-    # Prevent Clickjacking
+    # ----------------------------
+    # Clickjacking Protection
+    # ----------------------------
     response.headers["X-Frame-Options"] = "DENY"
 
-    # Prevent MIME Type Sniffing
+    # ----------------------------
+    # MIME Sniffing Protection
+    # ----------------------------
     response.headers["X-Content-Type-Options"] = "nosniff"
 
-    # XSS Protection (Legacy browsers)
+    # ----------------------------
+    # Legacy XSS Protection
+    # ----------------------------
     response.headers["X-XSS-Protection"] = "1; mode=block"
 
+    # ----------------------------
     # Referrer Policy
+    # ----------------------------
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-    # Force HTTPS
+    # ----------------------------
+    # HTTPS Enforcement
+    # ----------------------------
     response.headers["Strict-Transport-Security"] = (
         "max-age=31536000; includeSubDomains; preload"
     )
 
-    # Disable Browser Features
-    response.headers["Permissions-Policy"] = (
-        "camera=(), microphone=(), geolocation=()"
-    )
+    # ----------------------------
+    # Browser Feature Restrictions
+    # ----------------------------
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
+    # ----------------------------
     # Cross-Origin Protection
+    # ----------------------------
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     response.headers["Cross-Origin-Resource-Policy"] = "same-site"
 
+    # ----------------------------
     # Adobe Cross-Domain Policy
+    # ----------------------------
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
 
-    # Prevent Sensitive Data Caching
+    # ----------------------------
+    # Cache Control
+    # ----------------------------
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
 
+    # ----------------------------
     # Remove Server Header (if present)
-    if "server" in response.headers:
-        del response.headers["server"]
+    # ----------------------------
+    # if "server" in response.headers:
+    #    del response.headers["server"]
 
+    # ----------------------------
     # Content Security Policy
+    # ----------------------------
     response.headers["Content-Security-Policy"] = (
+        # Default
         "default-src 'self'; "
+        # JavaScript
         "script-src 'self' "
         "'unsafe-inline' "
         "'unsafe-eval' "
         "https://checkout.razorpay.com "
         "https://www.googletagmanager.com "
-        "https://www.google-analytics.com; "
+        "https://www.google-analytics.com "
+        "https://accounts.google.com "
+        "https://us-assets.i.posthog.com; "
+        # CSS
         "style-src 'self' "
         "'unsafe-inline' "
         "https://fonts.googleapis.com; "
+        # Fonts
         "font-src 'self' "
         "https://fonts.gstatic.com "
         "data:; "
+        # Images
         "img-src 'self' "
         "data: "
         "blob: "
         "https:; "
+        # AJAX / Fetch / WebSocket
         "connect-src 'self' "
-        "https://api.razorpay.com "
-        "https://www.google-analytics.com "
         "https://khajurkart1.onrender.com "
         "https://khajurkart.com "
-        "https://www.khajurkart.com; "
+        "https://www.khajurkart.com "
+        "https://api.razorpay.com "
+        "https://www.google-analytics.com "
+        "https://analytics.google.com "
+        "https://www.google.com "
+        "https://accounts.google.com "
+        "https://us.i.posthog.com; "
+        # Frames
         "frame-src 'self' "
-        "https://checkout.razorpay.com; "
+        "https://checkout.razorpay.com "
+        "https://accounts.google.com; "
+        # Form submission
+        "form-action 'self'; "
+        # Prevent embedding
+        "frame-ancestors 'none'; "
+        # Other protections
         "object-src 'none'; "
         "base-uri 'self'; "
-        "form-action 'self'; "
-        "frame-ancestors 'none'; "
         "upgrade-insecure-requests;"
     )
 
