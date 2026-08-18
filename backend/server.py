@@ -154,7 +154,7 @@ async def add_security_headers(request: Request, call_next):
         "script-src "
         "'self' "
         "'unsafe-inline' "
-        "'unsafe-eval' "
+       # "'unsafe-eval' "
         "blob: "
         "https://www.googletagmanager.com "
         "https://www.google-analytics.com "
