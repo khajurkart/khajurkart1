@@ -151,62 +151,74 @@ async def add_security_headers(request: Request, call_next):
         "default-src 'self'; "
     
         # JavaScript
-        "script-src 'self' "
+        "script-src "
+        "'self' "
         "'unsafe-inline' "
         "'unsafe-eval' "
         "blob: "
         "https://www.googletagmanager.com "
+        "https://www.google-analytics.com "
         "https://accounts.google.com "
         "https://checkout.razorpay.com "
-        "https://www.google-analytics.com "
+        "https://cdn.razorpay.com "
         "https://us-assets.i.posthog.com; "
     
-        # Workers (Required for PostHog)
-        "worker-src 'self' blob:; "
+        # Web Workers
+        "worker-src "
+        "'self' "
+        "blob:; "
     
-        # Styles
-        "style-src 'self' "
+        # CSS
+        "style-src "
+        "'self' "
         "'unsafe-inline' "
         "https://fonts.googleapis.com; "
     
         # Fonts
-        "font-src 'self' "
+        "font-src "
+        "'self' "
         "https://fonts.gstatic.com "
         "data:; "
     
         # Images
-        "img-src 'self' "
+        "img-src "
+        "'self' "
         "data: "
         "blob: "
         "https:; "
     
-        # AJAX / Fetch / WebSocket
-        "connect-src 'self' "
+        # API / Fetch / XHR / WebSocket
+        "connect-src "
+        "'self' "
         "https://khajurkart1.onrender.com "
         "https://khajurkart.com "
         "https://www.khajurkart.com "
         "https://api.razorpay.com "
+        "https://lumberjack.razorpay.com "
         "https://accounts.google.com "
         "https://www.google.com "
         "https://analytics.google.com "
         "https://www.google-analytics.com "
         "https://us.i.posthog.com "
-        "https://us-assets.i.posthog.com; "
+        "https://us-assets.i.posthog.com "
+        "wss://us.i.posthog.com; "
     
-        # Frames
-        "frame-src 'self' "
-        "https://accounts.google.com "
-        "https://checkout.razorpay.com; "
+        # Frames / Iframes
+        "frame-src "
+        "'self' "
+        "https://checkout.razorpay.com "
+        "https://api.razorpay.com "
+        "https://accounts.google.com; "
     
-        # Form submission
+        # Forms
         "form-action 'self'; "
     
         # Security
-        "frame-ancestors 'none'; "
         "object-src 'none'; "
         "base-uri 'self'; "
+        "frame-ancestors 'none'; "
     
-        # HTTPS only
+        # Upgrade HTTP → HTTPS
         "upgrade-insecure-requests;"
     )
 
