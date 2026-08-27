@@ -156,7 +156,7 @@ const Navbar = () => {
                         {/* ── Logo ── */}
                         <Link
                             to="/"
-                            className="flex items-center gap-2 group flex-shrink-0"
+                            className="flex items-center gap-3 group flex-shrink-0"
                         >
                             <img
                                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1787836580/24f2453b-2cb7-40a7-b52d-505ae8323e96_1_v2r5dz.png"
