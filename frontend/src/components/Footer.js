@@ -109,7 +109,7 @@ const Footer = () => (
                 <div className="lg:col-span-3">
                     <Link to="/" className="flex items-center gap-2 mb-5 group">
                         <img
-                            src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1777381692/Logo-Photoroom_nslk5u.png"
+                            src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1787836580/24f2453b-2cb7-40a7-b52d-505ae8323e96_1_v2r5dz.png"
                             alt="KhajurKart Logo"
                             className="h-12 w-auto"
                         />
