@@ -11,6 +11,7 @@ const API = `${BACKEND_URL}/api`;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BUSINESS_TYPES = [
+
     { value: 'corporate', label: 'Corporate Office', icon: '🏢' },
     { value: 'hotel-restaurant', label: 'Hotel / Restaurant', icon: '🏨' },
     { value: 'event-planner', label: 'Event Planner', icon: '🎉' },
@@ -21,6 +22,9 @@ const BUSINESS_TYPES = [
     { value: 'wholesale', label: 'Wholesale Dealer', icon: '📦' },
     { value: 'retail', label: 'Retail Store', icon: '🏪' },
     { value: 'gift-shop', label: 'Gift Shop', icon: '🎁' },
+    { value: 'hospital', label: 'Hospital', icon: '🏥' },
+    { value: 'orphanage', label: 'Orphanage', icon: '🫶' },
+    { value: 'old-age-home', label: 'Old Age Home', icon: '🏡' },
     { value: 'other', label: 'Other', icon: '💼' },
 ];
 
@@ -32,6 +36,9 @@ const DISCOUNT_TIERS = [
 ];
 
 const WHO_WE_SERVE = [
+    { icon: '🏥', label: 'Hospitals' },
+    { icon: '🫶', label: 'Orphanages' },
+    { icon: '🏡', label: 'Old Age Homes' },
     { icon: '🏢', label: 'Corporate Offices' },
     { icon: '🏨', label: 'Hotels & Restaurants' },
     { icon: '🎉', label: 'Event Planners' },
@@ -42,6 +49,9 @@ const WHO_WE_SERVE = [
     { icon: '📦', label: 'Wholesale Dealers' },
     { icon: '🏪', label: 'Retail Stores' },
     { icon: '🎁', label: 'Gift Shops' },
+
+    // New categories
+
 ];
 
 const BULK_BENEFITS = [
@@ -54,12 +64,23 @@ const BULK_BENEFITS = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Sub-Components
+// Form Input
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// ✅ FIXED: Added htmlFor + id + error display
-const FormInput = ({ label, type = 'text', required = true, id, error, ...props }) => {
-    const inputId = id || `bulk-${label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')}`;
+const FormInput = ({
+    label,
+    type = 'text',
+    required = true,
+    id,
+    error,
+    ...props
+}) => {
+    const inputId =
+        id ||
+        `bulk-${label
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z-]/g, '')}`;
 
     return (
         <div>
@@ -67,8 +88,12 @@ const FormInput = ({ label, type = 'text', required = true, id, error, ...props 
                 htmlFor={inputId}
                 className="block text-sm font-medium text-khajur-dark mb-2"
             >
-                {label} {required && <span className="text-khajur-gold">*</span>}
+                {label}{' '}
+                {required && (
+                    <span className="text-khajur-gold">*</span>
+                )}
             </label>
+
             <input
                 id={inputId}
                 type={type}
@@ -79,12 +104,20 @@ const FormInput = ({ label, type = 'text', required = true, id, error, ...props 
                     w-full bg-transparent px-0 py-3 outline-none
                     transition-colors duration-200 text-khajur-primary
                     placeholder:text-khajur-dark/30 border-b
-                    ${error ? 'border-red-500' : 'border-khajur-primary/20 focus:border-khajur-gold'}
+                    ${
+                        error
+                            ? 'border-red-500'
+                            : 'border-khajur-primary/20 focus:border-khajur-gold'
+                    }
                 `}
                 {...props}
             />
+
             {error && (
-                <p id={`${inputId}-error`} className="text-xs text-red-500 mt-1">
+                <p
+                    id={`${inputId}-error`}
+                    className="text-xs text-red-500 mt-1"
+                >
                     {error}
                 </p>
             )}
@@ -92,9 +125,22 @@ const FormInput = ({ label, type = 'text', required = true, id, error, ...props 
     );
 };
 
-// ✅ FIXED: Added htmlFor + id
-const FormTextarea = ({ label, required = false, id, ...props }) => {
-    const textareaId = id || `bulk-${label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')}`;
+// ═══════════════════════════════════════════════════════════════════════════════
+// Textarea
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const FormTextarea = ({
+    label,
+    required = false,
+    id,
+    ...props
+}) => {
+    const textareaId =
+        id ||
+        `bulk-${label
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z-]/g, '')}`;
 
     return (
         <div>
@@ -102,8 +148,12 @@ const FormTextarea = ({ label, required = false, id, ...props }) => {
                 htmlFor={textareaId}
                 className="block text-sm font-medium text-khajur-dark mb-2"
             >
-                {label} {required && <span className="text-khajur-gold">*</span>}
+                {label}{' '}
+                {required && (
+                    <span className="text-khajur-gold">*</span>
+                )}
             </label>
+
             <textarea
                 id={textareaId}
                 required={required}
@@ -119,13 +169,29 @@ const FormTextarea = ({ label, required = false, id, ...props }) => {
     );
 };
 
-// ✅ FIXED: Added id to label + button + ARIA
-const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
+// ═══════════════════════════════════════════════════════════════════════════════
+// Business Type Dropdown
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const BusinessTypeSelect = ({
+    value,
+    onChange,
+    required = true,
+    error,
+}) => {
     const [isOpen, setIsOpen] = useState(false);
-    const selectedBusiness = BUSINESS_TYPES.find(b => b.value === value);
+
+    const selectedBusiness = BUSINESS_TYPES.find(
+        (b) => b.value === value
+    );
 
     const handleSelect = (businessValue) => {
-        onChange({ target: { value: businessValue } });
+        onChange({
+            target: {
+                value: businessValue,
+            },
+        });
+
         setIsOpen(false);
     };
 
@@ -135,9 +201,14 @@ const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
                 htmlFor="bulk-business-type"
                 className="block text-sm font-medium text-khajur-dark mb-2"
             >
-                Business Type {required && <span className="text-khajur-gold">*</span>}
+                Business Type{' '}
+                {required && (
+                    <span className="text-khajur-gold">*</span>
+                )}
             </label>
+
             <div className="relative">
+
                 <button
                     id="bulk-business-type"
                     type="button"
@@ -149,23 +220,32 @@ const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
                         w-full bg-transparent border-b px-0 py-3 pr-8
                         text-left outline-none transition-colors duration-200
                         text-khajur-primary
-                        ${error ? 'border-red-500' : 'border-khajur-primary/20 focus:border-khajur-gold'}
+                        ${
+                            error
+                                ? 'border-red-500'
+                                : 'border-khajur-primary/20 focus:border-khajur-gold'
+                        }
                     `}
                 >
+
                     {selectedBusiness ? (
                         <span className="flex items-center gap-2">
                             <span>{selectedBusiness.icon}</span>
                             <span>{selectedBusiness.label}</span>
                         </span>
                     ) : (
-                        <span className="text-khajur-dark/30">Select your business type</span>
+                        <span className="text-khajur-dark/30">
+                            Select your business type
+                        </span>
                     )}
+
                 </button>
 
                 <ChevronDown
                     className={`
                         absolute right-0 top-1/2 -translate-y-1/2
-                        w-4 h-4 text-khajur-primary/40 pointer-events-none
+                        w-4 h-4 text-khajur-primary/40
+                        pointer-events-none
                         transition-transform duration-200
                         ${isOpen ? 'rotate-180' : ''}
                     `}
@@ -177,6 +257,7 @@ const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
                             className="fixed inset-0 z-10"
                             onClick={() => setIsOpen(false)}
                         />
+
                         <div
                             role="listbox"
                             className="
@@ -190,34 +271,77 @@ const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
                                     key={type.value}
                                     type="button"
                                     role="option"
-                                    aria-selected={value === type.value}
-                                    onClick={() => handleSelect(type.value)}
-                                    className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 transition-all duration-200"
+                                    aria-selected={
+                                        value === type.value
+                                    }
+                                    onClick={() =>
+                                        handleSelect(type.value)
+                                    }
+                                    className="
+                                        w-full text-left px-4 py-3
+                                        flex items-center justify-between
+                                        gap-3 transition-all duration-200
+                                    "
                                     style={{
-                                        backgroundColor: value === type.value ? '#0F3D2E' : 'transparent',
-                                        color: value === type.value ? '#F5F0E8' : '#0F3D2E'
+                                        backgroundColor:
+                                            value === type.value
+                                                ? '#0F3D2E'
+                                                : 'transparent',
+
+                                        color:
+                                            value === type.value
+                                                ? '#F5F0E8'
+                                                : '#0F3D2E',
                                     }}
                                     onMouseEnter={(e) => {
-                                        if (value !== type.value) {
-                                            e.currentTarget.style.backgroundColor = '#0F3D2E';
-                                            e.currentTarget.style.color = '#F5F0E8';
+                                        if (
+                                            value !== type.value
+                                        ) {
+                                            e.currentTarget.style.backgroundColor =
+                                                '#0F3D2E';
+
+                                            e.currentTarget.style.color =
+                                                '#F5F0E8';
                                         }
                                     }}
                                     onMouseLeave={(e) => {
-                                        if (value !== type.value) {
-                                            e.currentTarget.style.backgroundColor = 'transparent';
-                                            e.currentTarget.style.color = '#0F3D2E';
+                                        if (
+                                            value !== type.value
+                                        ) {
+                                            e.currentTarget.style.backgroundColor =
+                                                'transparent';
+
+                                            e.currentTarget.style.color =
+                                                '#0F3D2E';
                                         }
                                     }}
                                 >
                                     <span className="flex items-center gap-2">
-                                        <span className="text-lg">{type.icon}</span>
-                                        <span className={`text-sm ${value === type.value ? 'font-medium' : ''}`}>
+
+                                        <span className="text-lg">
+                                            {type.icon}
+                                        </span>
+
+                                        <span
+                                            className={`text-sm ${
+                                                value ===
+                                                type.value
+                                                    ? 'font-medium'
+                                                    : ''
+                                            }`}
+                                        >
                                             {type.label}
                                         </span>
+
                                     </span>
+
                                     {value === type.value && (
-                                        <Check className="w-4 h-4" style={{ color: '#F5F0E8' }} />
+                                        <Check
+                                            className="w-4 h-4"
+                                            style={{
+                                                color: '#F5F0E8',
+                                            }}
+                                        />
                                     )}
                                 </button>
                             ))}
@@ -225,7 +349,6 @@ const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
                     </>
                 )}
 
-                {/* Hidden select for form validation */}
                 <select
                     required={required}
                     value={value}
@@ -234,16 +357,26 @@ const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
                     tabIndex={-1}
                     aria-hidden="true"
                 >
-                    <option value="">Select business type</option>
+                    <option value="">
+                        Select business type
+                    </option>
+
                     {BUSINESS_TYPES.map((type) => (
-                        <option key={type.value} value={type.value}>
+                        <option
+                            key={type.value}
+                            value={type.value}
+                        >
                             {type.label}
                         </option>
                     ))}
                 </select>
+
             </div>
+
             {error && (
-                <p className="text-xs text-red-500 mt-1">{error}</p>
+                <p className="text-xs text-red-500 mt-1">
+                    {error}
+                </p>
             )}
         </div>
     );
@@ -254,6 +387,7 @@ const BusinessTypeSelect = ({ value, onChange, required = true, error }) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BulkOrders = () => {
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -263,91 +397,185 @@ const BulkOrders = () => {
         products_needed: '',
         quantity: '',
         address: '',
-        message: ''
+        message: '',
     });
+
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        document.title = 'Bulk Orders — KhajurKart';
+
+        document.title =
+            'Bulk Orders — KhajurKart';
+
         return () => {
-            document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+            document.title =
+                'KhajurKart — Premium Dates, Dry Fruits & Spices';
         };
+
     }, []);
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Validation
+    // ═══════════════════════════════════════════════════════════════════════════
+
     const validateForm = () => {
+
         const newErrors = {};
 
-        if (!formData.name.trim()) newErrors.name = 'Name is required';
-        if (!formData.business_name.trim()) newErrors.business_name = 'Business name is required';
+        if (!formData.name.trim()) {
+            newErrors.name = 'Name is required';
+        }
+
+        if (!formData.business_name.trim()) {
+            newErrors.business_name =
+                'Business name is required';
+        }
 
         if (!formData.email.trim()) {
+
             newErrors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Invalid email format';
+
+        } else if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                formData.email
+            )
+        ) {
+
+            newErrors.email =
+                'Invalid email format';
+
         }
 
         if (!formData.phone.trim()) {
-            newErrors.phone = 'Phone is required';
-        } else if (!/^[6-9]\d{9}$/.test(formData.phone.replace(/\D/g, ''))) {
-            newErrors.phone = 'Invalid phone number';
+
+            newErrors.phone =
+                'Phone is required';
+
+        } else if (
+            !/^[6-9]\d{9}$/.test(
+                formData.phone.replace(/\D/g, '')
+            )
+        ) {
+
+            newErrors.phone =
+                'Invalid phone number';
+
         }
 
-        if (!formData.business_type) newErrors.business_type = 'Business type is required';
-        if (!formData.products_needed.trim()) newErrors.products_needed = 'Products needed is required';
-        if (!formData.quantity.trim()) newErrors.quantity = 'Quantity/Budget is required';
-        if (!formData.address.trim()) newErrors.address = 'Delivery address is required';
+        if (!formData.business_type) {
+            newErrors.business_type =
+                'Business type is required';
+        }
+
+        if (!formData.products_needed.trim()) {
+            newErrors.products_needed =
+                'Products needed is required';
+        }
+
+        if (!formData.quantity.trim()) {
+            newErrors.quantity =
+                'Quantity/Budget is required';
+        }
+
+        if (!formData.address.trim()) {
+            newErrors.address =
+                'Delivery address is required';
+        }
 
         setErrors(newErrors);
+
         return Object.keys(newErrors).length === 0;
     };
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Input Handler
+    // ═══════════════════════════════════════════════════════════════════════════
+
     const handleInputChange = (field) => (e) => {
+
         let value = e.target.value;
 
         if (field === 'phone') {
-            value = value.replace(/\D/g, '').slice(0, 10);
+            value = value
+                .replace(/\D/g, '')
+                .slice(0, 10);
         }
 
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
 
         if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: '' }));
+
+            setErrors((prev) => ({
+                ...prev,
+                [field]: '',
+            }));
+
         }
     };
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Submit
+    // ═══════════════════════════════════════════════════════════════════════════
+
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
         if (!validateForm()) {
-            toast.error('Please fill in all required fields correctly');
+
+            toast.error(
+                'Please fill in all required fields correctly'
+            );
+
             return;
         }
 
         setLoading(true);
 
         try {
-            const businessType = BUSINESS_TYPES.find(b => b.value === formData.business_type);
 
-            await axios.post(`${API}/contact`, {
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone,
-                message: `
+            const businessType =
+                BUSINESS_TYPES.find(
+                    (b) =>
+                        b.value ===
+                        formData.business_type
+                );
+
+            await axios.post(
+                `${API}/contact`,
+                {
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+
+                    message: `
 🛒 BULK ORDER ENQUIRY
 
 👤 Contact Person: ${formData.name}
 🏢 Business: ${formData.business_name}
-📊 Type: ${businessType?.label || formData.business_type}
+📊 Type: ${
+                        businessType?.label ||
+                        formData.business_type
+                    }
 📦 Products: ${formData.products_needed}
 ⚖️ Quantity/Budget: ${formData.quantity}
 📍 Address: ${formData.address}
 
-💬 Message: ${formData.message || 'No additional message'}
-                `.trim()
-            });
+💬 Message: ${
+                        formData.message ||
+                        'No additional message'
+                    }
+                    `.trim(),
+                }
+            );
 
-            toast.success('Bulk order enquiry sent successfully! We will contact you within 24 hours.');
+            toast.success(
+                'Bulk order enquiry sent successfully! We will contact you within 24 hours.'
+            );
 
             setFormData({
                 name: '',
@@ -358,183 +586,398 @@ const BulkOrders = () => {
                 products_needed: '',
                 quantity: '',
                 address: '',
-                message: ''
+                message: '',
             });
+
             setErrors({});
 
         } catch (error) {
-            console.error('Bulk order error:', error);
-            toast.error('Failed to send enquiry. Please try calling us directly at +91 7981002137');
+
+            console.error(
+                'Bulk order error:',
+                error
+            );
+
+            toast.error(
+                'Failed to send enquiry. Please call or WhatsApp us directly.'
+            );
+
         } finally {
+
             setLoading(false);
+
         }
     };
 
     return (
-        <div className="min-h-screen bg-white" data-testid="bulk-orders-page">
+        <div
+            className="min-h-screen bg-white"
+            data-testid="bulk-orders-page"
+        >
 
-            {/* ===== HERO ===== */}
+            {/* ═════════════ HERO ═════════════ */}
+
             <section className="bg-khajur-primary py-20 px-6">
+
                 <div className="max-w-7xl mx-auto text-center">
+
                     <p className="text-khajur-gold text-sm uppercase tracking-widest mb-4">
                         — For Businesses
                     </p>
+
                     <h1 className="font-serif text-5xl md:text-6xl font-medium text-khajur-cream mb-6">
                         Bulk Orders
                     </h1>
+
                     <p className="text-khajur-cream/70 text-lg max-w-2xl mx-auto leading-relaxed">
-                        Special pricing for offices, hotels, restaurants,
-                        event planners and retailers across Hyderabad
+                        Special pricing for offices, hotels,
+                        restaurants, event planners and retailers
+                        across Hyderabad.
                     </p>
+
                 </div>
+
             </section>
 
-            {/* ===== DISCOUNT TIERS ===== */}
+            {/* ═════════════ DISCOUNT TIERS ═════════════ */}
+
             <section className="py-16 bg-white">
+
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-                        {DISCOUNT_TIERS.map((tier, index) => (
-                            <div
-                                key={index}
-                                className="bg-khajur-cream p-6 border border-khajur-border hover:border-khajur-gold transition-all duration-300 text-center"
-                            >
-                                <p className="font-serif text-4xl font-bold text-khajur-gold mb-2">
-                                    {tier.discount}
-                                </p>
-                                <p className="text-sm text-khajur-dark/60 font-medium">
-                                    Off on {tier.threshold}
-                                </p>
-                            </div>
-                        ))}
+
+                        {DISCOUNT_TIERS.map(
+                            (tier, index) => (
+                                <div
+                                    key={index}
+                                    className="
+                                        bg-khajur-cream
+                                        p-6
+                                        border
+                                        border-khajur-border
+                                        hover:border-khajur-gold
+                                        transition-all
+                                        duration-300
+                                        text-center
+                                    "
+                                >
+
+                                    <p className="font-serif text-4xl font-bold text-khajur-gold mb-2">
+                                        {tier.discount}
+                                    </p>
+
+                                    <p className="text-sm text-khajur-dark/60 font-medium">
+                                        Off on{' '}
+                                        {tier.threshold}
+                                    </p>
+
+                                </div>
+                            )
+                        )}
+
                     </div>
+
                 </div>
+
             </section>
 
-            {/* ===== WHO WE SERVE ===== */}
+            {/* ═════════════ WHO WE SERVE ═════════════ */}
+
             <section className="py-16 bg-khajur-cream">
+
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <div className="text-center mb-12">
+
+                    <div className="text-center mb-10">
+
                         <p className="text-xs uppercase tracking-widest text-khajur-gold mb-2">
                             Our Clients
                         </p>
+
                         <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-primary">
                             Who We Serve
                         </h2>
+
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                        {WHO_WE_SERVE.map((item, index) => (
-                            <div
-                                key={index}
-                                className="bg-white border border-khajur-border p-6 text-center hover:border-khajur-gold hover:shadow-md transition-all duration-300"
-                            >
-                                <p className="text-4xl mb-3">{item.icon}</p>
-                                <p className="text-sm font-medium text-khajur-primary">
-                                    {item.label}
-                                </p>
-                            </div>
-                        ))}
+
+                    {/* SPECIAL DISCOUNT NOTICE */}
+
+                    <div
+                        className="
+                            max-w-5xl mx-auto
+                            mb-12
+                            bg-khajur-primary
+                            border border-khajur-gold/50
+                            px-6 md:px-10
+                            py-7
+                            text-center
+                            shadow-xl
+                            relative
+                            overflow-hidden
+                        "
+                    >
+
+                        <div className="absolute top-0 left-0 w-full h-1 bg-khajur-gold" />
+
+                        <p className="
+                            text-khajur-gold
+                            text-xs md:text-sm
+                            font-bold
+                            uppercase
+                            tracking-[0.2em]
+                            mb-3
+                        ">
+                            ❤️ Special Community Discount
+                        </p>
+
+                        <h3 className="
+                            font-serif
+                            text-xl md:text-3xl
+                            text-khajur-cream
+                            font-medium
+                            mb-3
+                        ">
+                            Special discounts for Hospitals,
+                            Orphanages & Old Age Homes
+                        </h3>
+
+                        <p className="
+                            text-sm md:text-base
+                            text-khajur-cream/75
+                            max-w-3xl
+                            mx-auto
+                            leading-relaxed
+                        ">
+                            KhajurKart is pleased to provide
+                            special discounted pricing for
+                            hospitals, orphanages and old age
+                            homes. Contact our team for
+                            customized bulk pricing and
+                            dedicated assistance.
+                        </p>
+
                     </div>
+
+                    {/* CLIENT CARDS */}
+
+                    <div className="
+                        grid
+                        grid-cols-2
+                        md:grid-cols-3
+                        lg:grid-cols-4
+                        xl:grid-cols-5
+                        gap-4
+                        md:gap-6
+                    ">
+
+                        {WHO_WE_SERVE.map(
+                            (item, index) => (
+                                <div
+                                    key={index}
+                                    className="
+                                        bg-white
+                                        border
+                                        border-khajur-border
+                                        p-6
+                                        text-center
+                                        hover:border-khajur-gold
+                                        hover:shadow-md
+                                        hover:-translate-y-1
+                                        transition-all
+                                        duration-300
+                                    "
+                                >
+
+                                    <p className="text-4xl mb-3">
+                                        {item.icon}
+                                    </p>
+
+                                    <p className="text-sm font-medium text-khajur-primary">
+                                        {item.label}
+                                    </p>
+
+                                </div>
+                            )
+                        )}
+
+                    </div>
+
                 </div>
+
             </section>
 
-            {/* ===== ENQUIRY FORM + CONTACT ===== */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+            {/* ═════════════ FORM + CONTACT ═════════════ */}
 
-                        {/* Form */}
+            <section className="py-16 bg-white">
+
+                <div className="max-w-7xl mx-auto px-6 md:px-12">
+
+                    <div className="
+                        grid
+                        grid-cols-1
+                        lg:grid-cols-2
+                        gap-12
+                        lg:gap-16
+                    ">
+
+                        {/* FORM */}
+
                         <div>
+
                             <div className="mb-8">
+
                                 <p className="text-xs uppercase tracking-widest text-khajur-gold mb-2">
                                     Request Quote
                                 </p>
+
                                 <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-primary">
                                     Get a Quote
                                 </h2>
+
                                 <p className="text-sm text-khajur-dark/60 mt-2">
-                                    Fill in the details below and we'll get back to you within 24 hours
+                                    Fill in the details below and
+                                    we'll get back to you within
+                                    24 hours.
                                 </p>
+
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                                {/* Row 1 */}
+                            <form
+                                onSubmit={handleSubmit}
+                                className="space-y-6"
+                                noValidate
+                            >
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                                     <FormInput
                                         label="Your Name"
                                         id="bulk-name"
-                                        value={formData.name}
-                                        onChange={handleInputChange('name')}
-                                        error={errors.name}
+                                        value={
+                                            formData.name
+                                        }
+                                        onChange={handleInputChange(
+                                            'name'
+                                        )}
+                                        error={
+                                            errors.name
+                                        }
                                         placeholder="John Doe"
                                         autoComplete="name"
                                     />
+
                                     <FormInput
                                         label="Business Name"
                                         id="bulk-business-name"
-                                        value={formData.business_name}
-                                        onChange={handleInputChange('business_name')}
-                                        error={errors.business_name}
+                                        value={
+                                            formData.business_name
+                                        }
+                                        onChange={handleInputChange(
+                                            'business_name'
+                                        )}
+                                        error={
+                                            errors.business_name
+                                        }
                                         placeholder="ABC Enterprises"
                                         autoComplete="organization"
                                     />
+
                                 </div>
 
-                                {/* Row 2 */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                                     <FormInput
                                         label="Email Address"
                                         id="bulk-email"
                                         type="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange('email')}
-                                        error={errors.email}
+                                        value={
+                                            formData.email
+                                        }
+                                        onChange={handleInputChange(
+                                            'email'
+                                        )}
+                                        error={
+                                            errors.email
+                                        }
                                         placeholder="john@example.com"
                                         autoComplete="email"
                                     />
+
                                     <FormInput
                                         label="Phone Number"
                                         id="bulk-phone"
                                         type="tel"
-                                        value={formData.phone}
-                                        onChange={handleInputChange('phone')}
-                                        error={errors.phone}
+                                        value={
+                                            formData.phone
+                                        }
+                                        onChange={handleInputChange(
+                                            'phone'
+                                        )}
+                                        error={
+                                            errors.phone
+                                        }
                                         placeholder="9876543210"
                                         autoComplete="tel"
                                         inputMode="numeric"
                                         maxLength={10}
                                     />
+
                                 </div>
 
                                 <BusinessTypeSelect
-                                    value={formData.business_type}
-                                    onChange={handleInputChange('business_type')}
-                                    error={errors.business_type}
+                                    value={
+                                        formData.business_type
+                                    }
+                                    onChange={handleInputChange(
+                                        'business_type'
+                                    )}
+                                    error={
+                                        errors.business_type
+                                    }
                                 />
 
                                 <FormInput
                                     label="Products Needed"
                                     id="bulk-products"
-                                    value={formData.products_needed}
-                                    onChange={handleInputChange('products_needed')}
-                                    error={errors.products_needed}
+                                    value={
+                                        formData.products_needed
+                                    }
+                                    onChange={handleInputChange(
+                                        'products_needed'
+                                    )}
+                                    error={
+                                        errors.products_needed
+                                    }
                                     placeholder="e.g. Ajwa Dates, Cashews, Mixed Nuts"
                                 />
 
                                 <FormInput
                                     label="Estimated Quantity / Budget"
                                     id="bulk-quantity"
-                                    value={formData.quantity}
-                                    onChange={handleInputChange('quantity')}
-                                    error={errors.quantity}
+                                    value={
+                                        formData.quantity
+                                    }
+                                    onChange={handleInputChange(
+                                        'quantity'
+                                    )}
+                                    error={
+                                        errors.quantity
+                                    }
                                     placeholder="e.g. 10kg or ₹10,000"
                                 />
 
                                 <FormInput
                                     label="Delivery Address"
                                     id="bulk-address"
-                                    value={formData.address}
-                                    onChange={handleInputChange('address')}
-                                    error={errors.address}
+                                    value={
+                                        formData.address
+                                    }
+                                    onChange={handleInputChange(
+                                        'address'
+                                    )}
+                                    error={
+                                        errors.address
+                                    }
                                     placeholder="Full delivery address with pincode"
                                     autoComplete="street-address"
                                 />
@@ -544,95 +987,213 @@ const BulkOrders = () => {
                                     id="bulk-message"
                                     required={false}
                                     rows={3}
-                                    value={formData.message}
-                                    onChange={handleInputChange('message')}
+                                    value={
+                                        formData.message
+                                    }
+                                    onChange={handleInputChange(
+                                        'message'
+                                    )}
                                     placeholder="Any special requirements or questions..."
                                 />
 
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2"
+                                    className="
+                                        w-full
+                                        bg-khajur-gold
+                                        text-khajur-primary
+                                        hover:bg-khajur-gold/90
+                                        hover:shadow-lg
+                                        disabled:opacity-50
+                                        disabled:cursor-not-allowed
+                                        rounded-sm
+                                        px-8
+                                        py-4
+                                        uppercase
+                                        tracking-widest
+                                        text-xs
+                                        font-bold
+                                        transition-all
+                                        duration-300
+                                        flex
+                                        items-center
+                                        justify-center
+                                        gap-2
+                                    "
                                 >
+
                                     {loading ? (
                                         <>
-                                            <span className="inline-block w-4 h-4 border-2 border-khajur-primary/30 border-t-khajur-primary rounded-full animate-spin" />
+                                            <span className="
+                                                inline-block
+                                                w-4 h-4
+                                                border-2
+                                                border-khajur-primary/30
+                                                border-t-khajur-primary
+                                                rounded-full
+                                                animate-spin
+                                            " />
+
                                             Sending Enquiry...
                                         </>
                                     ) : (
-                                        <>📦 Send Bulk Enquiry</>
+                                        <>
+                                            📦 Send Bulk Enquiry
+                                        </>
                                     )}
+
                                 </button>
 
                                 <p className="text-xs text-khajur-dark/40 text-center">
-                                    All fields marked with <span className="text-khajur-gold">*</span> are mandatory
+
+                                    All fields marked with{' '}
+
+                                    <span className="text-khajur-gold">
+                                        *
+                                    </span>{' '}
+
+                                    are mandatory
+
                                 </p>
+
                             </form>
+
                         </div>
 
-                        {/* Contact Info */}
+                        {/* CONTACT INFO */}
+
                         <div>
+
                             <div className="mb-8">
+
                                 <p className="text-xs uppercase tracking-widest text-khajur-gold mb-2">
                                     Quick Contact
                                 </p>
+
                                 <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-primary">
                                     Or Contact Us Directly
                                 </h2>
+
                             </div>
 
                             <div className="space-y-6">
+
+                                {/* PHONE NUMBERS */}
+
                                 <div className="bg-khajur-cream border border-khajur-border p-6 hover:border-khajur-gold transition-colors">
+
                                     <p className="text-sm text-khajur-dark/60 mb-3 uppercase tracking-wide">
                                         WhatsApp / Call
                                     </p>
 
                                     <div className="flex flex-col gap-2">
+
                                         <a
                                             href="tel:+919133105000"
-                                            className="font-serif text-2xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors"
+                                            className="
+                                                font-serif
+                                                text-2xl
+                                                font-medium
+                                                text-khajur-primary
+                                                hover:text-khajur-gold
+                                                transition-colors
+                                            "
                                         >
                                             +91 91331 05000
                                         </a>
 
                                         <a
                                             href="tel:+919133805000"
-                                            className="font-serif text-2xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors"
+                                            className="
+                                                font-serif
+                                                text-2xl
+                                                font-medium
+                                                text-khajur-primary
+                                                hover:text-khajur-gold
+                                                transition-colors
+                                            "
                                         >
                                             +91 91338 05000
                                         </a>
+
                                     </div>
+
                                 </div>
 
+                                {/* EMAIL */}
+
                                 <div className="bg-khajur-cream border border-khajur-border p-6 hover:border-khajur-gold transition-colors">
+
                                     <p className="text-sm text-khajur-dark/60 mb-2 uppercase tracking-wide">
                                         Email
                                     </p>
+
                                     <a
                                         href="mailto:khajurkart@gmail.com"
-                                        className="font-serif text-xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors break-all"
+                                        className="
+                                            font-serif
+                                            text-xl
+                                            font-medium
+                                            text-khajur-primary
+                                            hover:text-khajur-gold
+                                            transition-colors
+                                            break-all
+                                        "
                                     >
                                         khajurkart@gmail.com
                                     </a>
+
                                 </div>
 
+                                {/* RESPONSE TIME */}
+
                                 <div className="bg-khajur-cream border border-khajur-border p-6">
+
                                     <p className="text-sm text-khajur-dark/60 mb-2 uppercase tracking-wide">
                                         Response Time
                                     </p>
+
                                     <p className="font-serif text-xl font-medium text-khajur-primary">
                                         Within 24 hours ⚡
                                     </p>
+
                                 </div>
 
+                                {/* WHATSAPP BUTTONS */}
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
                                     <a
                                         href="https://wa.me/919133105000?text=Hi%20KhajurKart!%20I%20am%20interested%20in%20placing%20a%20bulk%20order."
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white rounded-sm px-5 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
+                                        className="
+                                            flex
+                                            items-center
+                                            justify-center
+                                            gap-2
+                                            w-full
+                                            bg-green-600
+                                            hover:bg-green-700
+                                            text-white
+                                            rounded-sm
+                                            px-5
+                                            py-4
+                                            uppercase
+                                            tracking-widest
+                                            text-xs
+                                            font-bold
+                                            transition-all
+                                            duration-300
+                                            shadow-lg
+                                            hover:shadow-xl
+                                        "
                                     >
-                                        <span className="text-lg">💬</span>
+                                        <span className="text-lg">
+                                            💬
+                                        </span>
+
                                         Bulk Orders
                                     </a>
 
@@ -640,34 +1201,83 @@ const BulkOrders = () => {
                                         href="https://wa.me/919133805000?text=Hi%20KhajurKart!%20I%20am%20interested%20in%20placing%20a%20bulk%20order."
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white rounded-sm px-5 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
+                                        className="
+                                            flex
+                                            items-center
+                                            justify-center
+                                            gap-2
+                                            w-full
+                                            bg-green-600
+                                            hover:bg-green-700
+                                            text-white
+                                            rounded-sm
+                                            px-5
+                                            py-4
+                                            uppercase
+                                            tracking-widest
+                                            text-xs
+                                            font-bold
+                                            transition-all
+                                            duration-300
+                                            shadow-lg
+                                            hover:shadow-xl
+                                        "
                                     >
-                                        <span className="text-lg">💬</span>
+                                        <span className="text-lg">
+                                            💬
+                                        </span>
+
                                         Customer Care
                                     </a>
+
                                 </div>
+
                             </div>
 
+                            {/* BULK BENEFITS */}
+
                             <div className="mt-8 bg-khajur-primary p-6 border border-khajur-gold/20">
+
                                 <h3 className="font-serif text-xl font-medium text-khajur-cream mb-4">
                                     Bulk Order Benefits
                                 </h3>
+
                                 <ul className="space-y-3">
-                                    {BULK_BENEFITS.map((benefit, index) => (
-                                        <li
-                                            key={index}
-                                            className="flex items-start gap-3 text-khajur-cream/80 text-sm"
-                                        >
-                                            <span className="text-khajur-gold mt-0.5">✓</span>
-                                            <span>{benefit}</span>
-                                        </li>
-                                    ))}
+
+                                    {BULK_BENEFITS.map(
+                                        (benefit, index) => (
+                                            <li
+                                                key={index}
+                                                className="
+                                                    flex
+                                                    items-start
+                                                    gap-3
+                                                    text-khajur-cream/80
+                                                    text-sm
+                                                "
+                                            >
+                                                <span className="text-khajur-gold mt-0.5">
+                                                    ✓
+                                                </span>
+
+                                                <span>
+                                                    {benefit}
+                                                </span>
+
+                                            </li>
+                                        )
+                                    )}
+
                                 </ul>
+
                             </div>
+
                         </div>
 
                     </div>
+
                 </div>
+
             </section>
 
         </div>
