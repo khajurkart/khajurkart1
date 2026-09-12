@@ -304,8 +304,8 @@ const Footer = () => (
                         {/* Phone 1 */}
                         <ContactItem
                             icon={Phone}
-                            content="+91 79810 02137"
-                            href="tel:+917981002137"
+                            content="+91 9133105000"
+                            href="tel:+919133105000"
                         />
 
                         {/* Phone 2 */}
