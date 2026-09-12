@@ -633,7 +633,7 @@ const BulkOrders = () => {
                                         className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white rounded-sm px-5 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
                                     >
                                         <span className="text-lg">💬</span>
-                                        WhatsApp 1
+                                        Bulk Orders
                                     </a>
 
                                     <a
@@ -643,7 +643,7 @@ const BulkOrders = () => {
                                         className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white rounded-sm px-5 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
                                     >
                                         <span className="text-lg">💬</span>
-                                        WhatsApp 2
+                                        Customer Care
                                     </a>
                                 </div>
                             </div>
