@@ -11,15 +11,17 @@ import {
     CreditCard,
     Star,
 } from 'lucide-react';
+
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
+
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const HERO_SLIDES = [
     {
@@ -103,14 +105,14 @@ const HERO_SLIDER_SETTINGS = {
     pauseOnHover: false,
     appendDots: (dots) => (
         <div className="absolute bottom-6 left-0 right-0">
-            <ul className="flex justify-center gap-2">{dots}</ul>
+            <ul className="flex justify-center gap-2">
+                {dots}
+            </ul>
         </div>
     ),
 };
 
-// ─── Sub-Components ────────────────────────────────────────────────────────────
-
-// ── Welcome Coupon Banner ──────────────────────────────────────────────────────
+// ─── Welcome Coupon Banner ──────────────────────────────────────────────────
 
 const WelcomeCouponBanner = ({ welcomeCoupon }) => {
     if (!welcomeCoupon) return null;
@@ -130,75 +132,119 @@ const WelcomeCouponBanner = ({ welcomeCoupon }) => {
                 <span
                     onClick={handleCopy}
                     className="
-                        bg-khajur-primary text-khajur-gold
-                        px-2 py-0.5 rounded
-                        cursor-pointer font-mono
+                        bg-khajur-primary
+                        text-khajur-gold
+                        px-2
+                        py-0.5
+                        rounded
+                        cursor-pointer
+                        font-mono
                         hover:bg-khajur-primary/80
-                        transition-colors duration-200
+                        transition-colors
+                        duration-200
                     "
                     data-testid="welcome-coupon-code"
                     title="Click to copy"
                 >
                     {welcomeCoupon.code}
+                </span>{' '}
+                for {welcomeCoupon.discount_percent}% off your first order!{' '}
+                <span className="text-xs opacity-75">
+                    (Click code to copy)
                 </span>
-                {' '}for {welcomeCoupon.discount_percent}% off your first order!{' '}
-                <span className="text-xs opacity-75">(Click code to copy)</span>
             </p>
         </div>
     );
 };
 
-// ── Section Header ─────────────────────────────────────────────────────────────
+// ─── Section Header ──────────────────────────────────────────────────────────
 
-const SectionHeader = ({ eyebrow, title, subtitle, light = false }) => (
+const SectionHeader = ({
+    eyebrow,
+    title,
+    subtitle,
+    light = false,
+}) => (
     <div className="text-center mb-10">
+
         {eyebrow && (
             <p className="text-xs uppercase tracking-widest font-semibold mb-3 text-khajur-gold">
                 {eyebrow}
             </p>
         )}
-        <h2 className={`
-            font-serif text-3xl md:text-5xl font-medium mb-4
-            ${light ? 'text-khajur-cream' : 'text-khajur-primary'}
-        `}>
+
+        <h2
+            className={`
+                font-serif
+                text-3xl
+                md:text-5xl
+                font-medium
+                mb-4
+                ${light ? 'text-khajur-cream' : 'text-khajur-primary'}
+            `}
+        >
             {title}
         </h2>
+
         {subtitle && (
-            <p className={`
-                text-base max-w-2xl mx-auto leading-relaxed
-                ${light ? 'text-khajur-cream/70' : 'text-khajur-dark/60'}
-            `}>
+            <p
+                className={`
+                    text-base
+                    max-w-2xl
+                    mx-auto
+                    leading-relaxed
+                    ${
+                        light
+                            ? 'text-khajur-cream/70'
+                            : 'text-khajur-dark/60'
+                    }
+                `}
+            >
                 {subtitle}
             </p>
         )}
+
     </div>
 );
 
-// ── Thin Divider ───────────────────────────────────────────────────────────────
+// ─── Divider ─────────────────────────────────────────────────────────────────
 
-const Divider = () => <div className="w-full h-px bg-khajur-border" />;
+const Divider = () => (
+    <div className="w-full h-px bg-khajur-border" />
+);
 
-// ── Product Skeleton ───────────────────────────────────────────────────────────
+// ─── Product Skeleton ────────────────────────────────────────────────────────
 
 const ProductSkeleton = () => (
     <div className="bg-white border border-khajur-border animate-pulse">
+
         <div className="aspect-square bg-khajur-cream" />
+
         <div className="p-5 space-y-3">
+
             <div className="h-3 bg-khajur-cream rounded w-1/3" />
+
             <div className="h-4 bg-khajur-cream rounded w-3/4" />
+
             <div className="h-3 bg-khajur-cream rounded w-full" />
+
             <div className="flex items-center justify-between mt-2">
+
                 <div className="h-6 bg-khajur-cream rounded w-1/3" />
+
                 <div className="w-11 h-11 bg-khajur-cream rounded" />
+
             </div>
+
         </div>
     </div>
 );
 
-// ── Hero Slide ─────────────────────────────────────────────────────────────────
+// ─── Hero Slide ──────────────────────────────────────────────────────────────
 
 const HeroSlide = ({ slide, index }) => (
     <div className="relative h-[520px] md:h-[720px]">
+
         <img
             src={slide.url}
             alt={slide.title}
@@ -207,30 +253,44 @@ const HeroSlide = ({ slide, index }) => (
             width="1920"
             height="720"
         />
-        {/* Gradient overlay */}
+
         <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary/85 via-khajur-primary/50 to-transparent" />
 
-        {/* Content */}
         <div className="absolute inset-0 flex items-center">
+
             <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
+
                 <div className="max-w-xl">
+
                     <p className="text-xs uppercase tracking-widest text-khajur-gold font-semibold mb-4">
                         KhajurKart — Premium Selection
                     </p>
+
                     <h1 className="font-serif text-5xl md:text-7xl font-medium text-khajur-cream mb-5 leading-tight">
                         {slide.title}
                     </h1>
+
                     <p className="text-lg text-khajur-cream/75 mb-8 leading-relaxed max-w-md">
                         {slide.subtitle}
                     </p>
+
                     <Link
                         to={`/products?category=${slide.category}`}
                         className="
-                            inline-flex items-center gap-2
-                            bg-khajur-gold text-khajur-primary
+                            inline-flex
+                            items-center
+                            gap-2
+                            bg-khajur-gold
+                            text-khajur-primary
                             hover:bg-khajur-gold/90
-                            px-8 py-3.5 text-xs font-bold uppercase tracking-widest
-                            transition-all duration-300
+                            px-8
+                            py-3.5
+                            text-xs
+                            font-bold
+                            uppercase
+                            tracking-widest
+                            transition-all
+                            duration-300
                             hover:shadow-[0_0_20px_rgba(198,169,98,0.4)]
                         "
                         data-testid="hero-shop-now-button"
@@ -238,13 +298,17 @@ const HeroSlide = ({ slide, index }) => (
                         Shop Now
                         <ChevronRight className="w-4 h-4" />
                     </Link>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 );
 
-// ── Category Card ──────────────────────────────────────────────────────────────
+// ─── Category Card ───────────────────────────────────────────────────────────
 
 const CategoryCard = ({ category }) => (
     <Link
@@ -252,81 +316,156 @@ const CategoryCard = ({ category }) => (
         className="group relative overflow-hidden block"
         data-testid={`category-card-${category.slug}`}
     >
+
         <div className="aspect-square overflow-hidden">
+
             <img
                 src={category.image}
                 alt={category.name}
                 loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                className="
+                    w-full
+                    h-full
+                    object-cover
+                    group-hover:scale-110
+                    transition-transform
+                    duration-700
+                "
             />
+
         </div>
-        {/* Overlay */}
+
         <div className="absolute inset-0 bg-gradient-to-t from-khajur-primary/90 via-khajur-primary/30 to-transparent" />
-        {/* Bottom text */}
+
         <div className="absolute bottom-0 left-0 right-0 p-6">
+
             <h3 className="font-serif text-2xl font-medium text-khajur-cream mb-1">
                 {category.name}
             </h3>
+
             {category.description && (
                 <p className="text-sm text-khajur-cream/70 line-clamp-1">
                     {category.description}
                 </p>
             )}
-            <div className="mt-3 flex items-center gap-1.5 text-khajur-gold text-xs font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                Explore <ChevronRight className="w-3.5 h-3.5" />
+
+            <div className="
+                mt-3
+                flex
+                items-center
+                gap-1.5
+                text-khajur-gold
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wider
+                opacity-0
+                group-hover:opacity-100
+                transition-opacity
+                duration-300
+            ">
+                Explore
+                <ChevronRight className="w-3.5 h-3.5" />
             </div>
+
         </div>
+
     </Link>
 );
 
-// ── Feature Card ───────────────────────────────────────────────────────────────
+// ─── Feature Card ────────────────────────────────────────────────────────────
 
 const FeatureCard = ({ feature, index }) => {
     const Icon = feature.icon;
+
     return (
         <div
             className="
-                group flex flex-col items-center text-center
-                p-8 border border-khajur-border bg-khajur-cream
-                hover:bg-white hover:border-khajur-gold hover:shadow-lg
-                transition-all duration-300
+                group
+                flex
+                flex-col
+                items-center
+                text-center
+                p-8
+                border
+                border-khajur-border
+                bg-khajur-cream
+                hover:bg-white
+                hover:border-khajur-gold
+                hover:shadow-lg
+                transition-all
+                duration-300
             "
             data-testid={`status-feature-${index}`}
         >
-            <div className="w-14 h-14 bg-khajur-primary/5 flex items-center justify-center mb-5 group-hover:bg-khajur-gold/10 transition-colors">
-                <Icon className="w-7 h-7 text-khajur-gold" aria-hidden="true" />
+
+            <div className="
+                w-14
+                h-14
+                bg-khajur-primary/5
+                flex
+                items-center
+                justify-center
+                mb-5
+                group-hover:bg-khajur-gold/10
+                transition-colors
+            ">
+                <Icon
+                    className="w-7 h-7 text-khajur-gold"
+                    aria-hidden="true"
+                />
             </div>
+
             <h3 className="font-serif text-lg font-medium text-khajur-primary mb-2">
                 {feature.title}
             </h3>
+
             <p className="text-sm text-khajur-dark/55 leading-relaxed">
                 {feature.description}
             </p>
+
         </div>
     );
 };
 
-// ── Review Card ────────────────────────────────────────────────────────────────
+// ─── Review Card ─────────────────────────────────────────────────────────────
 
 const ReviewCard = ({ review, index }) => (
     <div
-        className="bg-khajur-cream border border-khajur-border p-8 flex flex-col gap-5"
+        className="
+            bg-khajur-cream
+            border
+            border-khajur-border
+            p-8
+            flex
+            flex-col
+            gap-5
+        "
         data-testid={`review-${index}`}
     >
-        {/* Stars */}
-        <div className="flex gap-1" aria-label={`${review.rating} out of 5 stars`}>
-            {Array.from({ length: review.rating }, (_, i) => (
-                <Star key={i} className="w-4 h-4 fill-khajur-gold text-khajur-gold" aria-hidden="true" />
-            ))}
+
+        <div
+            className="flex gap-1"
+            aria-label={`${review.rating} out of 5 stars`}
+        >
+            {Array.from(
+                { length: review.rating },
+                (_, i) => (
+                    <Star
+                        key={i}
+                        className="w-4 h-4 fill-khajur-gold text-khajur-gold"
+                        aria-hidden="true"
+                    />
+                )
+            )}
         </div>
 
-        {/* Quote */}
         <p className="text-sm text-khajur-dark/75 leading-relaxed italic flex-1">
             "{review.text}"
         </p>
 
-        {/* Reviewer */}
         <div className="flex items-center gap-4 pt-4 border-t border-khajur-border">
+
             <img
                 src={review.image}
                 alt={review.name}
@@ -335,65 +474,97 @@ const ReviewCard = ({ review, index }) => (
                 height="48"
                 className="w-12 h-12 rounded-full object-cover flex-shrink-0"
             />
+
             <div>
+
                 <p className="font-serif text-base font-medium text-khajur-primary">
                     {review.name}
                 </p>
+
                 {review.location && (
-                    <p className="text-xs text-khajur-dark/40 mt-0.5">{review.location}</p>
+                    <p className="text-xs text-khajur-dark/40 mt-0.5">
+                        {review.location}
+                    </p>
                 )}
+
             </div>
+
         </div>
+
     </div>
 );
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 const Home = () => {
+
     const { user, token } = useAuth();
+
     const [categories, setCategories] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [welcomeCoupon, setWelcomeCoupon] = useState(null);
 
-    // ── Set page title ─────────────────────────────────────────────────────────
     useEffect(() => {
-        document.title = 'KhajurKart — Premium Dates, Dry Fruits & Spices';
+        document.title =
+            'KhajurKart — Premium Dates, Dry Fruits & Spices';
     }, []);
 
-    // ── Check for welcome coupon ───────────────────────────────────────────────
     useEffect(() => {
+
         if (user && token) {
+
             const checkWelcome = async () => {
+
                 try {
-                    const res = await axios.get(`${API}/welcome-coupon`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+
+                    const res = await axios.get(
+                        `${API}/welcome-coupon`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+
                     if (res.data.available) {
                         setWelcomeCoupon(res.data);
                     }
+
                 } catch {
-                    // silent fail — welcome coupon is optional
+                    // welcome coupon is optional
                 }
+
             };
+
             checkWelcome();
         }
+
     }, [user, token]);
 
-    // ── Fetch categories & featured products ───────────────────────────────────
     const fetchData = useCallback(async () => {
+
         try {
-            const [categoriesRes, productsRes] = await Promise.all([
+
+            const [
+                categoriesRes,
+                productsRes,
+            ] = await Promise.all([
                 axios.get(`${API}/categories`),
-                axios.get(`${API}/products?featured=true`),
+                axios.get(
+                    `${API}/products?featured=true`
+                ),
             ]);
+
             setCategories(categoriesRes.data);
             setFeaturedProducts(productsRes.data);
+
         } catch {
-            // fail silently — UI handles empty states gracefully
+            // UI handles empty states gracefully
         } finally {
             setLoading(false);
         }
+
     }, []);
 
     useEffect(() => {
@@ -401,191 +572,425 @@ const Home = () => {
     }, [fetchData]);
 
     return (
-        <div id="main-content" className="min-h-screen bg-white" data-testid="home-page">
+        <div
+            id="main-content"
+            className="min-h-screen bg-white"
+            data-testid="home-page"
+        >
 
-            {/* ── Welcome Coupon Banner ────────────────────────────────────────────── */}
-            <WelcomeCouponBanner welcomeCoupon={welcomeCoupon} />
+            {/* Welcome Coupon Banner */}
 
-            {/* ── Hero Slider ──────────────────────────────────────────────────────── */}
-            <section className="relative" data-testid="hero-slider">
+            <WelcomeCouponBanner
+                welcomeCoupon={welcomeCoupon}
+            />
+
+            {/* Hero Slider */}
+
+            <section
+                className="relative"
+                data-testid="hero-slider"
+            >
+
                 <Slider {...HERO_SLIDER_SETTINGS}>
-                    {HERO_SLIDES.map((slide, index) => (
-                        <HeroSlide key={index} slide={slide} index={index} />
-                    ))}
+
+                    {HERO_SLIDES.map(
+                        (slide, index) => (
+                            <HeroSlide
+                                key={index}
+                                slide={slide}
+                                index={index}
+                            />
+                        )
+                    )}
+
                 </Slider>
+
             </section>
 
-            {/* ── Categories Grid ──────────────────────────────────────────────────── */}
-            <section className="py-16 md:py-20 bg-white" data-testid="categories-section">
+            {/* Categories */}
+
+            <section
+                className="py-16 md:py-20 bg-white"
+                data-testid="categories-section"
+            >
+
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
+
                     <SectionHeader
                         eyebrow="Browse by Category"
                         title="Explore Our Collections"
                         subtitle="Discover premium categories of dates, nuts, dry fruits, and exotic spices"
                     />
 
-                    {categories.length === 0 && !loading ? (
+                    {categories.length === 0 &&
+                    !loading ? (
+
                         <p className="text-center text-khajur-dark/40 text-sm py-12">
                             No categories available at the moment.
                         </p>
+
                     ) : (
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {categories.map((category) => (
-                                <CategoryCard key={category.id} category={category} />
-                            ))}
+
+                            {categories.map(
+                                (category) => (
+                                    <CategoryCard
+                                        key={category.id}
+                                        category={category}
+                                    />
+                                )
+                            )}
+
                         </div>
+
                     )}
+
                 </div>
+
             </section>
 
             <Divider />
 
-            {/* ── Featured Products ─────────────────────────────────────────────────── */}
-            <section className="py-16 md:py-20 bg-white" data-testid="featured-products-section">
+            {/* Featured Products */}
+
+            <section
+                className="py-16 md:py-20 bg-white"
+                data-testid="featured-products-section"
+            >
+
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
+
                     <SectionHeader
                         eyebrow="Handpicked For You"
                         title="Featured Products"
                         subtitle="Our most loved premium selection — curated for discerning customers"
                     />
 
-                    {/* Product Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
                         {loading
-                            ? Array.from({ length: 4 }, (_, i) => <ProductSkeleton key={i} />)
-                            : featuredProducts.slice(0, 4).map((product) => (
-                                <ProductCard key={product.id} product={product} />
-                            ))
-                        }
+                            ? Array.from(
+                                  { length: 4 },
+                                  (_, i) => (
+                                      <ProductSkeleton
+                                          key={i}
+                                      />
+                                  )
+                              )
+                            : featuredProducts
+                                  .slice(0, 4)
+                                  .map((product) => (
+                                      <ProductCard
+                                          key={product.id}
+                                          product={product}
+                                      />
+                                  ))}
+
                     </div>
 
-                    {/* View All CTA */}
                     {!loading && (
                         <div className="text-center mt-12">
+
                             <Link
                                 to="/products"
                                 className="
-                                    inline-flex items-center gap-2
-                                    bg-khajur-primary text-khajur-cream
+                                    inline-flex
+                                    items-center
+                                    gap-2
+                                    bg-khajur-primary
+                                    text-khajur-cream
                                     hover:bg-khajur-primary/90
-                                    px-8 py-3.5 text-xs font-bold uppercase tracking-widest
-                                    transition-all duration-300
-                                    border border-transparent hover:border-khajur-gold
+                                    px-8
+                                    py-3.5
+                                    text-xs
+                                    font-bold
+                                    uppercase
+                                    tracking-widest
+                                    transition-all
+                                    duration-300
+                                    border
+                                    border-transparent
+                                    hover:border-khajur-gold
                                 "
                                 data-testid="view-all-products-button"
                             >
                                 View All Products
                                 <ChevronRight className="w-4 h-4" />
                             </Link>
+
                         </div>
                     )}
+
                 </div>
+
             </section>
 
             <Divider />
 
-            {/* ── Bulk Orders Banner ────────────────────────────────────────────────── */}
+            {/* Bulk Orders Banner */}
+
             <section className="py-16 bg-khajur-primary">
+
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+
+                    <div className="
+                        flex
+                        flex-col
+                        md:flex-row
+                        items-center
+                        justify-between
+                        gap-10
+                    ">
 
                         {/* Left */}
-                        <div className="max-w-xl">
+
+                        <div className="max-w-2xl">
+
                             <p className="text-xs uppercase tracking-widest text-khajur-gold font-semibold mb-3">
                                 For Businesses & Events
                             </p>
+
                             <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-cream mb-4">
                                 Bulk Orders Available
                             </h2>
-                            <p className="text-khajur-cream/65 text-base leading-relaxed">
-                                Special pricing for offices, hotels, restaurants and event planners.
-                                Minimum order ₹5,000. Free delivery within Hyderabad.
+
+                            <p className="text-khajur-cream/65 text-base leading-relaxed mb-6">
+                                Special pricing for offices, hotels,
+                                restaurants and event planners.
+                                Minimum order ₹5,000. Free delivery
+                                within Hyderabad.
                             </p>
+
+                            {/* Special Public Discount Notice */}
+
+                            <div
+                                className="
+                                    relative
+                                    overflow-hidden
+                                    bg-khajur-gold/10
+                                    border
+                                    border-khajur-gold/50
+                                    px-5
+                                    md:px-6
+                                    py-5
+                                    shadow-lg
+                                "
+                            >
+
+                                <div className="
+                                    absolute
+                                    top-0
+                                    left-0
+                                    w-full
+                                    h-1
+                                    bg-khajur-gold
+                                " />
+
+                                <div className="flex items-start gap-3">
+
+                                    <span className="text-xl flex-shrink-0">
+                                        ❤️
+                                    </span>
+
+                                    <div>
+
+                                        <p className="
+                                            text-khajur-gold
+                                            text-xs
+                                            md:text-sm
+                                            font-bold
+                                            uppercase
+                                            tracking-[0.18em]
+                                            mb-2
+                                        ">
+                                            Special Community Discount
+                                        </p>
+
+                                        <p className="
+                                            font-serif
+                                            text-lg
+                                            md:text-xl
+                                            text-khajur-cream
+                                            font-medium
+                                            mb-2
+                                        ">
+                                            Special discounts for Hospitals,
+                                            Orphanages & Old Age Homes
+                                        </p>
+
+                                        <p className="
+                                            text-sm
+                                            text-khajur-cream/75
+                                            leading-relaxed
+                                        ">
+                                            KhajurKart proudly offers special
+                                            discounted pricing for hospitals,
+                                            orphanages and old age homes.
+                                            Contact us for dedicated pricing,
+                                            bulk support and personalized
+                                            assistance.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
                         </div>
 
                         {/* Right */}
+
                         <Link
                             to="/bulk-orders"
                             className="
-                                flex-shrink-0 inline-flex items-center gap-2
-                                bg-khajur-gold text-khajur-primary
+                                flex-shrink-0
+                                inline-flex
+                                items-center
+                                gap-2
+                                bg-khajur-gold
+                                text-khajur-primary
                                 hover:bg-khajur-gold/90
-                                px-10 py-4 text-xs font-bold uppercase tracking-widest
-                                transition-all duration-300
+                                px-10
+                                py-4
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-widest
+                                transition-all
+                                duration-300
                                 hover:shadow-[0_0_20px_rgba(198,169,98,0.35)]
                             "
                         >
                             Get a Bulk Quote
                             <ChevronRight className="w-4 h-4" />
                         </Link>
+
                     </div>
+
                 </div>
+
             </section>
 
             <Divider />
 
-            {/* ── Trust Features ────────────────────────────────────────────────────── */}
-            <section className="py-16 md:py-20" data-testid="status-section">
+            {/* Trust Features */}
+
+            <section
+                className="py-16 md:py-20"
+                data-testid="status-section"
+            >
+
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
+
                     <SectionHeader
                         eyebrow="Why Choose Us"
                         title="The KhajurKart Promise"
                         subtitle="We are committed to quality, authenticity, and your satisfaction"
                     />
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {STATUS_FEATURES.map((feature, index) => (
-                            <FeatureCard key={index} feature={feature} index={index} />
-                        ))}
+
+                        {STATUS_FEATURES.map(
+                            (feature, index) => (
+                                <FeatureCard
+                                    key={index}
+                                    feature={feature}
+                                    index={index}
+                                />
+                            )
+                        )}
+
                     </div>
+
                 </div>
+
             </section>
 
             <Divider />
 
-            {/* ── Customer Reviews ──────────────────────────────────────────────────── */}
-            <section className="py-16 md:py-20 bg-white" data-testid="reviews-section">
+            {/* Reviews */}
+
+            <section
+                className="py-16 md:py-20 bg-white"
+                data-testid="reviews-section"
+            >
+
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
+
                     <SectionHeader
                         eyebrow="Customer Stories"
                         title="What Our Customers Say"
                         subtitle="Trusted by thousands of happy customers across India"
                     />
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {REVIEWS.map((review, index) => (
-                            <ReviewCard key={index} review={review} index={index} />
-                        ))}
+
+                        {REVIEWS.map(
+                            (review, index) => (
+                                <ReviewCard
+                                    key={index}
+                                    review={review}
+                                    index={index}
+                                />
+                            )
+                        )}
+
                     </div>
+
                 </div>
+
             </section>
 
-            {/* ── Final CTA Banner ──────────────────────────────────────────────────── */}
+            {/* Final CTA */}
+
             <section className="py-16 bg-khajur-cream border-t border-khajur-border">
+
                 <div className="max-w-3xl mx-auto px-6 md:px-12 text-center">
+
                     <p className="text-xs uppercase tracking-widest text-khajur-gold font-semibold mb-4">
                         Start Shopping
                     </p>
+
                     <h2 className="font-serif text-3xl md:text-4xl font-medium text-khajur-primary mb-5">
                         Taste the Difference of Premium Quality
                     </h2>
+
                     <p className="text-khajur-dark/60 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-                        From gift-worthy dates to everyday nuts and spices — find everything
-                        you need in one trusted store.
+                        From gift-worthy dates to everyday nuts and
+                        spices — find everything you need in one
+                        trusted store.
                     </p>
+
                     <Link
                         to="/products"
                         className="
-                            inline-flex items-center gap-2
-                            bg-khajur-primary text-khajur-cream
+                            inline-flex
+                            items-center
+                            gap-2
+                            bg-khajur-primary
+                            text-khajur-cream
                             hover:bg-khajur-primary/90
-                            px-10 py-4 text-xs font-bold uppercase tracking-widest
-                            transition-all duration-300
-                            border border-transparent hover:border-khajur-gold
+                            px-10
+                            py-4
+                            text-xs
+                            font-bold
+                            uppercase
+                            tracking-widest
+                            transition-all
+                            duration-300
+                            border
+                            border-transparent
+                            hover:border-khajur-gold
                         "
                     >
                         Shop All Products
                         <ChevronRight className="w-4 h-4" />
                     </Link>
+
                 </div>
+
             </section>
 
         </div>
