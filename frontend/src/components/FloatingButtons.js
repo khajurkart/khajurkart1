@@ -94,7 +94,7 @@ const FloatingButtons = () => {
             case 'call':
                 return () => {
                     const choice = window.confirm(
-                        'Click OK to call +91 7981002137\nClick Cancel to call +91 9876543210'
+                        'Click OK to call +91 9133105000\nClick Cancel to call +91 9133805000'
                     );
 
                     window.location.href = choice
