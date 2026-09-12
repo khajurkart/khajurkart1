@@ -77,14 +77,32 @@ const FloatingButtons = () => {
     const getAction = (type) => {
         switch (type) {
             case 'whatsapp':
-                return () => window.open('https://wa.me/917981002137', '_blank');
+                return () => {
+                    const choice = window.confirm(
+                        'Click OK for Sales\nClick Cancel for Support'
+                    );
+
+                    if (choice) {
+                        window.open('https://wa.me/919133105000', '_blank');
+                    } else {
+                        window.open('https://wa.me/919133805000', '_blank');
+                    }
+                };
             case 'email':
                 // ✅ Navigate to contact page — form submission sends auto confirmation email
                 return () => navigate('/contact');
             case 'call':
-                return () => window.location.href = 'tel:+917981002137';
+                return () => {
+                    const choice = window.confirm(
+                        'Click OK to call +91 7981002137\nClick Cancel to call +91 9876543210'
+                    );
+
+                    window.location.href = choice
+                        ? 'tel:+919133105000'
+                        : 'tel:+919133805000';
+                };
             default:
-                return () => {};
+                return () => { };
         }
     };
 
