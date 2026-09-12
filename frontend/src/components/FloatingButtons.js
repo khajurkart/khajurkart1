@@ -206,9 +206,6 @@ const FloatingButtons = () => {
                                 )}
 
                                 <div>
-                                    <p className="text-sm font-semibold text-khajur-primary">
-                                        Sales
-                                    </p>
 
                                     <p className="text-sm text-khajur-primary/70">
                                         +91 91331 05000
@@ -241,9 +238,6 @@ const FloatingButtons = () => {
                                 )}
 
                                 <div>
-                                    <p className="text-sm font-semibold text-khajur-primary">
-                                        Support
-                                    </p>
 
                                     <p className="text-sm text-khajur-primary/70">
                                         +91 91338 05000
