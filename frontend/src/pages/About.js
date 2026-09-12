@@ -225,10 +225,26 @@ const About = () => {
 
                         <div className="text-center p-8 border border-khajur-border hover:border-khajur-gold transition-colors">
                             <Phone className="w-8 h-8 text-khajur-gold mx-auto mb-4" />
-                            <h3 className="font-serif text-lg font-medium text-khajur-primary mb-2">Phone</h3>
-                            <a href="tel:+917981002137" className="text-sm text-khajur-dark/60 hover:text-khajur-gold transition-colors">
-                                +91 7981002137
-                            </a>
+
+                            <h3 className="font-serif text-lg font-medium text-khajur-primary mb-3">
+                                Phone
+                            </h3>
+
+                            <div className="flex flex-col items-center gap-2">
+                                <a
+                                    href="tel:+919133105000"
+                                    className="text-sm text-khajur-dark/60 hover:text-khajur-gold transition-colors"
+                                >
+                                    +91 91331 05000
+                                </a>
+
+                                <a
+                                    href="tel:+919133805000"
+                                    className="text-sm text-khajur-dark/60 hover:text-khajur-gold transition-colors"
+                                >
+                                    +91 91338 05000
+                                </a>
+                            </div>
                         </div>
 
                         <div className="text-center p-8 border border-khajur-border hover:border-khajur-gold transition-colors">
