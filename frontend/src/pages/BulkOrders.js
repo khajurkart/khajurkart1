@@ -583,15 +583,25 @@ const BulkOrders = () => {
 
                             <div className="space-y-6">
                                 <div className="bg-khajur-cream border border-khajur-border p-6 hover:border-khajur-gold transition-colors">
-                                    <p className="text-sm text-khajur-dark/60 mb-2 uppercase tracking-wide">
+                                    <p className="text-sm text-khajur-dark/60 mb-3 uppercase tracking-wide">
                                         WhatsApp / Call
                                     </p>
-                                    <a
-                                        href="tel:+917981002137"
-                                        className="font-serif text-2xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors"
-                                    >
-                                        +91 79810 02137
-                                    </a>
+
+                                    <div className="flex flex-col gap-2">
+                                        <a
+                                            href="tel:+919133105000"
+                                            className="font-serif text-2xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors"
+                                        >
+                                            +91 91331 05000
+                                        </a>
+
+                                        <a
+                                            href="tel:+919133805000"
+                                            className="font-serif text-2xl font-medium text-khajur-primary hover:text-khajur-gold transition-colors"
+                                        >
+                                            +91 91338 05000
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <div className="bg-khajur-cream border border-khajur-border p-6 hover:border-khajur-gold transition-colors">
@@ -615,15 +625,27 @@ const BulkOrders = () => {
                                     </p>
                                 </div>
 
-                                <a
-                                    href="https://wa.me/917981002137?text=Hi%20KhajurKart!%20I%20am%20interested%20in%20placing%20a%20bulk%20order."
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-3 w-full bg-green-600 hover:bg-green-700 text-white rounded-sm px-8 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
-                                >
-                                    <span className="text-xl">💬</span>
-                                    WhatsApp Us Now
-                                </a>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <a
+                                        href="https://wa.me/919133105000?text=Hi%20KhajurKart!%20I%20am%20interested%20in%20placing%20a%20bulk%20order."
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white rounded-sm px-5 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
+                                    >
+                                        <span className="text-lg">💬</span>
+                                        WhatsApp 1
+                                    </a>
+
+                                    <a
+                                        href="https://wa.me/919133805000?text=Hi%20KhajurKart!%20I%20am%20interested%20in%20placing%20a%20bulk%20order."
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white rounded-sm px-5 py-4 uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
+                                    >
+                                        <span className="text-lg">💬</span>
+                                        WhatsApp 2
+                                    </a>
+                                </div>
                             </div>
 
                             <div className="mt-8 bg-khajur-primary p-6 border border-khajur-gold/20">
