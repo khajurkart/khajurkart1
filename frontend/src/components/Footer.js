@@ -199,7 +199,7 @@ const Footer = () => (
                         <img
                             src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1790870637/Logo_tjb3v8.png"
                             alt="KhajurKart Logo"
-                            className="h-20 w-auto"
+                            className="h-15 w-auto"
                         />
 
                         <span
