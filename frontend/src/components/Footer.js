@@ -197,9 +197,9 @@ const Footer = () => (
                         className="flex items-center gap-2 mb-5 group"
                     >
                         <img
-                            src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1790870637/Logo_tjb3v8.png"
+                            src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1790947325/copy_of_1790946948899_mmvsso.png"
                             alt="KhajurKart Logo"
-                            className="h-16 w-auto"
+                            className="h-18 w-auto"
                         />
 
                         <span
