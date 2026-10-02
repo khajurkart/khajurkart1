@@ -161,7 +161,7 @@ const Navbar = () => {
                             <img
                                 src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1790947325/copy_of_1790946948899_mmvsso.png"
                                 alt="KhajurKart"
-                                className="h-18 w-auto"
+                                className="h-16 w-auto"
                             />
                             <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
                                 KhajurKart
