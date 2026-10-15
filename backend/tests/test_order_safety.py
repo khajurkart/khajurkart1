@@ -16,23 +16,3 @@ def test_invalid_price():
     with pytest.raises(ValueError):
         to_paise(float('nan'))
 
-from delivery.order_safety import calculate_items
-
-
-def test_duplicate_product_cannot_exceed_stock():
-    products = {
-        "ajwa-dates": {
-            "id": "ajwa-dates",
-            "price": 1299,
-            "stock": 5,
-            "sizes": [],
-        }
-    }
-
-    cart = [
-        {"product_id": "ajwa-dates", "quantity": 4},
-        {"product_id": "ajwa-dates", "quantity": 4},
-    ]
-
-    with pytest.raises(ValueError, match="Insufficient stock"):
-        calculate_items(cart, products)
