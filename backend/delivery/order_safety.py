@@ -1,4 +1,3 @@
-
 """Validate cart prices and stock without modifying orders."""
 
 from decimal import Decimal, InvalidOperation
