@@ -1,4 +1,3 @@
-
 import pytest
 
 from delivery.cod_ledger import CODAccount
