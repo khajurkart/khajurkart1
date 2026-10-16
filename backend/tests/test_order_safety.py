@@ -1,4 +1,3 @@
-
 import pytest
 
 from delivery.order_safety import calculate_items, to_paise
