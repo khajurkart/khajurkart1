@@ -2383,6 +2383,7 @@ async def update_order_status(
             detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}",
         )
 
+    # Internal KhajurKart tracking reference only; never a courier AWB.
     # Generate tracking ID if status is shipped and doesn't have one
     update_data = {"status": status}
     if status == "shipped":
@@ -2829,6 +2830,74 @@ async def update_return_status(
         raise HTTPException(status_code=404, detail="Return request not found")
 
     return {"message": "Return status updated successfully"}
+
+
+# ================= DELIVERY GATEWAY (SAFE ADMIN READ API) =================
+# No live courier bookings, webhook ingestion, or financial verification are enabled.
+from delivery.cod_ledger import CODAccount
+from delivery.partner_rotation import assigned_partner
+from delivery.order_safety import to_paise
+
+
+@api_router.get("/admin/delivery/orders/{order_id}")
+async def admin_delivery_order(order_id: str, admin: dict = Depends(get_admin_user)):
+    """Read order shipment and COD status without changing money or shipment state."""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    shipments = await db.shipments.find({"order_id": order_id}, {"_id": 0}).to_list(100)
+    cod = await db.cod_accounts.find_one({"order_id": order_id}, {"_id": 0})
+    cod_status = None
+    if cod:
+        try:
+            cod_status = CODAccount(
+                order_id=order_id,
+                expected_paise=cod["expected_paise"],
+                collected_paise=cod.get("collected_paise", 0),
+                payout_reported_paise=cod.get("payout_reported_paise", 0),
+                bank_verified_paise=cod.get("bank_verified_paise", 0),
+                courier_deductions_paise=cod.get("courier_deductions_paise", 0),
+            ).status
+        except (ValueError, KeyError, TypeError):
+            cod_status = "reconciliation_error"
+    return {
+        "order_id": order_id,
+        "payment_method": order.get("payment_method"),
+        "shipments": shipments,
+        "cod_account": cod,
+        "cod_status": cod_status,
+        "live_booking_enabled": False,
+    }
+
+
+@api_router.get("/admin/delivery/summary")
+async def admin_delivery_summary(admin: dict = Depends(get_admin_user)):
+    """Operational counts; never infer COD paid from delivered status."""
+    return {
+        "shipments_total": await db.shipments.count_documents({}),
+        "shipments_pending": await db.shipments.count_documents({"status": "booking_pending"}),
+        "shipments_unknown": await db.shipments.count_documents({"status": "booking_unknown"}),
+        "cod_accounts_total": await db.cod_accounts.count_documents({}),
+        "live_booking_enabled": False,
+    }
+
+
+@api_router.get("/admin/delivery/partner-on-duty")
+async def admin_delivery_partner_on_duty(admin: dict = Depends(get_admin_user)):
+    """Rotation is operational only and never changes merchant bank ownership."""
+    from datetime import date
+    start_raw = os.environ.get("DELIVERY_ROTATION_START_DATE")
+    if not start_raw:
+        return {"configured": False, "partner": None}
+    try:
+        start_date = date.fromisoformat(start_raw)
+        interval = int(os.environ.get("DELIVERY_ROTATION_DAYS", "15"))
+        today = datetime.now(timezone.utc).date()
+        partner = assigned_partner(today, start_date, interval)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=503, detail="Partner rotation configuration invalid")
+    return {"configured": True, "partner": partner, "days_per_partner": interval,
+            "date_utc": today.isoformat()}
 
 
 # Include router
