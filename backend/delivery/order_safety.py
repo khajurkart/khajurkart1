@@ -1,12 +1,6 @@
+"""Validate cart prices and stock without modifying orders."""
 
-"""Pure order-price validation helper for server.py integration.
-
-Product records must come from MongoDB, not from the customer.
-Coupons must be validated separately on the server.
-This helper does not change stock or create orders.
-"""
-
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation
 
 
 def to_paise(value):
@@ -23,18 +17,17 @@ def to_paise(value):
     if paise != paise.to_integral_value():
         raise ValueError("Amount has more than two decimal places")
 
-    return int(paise.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    return int(paise)
 
 
 def calculate_items(cart_items, product_by_id):
     if not cart_items:
         raise ValueError("Empty cart")
 
+    quantities = {}
     lines = []
     total = 0
-    quantities_by_product = {}
 
-    # First pass: validate and combine product quantities.
     for item in cart_items:
         product_id = item["product_id"]
         qty = item["quantity"]
@@ -47,18 +40,14 @@ def calculate_items(cart_items, product_by_id):
         if not product:
             raise ValueError(f"Unknown product: {product_id}")
 
-        quantities_by_product[product_id] = (
-            quantities_by_product.get(product_id, 0) + qty
-        )
+        quantities[product_id] = quantities.get(product_id, 0) + qty
 
-    # Check combined quantities against authoritative stock.
-    for product_id, total_qty in quantities_by_product.items():
+    for product_id, qty in quantities.items():
         product = product_by_id[product_id]
 
-        if total_qty > product.get("stock", 0):
+        if qty > product.get("stock", 0):
             raise ValueError(f"Insufficient stock: {product_id}")
 
-    # Second pass: validate sizes and calculate prices.
     for item in cart_items:
         product_id = item["product_id"]
         qty = item["quantity"]
@@ -79,19 +68,15 @@ def calculate_items(cart_items, product_by_id):
 
             price = option["price"]
             selected_size = chosen
-
         else:
             if item.get("size"):
-                raise ValueError(
-                    "Product does not offer size selection"
-                )
+                raise ValueError("Product does not offer size selection")
 
             price = product["price"]
             selected_size = None
 
         unit_paise = to_paise(price)
         line_total = unit_paise * qty
-
         total += line_total
 
         lines.append({
