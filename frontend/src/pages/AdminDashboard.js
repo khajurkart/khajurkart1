@@ -20,6 +20,7 @@ import CouponManager from './CouponManager';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
 const StatCard = ({ icon: Icon, value, label, highlight = false }) => (
