@@ -1,9 +1,7 @@
+"""COD amount validation for KhajurKart.
 
-"""COD accounting validation for KhajurKart.
-
-Delivery does not imply COD collection.
-Courier payout reports do not prove bank settlement.
-Bank verification requires independently matched bank records.
+Delivery, collection, courier payout and bank verification
+are separate accounting stages.
 """
 
 from dataclasses import dataclass
@@ -11,7 +9,9 @@ from dataclasses import dataclass
 
 def validate_paise(value, name):
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-        raise ValueError(f"{name} must be a non-negative integer paise")
+        raise ValueError(
+            f"{name} must be a non-negative integer paise"
+        )
     return value
 
 
@@ -28,13 +28,15 @@ class CODAccount:
         if not isinstance(self.order_id, str) or not self.order_id.strip():
             raise ValueError("A valid order ID is required")
 
-        for field in (
+        fields = (
             "expected_paise",
             "collected_paise",
             "payout_reported_paise",
             "bank_verified_paise",
             "courier_deductions_paise",
-        ):
+        )
+
+        for field in fields:
             validate_paise(getattr(self, field), field)
 
         if self.collected_paise > self.expected_paise:
@@ -51,17 +53,16 @@ class CODAccount:
             + self.courier_deductions_paise
             > self.collected_paise
         ):
-            raise ValueError("Payout plus deductions exceeds collection")
+            raise ValueError(
+                "Payout plus deductions exceeds collection"
+            )
 
         if self.bank_verified_paise > self.payout_reported_paise:
             raise ValueError("Bank credit exceeds reported payout")
 
-        if self.bank_verified_paise and not self.payout_reported_paise:
-            raise ValueError("Cannot verify bank credit without payout")
-
     @property
     def status(self):
-        if (
+        fully_reconciled = (
             self.expected_paise > 0
             and self.collected_paise == self.expected_paise
             and self.payout_reported_paise > 0
@@ -71,7 +72,9 @@ class CODAccount:
                 + self.courier_deductions_paise
                 == self.collected_paise
             )
-        ):
+        )
+
+        if fully_reconciled:
             return "bank_verified"
 
         if self.bank_verified_paise:
