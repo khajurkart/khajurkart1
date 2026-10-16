@@ -302,6 +302,13 @@ const AdminDashboard = () => {
             variant: 'gold',
         },
         {
+            to: '/admin/delivery',
+            icon: Package,
+            title: 'Delivery Gateway',
+            description: 'View shipments, COD reconciliation and partner duty (read-only).',
+            variant: 'white',
+        },
+        {
             to: '/admin/returns',
             icon: RefreshCw,
             title: 'Returns & Exchanges',
