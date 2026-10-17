@@ -1,3 +1,4 @@
+
 name: KhajurKart Backend Integration
 
 on:
@@ -8,6 +9,7 @@ on:
 
 jobs:
   verify:
+    name: Verify FastAPI
     runs-on: ubuntu-latest
 
     defaults:
@@ -58,4 +60,62 @@ jobs:
 
           print("FastAPI imported successfully.")
           print("All delivery routes registered.")
+          PY
+
+  mongodb_test:
+    name: Verify MongoDB Atlas Connection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install MongoDB driver
+        run: python -m pip install "pymongo[srv]"
+
+      - name: Test database connection
+        env:
+          TEST_MONGO_URL: ${{ secrets.TEST_MONGO_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          from uuid import uuid4
+          from pymongo import MongoClient
+
+          uri = os.environ.get("TEST_MONGO_URL")
+          if not uri:
+              raise RuntimeError("TEST_MONGO_URL secret is missing")
+
+          client = MongoClient(
+              uri,
+              serverSelectionTimeoutMS=10000
+          )
+
+          try:
+              client.admin.command("ping")
+              print("PASS: MongoDB Atlas connection")
+
+              db = client["khajurkart_integration_test"]
+              collection = db["ci_connection_checks"]
+
+              test_id = str(uuid4())
+
+              collection.insert_one({
+                  "_id": test_id,
+                  "test": "khajurkart_ci"
+              })
+
+              try:
+                  found = collection.find_one({"_id": test_id})
+                  assert found is not None
+                  print("PASS: Test database read/write")
+              finally:
+                  collection.delete_one({"_id": test_id})
+
+              print("PASS: Test document cleanup")
+
+          finally:
+              client.close()
           PY
