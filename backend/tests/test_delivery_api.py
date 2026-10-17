@@ -85,7 +85,6 @@ def test_missing_order_returns_404(api):
     db.users.find_one.return_value = {"id": "ci_admin", "email": server.ADMIN_EMAILS[0], "role": "admin"}
     assert client.get(PATHS[2], headers=auth_header()).status_code == 404
 
-
 def test_order_detail_admin(api):
     client, db = api
     db.users.find_one.return_value = {"id": "ci_admin", "email": server.ADMIN_EMAILS[0], "role": "admin"}
