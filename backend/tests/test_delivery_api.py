@@ -16,7 +16,6 @@ os.environ.pop("DELIVERY_ROTATION_START_DATE", None)
 
 from backend import server  # noqa: E402
 
-
 @pytest.fixture
 def api(monkeypatch):
     database = MagicMock()
