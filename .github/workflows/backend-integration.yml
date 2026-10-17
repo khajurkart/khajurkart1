@@ -103,10 +103,23 @@ jobs:
               print("Configured MongoDB username:", unquote(parsed.username or "MISSING"))
               print("Configured MongoDB host:", parsed.hostname or "MISSING")
 
-              status = client.admin.command("connectionStatus")
+              status = client.admin.command( "connectionStatus", showPrivileges=True)
               auth_users = status.get("authInfo", {}).get("authenticatedUsers", [])
 
               print("Authenticated MongoDB users:", auth_users)
+              
+              auth_info = status.get("authInfo", {})
+
+              print(
+                  "Authenticated MongoDB roles:",
+                  auth_info.get("authenticatedUserRoles", [])
+              )
+              
+              for privilege in auth_info.get("authenticatedUserPrivileges", []):
+                  resource = privilege.get("resource", {})
+                  if resource.get("db") == "khajurkart_integration_test":
+                      print("Test database resource:", resource)
+                      print("Allowed actions:", privilege.get("actions", []))
               
               db = client["khajurkart_integration_test"]
               collection = db["ci_connection_checks"]
