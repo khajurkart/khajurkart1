@@ -144,3 +144,64 @@ jobs:
               client.close()
           PY
 
+
+      - name: Verify MongoDB transaction commit and rollback
+        env:
+          TEST_MONGO_URL: ${{ secrets.TEST_MONGO_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          from uuid import uuid4
+          from pymongo import MongoClient
+
+          uri = os.environ.get("TEST_MONGO_URL")
+          if not uri:
+              raise RuntimeError("TEST_MONGO_URL is missing")
+
+          client = MongoClient(
+              uri,
+              serverSelectionTimeoutMS=10000,
+          )
+
+          db = client["khajurkart_integration_test"]
+          collection = db["ci_transaction_checks"]
+          commit_id = f"commit-{uuid4().hex}"
+          rollback_id = f"rollback-{uuid4().hex}"
+
+          try:
+              with client.start_session() as session:
+                  with session.start_transaction():
+                      collection.insert_one(
+                          {"_id": commit_id, "test": "commit"},
+                          session=session,
+                      )
+
+              assert collection.find_one(
+                  {"_id": commit_id}
+              ) is not None
+              print("PASS: Transaction commit")
+
+              try:
+                  with client.start_session() as session:
+                      with session.start_transaction():
+                          collection.insert_one(
+                              {"_id": rollback_id, "test": "rollback"},
+                              session=session,
+                          )
+                          raise RuntimeError("Intentional rollback")
+              except RuntimeError as exc:
+                  if str(exc) != "Intentional rollback":
+                      raise
+
+              assert collection.find_one(
+                  {"_id": rollback_id}
+              ) is None
+              print("PASS: Transaction rollback")
+
+          finally:
+              collection.delete_many({
+                  "_id": {"$in": [commit_id, rollback_id]}
+              })
+              client.close()
+
+          PY
