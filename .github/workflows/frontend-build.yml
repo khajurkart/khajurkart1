@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: frontend
@@ -21,12 +22,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Enable Yarn
+        run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Build frontend
-        run: npm run build
+        run: yarn build
         env:
           CI: 'false'
           REACT_APP_BACKEND_URL: https://khajurkart1.onrender.com
