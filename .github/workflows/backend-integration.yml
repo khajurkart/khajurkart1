@@ -95,7 +95,19 @@ jobs:
           try:
               client.admin.command("ping")
               print("PASS: MongoDB Atlas connection")
+              
+              from urllib.parse import urlsplit, unquote
 
+              parsed = urlsplit(uri)
+
+              print("Configured MongoDB username:", unquote(parsed.username or "MISSING"))
+              print("Configured MongoDB host:", parsed.hostname or "MISSING")
+
+              status = client.admin.command("connectionStatus")
+              auth_users = status.get("authInfo", {}).get("authenticatedUsers", [])
+
+              print("Authenticated MongoDB users:", auth_users)
+              
               db = client["khajurkart_integration_test"]
               collection = db["ci_connection_checks"]
 
