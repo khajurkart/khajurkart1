@@ -526,19 +526,24 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict:
-    if current_user.get("email") not in ADMIN_EMAILS:
-        raise HTTPException(status_code=403, detail="Admin access required")
 
-    
-    # Require both an allowlisted email and an admin role.
-    if user.get("role") != "admin":
+async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict:
+    # Verify the user's email is authorized.
+    if current_user.get("email") not in ADMIN_EMAILS:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
+            detail="Admin access required"
+        )
+
+    # Verify the user has the admin role.
+    if current_user.get("role") != "admin":
+        raise HTTPException(
+            status_code=403,
             detail="Admin access required"
         )
 
     return current_user
+
 
 # ============ EMAIL VERIFICATION ============
 
