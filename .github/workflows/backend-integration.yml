@@ -1,0 +1,61 @@
+name: KhajurKart Backend Integration
+
+on:
+  push:
+    branches:
+      - feature/delivery-gateway
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify FastAPI imports and routes
+        env:
+          MONGO_URL: mongodb://127.0.0.1:27017
+          DB_NAME: khajurkart_integration_test
+          JWT_SECRET: github-actions-test-secret
+          RESEND_API_KEY: test-key
+          RAZORPAY_KEY_ID: rzp_test_dummy
+          RAZORPAY_KEY_SECRET: dummy-secret
+        run: |
+          python - <<'PY'
+          from server import app
+
+          routes = {
+              (method, route.path)
+              for route in app.routes
+              for method in getattr(route, "methods", [])
+          }
+
+          required = [
+              "/api/admin/delivery/summary",
+              "/api/admin/delivery/partner-on-duty",
+              "/api/admin/delivery/orders/{order_id}",
+          ]
+
+          for path in required:
+              assert ("GET", path) in routes, (
+                  f"Missing GET route: {path}"
+              )
+              print(f"PASS: GET {path}")
+
+          print("FastAPI imported successfully.")
+          print("All delivery routes registered.")
+          PY
