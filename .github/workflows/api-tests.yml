@@ -1,0 +1,26 @@
+name: KhajurKart Delivery API Tests
+on:
+  push:
+    branches: [feature/delivery-gateway]
+  workflow_dispatch:
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend and test dependencies
+        run: |
+          python -m pip install -r backend/requirements.txt
+          python -m pip install pytest httpx
+      - name: Run isolated API security tests
+        env:
+          MONGO_URL: mongodb://127.0.0.1:27017
+          DB_NAME: khajurkart_integration_test
+          JWT_SECRET: ci-test-only-jwt-secret-not-for-production
+          RESEND_API_KEY: ci-test-placeholder
+          RAZORPAY_KEY_ID: rzp_test_placeholder
+          RAZORPAY_KEY_SECRET: ci-test-placeholder
+        run: python -m pytest backend/tests/test_delivery_api.py -q
