@@ -23,20 +23,49 @@ const NAV_LINKS = [
 
 // ─── Free Delivery Announcement ───────────────────────────────────────────────
 
-const FreeDeliveryBanner = () => {
-    const announcement = (
-        <span className="announcement-content">
-            <Truck className="announcement-truck" />
-            <span>
-                Enjoy <strong>FREE DELIVERY</strong> on orders above{' '}
-                <strong>₹2,000!</strong>
-            </span>
-            <span className="announcement-separator">|</span>
-            <span>
-                More shopping, more savings — only at KhajurKart.
-            </span>
-        </span>
-    );
+
+const FreeDeliveryBanner = () => (
+    <div className="w-full overflow-hidden bg-[#C6A962] text-[#0F3D2E] py-3">
+        <div className="flex w-full overflow-hidden">
+            <div className="flex w-max shrink-0 items-center animate-delivery-marquee">
+                <div className="flex w-max shrink-0 items-center gap-2 px-6 whitespace-nowrap">
+                    <Truck className="h-5 w-5 shrink-0" />
+
+                    <p className="text-xs font-semibold sm:text-sm md:text-base whitespace-nowrap">
+                        Enjoy <span className="font-bold">FREE DELIVERY</span> on orders above{' '}
+                        <span className="font-bold">₹2,000!</span>
+                    </p>
+
+                    <span className="mx-3 opacity-60">|</span>
+
+                    <p className="text-xs font-normal sm:text-sm md:text-base whitespace-nowrap">
+                        More shopping, more savings — only at KhajurKart.
+                    </p>
+                </div>
+
+                {/* Duplicate for a seamless continuous loop */}
+                <div
+                    className="flex w-max shrink-0 items-center gap-2 px-6 whitespace-nowrap"
+                    aria-hidden="true"
+                >
+                    <Truck className="h-5 w-5 shrink-0" />
+
+                    <p className="text-xs font-semibold sm:text-sm md:text-base whitespace-nowrap">
+                        Enjoy <span className="font-bold">FREE DELIVERY</span> on orders above{' '}
+                        <span className="font-bold">₹2,000!</span>
+                    </p>
+
+                    <span className="mx-3 opacity-60">|</span>
+
+                    <p className="text-xs font-normal sm:text-sm md:text-base whitespace-nowrap">
+                        More shopping, more savings — only at KhajurKart.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 
     return (
         <div
@@ -72,7 +101,7 @@ const FreeDeliveryBanner = () => {
                 .announcement-track {
                     display: flex;
                     width: max-content;
-                    animation: khajur-delivery-marquee 28s linear infinite;
+                    animation: khajur-delivery-marquee 25s linear infinite;
                     will-change: transform;
                 }
 
