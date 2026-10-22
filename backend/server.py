@@ -448,6 +448,11 @@ class VerifyRequest(BaseModel):
 class VerifyRequest(BaseModel):
     email: str
     verification_code: str
+    
+    
+class ProfileUpdate(BaseModel):
+    name: str
+    phone: str | None = None
 
 
 # ============ COUPON MODELS ============
@@ -836,6 +841,51 @@ async def reset_password(reset_token: str, new_password: str):
         },
     )
     return {"message": "Password reset successful"}
+
+
+@api_router.put("/user/profile")
+async def update_user_profile(
+    profile_data: ProfileUpdate,
+    current_user: dict = Depends(get_current_user),
+):
+    name = profile_data.name.strip()
+
+    if not name:
+        raise HTTPException(
+            status_code=400,
+            detail="Name cannot be empty",
+        )
+
+    update_fields = {
+        "name": name,
+        "phone": (
+            profile_data.phone.strip()
+            if profile_data.phone
+            else ""
+        ),
+    }
+
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": update_fields},
+    )
+
+    updated_user = await db.users.find_one(
+        {"id": current_user["id"]},
+        {"_id": 0, "password": 0},
+    )
+
+    if updated_user is None:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+
+    return {
+        "message": "Profile updated successfully",
+        "user": updated_user,
+    }
+
 
 
 # ============ EMAIL RECEIVER (Admin Notification) ============
