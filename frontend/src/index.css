@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap');
 /*@import url('https://fonts.googleapis.com/css2?family=YourFont&display=swap');*/
 
@@ -45,6 +46,7 @@ code {
     * {
         @apply border-border;
     }
+
     body {
         @apply bg-khajur-cream text-khajur-dark;
     }
@@ -82,7 +84,6 @@ code {
     }
 }
 
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 10px;
@@ -118,4 +119,41 @@ html {
 .slick-prev:before,
 .slick-next:before {
     color: #C6A962 !important;
+}
+
+/* ==========================================
+   FREE DELIVERY ANNOUNCEMENT MARQUEE
+   Starts outside the right edge and moves left
+   Works on desktop and mobile
+   ========================================== */
+
+@keyframes delivery-marquee {
+    0% {
+        transform: translateX(100vw);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-delivery-marquee {
+    display: flex;
+    width: max-content;
+    flex-shrink: 0;
+    animation: delivery-marquee 18s linear infinite;
+    will-change: transform;
+}
+
+/* Pause the announcement when hovered on desktop */
+.animate-delivery-marquee:hover {
+    animation-play-state: paused;
+}
+
+/* Respect reduced-motion accessibility settings */
+@media (prefers-reduced-motion: reduce) {
+    .animate-delivery-marquee {
+        animation: none;
+        transform: none;
+    }
 }
