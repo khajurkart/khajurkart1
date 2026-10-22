@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -66,26 +65,25 @@ const FreeDeliveryBanner = () => (
     </div>
 );
 
-
-    return (
-        <div
-            className="free-delivery-banner"
-            role="region"
-            aria-label="Free delivery announcement"
-        >
-            <div className="announcement-marquee">
-                <div className="announcement-track">
-                    {/* Two identical groups create a seamless scrolling loop */}
-                    <div className="announcement-group">
-                        {announcement}
-                    </div>
-                    <div className="announcement-group" aria-hidden="true">
-                        {announcement}
-                    </div>
+return (
+    <div
+        className="free-delivery-banner"
+        role="region"
+        aria-label="Free delivery announcement"
+    >
+        <div className="announcement-marquee">
+            <div className="announcement-track">
+                {/* Two identical groups create a seamless scrolling loop */}
+                <div className="announcement-group">
+                    {announcement}
+                </div>
+                <div className="announcement-group" aria-hidden="true">
+                    {announcement}
                 </div>
             </div>
+        </div>
 
-            <style>{`
+        <style>{`
                 .free-delivery-banner {
                     width: 100%;
                     overflow: hidden;
@@ -176,9 +174,8 @@ const FreeDeliveryBanner = () => (
                     }
                 }
             `}</style>
-        </div>
-    );
-};
+    </div>
+);
 
 // ─── Navigation Link ──────────────────────────────────────────────────────────
 
