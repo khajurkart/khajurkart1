@@ -585,21 +585,6 @@ const Home = () => {
                 welcomeCoupon={welcomeCoupon}
             />
 
-            {/* Free Delivery Banner */}
-            <div className="bg-khajur-primary px-4 py-3 text-center border-y border-khajur-gold/40">
-                <div className="flex items-center justify-center gap-2 flex-wrap">
-                    <Truck className="w-5 h-5 text-khajur-gold" />
-                    <p className="text-khajur-cream text-sm md:text-base font-medium">
-                        Enjoy <span className="text-khajur-gold font-bold">FREE DELIVERY</span>
-                        {' '}on orders above <span className="text-khajur-gold font-bold">₹2,000</span>!
-                    </p>
-                </div>
-                <p className="text-khajur-cream/60 text-xs mt-1">
-                    More shopping, more savings — only at KhajurKart.
-                </p>
-            </div>
-
-
             {/* Hero Slider */}
 
             <section
