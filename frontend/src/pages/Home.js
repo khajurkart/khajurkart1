@@ -53,7 +53,7 @@ const STATUS_FEATURES = [
     },
     {
         icon: Truck,
-        title: 'Fast & Free Delivery',
+        title: 'Fast Delivery',
         description: 'Quick and secure shipping across India',
     },
     {
@@ -68,29 +68,29 @@ const STATUS_FEATURES = [
     },
 ];
 
-const REVIEWS = [
-    {
-        name: 'Fatima Hassan',
-        image: 'https://i.pravatar.cc/150?img=47',
-        rating: 5,
-        text: 'The quality of dates and nuts is exceptional. Best premium dry fruits I have purchased online!',
-        location: 'Hyderabad',
-    },
-    {
-        name: 'Mohammed Abdullah',
-        image: 'https://i.pravatar.cc/150?img=12',
-        rating: 5,
-        text: 'Fresh products, beautiful packaging, and timely delivery. KhajurKart is my go-to store now.',
-        location: 'Mumbai',
-    },
-    {
-        name: 'Aisha Rahman',
-        image: 'https://i.pravatar.cc/150?img=45',
-        rating: 5,
-        text: 'Ordered the stuffed dates for Ramadan. Everyone loved them! Excellent quality and taste.',
-        location: 'Chennai',
-    },
-];
+// const REVIEWS = [
+//     {
+//         name: 'Fatima Hassan',
+//         image: 'https://i.pravatar.cc/150?img=47',
+//         rating: 5,
+//         text: 'The quality of dates and nuts is exceptional. Best premium dry fruits I have purchased online!',
+//         location: 'Hyderabad',
+//     },
+//     {
+//         name: 'Mohammed Abdullah',
+//         image: 'https://i.pravatar.cc/150?img=12',
+//         rating: 5,
+//         text: 'Fresh products, beautiful packaging, and timely delivery. KhajurKart is my go-to store now.',
+//         location: 'Mumbai',
+//     },
+//     {
+//         name: 'Aisha Rahman',
+//         image: 'https://i.pravatar.cc/150?img=45',
+//         rating: 5,
+//         text: 'Ordered the stuffed dates for Ramadan. Everyone loved them! Excellent quality and taste.',
+//         location: 'Chennai',
+//     },
+// ];
 
 // ─── Hero Slider Settings ─────────────────────────────────────────────────────
 
@@ -816,29 +816,29 @@ const Home = () => {
 
             <Divider />
 
-            {/* Customer Reviews */}
-            <section
-                className="py-16 md:py-20 bg-white"
-                data-testid="reviews-section"
-            >
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <SectionHeader
-                        eyebrow="Customer Stories"
-                        title="What Our Customers Say"
-                        subtitle="Trusted by thousands of happy customers across India"
-                    />
+            // {/* Customer Reviews */}
+            // <section
+            //     className="py-16 md:py-20 bg-white"
+            //     data-testid="reviews-section"
+            // >
+            //     <div className="max-w-7xl mx-auto px-6 md:px-12">
+            //         <SectionHeader
+            //             eyebrow="Customer Stories"
+            //             title="What Our Customers Say"
+            //             subtitle="Trusted by thousands of happy customers across India"
+            //         />
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {REVIEWS.map((review, index) => (
-                            <ReviewCard
-                                key={index}
-                                review={review}
-                                index={index}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </section>
+            //         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            //             {REVIEWS.map((review, index) => (
+            //                 <ReviewCard
+            //                     key={index}
+            //                     review={review}
+            //                     index={index}
+            //                 />
+            //             ))}
+            //         </div>
+            //     </div>
+            // </section>
 
             {/* Final CTA */}
             <section className="py-16 bg-khajur-cream border-t border-khajur-border">
