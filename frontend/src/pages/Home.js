@@ -816,29 +816,29 @@ const Home = () => {
 
             <Divider />
 
-            // {/* Customer Reviews */}
-            // <section
-            //     className="py-16 md:py-20 bg-white"
-            //     data-testid="reviews-section"
-            // >
-            //     <div className="max-w-7xl mx-auto px-6 md:px-12">
-            //         <SectionHeader
-            //             eyebrow="Customer Stories"
-            //             title="What Our Customers Say"
-            //             subtitle="Trusted by thousands of happy customers across India"
-            //         />
+            {/* Customer Reviews */}
+            { /*<section
+                className="py-16 md:py-20 bg-white"
+                data-testid="reviews-section"
+            >
+                <div className="max-w-7xl mx-auto px-6 md:px-12">
+                    <SectionHeader
+                        eyebrow="Customer Stories"
+                        title="What Our Customers Say"
+                        subtitle="Trusted by thousands of happy customers across India"
+                    />
 
-            //         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            //             {REVIEWS.map((review, index) => (
-            //                 <ReviewCard
-            //                     key={index}
-            //                     review={review}
-            //                     index={index}
-            //                 />
-            //             ))}
-            //         </div>
-            //     </div>
-            // </section>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {REVIEWS.map((review, index) => (
+                            <ReviewCard
+                                key={index}
+                                review={review}
+                                index={index}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </section> */}
 
             {/* Final CTA */}
             <section className="py-16 bg-khajur-cream border-t border-khajur-border">
