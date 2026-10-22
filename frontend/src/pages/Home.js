@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from 'react-slick';
@@ -91,7 +92,10 @@ const REVIEWS = [
     },
 ];
 
+// ─── Hero Slider Settings ─────────────────────────────────────────────────────
+
 const HERO_SLIDER_SETTINGS = {
+    arrows: false,
     dots: true,
     infinite: true,
     speed: 1000,
@@ -103,6 +107,9 @@ const HERO_SLIDER_SETTINGS = {
     cssEase: 'ease-in-out',
     lazyLoad: 'ondemand',
     pauseOnHover: false,
+    pauseOnFocus: false,
+    swipe: true,
+    draggable: true,
     appendDots: (dots) => (
         <div className="absolute bottom-6 left-0 right-0">
             <ul className="flex justify-center gap-2">
@@ -112,14 +119,18 @@ const HERO_SLIDER_SETTINGS = {
     ),
 };
 
-// ─── Welcome Coupon Banner ──────────────────────────────────────────────────
+// ─── Welcome Coupon Banner ────────────────────────────────────────────────────
 
 const WelcomeCouponBanner = ({ welcomeCoupon }) => {
     if (!welcomeCoupon) return null;
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(welcomeCoupon.code);
-        toast.success('Coupon code copied! 🎉');
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(welcomeCoupon.code);
+            toast.success('Coupon code copied! 🎉');
+        } catch {
+            toast.error('Unable to copy coupon code.');
+        }
     };
 
     return (
@@ -131,6 +142,14 @@ const WelcomeCouponBanner = ({ welcomeCoupon }) => {
                 🎉 Welcome to KhajurKart! Use code{' '}
                 <span
                     onClick={handleCopy}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleCopy();
+                        }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     className="
                         bg-khajur-primary
                         text-khajur-gold
@@ -157,7 +176,7 @@ const WelcomeCouponBanner = ({ welcomeCoupon }) => {
     );
 };
 
-// ─── Section Header ──────────────────────────────────────────────────────────
+// ─── Section Header ───────────────────────────────────────────────────────────
 
 const SectionHeader = ({
     eyebrow,
@@ -166,7 +185,6 @@ const SectionHeader = ({
     light = false,
 }) => (
     <div className="text-center mb-10">
-
         {eyebrow && (
             <p className="text-xs uppercase tracking-widest font-semibold mb-3 text-khajur-gold">
                 {eyebrow}
@@ -202,48 +220,38 @@ const SectionHeader = ({
                 {subtitle}
             </p>
         )}
-
     </div>
 );
 
-// ─── Divider ─────────────────────────────────────────────────────────────────
+// ─── Divider ──────────────────────────────────────────────────────────────────
 
 const Divider = () => (
     <div className="w-full h-px bg-khajur-border" />
 );
 
-// ─── Product Skeleton ────────────────────────────────────────────────────────
+// ─── Product Skeleton ─────────────────────────────────────────────────────────
 
 const ProductSkeleton = () => (
     <div className="bg-white border border-khajur-border animate-pulse">
-
         <div className="aspect-square bg-khajur-cream" />
 
         <div className="p-5 space-y-3">
-
             <div className="h-3 bg-khajur-cream rounded w-1/3" />
-
             <div className="h-4 bg-khajur-cream rounded w-3/4" />
-
             <div className="h-3 bg-khajur-cream rounded w-full" />
 
             <div className="flex items-center justify-between mt-2">
-
                 <div className="h-6 bg-khajur-cream rounded w-1/3" />
-
                 <div className="w-11 h-11 bg-khajur-cream rounded" />
-
             </div>
-
         </div>
     </div>
 );
 
-// ─── Hero Slide ──────────────────────────────────────────────────────────────
+// ─── Hero Slide ───────────────────────────────────────────────────────────────
 
 const HeroSlide = ({ slide, index }) => (
     <div className="relative h-[520px] md:h-[720px]">
-
         <img
             src={slide.url}
             alt={slide.title}
@@ -256,11 +264,8 @@ const HeroSlide = ({ slide, index }) => (
         <div className="absolute inset-0 bg-gradient-to-r from-khajur-primary/85 via-khajur-primary/50 to-transparent" />
 
         <div className="absolute inset-0 flex items-center">
-
             <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-
                 <div className="max-w-xl">
-
                     <p className="text-xs uppercase tracking-widest text-khajur-gold font-semibold mb-4">
                         KhajurKart — Premium Selection
                     </p>
@@ -297,17 +302,13 @@ const HeroSlide = ({ slide, index }) => (
                         Shop Now
                         <ChevronRight className="w-4 h-4" />
                     </Link>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
 );
 
-// ─── Category Card ───────────────────────────────────────────────────────────
+// ─── Category Card ────────────────────────────────────────────────────────────
 
 const CategoryCard = ({ category }) => (
     <Link
@@ -315,9 +316,7 @@ const CategoryCard = ({ category }) => (
         className="group relative overflow-hidden block"
         data-testid={`category-card-${category.slug}`}
     >
-
         <div className="aspect-square overflow-hidden">
-
             <img
                 src={category.image}
                 alt={category.name}
@@ -331,13 +330,11 @@ const CategoryCard = ({ category }) => (
                     duration-700
                 "
             />
-
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-khajur-primary/90 via-khajur-primary/30 to-transparent" />
 
         <div className="absolute bottom-0 left-0 right-0 p-6">
-
             <h3 className="font-serif text-2xl font-medium text-khajur-cream mb-1">
                 {category.name}
             </h3>
@@ -366,13 +363,11 @@ const CategoryCard = ({ category }) => (
                 Explore
                 <ChevronRight className="w-3.5 h-3.5" />
             </div>
-
         </div>
-
     </Link>
 );
 
-// ─── Feature Card ────────────────────────────────────────────────────────────
+// ─── Feature Card ─────────────────────────────────────────────────────────────
 
 const FeatureCard = ({ feature, index }) => {
     const Icon = feature.icon;
@@ -397,7 +392,6 @@ const FeatureCard = ({ feature, index }) => {
             "
             data-testid={`status-feature-${index}`}
         >
-
             <div className="
                 w-14
                 h-14
@@ -422,12 +416,11 @@ const FeatureCard = ({ feature, index }) => {
             <p className="text-sm text-khajur-dark/55 leading-relaxed">
                 {feature.description}
             </p>
-
         </div>
     );
 };
 
-// ─── Review Card ─────────────────────────────────────────────────────────────
+// ─── Review Card ──────────────────────────────────────────────────────────────
 
 const ReviewCard = ({ review, index }) => (
     <div
@@ -442,7 +435,6 @@ const ReviewCard = ({ review, index }) => (
         "
         data-testid={`review-${index}`}
     >
-
         <div
             className="flex gap-1"
             aria-label={`${review.rating} out of 5 stars`}
@@ -464,7 +456,6 @@ const ReviewCard = ({ review, index }) => (
         </p>
 
         <div className="flex items-center gap-4 pt-4 border-t border-khajur-border">
-
             <img
                 src={review.image}
                 alt={review.name}
@@ -475,7 +466,6 @@ const ReviewCard = ({ review, index }) => (
             />
 
             <div>
-
                 <p className="font-serif text-base font-medium text-khajur-primary">
                     {review.name}
                 </p>
@@ -485,18 +475,14 @@ const ReviewCard = ({ review, index }) => (
                         {review.location}
                     </p>
                 )}
-
             </div>
-
         </div>
-
     </div>
 );
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const Home = () => {
-
     const { user, token } = useAuth();
 
     const [categories, setCategories] = useState([]);
@@ -510,60 +496,49 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-
-        if (user && token) {
-
-            const checkWelcome = async () => {
-
-                try {
-
-                    const res = await axios.get(
-                        `${API}/welcome-coupon`,
-                        {
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                            },
-                        }
-                    );
-
-                    if (res.data.available) {
-                        setWelcomeCoupon(res.data);
-                    }
-
-                } catch {
-                    // welcome coupon is optional
-                }
-
-            };
-
-            checkWelcome();
+        if (!user || !token) {
+            setWelcomeCoupon(null);
+            return;
         }
 
+        const checkWelcome = async () => {
+            try {
+                const res = await axios.get(
+                    `${API}/welcome-coupon`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                if (res.data.available) {
+                    setWelcomeCoupon(res.data);
+                } else {
+                    setWelcomeCoupon(null);
+                }
+            } catch {
+                // Welcome coupon is optional.
+            }
+        };
+
+        checkWelcome();
     }, [user, token]);
 
     const fetchData = useCallback(async () => {
-
         try {
-
-            const [
-                categoriesRes,
-                productsRes,
-            ] = await Promise.all([
+            const [categoriesRes, productsRes] = await Promise.all([
                 axios.get(`${API}/categories`),
-                axios.get(
-                    `${API}/products?featured=true`
-                ),
+                axios.get(`${API}/products?featured=true`),
             ]);
 
             setCategories(categoriesRes.data);
             setFeaturedProducts(productsRes.data);
-
         } catch {
-            // UI handles empty states gracefully
+            // UI handles empty states gracefully.
         } finally {
             setLoading(false);
         }
-
     }, []);
 
     useEffect(() => {
@@ -576,92 +551,64 @@ const Home = () => {
             className="min-h-screen bg-white"
             data-testid="home-page"
         >
-
-            {/* Welcome Coupon Banner */}
-
-
             {/* Welcome Coupon Banner */}
             <WelcomeCouponBanner
                 welcomeCoupon={welcomeCoupon}
             />
 
-            {/* Hero Slider */}
-
+            {/* Hero Slider: arrows disabled; automatic rotation retained */}
             <section
                 className="relative"
                 data-testid="hero-slider"
             >
-
                 <Slider {...HERO_SLIDER_SETTINGS}>
-
-                    {HERO_SLIDES.map(
-                        (slide, index) => (
-                            <HeroSlide
-                                key={index}
-                                slide={slide}
-                                index={index}
-                            />
-                        )
-                    )}
-
+                    {HERO_SLIDES.map((slide, index) => (
+                        <HeroSlide
+                            key={index}
+                            slide={slide}
+                            index={index}
+                        />
+                    ))}
                 </Slider>
-
             </section>
 
             {/* Categories */}
-
             <section
                 className="py-16 md:py-20 bg-white"
                 data-testid="categories-section"
             >
-
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-
                     <SectionHeader
                         eyebrow="Browse by Category"
                         title="Explore Our Collections"
                         subtitle="Discover premium categories of dates, nuts, dry fruits, and exotic spices"
                     />
 
-                    {categories.length === 0 &&
-                        !loading ? (
-
+                    {categories.length === 0 && !loading ? (
                         <p className="text-center text-khajur-dark/40 text-sm py-12">
                             No categories available at the moment.
                         </p>
-
                     ) : (
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                            {categories.map(
-                                (category) => (
-                                    <CategoryCard
-                                        key={category.id}
-                                        category={category}
-                                    />
-                                )
-                            )}
-
+                            {categories.map((category) => (
+                                <CategoryCard
+                                    key={category.id}
+                                    category={category}
+                                />
+                            ))}
                         </div>
-
                     )}
-
                 </div>
-
             </section>
 
             <Divider />
 
             {/* Featured Products */}
-
             <section
                 className="py-16 md:py-20 bg-white"
                 data-testid="featured-products-section"
             >
-
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-
                     <SectionHeader
                         eyebrow="Handpicked For You"
                         title="Featured Products"
@@ -669,30 +616,20 @@ const Home = () => {
                     />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
                         {loading
-                            ? Array.from(
-                                { length: 4 },
-                                (_, i) => (
-                                    <ProductSkeleton
-                                        key={i}
-                                    />
-                                )
-                            )
-                            : featuredProducts
-                                .slice(0, 4)
-                                .map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        product={product}
-                                    />
-                                ))}
-
+                            ? Array.from({ length: 4 }, (_, i) => (
+                                <ProductSkeleton key={i} />
+                            ))
+                            : featuredProducts.slice(0, 4).map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                />
+                            ))}
                     </div>
 
                     {!loading && (
                         <div className="text-center mt-12">
-
                             <Link
                                 to="/products"
                                 className="
@@ -719,22 +656,16 @@ const Home = () => {
                                 View All Products
                                 <ChevronRight className="w-4 h-4" />
                             </Link>
-
                         </div>
                     )}
-
                 </div>
-
             </section>
 
             <Divider />
 
             {/* Bulk Orders Banner */}
-
             <section className="py-16 bg-khajur-primary">
-
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-
                     <div className="
                         flex
                         flex-col
@@ -743,11 +674,7 @@ const Home = () => {
                         justify-between
                         gap-10
                     ">
-
-                        {/* Left */}
-
                         <div className="max-w-2xl">
-
                             <p className="text-xs uppercase tracking-widest text-khajur-gold font-semibold mb-3">
                                 For Businesses & Events
                             </p>
@@ -763,8 +690,7 @@ const Home = () => {
                                 within Hyderabad.
                             </p>
 
-                            {/* Special Public Discount Notice */}
-
+                            {/* Special Community Discount Notice */}
                             <div
                                 className="
                                     relative
@@ -778,7 +704,6 @@ const Home = () => {
                                     shadow-lg
                                 "
                             >
-
                                 <div className="
                                     absolute
                                     top-0
@@ -789,13 +714,11 @@ const Home = () => {
                                 " />
 
                                 <div className="flex items-start gap-3">
-
                                     <span className="text-xl flex-shrink-0">
                                         ❤️
                                     </span>
 
                                     <div>
-
                                         <p className="
                                             text-khajur-gold
                                             text-xs
@@ -832,16 +755,10 @@ const Home = () => {
                                             bulk support and personalized
                                             assistance.
                                         </p>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
-                        {/* Right */}
 
                         <Link
                             to="/bulk-orders"
@@ -867,24 +784,18 @@ const Home = () => {
                             Get a Bulk Quote
                             <ChevronRight className="w-4 h-4" />
                         </Link>
-
                     </div>
-
                 </div>
-
             </section>
 
             <Divider />
 
             {/* Trust Features */}
-
             <section
                 className="py-16 md:py-20"
                 data-testid="status-section"
             >
-
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-
                     <SectionHeader
                         eyebrow="Why Choose Us"
                         title="The KhajurKart Promise"
@@ -892,34 +803,25 @@ const Home = () => {
                     />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                        {STATUS_FEATURES.map(
-                            (feature, index) => (
-                                <FeatureCard
-                                    key={index}
-                                    feature={feature}
-                                    index={index}
-                                />
-                            )
-                        )}
-
+                        {STATUS_FEATURES.map((feature, index) => (
+                            <FeatureCard
+                                key={index}
+                                feature={feature}
+                                index={index}
+                            />
+                        ))}
                     </div>
-
                 </div>
-
             </section>
 
             <Divider />
 
-            {/* Reviews */}
-
+            {/* Customer Reviews */}
             <section
                 className="py-16 md:py-20 bg-white"
                 data-testid="reviews-section"
             >
-
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
-
                     <SectionHeader
                         eyebrow="Customer Stories"
                         title="What Our Customers Say"
@@ -927,29 +829,20 @@ const Home = () => {
                     />
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                        {REVIEWS.map(
-                            (review, index) => (
-                                <ReviewCard
-                                    key={index}
-                                    review={review}
-                                    index={index}
-                                />
-                            )
-                        )}
-
+                        {REVIEWS.map((review, index) => (
+                            <ReviewCard
+                                key={index}
+                                review={review}
+                                index={index}
+                            />
+                        ))}
                     </div>
-
                 </div>
-
             </section>
 
             {/* Final CTA */}
-
             <section className="py-16 bg-khajur-cream border-t border-khajur-border">
-
                 <div className="max-w-3xl mx-auto px-6 md:px-12 text-center">
-
                     <p className="text-xs uppercase tracking-widest text-khajur-gold font-semibold mb-4">
                         Start Shopping
                     </p>
@@ -989,11 +882,8 @@ const Home = () => {
                         Shop All Products
                         <ChevronRight className="w-4 h-4" />
                     </Link>
-
                 </div>
-
             </section>
-
         </div>
     );
 };
