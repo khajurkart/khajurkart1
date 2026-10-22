@@ -193,10 +193,9 @@ const SectionHeader = ({
                     max-w-2xl
                     mx-auto
                     leading-relaxed
-                    ${
-                        light
-                            ? 'text-khajur-cream/70'
-                            : 'text-khajur-dark/60'
+                    ${light
+                        ? 'text-khajur-cream/70'
+                        : 'text-khajur-dark/60'
                     }
                 `}
             >
@@ -580,9 +579,26 @@ const Home = () => {
 
             {/* Welcome Coupon Banner */}
 
+
+            {/* Welcome Coupon Banner */}
             <WelcomeCouponBanner
                 welcomeCoupon={welcomeCoupon}
             />
+
+            {/* Free Delivery Banner */}
+            <div className="bg-khajur-primary px-4 py-3 text-center border-y border-khajur-gold/40">
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <Truck className="w-5 h-5 text-khajur-gold" />
+                    <p className="text-khajur-cream text-sm md:text-base font-medium">
+                        Enjoy <span className="text-khajur-gold font-bold">FREE DELIVERY</span>
+                        {' '}on orders above <span className="text-khajur-gold font-bold">₹2,000</span>!
+                    </p>
+                </div>
+                <p className="text-khajur-cream/60 text-xs mt-1">
+                    More shopping, more savings — only at KhajurKart.
+                </p>
+            </div>
+
 
             {/* Hero Slider */}
 
@@ -623,7 +639,7 @@ const Home = () => {
                     />
 
                     {categories.length === 0 &&
-                    !loading ? (
+                        !loading ? (
 
                         <p className="text-center text-khajur-dark/40 text-sm py-12">
                             No categories available at the moment.
@@ -671,21 +687,21 @@ const Home = () => {
 
                         {loading
                             ? Array.from(
-                                  { length: 4 },
-                                  (_, i) => (
-                                      <ProductSkeleton
-                                          key={i}
-                                      />
-                                  )
-                              )
+                                { length: 4 },
+                                (_, i) => (
+                                    <ProductSkeleton
+                                        key={i}
+                                    />
+                                )
+                            )
                             : featuredProducts
-                                  .slice(0, 4)
-                                  .map((product) => (
-                                      <ProductCard
-                                          key={product.id}
-                                          product={product}
-                                      />
-                                  ))}
+                                .slice(0, 4)
+                                .map((product) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                    />
+                                ))}
 
                     </div>
 
