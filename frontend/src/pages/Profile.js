@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -16,9 +17,7 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// ─── Sub-Components ────────────────────────────────────────────────────────────
-
-// ── Avatar ─────────────────────────────────────────────────────────────────────
+// ─── Avatar ────────────────────────────────────────────────────────────────────
 
 const Avatar = ({ name }) => {
   const initials = name
@@ -27,16 +26,21 @@ const Avatar = ({ name }) => {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="
-        w-20 h-20 rounded-full bg-khajur-gold/20 border-2 border-khajur-gold/30
-        flex items-center justify-center
-      ">
+      <div
+        className="
+          w-20 h-20 rounded-full bg-khajur-gold/20 border-2 border-khajur-gold/30
+          flex items-center justify-center
+        "
+      >
         <span className="font-serif text-2xl font-bold text-khajur-gold">
           {initials}
         </span>
       </div>
+
       <div className="text-center">
-        <p className="font-serif text-lg font-medium text-khajur-primary">{name}</p>
+        <p className="font-serif text-lg font-medium text-khajur-primary">
+          {name}
+        </p>
         <p className="text-xs uppercase tracking-widest text-khajur-gold mt-0.5">
           Member
         </p>
@@ -45,7 +49,7 @@ const Avatar = ({ name }) => {
   );
 };
 
-// ── Field ──────────────────────────────────────────────────────────────────────
+// ─── Field ─────────────────────────────────────────────────────────────────────
 
 const Field = ({ icon: Icon, label, hint, children }) => (
   <div className="space-y-2">
@@ -53,7 +57,9 @@ const Field = ({ icon: Icon, label, hint, children }) => (
       <Icon className="w-3.5 h-3.5 text-khajur-gold" />
       {label}
     </label>
+
     {children}
+
     {hint && (
       <p className="text-xs text-khajur-dark/40 flex items-center gap-1.5">
         <ShieldCheck className="w-3 h-3" />
@@ -73,51 +79,98 @@ const inputBase = `
 
 const Profile = () => {
   const { user, token } = useAuth();
-  const navigate        = useNavigate();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name:  user?.name  || '',
+    name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
   });
+
   const [loading, setLoading] = useState(false);
 
-  // ── Guard ──────────────────────────────────────────────────────────────────
-
-  if (!user) {
-    navigate('/');
-    return null;
-  }
-
-  // ── Handler ────────────────────────────────────────────────────────────────
-
-  const set = (field) => (e) =>
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  const set = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+
     setLoading(true);
+
     try {
-      await axios.put(
+      const response = await axios.put(
         `${API}/user/profile`,
-        { name: formData.name, phone: formData.phone },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+
+      // Update local form data from the saved response, if available.
+      const updatedUser = response.data?.user;
+
+      if (updatedUser) {
+        setFormData((prev) => ({
+          ...prev,
+          name: updatedUser.name ?? prev.name,
+          phone: updatedUser.phone ?? prev.phone,
+        }));
+      }
+
       toast.success('Profile updated successfully.');
-    } catch {
-      toast.error('Failed to update profile. Please try again.');
+
+      // Return to the Account page after a successful save.
+      navigate('/account', { replace: true });
+    } catch (error) {
+      console.error(
+        'Profile update failed:',
+        error.response?.data || error.message
+      );
+
+      toast.error(
+        error.response?.data?.detail ||
+          'Failed to update profile. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // Guard against unauthenticated access.
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-khajur-cream flex items-center justify-center">
+        <p className="text-khajur-primary">Please log in to view your profile.</p>
+        <button
+          type="button"
+          onClick={() => navigate('/', { replace: true })}
+          className="ml-3 text-khajur-gold underline"
+        >
+          Go to Home
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-khajur-cream py-16 md:py-24" data-testid="profile-page">
+    <div
+      className="min-h-screen bg-khajur-cream py-16 md:py-24"
+      data-testid="profile-page"
+    >
       <div className="max-w-xl mx-auto px-6 md:px-12 space-y-10">
 
-        {/* ── Page Header ── */}
+        {/* Page Header */}
         <div className="flex items-center gap-4 border-b border-khajur-gold/20 pb-8">
           <Link
             to="/account"
@@ -127,6 +180,7 @@ const Profile = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </Link>
+
           <div>
             <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
               Account
@@ -137,10 +191,10 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* ── Profile Card ── */}
+        {/* Profile Card */}
         <div className="bg-white border border-khajur-border rounded-sm overflow-hidden">
 
-          {/* Avatar Section */}
+          {/* Avatar */}
           <div className="flex flex-col items-center gap-2 py-10 px-8 border-b border-khajur-border bg-khajur-cream/40">
             <Avatar name={formData.name} />
           </div>
@@ -153,6 +207,7 @@ const Profile = () => {
               <input
                 type="text"
                 required
+                minLength={1}
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={set('name')}
@@ -161,7 +216,7 @@ const Profile = () => {
               />
             </Field>
 
-            {/* Email — read only */}
+            {/* Email */}
             <Field
               icon={Mail}
               label="Email Address"
@@ -188,7 +243,7 @@ const Profile = () => {
               />
             </Field>
 
-            {/* Submit */}
+            {/* Save Button */}
             <button
               type="submit"
               disabled={loading}
@@ -204,15 +259,21 @@ const Profile = () => {
               "
             >
               {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving…
+                </>
               ) : (
-                <><Save className="w-4 h-4" /> Save Changes</>
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </>
               )}
             </button>
           </form>
         </div>
 
-        {/* ── Account Note ── */}
+        {/* Account Note */}
         <p className="text-center text-xs text-khajur-dark/30 leading-relaxed">
           Your personal information is encrypted and stored securely.
           We never share your data with third parties.
