@@ -240,10 +240,17 @@ const OrderSummaryPanel = ({ cart, cartTotal, onCheckout }) => (
             </div>
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Delivery</span>
-                <span className="font-semibold text-green-600 flex items-center gap-1.5">
-                    <Truck className="w-3.5 h-3.5" /> Free
-                </span>
+                {(cartTotal || 0) >= 2000 ? (
+                    <span className="font-semibold text-green-600 flex items-center gap-1.5">
+                        <Truck className="w-3.5 h-3.5" /> Free
+                    </span>
+                ) : (
+                    <span className="font-semibold text-amber-700">Confirmed after order</span>
+                )}
             </div>
+            {(cartTotal || 0) < 2000 && (
+                <p className="text-xs text-amber-700">Actual delivery fee will be confirmed before dispatch.</p>
+            )}
         </div>
 
         {/* Grand Total */}
