@@ -23,6 +23,7 @@ const API = `${BACKEND_URL}/api`;
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
 const ORDER_STATUSES = [
+    { value: 'delivery_fee_pending', label: 'Delivery Fee Pending', color: 'bg-amber-100 text-amber-800' },
     { value: 'pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
     { value: 'confirmed', label: 'Confirmed', color: 'bg-blue-100 text-blue-800' },
     { value: 'processing', label: 'Processing', color: 'bg-purple-100 text-purple-800' },
@@ -82,8 +83,8 @@ const EmptyState = () => (
 
 // ── Order Detail Modal ─────────────────────────────────────────────────────────
 
-const OrderDetailModal = ({ order, onClose, onStatusChange }) => {
-    const subtotal = order.total_amount ?? 0;
+const OrderDetailModal = ({ order, onClose, onStatusChange, onDeliveryFeeChange }) => {
+    const subtotal = order.product_subtotal ?? Math.max(0, Number(order.total_amount ?? 0) - Number(order.delivery_charges ?? 0));
     const delivery = order.delivery_charges ?? 0;
 
     return (
@@ -216,6 +217,20 @@ const OrderDetailModal = ({ order, onClose, onStatusChange }) => {
                             </span>
                         </div>
                     </div>
+
+                    {order.delivery_fee_status !== 'free' && (
+                        <div className="border border-amber-200 bg-amber-50 p-5 space-y-3">
+                            <p className="font-semibold text-amber-900">Delivery fee: {order.delivery_fee_status || 'pending'}</p>
+                            <p className="text-sm text-amber-900">Check the actual Rapido price. Contact the customer with the final total and use the button only after recording whether they agreed.</p>
+                            <button
+                                type="button"
+                                onClick={() => onDeliveryFeeChange(order)}
+                                className="bg-khajur-primary text-white px-4 py-2 text-xs font-semibold uppercase tracking-wide"
+                            >
+                                Enter Rapido Fee / Record Customer Agreement
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -278,6 +293,33 @@ const AdminOrders = () => {
             toast.success('Order status updated.');
         } catch {
             toast.error('Failed to update order status.');
+        }
+    };
+
+    const updateDeliveryFee = async (order) => {
+        const rawFee = window.prompt('Enter the actual Rapido delivery fee in rupees:', String(order.delivery_charges ?? ''));
+        if (rawFee === null) return;
+        const fee = Number(rawFee);
+        if (!Number.isFinite(fee) || fee < 0) {
+            toast.error('Enter a valid delivery fee (zero or more).');
+            return;
+        }
+        const customerConfirmed = window.confirm(
+            'Has the customer explicitly agreed to the final total including this delivery fee?\n\nChoose OK only if the customer has agreed. Choose Cancel to save the fee but keep the order pending confirmation.'
+        );
+        try {
+            const { data } = await axios.put(
+                `${API}/admin/orders/${order.id}/delivery-fee`,
+                { delivery_charge: fee, customer_confirmed: customerConfirmed },
+                authHeaders
+            );
+            await fetchOrders(true);
+            const refreshed = await axios.get(`${API}/admin/orders`, authHeaders);
+            const updated = refreshed.data.find((item) => item.id === order.id);
+            if (updated && selectedOrder?.id === order.id) setSelectedOrder(updated);
+            toast.success(data.message);
+        } catch (error) {
+            toast.error(error.response?.data?.detail || 'Failed to update delivery fee.');
         }
     };
 
@@ -458,7 +500,7 @@ const AdminOrders = () => {
 
                                         {/* Total */}
                                         <td className="px-5 py-4 font-semibold text-khajur-gold whitespace-nowrap">
-                                            ₹{order.total_amount.toFixed(2)}
+                                            ₹{Number(order.total_amount || 0).toFixed(2)}
                                         </td>
 
                                         {/* Payment */}
@@ -537,6 +579,7 @@ const AdminOrders = () => {
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
                     onStatusChange={updateOrderStatus}
+                    onDeliveryFeeChange={updateDeliveryFee}
                 />
             )}
         </div>
