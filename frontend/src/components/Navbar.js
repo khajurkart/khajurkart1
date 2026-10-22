@@ -1,6 +1,14 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
+import {
+    Search,
+    ShoppingCart,
+    User,
+    Menu,
+    X,
+    Truck,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import AuthModal from './AuthModal';
@@ -12,6 +20,28 @@ const NAV_LINKS = [
     { label: 'Bulk Orders', to: '/bulk-orders' },
     { label: 'Contact Us', to: '/contact' },
 ];
+
+// ─── Free Delivery Announcement ────────────────────────────────────────────────
+
+const FreeDeliveryBanner = () => (
+    <div className="w-full bg-[#C6A962] text-[#0F3D2E] px-4 py-3 text-center border-b border-[#0F3D2E]/20">
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+            <Truck className="w-5 h-5 flex-shrink-0" />
+            <p className="text-sm md:text-base font-semibold">
+                Enjoy{' '}
+                <span className="font-bold">FREE DELIVERY</span>
+                {' '}on orders above{' '}
+                <span className="font-bold">₹2,000!</span>
+            </p>
+        </div>
+
+        <p className="text-xs mt-1 text-[#0F3D2E]/80">
+            More shopping, more savings — only at KhajurKart.
+        </p>
+    </div>
+);
+
+// ─── Navigation Link ──────────────────────────────────────────────────────────
 
 const NavLink = ({ to, label, isActive, onClick, testId }) => (
     <Link
@@ -34,10 +64,20 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
     </Link>
 );
 
-const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
+// ─── Search Form ──────────────────────────────────────────────────────────────
+
+const SearchForm = ({
+    value,
+    onChange,
+    onSubmit,
+    className = '',
+}) => (
     <form onSubmit={onSubmit} className={className}>
         <div className="relative">
-            <label htmlFor="search-input" className="sr-only">Search products</label>
+            <label htmlFor="search-input" className="sr-only">
+                Search products
+            </label>
+
             <input
                 id="search-input"
                 type="text"
@@ -46,8 +86,10 @@ const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
                 onChange={onChange}
                 className="w-40 bg-white/5 border border-white/10 hover:border-white/40 focus:border-khajur-gold text-sm text-khajur-cream placeholder:text-khajur-cream/30 pl-3 pr-8 py-2 rounded-sm focus:outline-none transition-colors"
             />
+
             <button
                 type="submit"
+                aria-label="Search"
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-khajur-cream/40 hover:text-white transition-colors"
             >
                 <Search className="w-4 h-4" />
@@ -56,6 +98,8 @@ const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
     </form>
 );
 
+// ─── Cart Button ──────────────────────────────────────────────────────────────
+
 const CartButton = ({ count }) => (
     <Link
         to="/cart"
@@ -63,6 +107,7 @@ const CartButton = ({ count }) => (
         aria-label="Shopping cart"
     >
         <ShoppingCart className="w-5 h-5" />
+
         {count > 0 && (
             <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 bg-khajur-gold text-khajur-primary text-[10px] font-bold rounded-full flex items-center justify-center">
                 {count > 99 ? '99+' : count}
@@ -71,8 +116,7 @@ const CartButton = ({ count }) => (
     </Link>
 );
 
-// ── Account Button ─────────────────────────────────────────────────────────────
-// Shows icon + first name when logged in, icon only when logged out
+// ─── Account Button ───────────────────────────────────────────────────────────
 
 const AccountButton = ({ user, onClick }) => (
     <button
@@ -81,7 +125,6 @@ const AccountButton = ({ user, onClick }) => (
         aria-label={user ? `Account: ${user.name}` : 'Sign in'}
         data-testid="account-button"
     >
-        {/* Icon — boxed style when logged in, plain when logged out */}
         <span
             className={`
                 flex items-center justify-center transition-all duration-200
@@ -94,7 +137,6 @@ const AccountButton = ({ user, onClick }) => (
             <User className="w-5 h-5" />
         </span>
 
-        {/* First name — only shown when logged in */}
         {user && (
             <span className="hidden sm:block text-sm font-semibold tracking-wide text-khajur-cream/80 group-hover:text-white transition-colors duration-200">
                 {user.name?.split(' ')[0] || 'Account'}
@@ -103,11 +145,12 @@ const AccountButton = ({ user, onClick }) => (
     </button>
 );
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Main Navbar Component ────────────────────────────────────────────────────
 
 const Navbar = () => {
     const { user } = useAuth();
     const { cartCount } = useCart();
+
     const navigate = useNavigate();
     const location = useLocation();
     const mobileMenuRef = useRef(null);
@@ -119,12 +162,15 @@ const Navbar = () => {
 
     useEffect(() => {
         const handler = () => setScrolled(window.scrollY > 10);
+
         window.addEventListener('scroll', handler, { passive: true });
+
         return () => window.removeEventListener('scroll', handler);
     }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
+
         if (query.trim()) {
             navigate(`/search?q=${encodeURIComponent(query.trim())}`);
             setQuery('');
@@ -133,8 +179,11 @@ const Navbar = () => {
     };
 
     const handleAuthClick = () => {
-        if (user) navigate('/account');
-        else setAuthOpen(true);
+        if (user) {
+            navigate('/account');
+        } else {
+            setAuthOpen(true);
+        }
     };
 
     const links = user
@@ -143,17 +192,23 @@ const Navbar = () => {
 
     return (
         <>
+            {/* Golden delivery announcement above navigation */}
+            <FreeDeliveryBanner />
+
             <nav
                 className={`
                     bg-khajur-primary sticky top-0 z-50
                     transition-shadow duration-300
-                    ${scrolled ? 'shadow-[0_4px_24px_rgba(0,0,0,0.3)]' : ''}
+                    ${scrolled
+                        ? 'shadow-[0_4px_24px_rgba(0,0,0,0.3)]'
+                        : ''
+                    }
                 `}
             >
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="flex items-center justify-between h-20">
 
-                        {/* ── Logo ── */}
+                        {/* Logo */}
                         <Link
                             to="/"
                             className="flex items-center gap-3 group flex-shrink-0"
@@ -163,12 +218,13 @@ const Navbar = () => {
                                 alt="KhajurKart"
                                 className="h-12 w-auto"
                             />
+
                             <span className="font-serif text-2xl font-bold text-khajur-gold group-hover:text-khajur-gold/80 transition-colors">
                                 KhajurKart
                             </span>
                         </Link>
 
-                        {/* ── Desktop Nav Links ── */}
+                        {/* Desktop Navigation Links */}
                         <div className="hidden md:flex items-center justify-center flex-1 gap-6">
                             {links.map((link) => (
                                 <NavLink
@@ -180,10 +236,10 @@ const Navbar = () => {
                             ))}
                         </div>
 
-                        {/* ── Right Actions ── */}
+                        {/* Right Actions */}
                         <div className="flex items-center gap-5 flex-shrink-0">
 
-                            {/* Search — desktop only */}
+                            {/* Desktop Search */}
                             <div className="hidden lg:block">
                                 <SearchForm
                                     value={query}
@@ -192,31 +248,40 @@ const Navbar = () => {
                                 />
                             </div>
 
-                            {/* Account button with name */}
-                            <AccountButton user={user} onClick={handleAuthClick} />
+                            {/* Account */}
+                            <AccountButton
+                                user={user}
+                                onClick={handleAuthClick}
+                            />
 
                             {/* Cart */}
                             <CartButton count={cartCount} />
 
-                            {/* Mobile menu toggle */}
+                            {/* Mobile Menu Toggle */}
                             <button
                                 onClick={() => setMenuOpen(!menuOpen)}
                                 className="md:hidden text-khajur-cream/70 hover:text-white transition-colors"
                                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
                             >
-                                {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                                {menuOpen
+                                    ? <X className="w-6 h-6" />
+                                    : <Menu className="w-6 h-6" />
+                                }
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* ── Mobile Menu ── */}
+                {/* Mobile Menu */}
                 <div
                     ref={mobileMenuRef}
                     className={`
                         md:hidden bg-khajur-primary border-t border-white/5
                         transition-all duration-300 overflow-hidden
-                        ${menuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}
+                        ${menuOpen
+                            ? 'max-h-screen opacity-100'
+                            : 'max-h-0 opacity-0'
+                        }
                     `}
                 >
                     <div className="px-6 py-8 space-y-6">
@@ -237,7 +302,7 @@ const Navbar = () => {
                             </Link>
                         ))}
 
-                        {/* Mobile search */}
+                        {/* Mobile Search */}
                         <SearchForm
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
@@ -245,12 +310,16 @@ const Navbar = () => {
                             className="pt-2"
                         />
 
-                        {/* Mobile account row */}
+                        {/* Mobile Account */}
                         <button
-                            onClick={() => { handleAuthClick(); setMenuOpen(false); }}
+                            onClick={() => {
+                                handleAuthClick();
+                                setMenuOpen(false);
+                            }}
                             className="flex items-center gap-3 text-khajur-cream/80 hover:text-white transition-colors text-sm font-semibold uppercase tracking-wider"
                         >
                             <User className="w-5 h-5" />
+
                             {user
                                 ? (user.name?.split(' ')[0] || 'Account')
                                 : 'Sign In'
@@ -260,7 +329,10 @@ const Navbar = () => {
                 </div>
             </nav>
 
-            <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+            <AuthModal
+                isOpen={authOpen}
+                onClose={() => setAuthOpen(false)}
+            />
         </>
     );
 };
