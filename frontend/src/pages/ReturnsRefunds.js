@@ -46,7 +46,7 @@ const RETURN_SECTIONS = [
     content: [
       {
         heading: 'Step 1 — Contact Us',
-        text: 'Email us at khajurkart@gmail.com or call +91 79810 02137 within 48 hours of receiving your order. Include your order number and a brief description of the issue.',
+        text: 'Email us at khajurkart@gmail.com or call +91 9133805000 within 48 hours of receiving your order. Include your order number and a brief description of the issue.',
       },
       {
         heading: 'Step 2 — Submit Photos',
