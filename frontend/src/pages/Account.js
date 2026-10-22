@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -17,6 +18,9 @@ import {
     ShoppingBag,
     ChevronRight,
     Tag,
+    Trash2,
+    Loader2,
+    ShieldAlert,
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -56,7 +60,8 @@ const MENU_ITEMS = [
         action: () =>
             window.open(
                 'https://wa.me/919133105000?text=Hi%20KhajurKart!%20I%20need%20support.',
-                '_blank'
+                '_blank',
+                'noopener,noreferrer'
             ),
         iconClass: 'text-green-500',
         testId: 'menu-whatsapp-support-1',
@@ -68,7 +73,8 @@ const MENU_ITEMS = [
         action: () =>
             window.open(
                 'https://wa.me/919133805000?text=Hi%20KhajurKart!%20I%20need%20support.',
-                '_blank'
+                '_blank',
+                'noopener,noreferrer'
             ),
         iconClass: 'text-green-500',
         testId: 'menu-whatsapp-support-2',
@@ -99,14 +105,18 @@ const MENU_ITEMS = [
     },
 ];
 
-// ─── Welcome Coupon Banner ───────────────────────────────────────────────────
+// ─── Welcome Coupon Banner ────────────────────────────────────────────────────
 
 const WelcomeCouponBanner = ({ welcomeCoupon }) => {
     if (!welcomeCoupon) return null;
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(welcomeCoupon.code);
-        toast.success('Coupon code copied! 🎉');
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(welcomeCoupon.code);
+            toast.success('Coupon code copied!');
+        } catch {
+            toast.error('Unable to copy the coupon code.');
+        }
     };
 
     return (
@@ -115,17 +125,13 @@ const WelcomeCouponBanner = ({ welcomeCoupon }) => {
                 bg-khajur-gold rounded-sm px-6 py-4
                 flex flex-col sm:flex-row
                 items-start sm:items-center
-                gap-3
-                border border-khajur-gold/40
+                gap-3 border border-khajur-gold/40
             "
             data-testid="welcome-coupon-banner"
         >
             <div className="
-                flex-shrink-0
-                w-10 h-10
-                bg-khajur-primary/10
-                rounded-sm
-                flex items-center justify-center
+                flex-shrink-0 w-10 h-10 bg-khajur-primary/10
+                rounded-sm flex items-center justify-center
             ">
                 <Tag className="w-5 h-5 text-khajur-primary" />
             </div>
@@ -136,27 +142,22 @@ const WelcomeCouponBanner = ({ welcomeCoupon }) => {
                 </p>
 
                 <p className="text-sm font-bold text-khajur-primary">
-                    🎉 Use code{' '}
-                    <span
+                    Use code{' '}
+                    <button
+                        type="button"
                         onClick={handleCopy}
                         className="
-                            bg-khajur-primary
-                            text-khajur-gold
-                            px-2 py-0.5
-                            rounded
-                            cursor-pointer
-                            font-mono
-                            hover:bg-khajur-primary/80
-                            transition-colors duration-200
-                            inline-block
+                            bg-khajur-primary text-khajur-gold
+                            px-2 py-0.5 rounded cursor-pointer font-mono
+                            hover:bg-khajur-primary/80 transition-colors
                         "
                         data-testid="welcome-coupon-code"
                         title="Click to copy"
                     >
                         {welcomeCoupon.code}
-                    </span>{' '}
+                    </button>{' '}
                     for{' '}
-                    <span className="text-khajur-primary font-extrabold">
+                    <span className="font-extrabold">
                         {welcomeCoupon.discount_percent}% off
                     </span>{' '}
                     your first order!
@@ -183,24 +184,16 @@ const QuickLinkCard = ({
         to={to}
         data-testid={testId}
         className="
-            group
-            flex flex-col gap-6
-            bg-white
-            border border-khajur-border
-            hover:border-khajur-gold/60
+            group flex flex-col gap-6 bg-white
+            border border-khajur-border hover:border-khajur-gold/60
             hover:shadow-[0_4px_24px_rgba(198,169,98,0.15)]
-            p-8 md:p-10
-            rounded-sm
-            transition-all duration-300
+            p-8 md:p-10 rounded-sm transition-all duration-300
         "
     >
         <div className="
-            w-14 h-14
-            flex items-center justify-center
-            bg-khajur-cream
-            group-hover:bg-khajur-gold/10
-            transition-colors duration-300
-            rounded-sm
+            w-14 h-14 flex items-center justify-center
+            bg-khajur-cream group-hover:bg-khajur-gold/10
+            transition-colors duration-300 rounded-sm
         ">
             <Icon className="w-6 h-6 text-khajur-primary" />
         </div>
@@ -216,14 +209,9 @@ const QuickLinkCard = ({
         </div>
 
         <ChevronRight className="
-            w-5 h-5
-            text-khajur-gold
-            opacity-0
-            group-hover:opacity-100
-            -translate-x-2
-            group-hover:translate-x-0
-            transition-all duration-300
-            mt-auto
+            w-5 h-5 text-khajur-gold opacity-0
+            group-hover:opacity-100 -translate-x-2
+            group-hover:translate-x-0 transition-all duration-300 mt-auto
         " />
     </Link>
 );
@@ -241,27 +229,17 @@ const MenuRow = ({
 }) => {
     const inner = (
         <div className="
-            group
-            flex items-center gap-6
-            bg-white
-            border border-khajur-border
-            hover:border-khajur-gold/60
+            group flex items-center gap-6 bg-white
+            border border-khajur-border hover:border-khajur-gold/60
             hover:shadow-[0_4px_20px_rgba(198,169,98,0.08)]
-            px-8 py-6
-            rounded-sm
-            transition-all duration-300
-            cursor-pointer
+            px-8 py-6 rounded-sm transition-all duration-300 cursor-pointer
         ">
             <div className="
-                w-12 h-12
-                flex items-center justify-center
-                bg-khajur-cream
-                group-hover:bg-khajur-gold/10
-                transition-colors duration-300
-                rounded-sm
-                flex-shrink-0
+                w-12 h-12 flex items-center justify-center
+                bg-khajur-cream group-hover:bg-khajur-gold/10
+                transition-colors duration-300 rounded-sm flex-shrink-0
             ">
-                <Icon className={`w-5 h-5 ${iconClass}`} />
+                <Icon className={`w-5 h-5 ${iconClass || 'text-khajur-gold'}`} />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -275,12 +253,8 @@ const MenuRow = ({
             </div>
 
             <ChevronRight className="
-                w-5 h-5
-                text-khajur-gold/60
-                group-hover:text-khajur-gold
-                group-hover:translate-x-1
-                transition-all duration-300
-                flex-shrink-0
+                w-5 h-5 text-khajur-gold/60 group-hover:text-khajur-gold
+                group-hover:translate-x-1 transition-all duration-300 flex-shrink-0
             " />
         </div>
     );
@@ -290,19 +264,14 @@ const MenuRow = ({
             {inner}
         </Link>
     ) : (
-        <div
+        <button
+            type="button"
             onClick={action}
             data-testid={testId}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    action?.();
-                }
-            }}
+            className="w-full text-left"
         >
             {inner}
-        </div>
+        </button>
     );
 };
 
@@ -333,63 +302,39 @@ const BottomNav = () => {
 
     return (
         <nav className="
-            fixed bottom-0 left-0 right-0
-            bg-khajur-primary
-            border-t border-khajur-gold/30
-            py-4 px-6
-            shadow-2xl
-            z-40
+            fixed bottom-0 left-0 right-0 bg-khajur-primary
+            border-t border-khajur-gold/30 py-4 px-6 shadow-2xl z-40
         ">
             <div className="max-w-7xl mx-auto flex items-center justify-around">
+                {NAV.map(({ icon: Icon, label, to, testId, active }) => (
+                    <Link
+                        key={to}
+                        to={to}
+                        data-testid={testId}
+                        className={`
+                            flex flex-col items-center gap-2 transition-colors
+                            ${active
+                                ? 'text-khajur-gold'
+                                : 'text-khajur-cream/60 hover:text-khajur-cream'
+                            }
+                        `}
+                    >
+                        <div className="relative">
+                            <Icon className="w-6 h-6" />
 
-                {NAV.map(
-                    ({
-                        icon: Icon,
-                        label,
-                        to,
-                        testId,
-                        active,
-                    }) => (
-                        <Link
-                            key={to}
-                            to={to}
-                            data-testid={testId}
-                            className={`
-                                flex flex-col items-center gap-2
-                                transition-colors
-                                ${
-                                    active
-                                        ? 'text-khajur-gold'
-                                        : 'text-khajur-cream/60 hover:text-khajur-cream'
-                                }
-                            `}
-                        >
-                            <div className="relative">
+                            {active && (
+                                <span className="
+                                    absolute -top-2 left-1/2 -translate-x-1/2
+                                    w-1.5 h-1.5 rounded-full bg-khajur-gold
+                                " />
+                            )}
+                        </div>
 
-                                <Icon className="w-6 h-6" />
-
-                                {active && (
-                                    <span className="
-                                        absolute
-                                        -top-2
-                                        left-1/2
-                                        -translate-x-1/2
-                                        w-1.5 h-1.5
-                                        rounded-full
-                                        bg-khajur-gold
-                                    " />
-                                )}
-
-                            </div>
-
-                            <span className="text-xs uppercase tracking-widest font-medium">
-                                {label}
-                            </span>
-
-                        </Link>
-                    )
-                )}
-
+                        <span className="text-xs uppercase tracking-widest font-medium">
+                            {label}
+                        </span>
+                    </Link>
+                ))}
             </div>
         </nav>
     );
@@ -398,49 +343,90 @@ const BottomNav = () => {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 const Account = () => {
-    const { user, token, logout } = useAuth();
+    const { user, token, logout, deleteAccount, isAdmin } = useAuth();
     const navigate = useNavigate();
 
     const [welcomeCoupon, setWelcomeCoupon] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
-        if (user && token) {
-            const checkWelcome = async () => {
-                try {
-                    const res = await axios.get(
-                        `${API}/welcome-coupon`,
-                        {
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                            },
-                        }
-                    );
+        if (!user || !token) return;
 
-                    if (res.data.available) {
-                        setWelcomeCoupon(res.data);
-                    }
-                } catch {
-                    // welcome coupon is optional
+        let cancelled = false;
+
+        const checkWelcome = async () => {
+            try {
+                const res = await axios.get(`${API}/welcome-coupon`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!cancelled && res.data.available) {
+                    setWelcomeCoupon(res.data);
                 }
-            };
+            } catch {
+                // Welcome coupon is optional.
+            }
+        };
 
-            checkWelcome();
-        }
+        checkWelcome();
+
+        return () => {
+            cancelled = true;
+        };
     }, [user, token]);
 
     useEffect(() => {
         if (!user) {
-            navigate('/');
+            navigate('/', { replace: true });
         }
     }, [user, navigate]);
 
-    if (!user) {
-        return null;
-    }
+    if (!user) return null;
 
     const handleLogout = () => {
         logout();
-        navigate('/');
+        navigate('/', { replace: true });
+    };
+
+    const handleDeleteAccount = async () => {
+        if (typeof deleteAccount !== 'function') {
+            toast.error('Account deletion is not configured yet.');
+            return;
+        }
+
+        if (typeof isAdmin === 'function' && isAdmin()) {
+            toast.error('Administrator accounts cannot be deleted here.');
+            return;
+        }
+
+        const confirmed = window.confirm(
+            'Are you sure you want to permanently delete your KhajurKart account? This action cannot be undone. Your order records may be retained where legally required. Continue?'
+        );
+
+        if (!confirmed) return;
+
+        setDeleting(true);
+
+        try {
+            await deleteAccount();
+            toast.success('Your account has been deleted.');
+            navigate('/', { replace: true });
+        } catch (error) {
+            console.error(
+                'Account deletion failed:',
+                error.response?.data || error.message
+            );
+
+            toast.error(
+                error.response?.data?.detail ||
+                error.message ||
+                'Unable to delete your account. Please try again.'
+            );
+        } finally {
+            setDeleting(false);
+        }
     };
 
     return (
@@ -449,17 +435,11 @@ const Account = () => {
             data-testid="account-page"
         >
             <div className="
-                max-w-5xl
-                mx-auto
-                px-6 md:px-12
-                py-16 md:py-20
-                space-y-14
+                max-w-5xl mx-auto px-6 md:px-12
+                py-16 md:py-20 space-y-14
             ">
-
                 {/* Page Header */}
-
                 <div className="space-y-2 border-b border-khajur-gold/20 pb-8">
-
                     <p className="text-sm uppercase tracking-widest text-khajur-gold font-medium">
                         My Account
                     </p>
@@ -474,84 +454,51 @@ const Account = () => {
                             {user.phone || user.email}
                         </span>
                     </p>
-
                 </div>
 
                 {/* Welcome Coupon */}
-
                 {welcomeCoupon && (
-                    <WelcomeCouponBanner
-                        welcomeCoupon={welcomeCoupon}
-                    />
+                    <WelcomeCouponBanner welcomeCoupon={welcomeCoupon} />
                 )}
 
                 {/* Quick Links */}
-
                 <section>
-
                     <p className="text-sm uppercase tracking-widest text-khajur-dark/40 mb-6 font-medium">
                         Quick Access
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-
                         {QUICK_LINKS.map((item) => (
-                            <QuickLinkCard
-                                key={item.to}
-                                {...item}
-                            />
+                            <QuickLinkCard key={item.to} {...item} />
                         ))}
-
                     </div>
-
                 </section>
 
                 {/* Support */}
-
                 <section>
-
                     <p className="text-sm uppercase tracking-widest text-khajur-dark/40 mb-6 font-medium">
                         Support
                     </p>
 
                     <div className="space-y-4">
-
                         {MENU_ITEMS.map((item) => (
-                            <MenuRow
-                                key={item.testId}
-                                {...item}
-                            />
+                            <MenuRow key={item.testId} {...item} />
                         ))}
-
                     </div>
-
                 </section>
 
                 {/* Logout */}
-
                 <section className="pt-4">
-
                     <button
+                        type="button"
                         onClick={handleLogout}
                         data-testid="logout-button"
                         className="
-                            w-full
-                            flex items-center justify-center
-                            gap-3
-                            border-2 border-red-200
-                            hover:border-red-500
-                            bg-white
-                            hover:bg-red-50
-                            text-red-500
-                            hover:text-red-700
-                            px-8 py-5
-                            rounded-sm
-                            text-sm
-                            uppercase
-                            tracking-widest
-                            font-bold
-                            transition-all
-                            duration-300
+                            w-full flex items-center justify-center gap-3
+                            border-2 border-red-200 hover:border-red-500
+                            bg-white hover:bg-red-50 text-red-500 hover:text-red-700
+                            px-8 py-5 rounded-sm text-sm uppercase tracking-widest
+                            font-bold transition-all duration-300
                         "
                     >
                         <LogOut className="w-5 h-5" />
@@ -561,13 +508,72 @@ const Account = () => {
                     <p className="text-center text-sm text-khajur-dark/40 mt-5">
                         You'll be redirected to the homepage after signing out.
                     </p>
-
                 </section>
 
+                {/* Delete Account */}
+                {!(
+                    typeof isAdmin === 'function' && isAdmin()
+                ) && (
+                    <section
+                        className="border border-red-200 bg-white rounded-sm p-6 md:p-8 space-y-5"
+                        data-testid="delete-account-section"
+                    >
+                        <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-sm bg-red-50">
+                                <ShieldAlert className="w-6 h-6 text-red-600" />
+                            </div>
+
+                            <div className="flex-1">
+                                <h2 className="text-lg font-semibold text-red-700">
+                                    Delete Account
+                                </h2>
+
+                                <p className="text-sm text-khajur-dark/60 mt-2 leading-relaxed">
+                                    Permanently request deletion of your KhajurKart
+                                    account and associated personal information.
+                                    This action cannot be undone. Certain order or
+                                    transaction records may need to be retained
+                                    where legally required.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleDeleteAccount}
+                            disabled={deleting}
+                            data-testid="delete-account-button"
+                            className="
+                                w-full flex items-center justify-center gap-3
+                                border border-red-600 bg-white text-red-600
+                                hover:bg-red-600 hover:text-white
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                px-6 py-4 rounded-sm text-sm uppercase
+                                tracking-widest font-bold transition-colors duration-300
+                            "
+                        >
+                            {deleting ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Deleting Account…
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-5 h-5" />
+                                    Delete My Account
+                                </>
+                            )}
+                        </button>
+
+                        <p className="text-xs text-khajur-dark/40">
+                            If you need help before deleting your account, contact
+                            KhajurKart support.
+                        </p>
+                    </section>
+                )}
             </div>
 
             <BottomNav />
-
         </div>
     );
 };
