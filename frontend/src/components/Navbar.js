@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -22,68 +23,46 @@ const NAV_LINKS = [
 
 // ─── Free Delivery Announcement ───────────────────────────────────────────────
 
+const FreeDeliveryBanner = () => {
+    const announcement = (
+        <div className="announcement-content">
+            <Truck className="announcement-truck" aria-hidden="true" />
 
-const FreeDeliveryBanner = () => (
-    <div className="w-full overflow-hidden bg-[#C6A962] text-[#0F3D2E] py-3">
-        <div className="flex w-full overflow-hidden">
-            <div className="flex w-max shrink-0 items-center animate-delivery-marquee">
-                <div className="flex w-max shrink-0 items-center gap-2 px-6 whitespace-nowrap">
-                    <Truck className="h-5 w-5 shrink-0" />
+            <span>
+                Enjoy <strong>FREE DELIVERY</strong> on orders above{' '}
+                <strong>₹2,000!</strong>
+            </span>
 
-                    <p className="text-xs font-semibold sm:text-sm md:text-base whitespace-nowrap">
-                        Enjoy <span className="font-bold">FREE DELIVERY</span> on orders above{' '}
-                        <span className="font-bold">₹2,000!</span>
-                    </p>
+            <span className="announcement-separator" aria-hidden="true">
+                |
+            </span>
 
-                    <span className="mx-3 opacity-60">|</span>
+            <span>More shopping, more savings — only at KhajurKart.</span>
+        </div>
+    );
 
-                    <p className="text-xs font-normal sm:text-sm md:text-base whitespace-nowrap">
-                        More shopping, more savings — only at KhajurKart.
-                    </p>
-                </div>
+    return (
+        <div
+            className="free-delivery-banner"
+            role="region"
+            aria-label="Free delivery announcement"
+        >
+            <div className="announcement-marquee">
+                <div className="announcement-track">
+                    <div className="announcement-group">
+                        {announcement}
+                    </div>
 
-                {/* Duplicate for a seamless continuous loop */}
-                <div
-                    className="flex w-max shrink-0 items-center gap-2 px-6 whitespace-nowrap"
-                    aria-hidden="true"
-                >
-                    <Truck className="h-5 w-5 shrink-0" />
-
-                    <p className="text-xs font-semibold sm:text-sm md:text-base whitespace-nowrap">
-                        Enjoy <span className="font-bold">FREE DELIVERY</span> on orders above{' '}
-                        <span className="font-bold">₹2,000!</span>
-                    </p>
-
-                    <span className="mx-3 opacity-60">|</span>
-
-                    <p className="text-xs font-normal sm:text-sm md:text-base whitespace-nowrap">
-                        More shopping, more savings — only at KhajurKart.
-                    </p>
+                    <div
+                        className="announcement-group"
+                        aria-hidden="true"
+                    >
+                        {announcement}
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-);
 
-return (
-    <div
-        className="free-delivery-banner"
-        role="region"
-        aria-label="Free delivery announcement"
-    >
-        <div className="announcement-marquee">
-            <div className="announcement-track">
-                {/* Two identical groups create a seamless scrolling loop */}
-                <div className="announcement-group">
-                    {announcement}
-                </div>
-                <div className="announcement-group" aria-hidden="true">
-                    {announcement}
-                </div>
-            </div>
-        </div>
-
-        <style>{`
+            <style>{`
                 .free-delivery-banner {
                     width: 100%;
                     overflow: hidden;
@@ -99,7 +78,7 @@ return (
                 .announcement-track {
                     display: flex;
                     width: max-content;
-                    animation: khajur-delivery-marquee 25s linear infinite;
+                    animation: khajur-delivery-marquee 24s linear infinite;
                     will-change: transform;
                 }
 
@@ -107,15 +86,14 @@ return (
                     display: flex;
                     flex: 0 0 auto;
                     align-items: center;
-                    justify-content: center;
                     padding: 10px 0;
                     white-space: nowrap;
                 }
 
                 .announcement-content {
                     display: inline-flex;
+                    flex: 0 0 auto;
                     align-items: center;
-                    justify-content: center;
                     gap: 9px;
                     padding: 0 28px;
                     white-space: nowrap;
@@ -141,6 +119,10 @@ return (
                     to {
                         transform: translateX(-50%);
                     }
+                }
+
+                .free-delivery-banner:hover .announcement-track {
+                    animation-play-state: paused;
                 }
 
                 @media (max-width: 640px) {
@@ -174,8 +156,9 @@ return (
                     }
                 }
             `}</style>
-    </div>
-);
+        </div>
+    );
+};
 
 // ─── Navigation Link ──────────────────────────────────────────────────────────
 
@@ -202,12 +185,7 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
 
 // ─── Search Form ──────────────────────────────────────────────────────────────
 
-const SearchForm = ({
-    value,
-    onChange,
-    onSubmit,
-    className = '',
-}) => (
+const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
     <form onSubmit={onSubmit} className={className}>
         <div className="relative">
             <label htmlFor="search-input" className="sr-only">
@@ -328,7 +306,6 @@ const Navbar = () => {
 
     return (
         <>
-            {/* Scrolling golden delivery announcement */}
             <FreeDeliveryBanner />
 
             <nav
@@ -343,7 +320,6 @@ const Navbar = () => {
             >
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <div className="flex items-center justify-between h-20">
-
                         {/* Logo */}
                         <Link
                             to="/"
@@ -374,8 +350,6 @@ const Navbar = () => {
 
                         {/* Right Actions */}
                         <div className="flex items-center gap-5 flex-shrink-0">
-
-                            {/* Desktop Search */}
                             <div className="hidden lg:block">
                                 <SearchForm
                                     value={query}
@@ -384,16 +358,13 @@ const Navbar = () => {
                                 />
                             </div>
 
-                            {/* Account */}
                             <AccountButton
                                 user={user}
                                 onClick={handleAuthClick}
                             />
 
-                            {/* Cart */}
                             <CartButton count={cartCount} />
 
-                            {/* Mobile Menu Toggle */}
                             <button
                                 onClick={() => setMenuOpen(!menuOpen)}
                                 className="md:hidden text-khajur-cream/70 hover:text-white transition-colors"
@@ -438,7 +409,6 @@ const Navbar = () => {
                             </Link>
                         ))}
 
-                        {/* Mobile Search */}
                         <SearchForm
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
@@ -446,7 +416,6 @@ const Navbar = () => {
                             className="pt-2"
                         />
 
-                        {/* Mobile Account */}
                         <button
                             onClick={() => {
                                 handleAuthClick();
@@ -455,7 +424,6 @@ const Navbar = () => {
                             className="flex items-center gap-3 text-khajur-cream/80 hover:text-white transition-colors text-sm font-semibold uppercase tracking-wider"
                         >
                             <User className="w-5 h-5" />
-
                             {user
                                 ? (user.name?.split(' ')[0] || 'Account')
                                 : 'Sign In'
