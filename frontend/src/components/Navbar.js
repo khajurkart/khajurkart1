@@ -95,7 +95,7 @@ const FreeDeliveryBanner = () => {
                     position: relative;
                     left: 0;
                     gap: 0;
-                    animation: khajur-delivery-marquee 24s linear infinite;
+                    animation: khajur-delivery-marquee 28s linear infinite;
                     will-change: transform;
                     transform: translate3d(0, 0, 0);
                 }
