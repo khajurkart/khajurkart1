@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -26,18 +25,26 @@ const NAV_LINKS = [
 const FreeDeliveryBanner = () => {
     const announcement = (
         <div className="announcement-content">
-            <Truck className="announcement-truck" aria-hidden="true" />
+            <Truck
+                className="announcement-truck"
+                aria-hidden="true"
+            />
 
             <span>
                 Enjoy <strong>FREE DELIVERY</strong> on orders above{' '}
                 <strong>₹2,000!</strong>
             </span>
 
-            <span className="announcement-separator" aria-hidden="true">
+            <span
+                className="announcement-separator"
+                aria-hidden="true"
+            >
                 |
             </span>
 
-            <span>More shopping, more savings — only at KhajurKart.</span>
+            <span>
+                More shopping, more savings — only at KhajurKart.
+            </span>
         </div>
     );
 
@@ -64,28 +71,40 @@ const FreeDeliveryBanner = () => {
 
             <style>{`
                 .free-delivery-banner {
+                    position: relative;
                     width: 100%;
                     overflow: hidden;
                     background: #C6A962;
                     color: #0F3D2E;
+                    isolation: isolate;
                 }
 
                 .announcement-marquee {
+                    position: relative;
+                    display: block;
                     width: 100%;
+                    max-width: 100%;
                     overflow: hidden;
                 }
 
                 .announcement-track {
                     display: flex;
+                    flex-wrap: nowrap;
                     width: max-content;
+                    max-width: none;
+                    position: relative;
+                    left: 0;
+                    gap: 0;
                     animation: khajur-delivery-marquee 24s linear infinite;
                     will-change: transform;
+                    transform: translate3d(0, 0, 0);
                 }
 
                 .announcement-group {
                     display: flex;
                     flex: 0 0 auto;
                     align-items: center;
+                    width: max-content;
                     padding: 10px 0;
                     white-space: nowrap;
                 }
@@ -112,17 +131,31 @@ const FreeDeliveryBanner = () => {
                     opacity: 0.6;
                 }
 
+                /*
+                  Each group has the same width.
+                  The track starts one full group-width to the right,
+                  then travels left by exactly one group-width.
+                  This makes the loop seamless on desktop and mobile.
+                */
                 @keyframes khajur-delivery-marquee {
-                    from {
-                        transform: translateX(0);
+                    0% {
+                        transform: translate3d(100vw, 0, 0);
                     }
-                    to {
-                        transform: translateX(-50%);
+
+                    100% {
+                        transform: translate3d(
+                            calc(100vw - 100% - 100vw),
+                            0,
+                            0
+                        );
                     }
                 }
 
-                .free-delivery-banner:hover .announcement-track {
-                    animation-play-state: paused;
+                /* Pause when hovered with a mouse */
+                @media (hover: hover) {
+                    .free-delivery-banner:hover .announcement-track {
+                        animation-play-state: paused;
+                    }
                 }
 
                 @media (max-width: 640px) {
@@ -149,6 +182,7 @@ const FreeDeliveryBanner = () => {
                 @media (prefers-reduced-motion: reduce) {
                     .announcement-track {
                         animation: none;
+                        transform: none;
                     }
 
                     .announcement-group:nth-child(2) {
@@ -185,7 +219,12 @@ const NavLink = ({ to, label, isActive, onClick, testId }) => (
 
 // ─── Search Form ──────────────────────────────────────────────────────────────
 
-const SearchForm = ({ value, onChange, onSubmit, className = '' }) => (
+const SearchForm = ({
+    value,
+    onChange,
+    onSubmit,
+    className = '',
+}) => (
     <form onSubmit={onSubmit} className={className}>
         <div className="relative">
             <label htmlFor="search-input" className="sr-only">
