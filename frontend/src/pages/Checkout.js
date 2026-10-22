@@ -372,11 +372,32 @@ const OrderSummary = ({
                     <span className="text-amber-700 font-semibold">Confirmed after order</span>
                 )}
             </div>
+
             {Number(finalTotal) < 2000 && (
-                <p className="text-xs text-amber-700" data-testid="delivery-fee-notice">
-                    We will check the actual delivery fee and contact you for approval. Your order will not be dispatched until you agree to the final total.
-                </p>
+                <div
+                    className="space-y-2"
+                    data-testid="delivery-fee-notice"
+                >
+                    <p className="text-xs text-amber-700 leading-relaxed">
+                        We will check the actual delivery fee and contact you for
+                        approval. Your order will not be dispatched until you
+                        agree to the final total.
+                    </p>
+
+                    <div className="flex items-start gap-2 rounded-sm border border-khajur-gold/30 bg-khajur-gold/10 px-3 py-2">
+                        <Check className="w-4 h-4 text-khajur-primary mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-khajur-primary leading-relaxed">
+                            <span className="font-semibold">
+                                Important:
+                            </span>{' '}
+                            Please provide your genuine, active phone number
+                            so we can contact you easily to confirm the
+                            delivery fee and final order total.
+                        </p>
+                    </div>
+                </div>
             )}
+
         </div>
         <div className="px-7 py-5 border-b border-khajur-border">
             <div className="flex justify-between items-center">
