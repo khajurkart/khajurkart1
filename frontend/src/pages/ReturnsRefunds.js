@@ -219,10 +219,10 @@ const ReturnsRefunds = () => {
               </a>{' '}
               or call{' '}
               <a
-                href="tel:+917981002137"
+                href="tel:+919133805000"
                 className="text-khajur-gold hover:underline font-medium"
               >
-                +91 79810 02137
+                +91 9133805000
               </a>
             </p>
           </div>
