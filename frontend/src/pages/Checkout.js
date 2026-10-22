@@ -374,7 +374,7 @@ const OrderSummary = ({
             </div>
             {Number(finalTotal) < 2000 && (
                 <p className="text-xs text-amber-700" data-testid="delivery-fee-notice">
-                    We will check the actual Rapido fee and contact you for approval. Your order will not be dispatched until you agree to the final total.
+                    We will check the actual delivery fee and contact you for approval. Your order will not be dispatched until you agree to the final total.
                 </p>
             )}
         </div>
