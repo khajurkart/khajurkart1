@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from 'react-slick';
@@ -573,6 +572,8 @@ const Home = () => {
             </section>
 
             {/* Categories */}
+
+            {/* Categories */}
             <section
                 className="py-16 md:py-20 bg-white"
                 data-testid="categories-section"
@@ -581,7 +582,7 @@ const Home = () => {
                     <SectionHeader
                         eyebrow="Browse by Category"
                         title="Explore Our Collections"
-                        subtitle="Discover premium categories of dates, nuts, dry fruits, and exotic spices"
+                        subtitle="Discover our premium selection of dates, nuts, dry fruits, spices, natural spice powders, seeds and stuffed dates"
                     />
 
                     {categories.length === 0 && !loading ? (
@@ -590,16 +591,35 @@ const Home = () => {
                         </p>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {categories.map((category) => (
-                                <CategoryCard
-                                    key={category.id}
-                                    category={category}
-                                />
-                            ))}
+                            {[
+                                "dates",
+                                "nuts",
+                                "dry fruits",
+                                "spices",
+                                "natural spice powder",
+                                "seeds",
+                                "stuffed dates",
+                            ].map((categoryName) => {
+                                const category = categories.find(
+                                    (item) =>
+                                        item.name?.trim().toLowerCase() ===
+                                        categoryName.toLowerCase()
+                                );
+
+                                if (!category) return null;
+
+                                return (
+                                    <CategoryCard
+                                        key={category.id}
+                                        category={category}
+                                    />
+                                );
+                            })}
                         </div>
                     )}
                 </div>
             </section>
+
 
             <Divider />
 
