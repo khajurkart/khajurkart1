@@ -364,10 +364,19 @@ const OrderSummary = ({
             )}
             <div className="flex justify-between text-sm">
                 <span className="text-khajur-dark/60">Delivery</span>
-                <span className="text-green-600 font-semibold flex items-center gap-1">
-                    <Truck className="w-3.5 h-3.5" /> Free
-                </span>
+                {Number(finalTotal) >= 2000 ? (
+                    <span className="text-green-600 font-semibold flex items-center gap-1">
+                        <Truck className="w-3.5 h-3.5" /> Free
+                    </span>
+                ) : (
+                    <span className="text-amber-700 font-semibold">Confirmed after order</span>
+                )}
             </div>
+            {Number(finalTotal) < 2000 && (
+                <p className="text-xs text-amber-700" data-testid="delivery-fee-notice">
+                    We will check the actual Rapido fee and contact you for approval. Your order will not be dispatched until you agree to the final total.
+                </p>
+            )}
         </div>
         <div className="px-7 py-5 border-b border-khajur-border">
             <div className="flex justify-between items-center">
@@ -564,8 +573,12 @@ const Checkout = () => {
     const handleCODOrder = async () => {
         setLoading(true);
         try {
-            await axios.post(`${API}/orders`, { ...buildOrderPayload(), payment_method: 'cod' }, authHeaders);
-            toast.success('Order placed successfully!');
+            const response = await axios.post(`${API}/orders`, { ...buildOrderPayload(), payment_method: 'cod' }, authHeaders);
+            if (response.data.delivery_fee_status === 'pending') {
+                toast.success('Order placed. We will confirm the Rapido delivery fee with you before dispatch.');
+            } else {
+                toast.success('Order placed successfully! Delivery is free.');
+            }
             await clearCart();
             navigate('/thank-you');
         } catch (error) {
@@ -586,7 +599,7 @@ const Checkout = () => {
             const orderId = orderRes.data.order_id;
             const rzpOrderRes = await axios.post(
                 `${API}/razorpay/create-order`,
-                { amount: finalTotal, currency: 'INR' },
+                { order_id: orderId, currency: 'INR' },
                 authHeaders
             );
             const rzpOrder = rzpOrderRes.data;
@@ -635,6 +648,10 @@ const Checkout = () => {
         e.preventDefault();
         if (!cart.items || cart.items.length === 0) {
             toast.error('Your cart is empty.');
+            return;
+        }
+        if (formData.paymentMethod === 'razorpay' && finalTotal < 2000) {
+            toast.error('For orders below ₹2,000, please choose Cash on Delivery while we confirm the actual delivery fee.');
             return;
         }
         formData.paymentMethod === 'razorpay'
