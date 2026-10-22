@@ -888,6 +888,53 @@ async def update_user_profile(
 
 
 
+@api_router.delete("/user/account")
+async def delete_user_account(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Delete the currently authenticated customer's account.
+    Existing order records are preserved.
+    """
+
+    user_id = current_user.get("id")
+    email = (current_user.get("email") or "").strip().lower()
+
+    # Safety checks
+    if not user_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to identify your account."
+        )
+
+    # Never allow admin accounts to be deleted through this endpoint
+    admin_emails = {
+        "admin@khajurkart.com",
+        "admin@khajurkart@gmail.com"
+    }
+
+    if email in admin_emails:
+        raise HTTPException(
+            status_code=403,
+            detail="Administrator accounts cannot be deleted here."
+        )
+
+    # Delete only the authenticated user's record
+    result = await db.users.delete_one({"id": user_id})
+
+    if result.deleted_count == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="Account not found or already deleted."
+        )
+
+    return {
+        "success": True,
+        "message": "Your account has been deleted successfully."
+    }
+
+
+
 # ============ EMAIL RECEIVER (Admin Notification) ============
 
 
