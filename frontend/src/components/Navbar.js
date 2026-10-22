@@ -21,25 +21,135 @@ const NAV_LINKS = [
     { label: 'Contact Us', to: '/contact' },
 ];
 
-// ─── Free Delivery Announcement ────────────────────────────────────────────────
+// ─── Free Delivery Announcement ───────────────────────────────────────────────
 
-const FreeDeliveryBanner = () => (
-    <div className="w-full bg-[#C6A962] text-[#0F3D2E] px-4 py-3">
-        <div className="flex items-center justify-center gap-2 flex-nowrap whitespace-nowrap">
-            <Truck className="w-5 h-5 flex-shrink-0" />
+const FreeDeliveryBanner = () => {
+    const announcement = (
+        <span className="announcement-content">
+            <Truck className="announcement-truck" />
+            <span>
+                Enjoy <strong>FREE DELIVERY</strong> on orders above{' '}
+                <strong>₹2,000!</strong>
+            </span>
+            <span className="announcement-separator">|</span>
+            <span>
+                More shopping, more savings — only at KhajurKart.
+            </span>
+        </span>
+    );
 
-            <p className="text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap">
-                Enjoy <span className="font-bold">FREE DELIVERY</span> on orders above{' '}
-                <span className="font-bold">₹2,000!</span>
-                <span className="mx-2 opacity-60">|</span>
-                <span className="font-normal">
-                    More shopping, more savings — only at KhajurKart.
-                </span>
-            </p>
+    return (
+        <div
+            className="free-delivery-banner"
+            role="region"
+            aria-label="Free delivery announcement"
+        >
+            <div className="announcement-marquee">
+                <div className="announcement-track">
+                    {/* Two identical groups create a seamless scrolling loop */}
+                    <div className="announcement-group">
+                        {announcement}
+                    </div>
+                    <div className="announcement-group" aria-hidden="true">
+                        {announcement}
+                    </div>
+                </div>
+            </div>
+
+            <style>{`
+                .free-delivery-banner {
+                    width: 100%;
+                    overflow: hidden;
+                    background: #C6A962;
+                    color: #0F3D2E;
+                }
+
+                .announcement-marquee {
+                    width: 100%;
+                    overflow: hidden;
+                }
+
+                .announcement-track {
+                    display: flex;
+                    width: max-content;
+                    animation: khajur-delivery-marquee 28s linear infinite;
+                    will-change: transform;
+                }
+
+                .announcement-group {
+                    display: flex;
+                    flex: 0 0 auto;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 10px 0;
+                    white-space: nowrap;
+                }
+
+                .announcement-content {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 9px;
+                    padding: 0 28px;
+                    white-space: nowrap;
+                    font-size: 15px;
+                    line-height: 1.5;
+                }
+
+                .announcement-truck {
+                    width: 20px;
+                    height: 20px;
+                    flex-shrink: 0;
+                }
+
+                .announcement-separator {
+                    margin: 0 3px;
+                    opacity: 0.6;
+                }
+
+                @keyframes khajur-delivery-marquee {
+                    from {
+                        transform: translateX(0);
+                    }
+                    to {
+                        transform: translateX(-50%);
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .announcement-group {
+                        padding: 9px 0;
+                    }
+
+                    .announcement-content {
+                        gap: 6px;
+                        padding: 0 16px;
+                        font-size: 12px;
+                    }
+
+                    .announcement-truck {
+                        width: 16px;
+                        height: 16px;
+                    }
+
+                    .announcement-separator {
+                        margin: 0 2px;
+                    }
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .announcement-track {
+                        animation: none;
+                    }
+
+                    .announcement-group:nth-child(2) {
+                        display: none;
+                    }
+                }
+            `}</style>
         </div>
-    </div>
-);
-
+    );
+};
 
 // ─── Navigation Link ──────────────────────────────────────────────────────────
 
@@ -192,7 +302,7 @@ const Navbar = () => {
 
     return (
         <>
-            {/* Golden delivery announcement above navigation */}
+            {/* Scrolling golden delivery announcement */}
             <FreeDeliveryBanner />
 
             <nav
