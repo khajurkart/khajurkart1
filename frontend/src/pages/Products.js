@@ -33,7 +33,7 @@ const CATEGORY_ORDER = [
     'nuts',
     'dry fruits',
     'spices',
-    'natural spices powder',
+    'natural spice powder',
     'seeds',
     'stuffed dates',
 ];
