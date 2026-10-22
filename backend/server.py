@@ -407,8 +407,13 @@ class CreateOrder(BaseModel):
     coupon_id: Optional[str] = None  # ✅ ADD
 
 
+class AdminDeliveryFeeUpdate(BaseModel):
+    delivery_charge: float = Field(ge=0)
+    customer_confirmed: bool = False
+
+
 class RazorpayOrder(BaseModel):
-    amount: float
+    order_id: str
     currency: str = "INR"
 
 
@@ -1992,57 +1997,61 @@ async def create_order(
     order_data: CreateOrder, current_user: dict = Depends(get_current_user)
 ):
     order_id = f"KK-{uuid.uuid4().hex[:10].upper()}"
-    # 🔥 STOCK CHECK + DEDUCT
+
+    # Validate products and reserve stock.
+    items_with_discount = []
+    product_subtotal = 0.0
+    for item in order_data.items:
+        product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
+        sizes = product.get("sizes", [])
+        selected_size = item.size or (sizes[0].get("weight") if sizes else None)
+        size_data = next((s for s in sizes if s.get("weight") == selected_size), None)
+        if not size_data:
+            raise HTTPException(status_code=400, detail=f"Invalid size selected for {product.get('name', item.product_id)}")
+        if item.quantity < 1:
+            raise HTTPException(status_code=400, detail="Quantity must be at least 1")
+
+        price = float(size_data["price"])
+        original_price = float(size_data.get("original_price", price))
+        discount_percent = round(((original_price - price) / original_price) * 100) if original_price > price else 0
+        product_subtotal += price * item.quantity
+        items_with_discount.append({
+            "product_id": item.product_id,
+            "product_name": product.get("name"),
+            "quantity": item.quantity,
+            "size": selected_size,
+            "original_price": original_price,
+            "price": price,
+            "discount": discount_percent,
+            "delivery_charge": 0,
+        })
+
+    # Apply the supplied coupon discount within the product subtotal.
+    # Existing coupon validation remains in the coupon application flow.
+    discount_amount = min(max(float(order_data.discount_amount or 0), 0.0), product_subtotal)
+    amount_after_discount = round(max(0.0, product_subtotal - discount_amount), 2)
+    delivery_is_free = amount_after_discount >= 2000
+    delivery_charges = 0.0
+    delivery_fee_status = "free" if delivery_is_free else "pending"
+    total_amount = amount_after_discount  # provisional until Rapido fee is confirmed
+
+    # Reserve stock only after all products/sizes have been validated.
     for item in order_data.items:
         result = await db.products.update_one(
             {"id": item.product_id, "stock": {"$gte": item.quantity}},
             {"$inc": {"stock": -item.quantity}},
         )
         if result.modified_count == 0:
-            raise HTTPException(400, f"Product {item.product_id} out of stock")
+            raise HTTPException(status_code=400, detail=f"Product {item.product_id} is out of stock")
 
-    # Delivery charges disabled (free delivery)
-    delivery_charges = 0
-    items_with_discount = []
-    for item in order_data.items:
-        product = await db.products.find_one({"id": item.product_id}, {"_id": 0})
-        if not product:
-            continue
-        selected_size = item.size or product.get("sizes", [])[0]["weight"]
-        size_data = next(
-            (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
-        )
-        if not size_data:
-            raise HTTPException(400, "Invalid size selected")
-        # ✅ find selected size
-        selected_size = item.size or product.get("sizes", [])[0]["weight"]
-
-        size_data = next(
-            (s for s in product.get("sizes", []) if s["weight"] == selected_size), None
-        )
-
-        if not size_data:
-            raise HTTPException(400, "Invalid size selected")
-
-        price = size_data["price"]
-        original_price = size_data.get("original_price", price)
-        # ✅ CALCULATE DISCOUNT %
-        if original_price > price:
-            discount = round(((original_price - price) / original_price) * 100)
-        else:
-            discount = 0
-        items_with_discount.append(
-            {
-                "product_id": item.product_id,  # ✅ ADD THIS
-                "product_name": product.get("name"),
-                "quantity": item.quantity,
-                "size": item.size,
-                "original_price": original_price,
-                "price": price,  # discounted price
-                "discount": discount,
-                "delivery_charge": 0,  # Free delivery
-            }
-        )
+    if not delivery_is_free and order_data.payment_method != "cod":
+        # Do not start a prepaid payment before the final delivery-inclusive amount exists.
+        # The frontend blocks this too; this server-side check is the safety net.
+        for item in order_data.items:
+            await db.products.update_one({"id": item.product_id}, {"$inc": {"stock": item.quantity}})
+        raise HTTPException(status_code=400, detail="For orders below ₹2,000, choose Cash on Delivery while the delivery fee is confirmed.")
 
     order_doc = {
         "id": order_id,
@@ -2050,50 +2059,51 @@ async def create_order(
         "customer_name": current_user.get("name", ""),
         "customer_email": current_user.get("email", ""),
         "items": items_with_discount,
-        "total_amount": order_data.total_amount,
+        "product_subtotal": round(product_subtotal, 2),
+        "total_amount": total_amount,
         "delivery_charges": delivery_charges,
-        "coupon_code": order_data.coupon_code,  # ✅ ADD
-        "discount_amount": order_data.discount_amount,  # ✅ ADD
+        "delivery_fee_status": delivery_fee_status,
+        "delivery_fee_customer_confirmed": delivery_is_free,
+        "coupon_code": order_data.coupon_code,
+        "discount_amount": round(discount_amount, 2),
         "payment_method": order_data.payment_method,
-        "payment_status": (
-            "pending" if order_data.payment_method == "razorpay" else "cod"
-        ),
+        "payment_status": "cod" if delivery_is_free and order_data.payment_method == "cod" else "pending",
         "shipping_address": order_data.shipping_address,
-        "status": "pending",
+        "status": "pending" if delivery_is_free else "delivery_fee_pending",
         "tracking_id": None,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     await db.orders.insert_one(order_doc)
 
-    # ✅ Mark coupon as used if applied
-    if order_data.coupon_id:
+    if order_data.coupon_id and delivery_is_free:
         await mark_coupon_used(order_data.coupon_id, current_user["id"], order_id)
 
-    # ✅ Send confirmation to customer
-    await send_order_email(
-        current_user["email"],
-        current_user["name"],
-        order_id,
-        items_with_discount,
-        order_data.total_amount,
-    )
+    # Do not email the customer a provisional total as though it were final.
+    if delivery_is_free:
+        await send_order_email(
+            current_user.get("email", ""), current_user.get("name", ""),
+            order_id, items_with_discount, total_amount,
+        )
 
-    # ✅ Send notification to admin
     await send_admin_order_notification(
         order_id,
         current_user.get("name", ""),
         current_user.get("email", ""),
         order_data.shipping_address,
         items_with_discount,
-        order_data.total_amount,
+        total_amount,
         order_data.payment_method,
     )
 
-    # Clear cart
     await db.carts.update_one({"user_id": current_user["id"]}, {"$set": {"items": []}})
-
-    return {"order_id": order_id, "message": "Order created successfully"}
+    return {
+        "order_id": order_id,
+        "message": "Order created successfully" if delivery_is_free else "Order placed. Delivery fee is pending confirmation.",
+        "status": order_doc["status"],
+        "delivery_fee_status": delivery_fee_status,
+        "total_amount": total_amount,
+    }
 
 
 @api_router.get("/orders")
@@ -2211,20 +2221,39 @@ async def get_invoice(order_id: str):
 async def create_razorpay_order(
     order: RazorpayOrder, current_user: dict = Depends(get_current_user)
 ):
+    saved_order = await db.orders.find_one(
+        {"id": order.order_id, "user_id": current_user["id"]}, {"_id": 0}
+    )
+    if not saved_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if saved_order.get("payment_method") != "razorpay":
+        raise HTTPException(status_code=400, detail="This order is not configured for online payment")
+    if saved_order.get("delivery_fee_status") not in (None, "free", "confirmed"):
+        raise HTTPException(status_code=400, detail="Delivery fee must be confirmed before payment")
+    if saved_order.get("payment_status") == "paid":
+        raise HTTPException(status_code=400, detail="This order is already paid")
+
     try:
-        # Amount in paise (smallest currency unit)
-        amount_paise = int(order.amount * 100)
-
-        razorpay_order = razorpay_client.order.create(
-            {"amount": amount_paise, "currency": order.currency, "payment_capture": 1}
+        amount_paise = int(round(float(saved_order["total_amount"]) * 100))
+        if amount_paise <= 0:
+            raise HTTPException(status_code=400, detail="Order amount must be greater than zero")
+        razorpay_order = razorpay_client.order.create({
+            "amount": amount_paise,
+            "currency": order.currency,
+            "payment_capture": 1,
+        })
+        await db.orders.update_one(
+            {"id": order.order_id, "user_id": current_user["id"]},
+            {"$set": {"razorpay_order_id": razorpay_order["id"]}},
         )
-
         return {
             "id": razorpay_order["id"],
             "amount": razorpay_order["amount"],
             "currency": razorpay_order["currency"],
             "key_id": os.environ["RAZORPAY_KEY_ID"],
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -2234,39 +2263,40 @@ async def verify_razorpay_payment(
     payment_data: RazorpayVerify, current_user: dict = Depends(get_current_user)
 ):
     try:
-        # Verify signature
+        order = await db.orders.find_one(
+            {"id": payment_data.order_id, "user_id": current_user["id"]}, {"_id": 0}
+        )
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        if order.get("razorpay_order_id") != payment_data.razorpay_order_id:
+            raise HTTPException(status_code=400, detail="Payment does not match this order")
+        if order.get("delivery_fee_status") not in (None, "free", "confirmed"):
+            raise HTTPException(status_code=400, detail="Delivery fee is not confirmed")
+
         params_dict = {
             "razorpay_order_id": payment_data.razorpay_order_id,
             "razorpay_payment_id": payment_data.razorpay_payment_id,
             "razorpay_signature": payment_data.razorpay_signature,
         }
-
         razorpay_client.utility.verify_payment_signature(params_dict)
 
-        # Update order
         await db.orders.update_one(
             {"id": payment_data.order_id, "user_id": current_user["id"]},
-            {
-                "$set": {
-                    "payment_status": "paid",
-                    "razorpay_order_id": payment_data.razorpay_order_id,
-                    "razorpay_payment_id": payment_data.razorpay_payment_id,
-                    "status": "confirmed",
-                }
-            },
+            {"$set": {
+                "payment_status": "paid",
+                "razorpay_payment_id": payment_data.razorpay_payment_id,
+                "status": "confirmed",
+            }},
         )
-        order = await db.orders.find_one({"id": payment_data.order_id})
         await send_order_email(
-            order["customer_email"],
-            order["customer_name"],
-            order["id"],
-            order["items"],
-            order["total_amount"],
+            order.get("customer_email", ""), order.get("customer_name", ""),
+            order["id"], order.get("items", []), order["total_amount"],
         )
-
         return {"message": "Payment verified successfully"}
     except razorpay.errors.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid payment signature")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -2363,40 +2393,85 @@ async def delete_product(product_id: str, admin: dict = Depends(get_admin_user))
     return {"message": "Product deleted successfully"}
 
 
+@api_router.put("/admin/orders/{order_id}/delivery-fee")
+async def update_order_delivery_fee(
+    order_id: str,
+    fee_data: AdminDeliveryFeeUpdate,
+    admin: dict = Depends(get_admin_user),
+):
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.get("delivery_fee_status") == "free":
+        raise HTTPException(status_code=400, detail="This order qualifies for free delivery")
+    if order.get("status") in ("shipped", "delivered", "cancelled"):
+        raise HTTPException(status_code=400, detail="Delivery fee cannot be changed for this order")
+
+    product_subtotal = float(order.get("product_subtotal", order.get("total_amount", 0)))
+    discount_amount = float(order.get("discount_amount", 0) or 0)
+    final_total = round(max(0.0, product_subtotal - discount_amount) + float(fee_data.delivery_charge), 2)
+    accepted = bool(fee_data.customer_confirmed)
+    update_data = {
+        "delivery_charges": round(float(fee_data.delivery_charge), 2),
+        "total_amount": final_total,
+        "delivery_fee_status": "confirmed" if accepted else "awaiting_customer_confirmation",
+        "delivery_fee_customer_confirmed": accepted,
+        "delivery_fee_updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if accepted:
+        update_data["status"] = "pending"
+        if order.get("payment_method") == "cod":
+            update_data["payment_status"] = "cod"
+        else:
+            update_data["payment_status"] = "pending"
+    else:
+        update_data["status"] = "delivery_fee_pending"
+
+    await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    if accepted:
+        await send_order_email(
+            order.get("customer_email", ""),
+            order.get("customer_name", ""),
+            order_id,
+            order.get("items", []),
+            final_total,
+        )
+    return {
+        "message": "Final total recorded" if accepted else "Delivery fee saved; customer confirmation is still required",
+        "order_id": order_id,
+        "delivery_charges": update_data["delivery_charges"],
+        "total_amount": final_total,
+        "delivery_fee_status": update_data["delivery_fee_status"],
+        "status": update_data["status"],
+    }
+
+
 @api_router.put("/admin/orders/{order_id}/status")
 async def update_order_status(
     order_id: str, status: str, admin: dict = Depends(get_admin_user)
 ):
     valid_statuses = [
-        "pending",
-        "confirmed",
-        "processing",
-        "shipped",
-        "delivered",
-        "exchange",
-        "return",
-        "cancelled",
+        "delivery_fee_pending", "pending", "confirmed", "processing",
+        "shipped", "delivered", "exchange", "return", "cancelled",
     ]
     if status not in valid_statuses:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}",
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
 
-    # Generate tracking ID if status is shipped and doesn't have one
-    update_data = {"status": status}
-    if status == "shipped":
-        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
-        if order and not order.get("tracking_id"):
-            update_data["tracking_id"] = (
-                f"KK{datetime.now(timezone.utc).strftime('%Y%m%d')}{order_id[-6:].upper()}"
-            )
-
-    result = await db.orders.update_one({"id": order_id}, {"$set": update_data})
-
-    if result.matched_count == 0:
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
+    if status in ("confirmed", "processing", "shipped", "delivered"):
+        if order.get("delivery_fee_status") not in (None, "free", "confirmed"):
+            raise HTTPException(status_code=400, detail="Cannot advance this order until the delivery fee is confirmed by the customer")
+    if status in ("shipped", "delivered") and order.get("payment_method") == "razorpay" and order.get("payment_status") != "paid":
+        raise HTTPException(status_code=400, detail="Cannot dispatch an online-payment order until payment is verified")
+
+    update_data = {"status": status}
+    if status == "shipped" and not order.get("tracking_id"):
+        update_data["tracking_id"] = f"KK{datetime.now(timezone.utc).strftime('%Y%m%d')}{order_id[-6:].upper()}"
+
+    await db.orders.update_one({"id": order_id}, {"$set": update_data})
     return {"message": "Order status updated successfully"}
 
 
