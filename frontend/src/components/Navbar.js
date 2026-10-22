@@ -24,22 +24,22 @@ const NAV_LINKS = [
 // ─── Free Delivery Announcement ────────────────────────────────────────────────
 
 const FreeDeliveryBanner = () => (
-    <div className="w-full bg-[#C6A962] text-[#0F3D2E] px-4 py-3 text-center border-b border-[#0F3D2E]/20">
-        <div className="flex items-center justify-center gap-2 flex-wrap">
+    <div className="w-full bg-[#C6A962] text-[#0F3D2E] px-4 py-3">
+        <div className="flex items-center justify-center gap-2 flex-nowrap whitespace-nowrap">
             <Truck className="w-5 h-5 flex-shrink-0" />
-            <p className="text-sm md:text-base font-semibold">
-                Enjoy{' '}
-                <span className="font-bold">FREE DELIVERY</span>
-                {' '}on orders above{' '}
+
+            <p className="text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap">
+                Enjoy <span className="font-bold">FREE DELIVERY</span> on orders above{' '}
                 <span className="font-bold">₹2,000!</span>
+                <span className="mx-2 opacity-60">|</span>
+                <span className="font-normal">
+                    More shopping, more savings — only at KhajurKart.
+                </span>
             </p>
         </div>
-
-        <p className="text-xs mt-1 text-[#0F3D2E]/80">
-            More shopping, more savings — only at KhajurKart.
-        </p>
     </div>
 );
+
 
 // ─── Navigation Link ──────────────────────────────────────────────────────────
 
