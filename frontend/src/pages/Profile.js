@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -101,13 +100,20 @@ const Profile = () => {
 
     if (loading) return;
 
+    const name = formData.name.trim();
+
+    if (!name) {
+      toast.error('Please enter your name.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await axios.put(
+      await axios.put(
         `${API}/user/profile`,
         {
-          name: formData.name.trim(),
+          name,
           phone: formData.phone.trim(),
         },
         {
@@ -117,21 +123,11 @@ const Profile = () => {
         }
       );
 
-      // Update local form data from the saved response, if available.
-      const updatedUser = response.data?.user;
-
-      if (updatedUser) {
-        setFormData((prev) => ({
-          ...prev,
-          name: updatedUser.name ?? prev.name,
-          phone: updatedUser.phone ?? prev.phone,
-        }));
-      }
-
+      // Show success before navigating away.
       toast.success('Profile updated successfully.');
 
-      // Return to the Account page after a successful save.
-      navigate('/account', { replace: true });
+      // Full page navigation reloads the app and its account data.
+      window.location.assign('/account');
     } catch (error) {
       console.error(
         'Profile update failed:',
@@ -142,16 +138,18 @@ const Profile = () => {
         error.response?.data?.detail ||
           'Failed to update profile. Please try again.'
       );
-    } finally {
+
       setLoading(false);
     }
   };
 
-  // Guard against unauthenticated access.
   if (!user) {
     return (
       <div className="min-h-screen bg-khajur-cream flex items-center justify-center">
-        <p className="text-khajur-primary">Please log in to view your profile.</p>
+        <p className="text-khajur-primary">
+          Please log in to view your profile.
+        </p>
+
         <button
           type="button"
           onClick={() => navigate('/', { replace: true })}
@@ -185,6 +183,7 @@ const Profile = () => {
             <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
               Account
             </p>
+
             <h1 className="font-serif text-4xl font-medium text-khajur-primary leading-tight">
               My Profile
             </h1>
@@ -207,7 +206,6 @@ const Profile = () => {
               <input
                 type="text"
                 required
-                minLength={1}
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={set('name')}
