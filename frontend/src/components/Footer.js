@@ -35,17 +35,19 @@ const CUSTOMER_SERVICE = [
 ];
 
 // ─── Social Links ────────────────────────────────────────────────────────────
-const SOCIAL_LINKS = [
-    {
-        label: 'Facebook',
-        href: 'https://www.facebook.com/profile.php?id=61572011713195',
-        icon: <Facebook className="w-4 h-4" />,
-    },
+const SOCIAL_LINKS = [    
     {
         label: 'Instagram',
         href: 'https://www.instagram.com/_khajurkart_/',
         icon: <Instagram className="w-4 h-4" />,
     },
+    
+    {
+        label: 'Facebook',
+        href: 'https://www.facebook.com/profile.php?id=61572011713195',
+        icon: <Facebook className="w-4 h-4" />,
+    },
+    
     {
         label: 'Pinterest',
         href: 'https://in.pinterest.com/khajurkart/',
