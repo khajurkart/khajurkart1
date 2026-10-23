@@ -38,6 +38,10 @@ const INITIAL_FORM = {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
+// Automatically capitalize the first letter of every word.
+const capitalizeWords = (value) =>
+  value.replace(/\b\w/g, (char) => char.toUpperCase());
+
 const buildProductPayload = (formData) => ({
   ...formData,
   sizes: formData.sizes.map((s) => ({
@@ -219,7 +223,9 @@ const ProductModal = ({
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => updateField('name', e.target.value)}
+                onChange={(e) =>
+                  updateField('name', capitalizeWords(e.target.value))
+                }
                 placeholder="e.g. Premium Medjool Dates"
                 className={inputBase}
                 data-testid="product-name-input"
@@ -357,7 +363,9 @@ const ProductModal = ({
                 src={formData.image}
                 alt="Preview"
                 className="mt-2 w-24 h-24 object-cover border border-khajur-border"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             )}
           </FormField>
@@ -418,15 +426,15 @@ const AdminProducts = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const [products, setProducts]           = useState([]);
-  const [categories, setCategories]       = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [saving, setSaving]               = useState(false);
-  const [deletingId, setDeletingId]       = useState(null);
-  const [showModal, setShowModal]         = useState(false);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [formData, setFormData]           = useState(INITIAL_FORM);
-  const [searchQuery, setSearchQuery]     = useState('');
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -455,7 +463,10 @@ const AdminProducts = () => {
 
   const openAddModal = () => {
     setEditingProduct(null);
-    setFormData(INITIAL_FORM);
+    setFormData({
+      ...INITIAL_FORM,
+      sizes: [{ ...EMPTY_SIZE }],
+    });
     setShowModal(true);
   };
 
@@ -485,7 +496,11 @@ const AdminProducts = () => {
       const payload = buildProductPayload(formData);
 
       if (editingProduct) {
-        await axios.put(`${API}/admin/products/${editingProduct.id}`, payload, authHeaders);
+        await axios.put(
+          `${API}/admin/products/${editingProduct.id}`,
+          payload,
+          authHeaders
+        );
         toast.success('Product updated successfully.');
       } else {
         await axios.post(`${API}/admin/products`, payload, authHeaders);
@@ -493,7 +508,7 @@ const AdminProducts = () => {
       }
 
       closeModal();
-      fetchData();
+      await fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to save product.');
     } finally {
@@ -504,9 +519,14 @@ const AdminProducts = () => {
   // ── Delete ─────────────────────────────────────────────────────────────────
 
   const handleDelete = async (productId) => {
-    if (!window.confirm('Are you sure you want to delete this product? This cannot be undone.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete this product? This cannot be undone.'
+      )
+    ) {
       return;
     }
+
     setDeletingId(productId);
     try {
       await axios.delete(`${API}/admin/products/${productId}`, authHeaders);
@@ -523,17 +543,24 @@ const AdminProducts = () => {
 
   const toggleStock = async (product) => {
     const newStock = product.stock > 0 ? 0 : 10;
+
     try {
       await axios.put(
         `${API}/admin/products/${product.id}`,
         { stock: newStock },
         authHeaders
       );
+
       setProducts((prev) =>
-        prev.map((p) => (p.id === product.id ? { ...p, stock: newStock } : p))
+        prev.map((p) =>
+          p.id === product.id ? { ...p, stock: newStock } : p
+        )
       );
+
       toast.success(
-        newStock > 0 ? 'Product marked as in stock.' : 'Product marked as out of stock.'
+        newStock > 0
+          ? 'Product marked as in stock.'
+          : 'Product marked as out of stock.'
       );
     } catch {
       toast.error('Failed to update stock status.');
@@ -544,6 +571,7 @@ const AdminProducts = () => {
 
   const filteredProducts = products.filter((p) => {
     const q = searchQuery.toLowerCase();
+
     return (
       !q ||
       p.name?.toLowerCase().includes(q) ||
@@ -565,7 +593,10 @@ const AdminProducts = () => {
   // ── Main Render ────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen py-20 bg-white" data-testid="admin-products-page">
+    <div
+      className="min-h-screen py-20 bg-white"
+      data-testid="admin-products-page"
+    >
       <div className="max-w-7xl mx-auto px-6 md:px-12">
 
         {/* Page Header */}
@@ -579,6 +610,7 @@ const AdminProducts = () => {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
+
             <div>
               <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
                 Administration
@@ -622,8 +654,14 @@ const AdminProducts = () => {
         {/* Count */}
         <p className="text-sm text-khajur-dark/50 mb-4">
           Showing{' '}
-          <span className="font-medium text-khajur-primary">{filteredProducts.length}</span> of{' '}
-          <span className="font-medium text-khajur-primary">{products.length}</span> products
+          <span className="font-medium text-khajur-primary">
+            {filteredProducts.length}
+          </span>{' '}
+          of{' '}
+          <span className="font-medium text-khajur-primary">
+            {products.length}
+          </span>{' '}
+          products
         </p>
 
         {/* Table */}
@@ -632,8 +670,14 @@ const AdminProducts = () => {
             <thead className="bg-khajur-cream border-b border-khajur-border">
               <tr>
                 {[
-                  'Image', 'Name', 'Category', 'Price',
-                  'Delivery', 'Stock', 'Status', 'Actions',
+                  'Image',
+                  'Name',
+                  'Category',
+                  'Price',
+                  'Delivery',
+                  'Stock',
+                  'Status',
+                  'Actions',
                 ].map((col) => (
                   <th
                     key={col}
@@ -648,6 +692,7 @@ const AdminProducts = () => {
                 ))}
               </tr>
             </thead>
+
             <tbody className="divide-y divide-khajur-border bg-white">
               {filteredProducts.length === 0 ? (
                 <EmptyState />
@@ -664,7 +709,9 @@ const AdminProducts = () => {
                           src={product.image}
                           alt={product.name}
                           className="w-14 h-14 object-cover border border-khajur-border"
-                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       ) : (
                         <div className="w-14 h-14 bg-khajur-cream flex items-center justify-center">
@@ -675,9 +722,13 @@ const AdminProducts = () => {
 
                     {/* Name */}
                     <td className="px-5 py-4">
-                      <p className="font-medium text-khajur-primary">{product.name}</p>
+                      <p className="font-medium text-khajur-primary">
+                        {product.name}
+                      </p>
                       {product.weight && (
-                        <p className="text-xs text-khajur-dark/50 mt-0.5">{product.weight}</p>
+                        <p className="text-xs text-khajur-dark/50 mt-0.5">
+                          {product.weight}
+                        </p>
                       )}
                     </td>
 
@@ -701,11 +752,12 @@ const AdminProducts = () => {
                       <span
                         className={`
                           text-sm font-medium
-                          ${product.stock <= 0
-                            ? 'text-red-500'
-                            : product.stock < 5
-                            ? 'text-orange-500'
-                            : 'text-khajur-dark/70'
+                          ${
+                            product.stock <= 0
+                              ? 'text-red-500'
+                              : product.stock < 5
+                              ? 'text-orange-500'
+                              : 'text-khajur-dark/70'
                           }
                         `}
                       >
@@ -724,12 +776,16 @@ const AdminProducts = () => {
                         {product.stock > 0 ? (
                           <>
                             <ToggleRight className="w-6 h-6 text-green-500" />
-                            <span className="text-xs font-medium text-green-600">In Stock</span>
+                            <span className="text-xs font-medium text-green-600">
+                              In Stock
+                            </span>
                           </>
                         ) : (
                           <>
                             <ToggleLeft className="w-6 h-6 text-red-400" />
-                            <span className="text-xs font-medium text-red-500">Out of Stock</span>
+                            <span className="text-xs font-medium text-red-500">
+                              Out of Stock
+                            </span>
                           </>
                         )}
                       </button>
@@ -746,6 +802,7 @@ const AdminProducts = () => {
                         >
                           <Edit className="w-4 h-4" />
                         </button>
+
                         <button
                           onClick={() => handleDelete(product.id)}
                           disabled={deletingId === product.id}
@@ -753,10 +810,11 @@ const AdminProducts = () => {
                           aria-label={`Delete ${product.name}`}
                           data-testid={`delete-product-${product.id}`}
                         >
-                          {deletingId === product.id
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                            : <Trash2 className="w-4 h-4" />
-                          }
+                          {deletingId === product.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </td>
