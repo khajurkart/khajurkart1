@@ -38,7 +38,7 @@ const CUSTOMER_SERVICE = [
 const SOCIAL_LINKS = [    
     {
         label: 'Instagram',
-        href: 'https://www.instagram.com/_khajurkart_/',
+        href: 'https://www.instagram.com/khajurkart/',
         icon: <Instagram className="w-4 h-4" />,
     },
     
