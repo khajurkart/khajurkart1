@@ -699,17 +699,55 @@ const ProductDetail = () => {
         return true;
     };
 
-    const handleAddToCart = () => {
+
+    const handleAddToCart = async () => {
         if (!validateSize()) return;
-        addToCart(product.id, quantity, selectedSize);
-        toast.success(`${product.name} added to cart!`);
+
+        if (Number(product.stock) <= 0) {
+            toast.error('This product is out of stock.');
+            return;
+        }
+
+        const success = await addToCart(
+            product.id ?? product._id,
+            quantity,
+            selectedSize,
+            {
+                ...product,
+                price: Number(currentPrice),
+            }
+        );
+
+        if (success) {
+            toast.success(`${product.name} added to cart!`);
+        }
     };
 
-    const handleBuyNow = () => {
+
+
+    const handleBuyNow = async () => {
         if (!validateSize()) return;
-        addToCart(product.id, quantity, selectedSize);
-        setTimeout(() => navigate('/cart'), 300);
+
+        if (Number(product.stock) <= 0) {
+            toast.error('This product is out of stock.');
+            return;
+        }
+
+        const success = await addToCart(
+            product.id ?? product._id,
+            quantity,
+            selectedSize,
+            {
+                ...product,
+                price: Number(currentPrice),
+            }
+        );
+
+        if (success) {
+            navigate('/cart');
+        }
     };
+
 
     // ── Breadcrumb Items ───────────────────────────────────────────────────────
 
