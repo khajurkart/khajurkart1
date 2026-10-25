@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -31,7 +31,11 @@ const getProductDetails = (item) => {
 
     return {
         ...product,
-        id: product.id ?? product._id ?? item.product_id ?? item.id,
+        id:
+            product.id ??
+            product._id ??
+            item.product_id ??
+            item.id,
         name: product.name ?? item.name ?? 'Product',
         image:
             product.image ??
@@ -120,7 +124,7 @@ const QuantityControl = ({
             type="button"
             onClick={onDecrease}
             data-testid={`decrease-cart-quantity-${productId}`}
-            className="w-8 h-8 flex items-center justify-center bg-khajur-cream hover:bg-khajur-gold/20 text-khajur-primary rounded-sm transition-colors"
+            className="w-8 h-8 flex items-center justify-center bg-khajur-cream hover:bg-khajur-gold/20 text-khajur-primary rounded-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Decrease quantity"
             disabled={quantity <= 1}
         >
@@ -157,7 +161,7 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
     const itemTotal = product.price * quantity;
 
     const productUrl = product.id
-        ? `/products/${product.id}`
+        ? `/product/${product.id}`
         : '/products';
 
     return (
@@ -174,6 +178,7 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
                     <img
                         src={product.image}
                         alt={product.name}
+                        loading="lazy"
                         className="w-full h-44 sm:h-full sm:min-h-40 object-cover rounded-sm"
                     />
                 ) : (
@@ -212,7 +217,9 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
 
                     <button
                         type="button"
-                        onClick={() => onRemove(productId, item.size ?? null)}
+                        onClick={() =>
+                            onRemove(productId, item.size ?? null)
+                        }
                         data-testid={`remove-cart-item-${productId}`}
                         className="text-red-300 hover:text-red-500 transition-colors flex-shrink-0"
                         aria-label={`Remove ${product.name}`}
@@ -379,9 +386,8 @@ const Cart = () => {
         loading,
     } = useCart();
 
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation();
 
     useEffect(() => {
         document.title = 'Your Cart — KhajurKart';
@@ -402,16 +408,12 @@ const Cart = () => {
         await updateCartItem(productId, newQuantity, size);
     };
 
-    const handleCheckout = () => {
-        if (!user) {
-            toast.error('Please sign in to complete your order.');
+    // Guests remain on the cart page and see only this message.
+    const handleCheckout = (event) => {
+        event?.preventDefault();
 
-            navigate('/login', {
-                state: {
-                    from: location.pathname || '/checkout',
-                },
-            });
-
+        if (!user || !token) {
+            toast.error('Please sign in to order.');
             return;
         }
 
@@ -428,14 +430,18 @@ const Cart = () => {
         return <EmptyCart />;
     }
 
-    // Calculate the displayed total from the same product details
-    // used to render each item.
+    // Calculate the displayed subtotal from the same details used
+    // to render the cart items.
     const displayedTotal = items.reduce((total, item) => {
         const product = getProductDetails(item);
 
         return total +
             product.price * Number(item.quantity || 0);
     }, 0);
+
+    const safeCartTotal = Number.isFinite(displayedTotal)
+        ? displayedTotal
+        : Number(cartTotal || 0);
 
     return (
         <div
@@ -497,9 +503,7 @@ const Cart = () => {
                     <div className="lg:col-span-1">
                         <OrderSummaryPanel
                             cart={{ items }}
-                            cartTotal={Number.isFinite(displayedTotal)
-                                ? displayedTotal
-                                : Number(cartTotal || 0)}
+                            cartTotal={safeCartTotal}
                             onCheckout={handleCheckout}
                         />
                     </div>
