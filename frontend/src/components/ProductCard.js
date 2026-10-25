@@ -86,12 +86,32 @@ const ProductCard = ({ product }) => {
 
     const handleAddToCart = async (e) => {
         e.preventDefault();
+        e.stopPropagation();
+
         if (isOutOfStock || adding) return;
+
         setAdding(true);
+
         try {
-            await addToCart(product.id);
-            toast.success(`${product.name} added to cart!`);
-        } catch {
+            const productId = product.id ?? product._id;
+
+            const success = await addToCart(
+                productId,
+                1,
+                null,
+                {
+                    ...product,
+                    id: productId,
+                    price: Number(displayPrice ?? product.price ?? 0),
+                }
+            );
+
+            // Show success only when CartContext confirms the item was added.
+            if (success) {
+                toast.success(`${product.name} added to cart!`);
+            }
+        } catch (error) {
+            console.error('Failed to add product to cart:', error);
             toast.error('Failed to add to cart. Please try again.');
         } finally {
             setAdding(false);
