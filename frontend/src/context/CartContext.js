@@ -4,6 +4,7 @@ import React, {
     useState,
     useEffect,
     useCallback,
+    useRef,
 } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
@@ -16,6 +17,10 @@ const GUEST_CART_KEY = 'khajurkart_guest_cart';
 
 const CartContext = createContext(null);
 
+// ------------------------------
+// Public hook
+// ------------------------------
+
 export const useCart = () => {
     const context = useContext(CartContext);
 
@@ -27,7 +32,7 @@ export const useCart = () => {
 };
 
 // ------------------------------
-// Guest cart helper functions
+// Guest cart helpers
 // ------------------------------
 
 const emptyCart = { items: [] };
@@ -42,11 +47,14 @@ const readGuestCart = () => {
 
         const parsedCart = JSON.parse(savedCart);
 
-        return {
-            items: Array.isArray(parsedCart.items)
+        // Support both { items: [...] } and [...] formats.
+        const items = Array.isArray(parsedCart)
+            ? parsedCart
+            : Array.isArray(parsedCart?.items)
                 ? parsedCart.items
-                : [],
-        };
+                : [];
+
+        return { items };
     } catch (error) {
         console.error('Failed to read guest cart:', error);
         return { items: [] };
@@ -67,24 +75,31 @@ const saveGuestCart = (cartData) => {
     }
 };
 
-// Identify a cart item by product and selected size.
-const getItemKey = (item) => {
-    const productId =
-        item.product_id ??
-        item.product?.id ??
-        item.product?._id ??
-        item.id;
-
-    const size = item.size ?? '';
-
-    return `${String(productId)}:${String(size)}`;
-};
-
 const getProductId = (item) =>
     item.product_id ??
     item.product?.id ??
     item.product?._id ??
-    item.id;
+    item.id ??
+    item._id;
+
+const getItemKey = (item) => {
+    const productId = getProductId(item);
+    const size = String(item.size ?? '').trim();
+
+    return `${String(productId)}::${size}`;
+};
+
+const normalizeCart = (data) => ({
+    ...(data && typeof data === 'object' ? data : {}),
+    items: Array.isArray(data?.items) ? data.items : [],
+});
+
+const getItemPrice = (item) =>
+    Number(
+        item.product?.price ??
+        item.price ??
+        0
+    );
 
 // ------------------------------
 // Cart Provider
@@ -98,19 +113,23 @@ export const CartProvider = ({ children }) => {
 
     const isLoggedIn = Boolean(user && token);
 
+    // Prevent stale effects from updating the cart after auth changes.
+    const authVersionRef = useRef(0);
+
+    // Prevent concurrent synchronization attempts.
+    const syncingRef = useRef(false);
+
     // ------------------------------
-    // Fetch cart
+    // Fetch server cart
     // ------------------------------
 
     const fetchCart = useCallback(async () => {
-        // Guest: load cart from this browser.
         if (!isLoggedIn) {
             const guestCart = readGuestCart();
             setCart(guestCart);
             return guestCart;
         }
 
-        // Logged-in customer: load cart from backend.
         try {
             setLoading(true);
 
@@ -120,12 +139,7 @@ export const CartProvider = ({ children }) => {
                 },
             });
 
-            const serverCart = {
-                ...response.data,
-                items: Array.isArray(response.data?.items)
-                    ? response.data.items
-                    : [],
-            };
+            const serverCart = normalizeCart(response.data);
 
             setCart(serverCart);
 
@@ -141,9 +155,193 @@ export const CartProvider = ({ children }) => {
         }
     }, [isLoggedIn, token]);
 
+    // ------------------------------
+    // Synchronize guest cart after login
+    // ------------------------------
+
     useEffect(() => {
-        fetchCart();
-    }, [fetchCart]);
+        const version = ++authVersionRef.current;
+        let cancelled = false;
+
+        const isCurrent = () =>
+            !cancelled &&
+            authVersionRef.current === version;
+
+        const syncCart = async () => {
+            if (!isLoggedIn) {
+                setCart(readGuestCart());
+                setLoading(false);
+                return;
+            }
+
+            // Wait if another synchronization is already in progress.
+            if (syncingRef.current) {
+                return;
+            }
+
+            syncingRef.current = true;
+            setLoading(true);
+
+            try {
+                // Read guest items before loading the server cart.
+                const guestCart = readGuestCart();
+                const guestItems = guestCart.items;
+
+                // Fetch the customer's existing cart.
+                const response = await axios.get(`${API}/cart`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!isCurrent()) return;
+
+                let serverCart = normalizeCart(response.data);
+
+                if (guestItems.length > 0) {
+                    // Merge matching product/size combinations by adding
+                    // quantities to the existing server quantity.
+                    const serverKeys = new Set(
+                        serverCart.items.map(getItemKey)
+                    );
+
+                    for (const guestItem of guestItems) {
+                        if (!isCurrent()) return;
+
+                        const productId = getProductId(guestItem);
+
+                        if (!productId) {
+                            throw new Error(
+                                'A guest cart item has no product ID.'
+                            );
+                        }
+
+                        const guestKey = getItemKey(guestItem);
+
+                        // Skip duplicate submission if the item is already
+                        // represented in the server cart. This avoids
+                        // repeating the same add when synchronization retries.
+                        if (serverKeys.has(guestKey)) {
+                            const existingItem = serverCart.items.find(
+                                (item) => getItemKey(item) === guestKey
+                            );
+
+                            const existingQuantity = Number(
+                                existingItem?.quantity || 0
+                            );
+
+                            const guestQuantity = Number(
+                                guestItem.quantity || 1
+                            );
+
+                            // Update to the combined quantity when the
+                            // backend supports this endpoint.
+                            await axios.post(
+                                `${API}/cart/update`,
+                                {
+                                    product_id: productId,
+                                    quantity:
+                                        existingQuantity + guestQuantity,
+                                    size: guestItem.size ?? null,
+                                },
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                }
+                            );
+                        } else {
+                            await axios.post(
+                                `${API}/cart/add`,
+                                {
+                                    product_id: productId,
+                                    quantity: Number(
+                                        guestItem.quantity || 1
+                                    ),
+                                    size: guestItem.size ?? null,
+                                },
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                }
+                            );
+
+                            serverKeys.add(guestKey);
+                        }
+
+                        if (!isCurrent()) return;
+                    }
+
+                    // Confirm that the backend contains the merged items
+                    // before removing the guest cart.
+                    const mergedResponse = await axios.get(
+                        `${API}/cart`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+
+                    if (!isCurrent()) return;
+
+                    serverCart = normalizeCart(mergedResponse.data);
+
+                    // Only clear the guest cart if every guest item can
+                    // be found in the server cart.
+                    const allItemsSynced = guestItems.every(
+                        (guestItem) =>
+                            serverCart.items.some(
+                                (serverItem) =>
+                                    getItemKey(serverItem) ===
+                                    getItemKey(guestItem)
+                            )
+                    );
+
+                    if (!allItemsSynced) {
+                        throw new Error(
+                            'Some guest cart items were not found after syncing.'
+                        );
+                    }
+
+                    // Clear only after the server cart has been verified.
+                    localStorage.removeItem(GUEST_CART_KEY);
+                }
+
+                if (isCurrent()) {
+                    setCart(serverCart);
+                }
+            } catch (error) {
+                console.error(
+                    'Failed to synchronize guest cart:',
+                    error
+                );
+
+                // Keep the guest cart in localStorage if syncing fails.
+                // Display it so the customer's items are not hidden.
+                if (isCurrent()) {
+                    setCart(readGuestCart());
+
+                    toast.error(
+                        'Your cart could not be synced. Your saved guest cart has been kept.'
+                    );
+                }
+            } finally {
+                syncingRef.current = false;
+
+                if (isCurrent()) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        syncCart();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isLoggedIn, token]);
 
     // ------------------------------
     // Add product to cart
@@ -176,7 +374,21 @@ export const CartProvider = ({ children }) => {
                 product_id: productId,
                 quantity: amount,
                 size,
-                ...(product ? { product } : {}),
+                ...(product
+                    ? {
+                        product: {
+                            ...product,
+                            id: product.id ?? productId,
+                            price: Number(
+                                product.price ??
+                                product.sizes?.find(
+                                    (s) => s.weight === size
+                                )?.price ??
+                                0
+                            ),
+                        },
+                    }
+                    : {}),
             };
 
             const itemKey = getItemKey(newItem);
@@ -190,15 +402,15 @@ export const CartProvider = ({ children }) => {
             if (existingIndex !== -1) {
                 updatedItems = currentCart.items.map(
                     (item, index) => {
-                        if (index !== existingIndex) {
-                            return item;
-                        }
+                        if (index !== existingIndex) return item;
 
                         return {
                             ...item,
                             quantity:
                                 Number(item.quantity || 0) + amount,
-                            ...(product ? { product } : {}),
+                            ...(product
+                                ? { product: newItem.product }
+                                : {}),
                         };
                     }
                 );
@@ -209,13 +421,9 @@ export const CartProvider = ({ children }) => {
                 ];
             }
 
-            const updatedCart = {
-                items: updatedItems,
-            };
+            const updatedCart = { items: updatedItems };
 
-            const saved = saveGuestCart(updatedCart);
-
-            if (!saved) {
+            if (!saveGuestCart(updatedCart)) {
                 toast.error(
                     'Unable to save your cart. Please check your browser storage.'
                 );
@@ -227,7 +435,7 @@ export const CartProvider = ({ children }) => {
             return true;
         }
 
-        // Authenticated cart: use backend API.
+        // Signed-in cart: use backend API.
         try {
             await axios.post(
                 `${API}/cart/add`,
@@ -274,7 +482,6 @@ export const CartProvider = ({ children }) => {
             return false;
         }
 
-        // Guest cart.
         if (!isLoggedIn) {
             const currentCart = readGuestCart();
 
@@ -285,22 +492,16 @@ export const CartProvider = ({ children }) => {
                         String(productId);
 
                     const sameSize =
-                        (item.size ?? null) === (size ?? null);
+                        String(item.size ?? '') ===
+                        String(size ?? '');
 
-                    if (sameProduct && sameSize) {
-                        return {
-                            ...item,
-                            quantity: amount,
-                        };
-                    }
-
-                    return item;
+                    return sameProduct && sameSize
+                        ? { ...item, quantity: amount }
+                        : item;
                 }),
             };
 
-            const saved = saveGuestCart(updatedCart);
-
-            if (!saved) {
+            if (!saveGuestCart(updatedCart)) {
                 toast.error('Unable to save your cart changes.');
                 return false;
             }
@@ -310,7 +511,6 @@ export const CartProvider = ({ children }) => {
             return true;
         }
 
-        // Authenticated cart.
         try {
             await axios.post(
                 `${API}/cart/update`,
@@ -349,7 +549,6 @@ export const CartProvider = ({ children }) => {
         productId,
         size = null
     ) => {
-        // Guest cart.
         if (!isLoggedIn) {
             const currentCart = readGuestCart();
 
@@ -360,15 +559,14 @@ export const CartProvider = ({ children }) => {
                         String(productId);
 
                     const sameSize =
-                        (item.size ?? null) === (size ?? null);
+                        String(item.size ?? '') ===
+                        String(size ?? '');
 
                     return !(sameProduct && sameSize);
                 }),
             };
 
-            const saved = saveGuestCart(updatedCart);
-
-            if (!saved) {
+            if (!saveGuestCart(updatedCart)) {
                 toast.error('Unable to update your cart.');
                 return false;
             }
@@ -380,8 +578,9 @@ export const CartProvider = ({ children }) => {
             return true;
         }
 
-        // Authenticated cart.
         try {
+            // Note: this endpoint removes by product ID. If your backend
+            // supports size-specific removal, pass size in its expected format.
             await axios.delete(
                 `${API}/cart/remove/${productId}`,
                 {
@@ -413,11 +612,8 @@ export const CartProvider = ({ children }) => {
     // ------------------------------
 
     const clearCart = async () => {
-        // Guest cart.
         if (!isLoggedIn) {
-            const saved = saveGuestCart(emptyCart);
-
-            if (!saved) {
+            if (!saveGuestCart(emptyCart)) {
                 toast.error('Unable to clear your cart.');
                 return false;
             }
@@ -427,7 +623,6 @@ export const CartProvider = ({ children }) => {
             return true;
         }
 
-        // Authenticated cart.
         try {
             await axios.delete(`${API}/cart/clear`, {
                 headers: {
@@ -457,15 +652,11 @@ export const CartProvider = ({ children }) => {
         0
     );
 
-    const cartTotal = cart.items.reduce((total, item) => {
-        const price = Number(
-            item.product?.price ??
-            item.price ??
-            0
-        );
-
-        return total + price * Number(item.quantity || 0);
-    }, 0);
+    const cartTotal = cart.items.reduce(
+        (total, item) =>
+            total + getItemPrice(item) * Number(item.quantity || 0),
+        0
+    );
 
     // ------------------------------
     // Provider
