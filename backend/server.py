@@ -2430,12 +2430,12 @@ async def create_product(
     product_data: ProductCreate, admin: dict = Depends(get_admin_user)
 ):
     try:
-        # ✅ STEP 1: CATEGORY BASED SIZES
-        category = product_data.category.lower()
 
-        if category == "saffron":
+        # ✅ STEP 1: PRODUCT-BASED SIZES
+        product_name = product_data.name.strip().lower()
+        
+        if product_name == "saffron":
             product_data.sizes = [
-                {"weight": "0.5g", "price": 0, "original_price": 0},
                 {"weight": "1g", "price": 0, "original_price": 0},
                 {"weight": "2g", "price": 0, "original_price": 0},
                 {"weight": "3g", "price": 0, "original_price": 0},
@@ -2445,10 +2445,13 @@ async def create_product(
         else:
             product_data.sizes = [
                 {"weight": "100g", "price": 0, "original_price": 0},
+                {"weight": "200g", "price": 0, "original_price": 0},
+                {"weight": "300g", "price": 0, "original_price": 0},
                 {"weight": "250g", "price": 0, "original_price": 0},
                 {"weight": "500g", "price": 0, "original_price": 0},
                 {"weight": "1kg", "price": 0, "original_price": 0},
             ]
+
 
         # ✅ STEP 2: CREATE PRODUCT
         product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
