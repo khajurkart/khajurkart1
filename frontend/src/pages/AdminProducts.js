@@ -313,7 +313,7 @@ const ProductModal = ({
           {/* Sizes */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-khajur-dark/60 uppercase tracking-wide">
+              <p className="text-xs font-medium text-khajur-dark/60 uppercase tracking-wide mb-3">
                 Sizes & Pricing
               </p>
               <div className="grid grid-cols-3 gap-2 text-xs text-khajur-dark/40 w-2/3">
