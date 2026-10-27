@@ -293,8 +293,9 @@ class Product(BaseModel):
     stock: int
     featured: bool = False
     delivery_charge: float = 0.0
-
-    sizes: List[dict] = []  # ✅ new    original_price: Optional[float] = None
+    base_original_price: Optional[float] = None
+    original_price: Optional[float] = None
+    sizes: List[dict] = []
 
 
 class ProductCreate(BaseModel):
@@ -306,6 +307,7 @@ class ProductCreate(BaseModel):
     stock: int
     featured: bool = False
     delivery_charge: float = 0.0
+    base_original_price: Optional[float] = None
 
     sizes: List[dict] = []
 
@@ -319,6 +321,7 @@ class ProductUpdate(BaseModel):
     stock: Optional[int] = None
     featured: Optional[bool] = None
     delivery_charge: Optional[float] = None
+    base_original_price: Optional[float] = None
 
     sizes: Optional[List[dict]] = None
 
@@ -1848,6 +1851,47 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
 
 # ============ PRODUCT ROUTES ============
 
+# General product-price uplift (not a separate checkout/payment surcharge).
+PRODUCT_PRICE_UPLIFT_RATE = 0.0236
+
+
+def _money(value):
+    return round(float(value or 0), 2)
+
+
+def apply_product_price_uplift(sizes):
+    adjusted_sizes = []
+    for size in sizes or []:
+        size = dict(size)
+        base_price = _money(size.get("base_price", size.get("price", 0)))
+        base_original_price = _money(
+            size.get("base_original_price", size.get("original_price", base_price))
+        )
+
+        size["base_price"] = base_price
+        size["base_original_price"] = base_original_price
+        size["price"] = round(base_price * (1 + PRODUCT_PRICE_UPLIFT_RATE) + 1e-9, 2)
+        size["original_price"] = round(
+            base_original_price * (1 + PRODUCT_PRICE_UPLIFT_RATE) + 1e-9, 2
+        )
+        adjusted_sizes.append(size)
+
+    return adjusted_sizes
+
+
+def apply_product_top_level_price_uplift(product_data):
+    base_original_price = product_data.get(
+        "base_original_price", product_data.get("original_price")
+    )
+    if base_original_price is not None:
+        base_original_price = _money(base_original_price)
+        product_data["base_original_price"] = base_original_price
+        product_data["original_price"] = round(
+            base_original_price * (1 + PRODUCT_PRICE_UPLIFT_RATE) + 1e-9, 2
+        )
+    return product_data
+
+
 
 def serialize(product):
     product["_id"] = str(product["_id"])
@@ -2430,56 +2474,53 @@ async def create_product(
     product_data: ProductCreate, admin: dict = Depends(get_admin_user)
 ):
     try:
+        product_doc = product_data.model_dump()
 
-        # ✅ STEP 1: PRODUCT-BASED SIZES
-        product_name = product_data.name.strip().lower()
-        
-        if product_name == "saffron":
-            product_data.sizes = [
-                {"weight": "1g", "price": 0, "original_price": 0},
-                {"weight": "2g", "price": 0, "original_price": 0},
-                {"weight": "3g", "price": 0, "original_price": 0},
-                {"weight": "4g", "price": 0, "original_price": 0},
-                {"weight": "5g", "price": 0, "original_price": 0},
-            ]
-        else:
-            product_data.sizes = [
-                {"weight": "100g", "price": 0, "original_price": 0},
-                {"weight": "200g", "price": 0, "original_price": 0},
-                {"weight": "300g", "price": 0, "original_price": 0},
-                {"weight": "250g", "price": 0, "original_price": 0},
-                {"weight": "500g", "price": 0, "original_price": 0},
-                {"weight": "1kg", "price": 0, "original_price": 0},
+        # Only create default size rows if the admin did not submit any.
+        # Preserve the actual size prices entered in Admin Products.
+        if not product_doc.get("sizes"):
+            product_name = product_data.name.strip().lower()
+            default_weights = (
+                ["1g", "2g", "3g", "4g", "5g"]
+                if product_name == "saffron"
+                else ["100g", "200g", "300g", "250g", "500g", "1kg"]
+            )
+            product_doc["sizes"] = [
+                {"weight": weight, "price": 0, "original_price": 0}
+                for weight in default_weights
             ]
 
-
-        # ✅ STEP 2: CREATE PRODUCT
-        product_id = f"product_{datetime.now(timezone.utc).timestamp()}"
-        product_doc = {"id": product_id, **product_data.model_dump()}
+        product_doc["sizes"] = apply_product_price_uplift(product_doc.get("sizes", []))
+        product_doc = apply_product_top_level_price_uplift(product_doc)
+        product_doc["id"] = f"product_{datetime.now(timezone.utc).timestamp()}"
 
         result = await db.products.insert_one(product_doc)
-
-        # ✅ STEP 3: RETURN WITH _id
         product_doc["_id"] = str(result.inserted_id)
-
         return product_doc
 
-    except Exception as e:
-        print("❌ ERROR:", str(e))
-        raise HTTPException(500, str(e))
+    except HTTPException:
+        raise
+    except Exception:
+        logging.exception("Failed to create product")
+        raise HTTPException(status_code=500, detail="Failed to create product")
 
 
 @api_router.put("/admin/products/{product_id}", response_model=Product)
 async def update_product(
     product_id: str, product_data: ProductUpdate, admin: dict = Depends(get_admin_user)
 ):
-
     update_data = product_data.model_dump(exclude_none=True)
 
-    result = await db.products.update_one({"id": product_id}, {"$set": update_data})
+    # Stock-only changes do not touch prices. Recalculate only when price fields arrive.
+    if "sizes" in update_data:
+        update_data["sizes"] = apply_product_price_uplift(update_data["sizes"])
 
+    if "base_original_price" in update_data or "original_price" in update_data:
+        update_data = apply_product_top_level_price_uplift(update_data)
+
+    result = await db.products.update_one({"id": product_id}, {"$set": update_data})
     if result.matched_count == 0:
-        raise HTTPException(404, "Product not found")
+        raise HTTPException(status_code=404, detail="Product not found")
 
     updated_product = await db.products.find_one({"id": product_id}, {"_id": 0})
     return Product(**updated_product)
