@@ -365,7 +365,7 @@ const Navbar = () => {
                             className="flex items-center gap-3 group flex-shrink-0"
                         >
                             <img
-                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1791034028/Logo_plrhvn.png"
+                                src="https://res.cloudinary.com/dwpqa8pgl/image/upload/v1793271239/Logo_g13mmz.png"
                                 alt="KhajurKart"
                                 className="h-12 w-auto"
                             />
