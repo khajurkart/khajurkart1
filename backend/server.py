@@ -1851,7 +1851,36 @@ async def create_category(category: Category, admin: dict = Depends(get_admin_us
 
 # ============ PRODUCT ROUTES ============
 
-# General product-price uplift (not a separate checkout/payment surcharge).
+# Never expose wholesale cost, profit, or pricing-calculation internals to
+# customer-facing product, search, or cart responses.
+PRIVATE_SIZE_PRICING_FIELDS = {
+    "cost_price",
+    "base_cost_price",
+    "base_price",
+    "profit_percentage",
+    "profit_amount",
+    "razorpay_adjustment",
+    "price_before_rounding",
+}
+
+
+def public_product_data(product):
+    safe_product = dict(product)
+    safe_product["sizes"] = [
+        {
+            key: value
+            for key, value in dict(size).items()
+            if key not in PRIVATE_SIZE_PRICING_FIELDS
+        }
+        for size in (safe_product.get("sizes") or [])
+    ]
+    return safe_product
+
+# KhajurKart product pricing:
+# 1) Add 30% markup to the admin-entered cost price.
+# 2) Add the existing 2.36% Razorpay price adjustment.
+# 3) Apply the requested custom rupee-price rounding rule.
+PRODUCT_PROFIT_MARKUP_RATE = 0.30
 PRODUCT_PRICE_UPLIFT_RATE = 0.0236
 
 
@@ -1859,21 +1888,71 @@ def _money(value):
     return round(float(value or 0), 2)
 
 
+def round_khajurkart_price(value):
+    """
+    Custom rounding requested by KhajurKart:
+    - Decimal part below .50: round down to the lower multiple of ₹10.
+    - Decimal part .50 or above: use the same decade's ₹9 ending.
+    Examples: 122.40 -> 120, 122.50 -> 129,
+              142.40 -> 140, 142.50 -> 149.
+    """
+    amount = max(0.0, float(value or 0))
+    whole_rupees = int(amount)
+    decimal_part = amount - whole_rupees
+    lower_ten = (whole_rupees // 10) * 10
+
+    if decimal_part < 0.50:
+        return float(lower_ten)
+
+    return float(lower_ten + 9)
+
+
 def apply_product_price_uplift(sizes):
+    """
+    Kept under the existing helper name so the current create/update routes
+    continue to call it. Each size now receives a cost price and a calculated
+    customer-facing selling price.
+    """
     adjusted_sizes = []
+
     for size in sizes or []:
         size = dict(size)
-        base_price = _money(size.get("base_price", size.get("price", 0)))
-        base_original_price = _money(
-            size.get("base_original_price", size.get("original_price", base_price))
+
+        # New Admin Products sends cost_price. The fallbacks keep older API
+        # clients from failing, but newly edited products should use cost_price.
+        cost_price = _money(
+            size.get("cost_price", size.get("base_cost_price", size.get("base_price", size.get("price", 0))))
         )
 
-        size["base_price"] = base_price
-        size["base_original_price"] = base_original_price
-        size["price"] = round(base_price * (1 + PRODUCT_PRICE_UPLIFT_RATE) + 1e-9, 2)
-        size["original_price"] = round(
-            base_original_price * (1 + PRODUCT_PRICE_UPLIFT_RATE) + 1e-9, 2
+        profit_amount = round(cost_price * PRODUCT_PROFIT_MARKUP_RATE + 1e-9, 2)
+        price_after_profit = round(cost_price + profit_amount, 2)
+        razorpay_adjustment = round(
+            price_after_profit * PRODUCT_PRICE_UPLIFT_RATE + 1e-9, 2
         )
+        price_before_rounding = round(price_after_profit + razorpay_adjustment, 2)
+        selling_price = round_khajurkart_price(price_before_rounding)
+
+        size["cost_price"] = cost_price
+        size["profit_percentage"] = int(PRODUCT_PROFIT_MARKUP_RATE * 100)
+        size["profit_amount"] = profit_amount
+        size["razorpay_adjustment"] = razorpay_adjustment
+        size["price_before_rounding"] = price_before_rounding
+        size["price"] = selling_price
+
+        # Keep the optional crossed-out/original price behavior separate from
+        # the cost-based selling-price calculation.
+        base_original_price = size.get(
+            "base_original_price", size.get("original_price")
+        )
+        if base_original_price is not None:
+            base_original_price = _money(base_original_price)
+            size["base_original_price"] = base_original_price
+            size["original_price"] = round(
+                base_original_price * (1 + PRODUCT_PRICE_UPLIFT_RATE) + 1e-9, 2
+            )
+        else:
+            size["original_price"] = selling_price
+
         adjusted_sizes.append(size)
 
     return adjusted_sizes
@@ -1947,7 +2026,7 @@ async def get_products(
                 else:
                     p["discount"] = 0
 
-        return products
+        return [public_product_data(product) for product in products]
 
     except Exception as e:
         print("❌ PRODUCT ERROR:", str(e))
@@ -1959,7 +2038,7 @@ async def get_product(product_id: str):
     product = await db.products.find_one({"id": product_id}, {"_id": 0})
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    return product
+    return public_product_data(product)
 
 
 @api_router.get("/search")
@@ -1978,7 +2057,7 @@ async def search_products(q: str):
         {"_id": 0},
     ).to_list(50)
 
-    return products
+    return [public_product_data(product) for product in products]
 
 
 @api_router.post("/products")
@@ -2035,7 +2114,7 @@ async def get_cart(current_user: dict = Depends(get_current_user)):
                 )
             else:
                 product["price"] = product.get("price", 0)
-            item["product"] = product
+            item["product"] = public_product_data(product)
 
     return cart
 
@@ -2469,6 +2548,29 @@ async def check_admin(admin: dict = Depends(get_admin_user)):
     return {"is_admin": True, "email": admin["email"]}
 
 
+@api_router.get("/admin/products")
+async def get_admin_products(admin: dict = Depends(get_admin_user)):
+    products = await db.products.find({}, {"_id": 0}).to_list(1000)
+
+    # Preserve the same summary fields used by the Admin Products table,
+    # while returning cost_price only to authenticated admins.
+    for product in products:
+        sizes = product.get("sizes") or []
+        if sizes:
+            selected_size = sizes[0]
+            product["price"] = selected_size.get("price", product.get("price", 0))
+            product["original_price"] = selected_size.get(
+                "original_price", product.get("original_price", product["price"])
+            )
+        else:
+            product["price"] = product.get("price", 0)
+            product["original_price"] = product.get(
+                "original_price", product["price"]
+            )
+
+    return products
+
+
 @api_router.post("/admin/products")
 async def create_product(
     product_data: ProductCreate, admin: dict = Depends(get_admin_user)
@@ -2486,7 +2588,7 @@ async def create_product(
                 else ["100g", "200g", "300g", "250g", "500g", "1kg"]
             )
             product_doc["sizes"] = [
-                {"weight": weight, "price": 0, "original_price": 0}
+                {"weight": weight, "cost_price": 0, "price": 0, "original_price": 0}
                 for weight in default_weights
             ]
 
