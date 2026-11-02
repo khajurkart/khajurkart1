@@ -20,12 +20,13 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Add 2.36% to the base product price.
+// KhajurKart pricing: 30% profit markup, then 2.36% Razorpay adjustment.
+const PROFIT_MARKUP_RATE = 0.30;
 const PRICE_UPLIFT_RATE = 0.0236;
 
 const EMPTY_SIZE = {
     weight: '',
-    price: '',
+    cost_price: '',
     original_price: '',
 };
 
@@ -44,13 +45,12 @@ const INITIAL_FORM = {
 const capitalizeWords = (value) =>
     value.replace(/\b\w/g, (char) => char.toUpperCase());
 
-const previewAdjustedPrice = (value) => {
+const previewAdjustedOriginalPrice = (value) => {
     if (value === '' || value === null || value === undefined) {
         return '';
     }
 
     const amount = Number(value);
-
     if (!Number.isFinite(amount) || amount < 0) {
         return '';
     }
@@ -58,26 +58,56 @@ const previewAdjustedPrice = (value) => {
     return (amount * (1 + PRICE_UPLIFT_RATE)).toFixed(2);
 };
 
-// Send base prices to the backend.
-// The backend should calculate and store the adjusted prices.
+const roundKhajurKartPrice = (value) => {
+    const amount = Math.max(0, Number(value) || 0);
+    const wholeRupees = Math.floor(amount);
+    const decimalPart = amount - wholeRupees;
+    const lowerTen = Math.floor(wholeRupees / 10) * 10;
+
+    return decimalPart < 0.5 ? lowerTen : lowerTen + 9;
+};
+
+const previewFinalSellingPrice = (value) => {
+    if (value === '' || value === null || value === undefined) {
+        return '';
+    }
+
+    const costPrice = Number(value);
+    if (!Number.isFinite(costPrice) || costPrice < 0) {
+        return '';
+    }
+
+    const profitAmount =
+        Math.round((costPrice * PROFIT_MARKUP_RATE + Number.EPSILON) * 100) / 100;
+    const afterProfit =
+        Math.round((costPrice + profitAmount + Number.EPSILON) * 100) / 100;
+    const razorpayAdjustment =
+        Math.round((afterProfit * PRICE_UPLIFT_RATE + Number.EPSILON) * 100) / 100;
+    const beforeRounding =
+        Math.round((afterProfit + razorpayAdjustment + Number.EPSILON) * 100) / 100;
+
+    return String(roundKhajurKartPrice(beforeRounding));
+};
+
+// Send the cost price to the backend. The backend is authoritative for
+// profit, Razorpay adjustment, and final custom rounding.
 const buildProductPayload = (formData) => ({
     ...formData,
 
     sizes: formData.sizes.map((size) => {
-        const basePrice = Number.parseFloat(size.price);
+        const costPrice = Number.parseFloat(size.cost_price);
 
         const baseOriginalPrice =
             size.original_price !== '' &&
             size.original_price !== null &&
             size.original_price !== undefined
                 ? Number.parseFloat(size.original_price)
-                : basePrice;
+                : null;
 
         return {
             weight: size.weight,
-            base_price: basePrice,
+            cost_price: costPrice,
             base_original_price: baseOriginalPrice,
-            price: basePrice,
             original_price: baseOriginalPrice,
         };
     }),
@@ -100,7 +130,8 @@ const buildProductPayload = (formData) => ({
     delivery_charge: Number.parseFloat(formData.delivery_charge || 0),
 });
 
-// Load base prices when editing so the 2.36% adjustment is not compounded.
+// Existing products without a saved cost_price intentionally show a blank
+// cost field. Their old selling prices must not be mistaken for wholesale cost.
 const productToForm = (product) => ({
     name: product.name || '',
     description: product.description || '',
@@ -108,11 +139,8 @@ const productToForm = (product) => ({
     sizes: product.sizes?.length
         ? product.sizes.map((size) => ({
               weight: size.weight || '',
-              price: size.base_price ?? size.price ?? '',
-              original_price:
-                  size.base_original_price ??
-                  size.original_price ??
-                  '',
+              cost_price: size.cost_price ?? '',
+              original_price: size.base_original_price ?? '',
           }))
         : [{ ...EMPTY_SIZE }],
 
@@ -162,16 +190,16 @@ const SizeRow = ({
     onRemove,
     canRemove,
 }) => {
-    const adjustedPrice = previewAdjustedPrice(item.price);
+    const adjustedPrice = previewFinalSellingPrice(item.cost_price);
 
-    const originalBase =
+    const hasOriginalPrice =
         item.original_price !== '' &&
         item.original_price !== null &&
-        item.original_price !== undefined
-            ? item.original_price
-            : item.price;
+        item.original_price !== undefined;
 
-    const adjustedOriginalPrice = previewAdjustedPrice(originalBase);
+    const adjustedOriginalPrice = hasOriginalPrice
+        ? previewAdjustedOriginalPrice(item.original_price)
+        : adjustedPrice;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
@@ -194,17 +222,17 @@ const SizeRow = ({
                     required
                     min="0"
                     step="0.01"
-                    placeholder="Base price (₹)"
-                    value={item.price}
+                    placeholder="Cost price (₹)"
+                    value={item.cost_price}
                     onChange={(e) =>
-                        onChange(index, 'price', e.target.value)
+                        onChange(index, 'cost_price', e.target.value)
                     }
                     className="w-full border border-khajur-border px-3 py-2 text-sm text-khajur-primary focus:outline-none focus:border-khajur-gold bg-white"
                 />
 
                 {adjustedPrice !== '' && (
                     <p className="mt-1 text-xs text-green-700">
-                        Price after 2.36%: ₹{adjustedPrice}
+                        Final selling price (30% profit + 2.36% Razorpay + rounding): ₹{adjustedPrice}
                     </p>
                 )}
             </div>
@@ -289,7 +317,7 @@ const ProductModal = ({
         ]);
     };
 
-    const adjustedTopLevelOriginalPrice = previewAdjustedPrice(
+    const adjustedTopLevelOriginalPrice = previewAdjustedOriginalPrice(
         formData.original_price
     );
 
@@ -460,13 +488,13 @@ const ProductModal = ({
                             </p>
 
                             <p className="text-xs text-khajur-dark/50">
-                                Enter your base prices. The backend applies
-                                the 2.36% adjustment when saving.
+                                Enter your total cost price for each size. The system adds 30% profit,
+                                the 2.36% Razorpay adjustment, and applies your custom rounding rule.
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-khajur-dark/40">
                                 <span>Weight</span>
-                                <span>Base sale price / adjusted preview</span>
+                                <span>Cost price / final selling price preview</span>
                                 <span>Base original price</span>
                             </div>
                         </div>
@@ -593,7 +621,7 @@ const AdminProducts = () => {
         try {
             const [productsResponse, categoriesResponse] =
                 await Promise.all([
-                    axios.get(`${API}/products`, authHeaders),
+                    axios.get(`${API}/admin/products`, authHeaders),
                     axios.get(`${API}/categories`, authHeaders),
                 ]);
 
@@ -642,14 +670,14 @@ const AdminProducts = () => {
         const invalidSize = formData.sizes.some(
             (size) =>
                 !String(size.weight).trim() ||
-                size.price === '' ||
-                !Number.isFinite(Number(size.price)) ||
-                Number(size.price) < 0
+                size.cost_price === '' ||
+                !Number.isFinite(Number(size.cost_price)) ||
+                Number(size.cost_price) < 0
         );
 
         if (invalidSize) {
             toast.error(
-                'Please enter a valid weight and base price for every size.'
+                'Please enter a valid weight and cost price for every size.'
             );
             return;
         }
