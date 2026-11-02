@@ -1890,15 +1890,16 @@ def _money(value):
 
 def round_khajurkart_price(value):
     """
-    KhajurKart custom price rounding:
+    KhajurKart pricing rules:
     - Below ₹2.50 above the lower multiple of ₹10: round down.
     - At or above ₹2.50: use the ₹9 ending.
+    - Never leave a final price ending in ₹0; subtract ₹1.
 
     Examples:
     122.40 -> 120
     122.50 -> 129
-    122.60 -> 129
-    142.40 -> 140
+    130.00 -> 129
+    132.50 -> 139
     142.50 -> 149
     """
     amount = max(0.0, float(value or 0))
@@ -1906,9 +1907,14 @@ def round_khajurkart_price(value):
     lower_ten = int(amount // 10) * 10
 
     if amount < lower_ten + 2.50:
-        return float(lower_ten)
+        final_price = lower_ten
+    else:
+        final_price = lower_ten + 9
 
-    return float(lower_ten + 9)
+    if final_price > 0 and final_price % 10 == 0:
+        final_price -= 1
+
+    return float(final_price)
 
 
 def apply_product_price_uplift(sizes):
