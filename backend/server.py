@@ -1890,18 +1890,22 @@ def _money(value):
 
 def round_khajurkart_price(value):
     """
-    Custom rounding requested by KhajurKart:
-    - Decimal part below .50: round down to the lower multiple of ₹10.
-    - Decimal part .50 or above: use the same decade's ₹9 ending.
-    Examples: 122.40 -> 120, 122.50 -> 129,
-              142.40 -> 140, 142.50 -> 149.
+    KhajurKart custom price rounding:
+    - Below ₹2.50 above the lower multiple of ₹10: round down.
+    - At or above ₹2.50: use the ₹9 ending.
+
+    Examples:
+    122.40 -> 120
+    122.50 -> 129
+    122.60 -> 129
+    142.40 -> 140
+    142.50 -> 149
     """
     amount = max(0.0, float(value or 0))
-    whole_rupees = int(amount)
-    decimal_part = amount - whole_rupees
-    lower_ten = (whole_rupees // 10) * 10
 
-    if decimal_part < 0.50:
+    lower_ten = int(amount // 10) * 10
+
+    if amount < lower_ten + 2.50:
         return float(lower_ten)
 
     return float(lower_ten + 9)
