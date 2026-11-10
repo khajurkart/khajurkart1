@@ -1880,7 +1880,7 @@ def public_product_data(product):
 # 1) Add 30% markup to the admin-entered cost price.
 # 2) Add the existing 2.36% Razorpay price adjustment.
 # 3) Apply the requested custom rupee-price rounding rule.
-PRODUCT_PROFIT_MARKUP_RATE = 0.30
+PRODUCT_PROFIT_MARKUP_RATE = 0.35
 PRODUCT_PRICE_UPLIFT_RATE = 0.0236
 
 
