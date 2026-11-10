@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const PROFIT_MARKUP_RATE = 0.30;
+const PROFIT_MARKUP_RATE = 0.35;
 const PRICE_UPLIFT_RATE = 0.0236;
 
 const EMPTY_SIZE = {
