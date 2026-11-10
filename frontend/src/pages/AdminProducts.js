@@ -257,7 +257,7 @@ const SizeRow = ({
 
                 {adjustedPrice !== '' && (
                     <p className="mt-1 text-xs text-green-700">
-                        Final selling price (30% profit + 2.36% Razorpay + rounding): ₹{adjustedPrice}
+                        Final selling price (35% profit + 2.36% Razorpay + rounding) : ₹{adjustedPrice}
                     </p>
                 )}
             </div>
