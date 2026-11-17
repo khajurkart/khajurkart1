@@ -616,9 +616,9 @@ const AdminOrders = () => {
                             <col style={{ width: '7%' }} />
                             <col style={{ width: '11%' }} />
                             <col style={{ width: '10%' }} />
-                            <col style={{ width: '13%' }} />
+                            <col style={{ width: '11%' }} />
                             <col style={{ width: '10%' }} />
-                            <col style={{ width: '8%' }} />
+                            <col style={{ width: '10%' }} />
                         </colgroup>
 
                         {/* Header */}
