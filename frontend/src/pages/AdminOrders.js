@@ -561,15 +561,15 @@ const AdminOrders = () => {
                     <table className="w-full table-fixed border-collapse text-[11px]">
 
                         <colgroup>
-                            <col style={{ width: '6%' }} />
-                            <col style={{ width: '6%' }} />
-                            <col style={{ width: '10%' }} />
-                            <col style={{ width: '6%' }} />
-                            <col style={{ width: '6%' }} />
-                            <col style={{ width: '6%' }} />
-                            <col style={{ width: '10%' }} />
-                            <col style={{ width: '10%' }} />
-                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
                         </colgroup>
 
                         <thead className="bg-khajur-cream border-b border-khajur-border">
