@@ -559,15 +559,15 @@ const AdminOrders = () => {
                     <table className="w-full table-fixed border-collapse text-[12px] md:text-[13px]">
 
                         <colgroup>
-                            <col style={{ width: '11%' }} />
-                            <col style={{ width: '10%' }} />
-                            <col style={{ width: '17%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '9%' }} />
-                            <col style={{ width: '8%' }} />
                             <col style={{ width: '13%' }} />
-                            <col style={{ width: '11%' }} />
-                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '20%' }} />
+                            <col style={{ width: '6%' }} />
+                            <col style={{ width: '9%' }} />
+                            <col style={{ width: '9%' }} />
+                            <col style={{ width: '14%' }} />
+                            <col style={{ width: '9%' }} />
+                            <col style={{ width: '10%' }} />
                         </colgroup>
 
                         <thead className="bg-khajur-cream border-b border-khajur-border">
@@ -687,14 +687,14 @@ const AdminOrders = () => {
                                             {order.tracking_id || '—'}
                                         </td>
 
-                                        {/* Actions: Reduced spacing and separated View and Delete */}
+                                        {/* Actions: Clean stack view for View and Delete options with balanced padding */}
                                         <td className="px-2 py-3">
-                                            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+                                            <div className="flex flex-col items-center justify-center gap-1.5">
 
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors px-2.5 py-1 rounded text-[11px] font-semibold"
+                                                    className="inline-flex items-center justify-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors w-20 py-1 rounded text-[11px] font-semibold"
                                                     data-testid={`view-order-${order.id}`}
                                                     title="View Order"
                                                 >
@@ -706,7 +706,7 @@ const AdminOrders = () => {
                                                     type="button"
                                                     onClick={() => deleteOrder(order.id)}
                                                     disabled={deletingId === order.id}
-                                                    className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors px-2 py-1 rounded text-[11px] font-semibold disabled:opacity-50"
+                                                    className="inline-flex items-center justify-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors w-20 py-1 rounded text-[11px] font-semibold disabled:opacity-50"
                                                     title="Delete Order"
                                                 >
                                                     {deletingId === order.id
