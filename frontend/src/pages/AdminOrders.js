@@ -559,15 +559,15 @@ const AdminOrders = () => {
                     <table className="w-full table-fixed border-collapse text-[12px] md:text-[13px]">
 
                         <colgroup>
-                            <col style={{ width: '13%' }} />
+                            <col style={{ width: '9%' }} />
+                            <col style={{ width: '9%' }} />
+                            <col style={{ width: '18%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '8%' }} />
+                            <col style={{ width: '8%' }} />
+                            <col style={{ width: '15%' }} />
                             <col style={{ width: '10%' }} />
-                            <col style={{ width: '20%' }} />
-                            <col style={{ width: '6%' }} />
-                            <col style={{ width: '9%' }} />
-                            <col style={{ width: '9%' }} />
-                            <col style={{ width: '14%' }} />
-                            <col style={{ width: '9%' }} />
-                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '18%' }} />
                         </colgroup>
 
                         <thead className="bg-khajur-cream border-b border-khajur-border">
@@ -586,7 +586,7 @@ const AdminOrders = () => {
                                     <th
                                         key={col}
                                         className={`
-                                            px-2 py-3 text-[10px] md:text-xs
+                                            px-1.5 py-3 text-[10px] md:text-xs
                                             font-semibold text-khajur-dark/70
                                             uppercase tracking-wide whitespace-nowrap
                                             ${col === 'Actions' ? 'text-center' : 'text-left'}
@@ -610,17 +610,17 @@ const AdminOrders = () => {
                                     >
 
                                         {/* Order ID */}
-                                        <td className="px-2 py-3 font-mono text-khajur-primary font-medium text-[10px] md:text-xs break-all">
+                                        <td className="px-1.5 py-3 font-mono text-khajur-primary font-medium text-[10px] md:text-xs break-all">
                                             #{String(order.id).substring(0, 10)}…
                                         </td>
 
                                         {/* Date */}
-                                        <td className="px-2 py-3 text-khajur-dark/70 whitespace-nowrap text-[11px]">
+                                        <td className="px-1.5 py-3 text-khajur-dark/70 whitespace-nowrap text-[11px]">
                                             {formatOrderDate(order.created_at)}
                                         </td>
 
                                         {/* Customer */}
-                                        <td className="px-2 py-3 min-w-0">
+                                        <td className="px-1.5 py-3 min-w-0">
                                             <p className="font-semibold text-khajur-dark break-words text-xs">
                                                 {order.customer_name}
                                             </p>
@@ -630,7 +630,7 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Items */}
-                                        <td className="px-2 py-3 text-khajur-dark/70 text-center">
+                                        <td className="px-1.5 py-3 text-khajur-dark/70 text-center">
                                             {(order.items || []).reduce(
                                                 (sum, item) =>
                                                     sum + Number(item.quantity || 0),
@@ -639,12 +639,12 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Total */}
-                                        <td className="px-2 py-3 font-semibold text-khajur-gold whitespace-nowrap text-xs">
+                                        <td className="px-1.5 py-3 font-semibold text-khajur-gold whitespace-nowrap text-xs">
                                             ₹{Number(order.total_amount || 0).toFixed(2)}
                                         </td>
 
                                         {/* Payment */}
-                                        <td className="px-2 py-3">
+                                        <td className="px-1.5 py-3">
                                             <span className={`
                                                 inline-block px-1.5 py-1 text-[9px] md:text-[10px]
                                                 font-semibold rounded-full whitespace-nowrap
@@ -658,7 +658,7 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-2 py-3">
+                                        <td className="px-1.5 py-3">
                                             <select
                                                 value={order.status}
                                                 onChange={(e) =>
@@ -683,18 +683,18 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Tracking ID */}
-                                        <td className="px-2 py-3 text-[10px] md:text-xs text-khajur-dark/60 font-mono break-all">
+                                        <td className="px-1.5 py-3 text-[10px] md:text-xs text-khajur-dark/60 font-mono break-all">
                                             {order.tracking_id || '—'}
                                         </td>
 
-                                        {/* Actions: Clean stack view for View and Delete options with balanced padding */}
-                                        <td className="px-2 py-3">
-                                            <div className="flex flex-col items-center justify-center gap-1.5">
+                                        {/* Actions: Separated buttons with compact spacing */}
+                                        <td className="px-1.5 py-3">
+                                            <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
 
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center justify-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors w-20 py-1 rounded text-[11px] font-semibold"
+                                                    className="inline-flex items-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors px-2 py-1 rounded text-[11px] font-semibold"
                                                     data-testid={`view-order-${order.id}`}
                                                     title="View Order"
                                                 >
@@ -706,7 +706,7 @@ const AdminOrders = () => {
                                                     type="button"
                                                     onClick={() => deleteOrder(order.id)}
                                                     disabled={deletingId === order.id}
-                                                    className="inline-flex items-center justify-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors w-20 py-1 rounded text-[11px] font-semibold disabled:opacity-50"
+                                                    className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors px-2 py-1 rounded text-[11px] font-semibold disabled:opacity-50"
                                                     title="Delete Order"
                                                 >
                                                     {deletingId === order.id
