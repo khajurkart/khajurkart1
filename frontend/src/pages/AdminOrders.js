@@ -37,7 +37,7 @@ const ORDER_STATUSES = [
 const getStatusStyle = (status) =>
     ORDER_STATUSES.find((s) => s.value === status)?.color ?? 'bg-gray-100 text-gray-800';
 
-// ─── Date Formatting: DD/MM/YYYY ───────────────────────────────────────────────
+// ─── Date Formatting DD/MM/YYYY ────────────────────────────────────────────────
 
 const formatOrderDate = (date) => {
     if (!date) return '—';
@@ -130,7 +130,7 @@ const OrderDetailModal = ({
         >
             <div className="bg-white w-full max-w-3xl rounded-sm shadow-2xl max-h-[92vh] flex flex-col">
 
-                {/* Header */}
+                {/* Modal Header */}
                 <div className="flex items-center justify-between px-8 py-5 border-b border-khajur-border flex-shrink-0">
                     <div>
                         <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
@@ -548,7 +548,6 @@ const AdminOrders = () => {
                 {/* Search and Filter */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-6">
 
-                    {/* Search */}
                     <div className="relative flex-1 min-w-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-khajur-dark/30" />
 
@@ -558,14 +557,13 @@ const AdminOrders = () => {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="
-                                w-full pl-10 pr-4 py-2.5 text-sm border border-khajur-border bg-white
+                                w-full pl-10 pr-4 py-3 text-sm border border-khajur-border bg-white
                                 text-khajur-primary placeholder:text-khajur-dark/30
                                 focus:outline-none focus:ring-1 focus:ring-khajur-gold
                             "
                         />
                     </div>
 
-                    {/* Status Filter */}
                     <div className="relative w-full sm:w-auto">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-khajur-dark/30" />
 
@@ -573,7 +571,7 @@ const AdminOrders = () => {
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="
-                                w-full sm:w-auto pl-10 pr-8 py-2.5 text-sm border border-khajur-border bg-white
+                                w-full sm:w-auto pl-10 pr-8 py-3 text-sm border border-khajur-border bg-white
                                 text-khajur-primary focus:outline-none focus:ring-1 focus:ring-khajur-gold
                                 appearance-none cursor-pointer
                             "
@@ -590,25 +588,24 @@ const AdminOrders = () => {
                 </div>
 
                 {/* Orders Count */}
-                <p className="text-sm text-khajur-dark/50 mb-4">
+                <p className="text-sm text-khajur-dark/50 mb-5">
                     Showing{' '}
-                    <span className="font-medium text-khajur-primary">
+                    <span className="font-semibold text-khajur-primary">
                         {filteredOrders.length}
                     </span>
                     {' '}of{' '}
-                    <span className="font-medium text-khajur-primary">
+                    <span className="font-semibold text-khajur-primary">
                         {orders.length}
                     </span>
                     {' '}orders
                 </p>
 
-                {/* ─── Orders Table: Single Box, No Horizontal Scroll ─── */}
+                {/* ─── Orders Table ─── */}
 
                 <div className="border border-khajur-border rounded-sm w-full overflow-hidden">
 
-                    <table className="w-full table-fixed border-collapse text-xs">
+                    <table className="w-full table-fixed border-collapse text-sm">
 
-                        {/* Column Widths */}
                         <colgroup>
                             <col style={{ width: '12%' }} />
                             <col style={{ width: '11%' }} />
@@ -638,9 +635,9 @@ const AdminOrders = () => {
                                     <th
                                         key={col}
                                         className={`
-                                            px-1 sm:px-2 py-3 text-[9px] sm:text-[10px] md:text-xs
-                                            font-semibold text-khajur-dark/60 uppercase
-                                            tracking-normal break-words
+                                            px-3 py-4 text-xs md:text-sm font-semibold
+                                            text-khajur-dark/70 uppercase tracking-wide
+                                            break-words
                                             ${col === 'Actions' ? 'text-center' : 'text-left'}
                                         `}
                                     >
@@ -663,28 +660,28 @@ const AdminOrders = () => {
                                     >
 
                                         {/* Order ID */}
-                                        <td className="px-1 sm:px-2 py-3 text-[10px] sm:text-xs font-mono text-khajur-primary font-medium break-all">
+                                        <td className="px-3 py-5 text-xs md:text-sm font-mono text-khajur-primary font-medium break-all">
                                             #{order.id.substring(0, 10)}…
                                         </td>
 
-                                        {/* Date DD/MM/YYYY */}
-                                        <td className="px-1 sm:px-2 py-3 text-[10px] sm:text-xs text-khajur-dark/70 whitespace-nowrap">
+                                        {/* Date */}
+                                        <td className="px-3 py-5 text-xs md:text-sm text-khajur-dark/70 whitespace-nowrap">
                                             {formatOrderDate(order.created_at)}
                                         </td>
 
                                         {/* Customer */}
-                                        <td className="px-1 sm:px-2 py-3 min-w-0">
-                                            <p className="font-medium text-khajur-dark break-words">
+                                        <td className="px-3 py-5 min-w-0">
+                                            <p className="text-sm font-semibold text-khajur-dark break-words">
                                                 {order.customer_name}
                                             </p>
 
-                                            <p className="text-[9px] sm:text-[10px] text-khajur-dark/50 break-all">
+                                            <p className="text-xs text-khajur-dark/50 break-all mt-1">
                                                 {order.customer_email}
                                             </p>
                                         </td>
 
                                         {/* Items */}
-                                        <td className="px-1 sm:px-2 py-3 text-khajur-dark/70 break-words">
+                                        <td className="px-3 py-5 text-sm text-khajur-dark/70">
                                             {(order.items || []).reduce(
                                                 (sum, item) =>
                                                     sum + Number(item.quantity || 0),
@@ -693,16 +690,16 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Total */}
-                                        <td className="px-1 sm:px-2 py-3 font-semibold text-khajur-gold break-words">
+                                        <td className="px-3 py-5 text-sm font-bold text-khajur-gold break-words">
                                             ₹{Number(order.total_amount || 0).toFixed(2)}
                                         </td>
 
                                         {/* Payment */}
-                                        <td className="px-1 sm:px-2 py-3">
+                                        <td className="px-3 py-5">
                                             <span
                                                 className={`
-                                                    inline-block px-1 py-1 text-[9px] sm:text-[10px]
-                                                    font-medium rounded-full break-words max-w-full
+                                                    inline-block px-2 py-1 text-xs font-semibold
+                                                    rounded-full break-words max-w-full
                                                     ${order.payment_status === 'paid'
                                                         ? 'bg-green-100 text-green-800'
                                                         : 'bg-gray-100 text-gray-700'
@@ -714,7 +711,7 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-1 sm:px-2 py-3">
+                                        <td className="px-3 py-5">
                                             <select
                                                 value={order.status}
                                                 onChange={(e) =>
@@ -724,8 +721,8 @@ const AdminOrders = () => {
                                                     )
                                                 }
                                                 className={`
-                                                    w-full min-w-0 text-[9px] sm:text-[10px]
-                                                    px-1 py-1 rounded border-0 cursor-pointer
+                                                    w-full min-w-0 text-xs md:text-sm
+                                                    px-2 py-2 rounded-md border-0 cursor-pointer
                                                     focus:outline-none focus:ring-1
                                                     focus:ring-khajur-gold
                                                     ${getStatusStyle(order.status)}
@@ -741,33 +738,33 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Tracking ID */}
-                                        <td className="px-1 sm:px-2 py-3 text-[9px] sm:text-[10px] text-khajur-dark/60 font-mono break-all">
+                                        <td className="px-3 py-5 text-xs md:text-sm text-khajur-dark/60 font-mono break-all">
                                             {order.tracking_id || '—'}
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-1 sm:px-2 py-3">
-                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                                        <td className="px-2 py-5">
+                                            <div className="flex flex-col items-center justify-center gap-3">
 
                                                 <button
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="flex items-center gap-1 text-khajur-primary hover:text-khajur-gold transition-colors text-[10px] font-medium"
+                                                    className="flex items-center gap-1 text-khajur-primary hover:text-khajur-gold transition-colors text-xs font-semibold"
                                                     data-testid={`view-order-${order.id}`}
                                                     title="View Order"
                                                 >
-                                                    <Eye className="w-3 h-3" />
+                                                    <Eye className="w-4 h-4" />
                                                     View
                                                 </button>
 
                                                 <button
                                                     onClick={() => deleteOrder(order.id)}
                                                     disabled={deletingId === order.id}
-                                                    className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors text-[10px] font-medium disabled:opacity-40"
+                                                    className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors text-xs font-semibold disabled:opacity-40"
                                                     title="Delete Order"
                                                 >
                                                     {deletingId === order.id
-                                                        ? <Loader2 className="w-3 h-3 animate-spin" />
-                                                        : <Trash2 className="w-3 h-3" />
+                                                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                        : <Trash2 className="w-4 h-4" />
                                                     }
                                                     Delete
                                                 </button>
@@ -785,7 +782,7 @@ const AdminOrders = () => {
 
             </div>
 
-            {/* Order Detail Modal */}
+            {/* Order Details Modal */}
             {selectedOrder && (
                 <OrderDetailModal
                     order={selectedOrder}
