@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -20,7 +21,7 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────────
 
 const ORDER_STATUSES = [
     { value: 'delivery_fee_pending', label: 'Delivery Fee Pending', color: 'bg-amber-100 text-amber-800' },
@@ -37,7 +38,7 @@ const ORDER_STATUSES = [
 const getStatusStyle = (status) =>
     ORDER_STATUSES.find((s) => s.value === status)?.color ?? 'bg-gray-100 text-gray-800';
 
-// ─── Date Formatting ─────────────────────────────────────────────────────────
+// ─── Date Formatting ───────────────────────────────────────────────────────────
 
 const formatOrderDate = (date) => {
     if (!date) return '—';
@@ -53,13 +54,15 @@ const formatOrderDate = (date) => {
     });
 };
 
-// ─── Sub Components ──────────────────────────────────────────────────────────
+// ─── Sub-Components ────────────────────────────────────────────────────────────
 
 const StatusBadge = ({ status }) => (
-    <span className={`
-        inline-block px-2 py-1 rounded-full text-xs font-semibold capitalize
-        ${getStatusStyle(status)}
-    `}>
+    <span
+        className={`
+            inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize
+            ${getStatusStyle(status)}
+        `}
+    >
         {status}
     </span>
 );
@@ -90,7 +93,7 @@ const InfoItem = ({ label, children }) => (
     </div>
 );
 
-// ─── Empty State ─────────────────────────────────────────────────────────────
+// ─── Empty State ───────────────────────────────────────────────────────────────
 
 const EmptyState = () => (
     <tr>
@@ -103,7 +106,7 @@ const EmptyState = () => (
     </tr>
 );
 
-// ─── Order Detail Modal ──────────────────────────────────────────────────────
+// ─── Order Detail Modal ─────────────────────────────────────────────────────────
 
 const OrderDetailModal = ({
     order,
@@ -111,14 +114,12 @@ const OrderDetailModal = ({
     onStatusChange,
     onDeliveryFeeChange
 }) => {
-    const subtotal = Number(
-        order.product_subtotal ??
+    const subtotal = order.product_subtotal ??
         Math.max(
             0,
             Number(order.total_amount ?? 0) -
             Number(order.delivery_charges ?? 0)
-        )
-    );
+        );
 
     const delivery = Number(order.delivery_charges ?? 0);
 
@@ -130,11 +131,13 @@ const OrderDetailModal = ({
         >
             <div className="bg-white w-full max-w-3xl rounded-sm shadow-2xl max-h-[92vh] flex flex-col">
 
+                {/* Modal Header */}
                 <div className="flex items-center justify-between px-8 py-5 border-b border-khajur-border flex-shrink-0">
                     <div>
                         <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
-                            Order #{String(order.id).substring(0, 12)}…
+                            Order #{order.id.substring(0, 12)}…
                         </p>
+
                         <h2 className="font-serif text-2xl font-medium text-khajur-primary">
                             Order Details
                         </h2>
@@ -150,12 +153,17 @@ const OrderDetailModal = ({
                     </button>
                 </div>
 
+                {/* Modal Body */}
                 <div className="overflow-y-auto px-8 py-6 space-y-6 flex-1">
 
+                    {/* Order Meta */}
                     <div className="bg-khajur-cream p-5">
                         <InfoGrid>
+
                             <InfoItem label="Order ID">
-                                <span className="font-mono text-xs">{order.id}</span>
+                                <span className="font-mono text-xs">
+                                    {order.id}
+                                </span>
                             </InfoItem>
 
                             <InfoItem label="Tracking ID">
@@ -171,8 +179,9 @@ const OrderDetailModal = ({
                             </InfoItem>
 
                             <InfoItem label="Status">
-                                <div className="flex items-center gap-3 flex-wrap">
+                                <div className="flex items-center gap-3">
                                     <StatusBadge status={order.status} />
+
                                     <select
                                         value={order.status}
                                         onChange={(e) =>
@@ -188,30 +197,38 @@ const OrderDetailModal = ({
                                     </select>
                                 </div>
                             </InfoItem>
+
                         </InfoGrid>
                     </div>
 
+                    {/* Customer Info */}
                     <div>
                         <SectionHeading icon={User} title="Customer Information" />
+
                         <div className="border border-khajur-border p-5 space-y-1">
                             <p className="text-sm font-medium text-khajur-dark">
                                 {order.customer_name}
                             </p>
+
                             <p className="text-sm text-khajur-dark/60">
                                 {order.customer_email}
                             </p>
+
                             <p className="text-sm text-khajur-dark/60">
                                 {order.shipping_address?.phone}
                             </p>
                         </div>
                     </div>
 
+                    {/* Shipping Address */}
                     <div>
                         <SectionHeading icon={MapPin} title="Shipping Address" />
+
                         <div className="border border-khajur-border p-5 space-y-1">
                             <p className="text-sm text-khajur-dark">
                                 {order.shipping_address?.address}
                             </p>
+
                             <p className="text-sm text-khajur-dark">
                                 {order.shipping_address?.city}, {order.shipping_address?.state}
                                 {' — '}
@@ -220,8 +237,10 @@ const OrderDetailModal = ({
                         </div>
                     </div>
 
+                    {/* Order Items */}
                     <div>
                         <SectionHeading icon={Package} title="Order Items" />
+
                         <div className="border border-khajur-border divide-y divide-khajur-border">
                             {(order.items || []).map((item, index) => (
                                 <div
@@ -232,6 +251,7 @@ const OrderDetailModal = ({
                                         <p className="text-sm font-medium text-khajur-dark truncate">
                                             {item.product_name}
                                         </p>
+
                                         <p className="text-xs text-khajur-dark/50 mt-0.5">
                                             {item.size && (
                                                 <span className="mr-3">
@@ -241,6 +261,7 @@ const OrderDetailModal = ({
                                             Qty: {item.quantity}
                                         </p>
                                     </div>
+
                                     <p className="text-sm font-semibold text-khajur-gold whitespace-nowrap">
                                         ₹{(
                                             Number(item.price || 0) *
@@ -252,14 +273,19 @@ const OrderDetailModal = ({
                         </div>
                     </div>
 
+                    {/* Order Summary */}
                     <div className="bg-khajur-cream p-5 space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-khajur-dark/70">Subtotal</span>
-                            <span>₹{subtotal.toFixed(2)}</span>
+                            <span className="text-khajur-dark/70">
+                                Subtotal
+                            </span>
+                            <span>₹{Number(subtotal).toFixed(2)}</span>
                         </div>
 
                         <div className="flex justify-between text-sm">
-                            <span className="text-khajur-dark/70">Delivery Charges</span>
+                            <span className="text-khajur-dark/70">
+                                Delivery Charges
+                            </span>
                             <span>₹{delivery.toFixed(2)}</span>
                         </div>
 
@@ -267,14 +293,19 @@ const OrderDetailModal = ({
                             <span className="font-serif text-base font-medium text-khajur-primary">
                                 Total
                             </span>
+
                             <span className="font-serif text-xl font-bold text-khajur-gold">
-                                ₹{(subtotal + delivery).toFixed(2)}
+                                ₹{(
+                                    Number(subtotal) + delivery
+                                ).toFixed(2)}
                             </span>
                         </div>
                     </div>
 
+                    {/* Delivery Fee Management */}
                     {order.delivery_fee_status !== 'free' && (
                         <div className="border border-amber-200 bg-amber-50 p-5 space-y-3">
+
                             <p className="font-semibold text-amber-900">
                                 Delivery fee: {order.delivery_fee_status || 'pending'}
                             </p>
@@ -292,6 +323,7 @@ const OrderDetailModal = ({
                             >
                                 Enter Rapido Fee / Record Customer Agreement
                             </button>
+
                         </div>
                     )}
 
@@ -301,7 +333,7 @@ const OrderDetailModal = ({
     );
 };
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 const AdminOrders = () => {
     const { token } = useAuth();
@@ -320,7 +352,7 @@ const AdminOrders = () => {
         }
     };
 
-    // ─── Fetch Orders ─────────────────────────────────────────────────────────
+    // ─── Data Fetching ─────────────────────────────────────────────────────────
 
     const fetchOrders = useCallback(async (silent = false) => {
         if (!silent) setLoading(true);
@@ -330,6 +362,7 @@ const AdminOrders = () => {
                 `${API}/admin/orders`,
                 authHeaders
             );
+
             setOrders(data);
         } catch {
             toast.error('Failed to load orders. Please try again.');
@@ -342,7 +375,7 @@ const AdminOrders = () => {
         fetchOrders();
     }, [fetchOrders]);
 
-    // ─── Update Status ────────────────────────────────────────────────────────
+    // ─── Update Order Status ───────────────────────────────────────────────────
 
     const updateOrderStatus = async (orderId, status) => {
         try {
@@ -355,7 +388,10 @@ const AdminOrders = () => {
             await fetchOrders(true);
 
             if (selectedOrder?.id === orderId) {
-                setSelectedOrder((prev) => ({ ...prev, status }));
+                setSelectedOrder((prev) => ({
+                    ...prev,
+                    status
+                }));
             }
 
             toast.success('Order status updated.');
@@ -364,7 +400,7 @@ const AdminOrders = () => {
         }
     };
 
-    // ─── Update Delivery Fee ──────────────────────────────────────────────────
+    // ─── Update Delivery Fee ───────────────────────────────────────────────────
 
     const updateDeliveryFee = async (order) => {
         const rawFee = window.prompt(
@@ -419,12 +455,14 @@ const AdminOrders = () => {
         }
     };
 
-    // ─── Delete Order ─────────────────────────────────────────────────────────
+    // ─── Delete Order ──────────────────────────────────────────────────────────
 
     const deleteOrder = async (id) => {
         if (!window.confirm(
             'Are you sure you want to delete this order? This action cannot be undone.'
-        )) return;
+        )) {
+            return;
+        }
 
         setDeletingId(id);
 
@@ -472,7 +510,7 @@ const AdminOrders = () => {
                 new Date(b.created_at) - new Date(a.created_at)
         );
 
-    // ─── Loading ──────────────────────────────────────────────────────────────
+    // ─── Loading State ─────────────────────────────────────────────────────────
 
     if (loading) {
         return (
@@ -483,14 +521,18 @@ const AdminOrders = () => {
         );
     }
 
-    // ─── Main Render ──────────────────────────────────────────────────────────
+    // ─── Main Render ───────────────────────────────────────────────────────────
 
     return (
-        <div className="min-h-screen py-16 bg-white" data-testid="admin-orders-page">
-            <div className="max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8">
+        <div
+            className="min-h-screen py-20 bg-white"
+            data-testid="admin-orders-page"
+        >
+            <div className="max-w-7xl mx-auto px-6 md:px-12">
 
                 {/* Page Header */}
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-4 mb-10">
+
                     <button
                         onClick={() => navigate('/admin/dashboard')}
                         className="text-khajur-primary hover:text-khajur-gold transition-colors"
@@ -504,33 +546,48 @@ const AdminOrders = () => {
                         <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
                             Administration
                         </p>
+
                         <h1 className="font-serif text-4xl font-medium text-khajur-primary">
                             Manage Orders
                         </h1>
                     </div>
                 </div>
 
-                {/* Search and Filter */}
+                {/* Toolbar */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                    <div className="relative flex-1 min-w-0">
+
+                    {/* Search */}
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-khajur-dark/30" />
+
                         <input
                             type="text"
                             placeholder="Search by name, email, order ID or tracking…"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-khajur-border bg-white text-khajur-primary placeholder:text-khajur-dark/30 focus:outline-none focus:ring-1 focus:ring-khajur-gold"
+                            className="
+                                w-full pl-10 pr-4 py-2.5 text-sm border border-khajur-border bg-white
+                                text-khajur-primary placeholder:text-khajur-dark/30
+                                focus:outline-none focus:ring-1 focus:ring-khajur-gold
+                            "
                         />
                     </div>
 
+                    {/* Status Filter */}
                     <div className="relative">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-khajur-dark/30" />
+
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full sm:w-auto pl-10 pr-9 py-2.5 text-sm border border-khajur-border bg-white text-khajur-primary focus:outline-none focus:ring-1 focus:ring-khajur-gold appearance-none cursor-pointer"
+                            className="
+                                pl-10 pr-8 py-2.5 text-sm border border-khajur-border bg-white
+                                text-khajur-primary focus:outline-none focus:ring-1 focus:ring-khajur-gold
+                                appearance-none cursor-pointer
+                            "
                         >
                             <option value="all">All Statuses</option>
+
                             {ORDER_STATUSES.map((s) => (
                                 <option key={s.value} value={s.value}>
                                     {s.label}
@@ -540,38 +597,24 @@ const AdminOrders = () => {
                     </div>
                 </div>
 
-                {/* Orders Count */}
+                {/* Summary */}
                 <p className="text-sm text-khajur-dark/50 mb-4">
                     Showing{' '}
-                    <span className="font-semibold text-khajur-primary">
+                    <span className="font-medium text-khajur-primary">
                         {filteredOrders.length}
                     </span>
                     {' '}of{' '}
-                    <span className="font-semibold text-khajur-primary">
+                    <span className="font-medium text-khajur-primary">
                         {orders.length}
                     </span>
                     {' '}orders
                 </p>
 
                 {/* Orders Table */}
+                <div className="border border-khajur-border overflow-x-auto">
+                    <table className="w-full text-sm">
 
-                {/* Orders Table */}
-                <div className="w-full border border-khajur-border rounded-sm overflow-hidden shadow-sm">
-
-                    <table className="w-full table-fixed border-collapse text-[11px]">
-
-                        <colgroup>
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                        </colgroup>
-
+                        {/* Table Header */}
                         <thead className="bg-khajur-cream border-b border-khajur-border">
                             <tr>
                                 {[
@@ -588,13 +631,10 @@ const AdminOrders = () => {
                                     <th
                                         key={col}
                                         className={`
-                            px-1 py-2.5 text-[10px]
-                            font-semibold text-khajur-dark/70
-                            uppercase tracking-normal whitespace-nowrap
-                            ${col === 'Actions' || col === 'Items'
-                                                ? 'text-center'
-                                                : 'text-left'}
-                        `}
+                                            px-5 py-3.5 text-xs font-medium text-khajur-dark/60
+                                            uppercase tracking-wide whitespace-nowrap
+                                            ${col === 'Actions' ? 'text-right' : 'text-left'}
+                                        `}
                                     >
                                         {col}
                                     </th>
@@ -602,6 +642,7 @@ const AdminOrders = () => {
                             </tr>
                         </thead>
 
+                        {/* Table Body */}
                         <tbody className="divide-y divide-khajur-border bg-white">
 
                             {filteredOrders.length === 0 ? (
@@ -614,68 +655,70 @@ const AdminOrders = () => {
                                     >
 
                                         {/* Order ID */}
-                                        <td className="px-1 py-2 font-mono text-khajur-primary font-medium text-[10px] break-all">
-                                            #{String(order.id).substring(0, 10)}…
+                                        <td className="px-5 py-4 font-mono text-khajur-primary font-medium whitespace-nowrap">
+                                            #{order.id.substring(0, 10)}…
                                         </td>
 
-                                        {/* Date */}
-                                        <td className="px-1 py-2 text-khajur-dark/70 whitespace-nowrap text-[10px]">
+                                        {/* Order Date - DD/MM/YYYY */}
+                                        <td className="px-5 py-4 text-khajur-dark/70 whitespace-nowrap font-medium">
                                             {formatOrderDate(order.created_at)}
                                         </td>
 
                                         {/* Customer */}
-                                        <td className="px-1 py-2 min-w-0">
-                                            <p className="font-semibold text-khajur-dark text-[11px] break-words">
+                                        <td className="px-5 py-4">
+                                            <p className="font-medium text-khajur-dark">
                                                 {order.customer_name}
                                             </p>
-                                            <p className="text-[10px] text-khajur-dark/50 break-all mt-0.5">
+
+                                            <p className="text-xs text-khajur-dark/50">
                                                 {order.customer_email}
                                             </p>
                                         </td>
 
                                         {/* Items */}
-                                        <td className="px-1 py-2 text-khajur-dark/70 text-center text-[11px]">
+                                        <td className="px-5 py-4 text-khajur-dark/70 whitespace-nowrap">
                                             {(order.items || []).reduce(
                                                 (sum, item) =>
                                                     sum + Number(item.quantity || 0),
                                                 0
-                                            )}
+                                            )} items
                                         </td>
 
                                         {/* Total */}
-                                        <td className="px-1 py-2 font-semibold text-khajur-gold whitespace-nowrap text-[10px]">
+                                        <td className="px-5 py-4 font-semibold text-khajur-gold whitespace-nowrap">
                                             ₹{Number(order.total_amount || 0).toFixed(2)}
                                         </td>
 
                                         {/* Payment */}
-                                        <td className="px-1 py-2">
-                                            <span className={`
-                                inline-block px-1 py-0.5 text-[9px]
-                                font-semibold rounded-full whitespace-nowrap
-                                ${order.payment_status === 'paid'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-gray-100 text-gray-700'
-                                                }
-                            `}>
+                                        <td className="px-5 py-4">
+                                            <span
+                                                className={`
+                                                    inline-block px-2 py-0.5 text-xs font-medium rounded-full
+                                                    ${order.payment_status === 'paid'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-gray-100 text-gray-700'
+                                                    }
+                                                `}
+                                            >
                                                 {order.payment_method?.toUpperCase() || '—'}
                                             </span>
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-1 py-2">
+                                        <td className="px-5 py-4">
                                             <select
                                                 value={order.status}
                                                 onChange={(e) =>
-                                                    updateOrderStatus(order.id, e.target.value)
+                                                    updateOrderStatus(
+                                                        order.id,
+                                                        e.target.value
+                                                    )
                                                 }
                                                 className={`
-                                    w-full min-w-0 text-[9px]
-                                    px-1 py-1.5 rounded-full border-0
-                                    cursor-pointer
-                                    focus:outline-none focus:ring-1
-                                    focus:ring-khajur-gold
-                                    ${getStatusStyle(order.status)}
-                                `}
+                                                    text-xs px-2.5 py-1 rounded-full border-0 cursor-pointer
+                                                    focus:outline-none focus:ring-1 focus:ring-khajur-gold
+                                                    ${getStatusStyle(order.status)}
+                                                `}
                                                 data-testid={`order-status-${order.id}`}
                                             >
                                                 {ORDER_STATUSES.map((s) => (
@@ -687,35 +730,31 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Tracking ID */}
-                                        <td className="px-1 py-2 text-[10px] text-khajur-dark/60 font-mono break-all">
+                                        <td className="px-5 py-4 text-khajur-dark/60 font-mono text-xs">
                                             {order.tracking_id || '—'}
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-1 py-2">
-                                            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center justify-end gap-3">
 
                                                 <button
-                                                    type="button"
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors px-2 py-1 rounded text-[10px] font-semibold"
+                                                    className="flex items-center gap-1 text-khajur-primary hover:text-khajur-gold transition-colors text-xs font-medium"
                                                     data-testid={`view-order-${order.id}`}
-                                                    title="View Order"
                                                 >
-                                                    <Eye className="w-3 h-3 flex-shrink-0" />
+                                                    <Eye className="w-3.5 h-3.5" />
                                                     View
                                                 </button>
 
                                                 <button
-                                                    type="button"
                                                     onClick={() => deleteOrder(order.id)}
                                                     disabled={deletingId === order.id}
-                                                    className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors px-2 py-1 rounded text-[10px] font-semibold disabled:opacity-50"
-                                                    title="Delete Order"
+                                                    className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors text-xs font-medium disabled:opacity-40"
                                                 >
                                                     {deletingId === order.id
-                                                        ? <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
-                                                        : <Trash2 className="w-3 h-3 flex-shrink-0" />
+                                                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                        : <Trash2 className="w-3.5 h-3.5" />
                                                     }
                                                     Delete
                                                 </button>
@@ -730,8 +769,6 @@ const AdminOrders = () => {
                         </tbody>
                     </table>
                 </div>
-
-
             </div>
 
             {/* Order Detail Modal */}
