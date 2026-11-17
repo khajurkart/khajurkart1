@@ -563,11 +563,11 @@ const AdminOrders = () => {
                             <col style={{ width: '10%' }} />
                             <col style={{ width: '17%' }} />
                             <col style={{ width: '5%' }} />
-                            <col style={{ width: '10%' }} />
                             <col style={{ width: '9%' }} />
+                            <col style={{ width: '8%' }} />
                             <col style={{ width: '13%' }} />
-                            <col style={{ width: '12%' }} />
-                            <col style={{ width: '13%' }} />
+                            <col style={{ width: '11%' }} />
+                            <col style={{ width: '16%' }} />
                         </colgroup>
 
                         <thead className="bg-khajur-cream border-b border-khajur-border">
@@ -687,18 +687,18 @@ const AdminOrders = () => {
                                             {order.tracking_id || '—'}
                                         </td>
 
-                                        {/* Actions: Separate View and Delete */}
+                                        {/* Actions: Reduced spacing and separated View and Delete */}
                                         <td className="px-2 py-3">
-                                            <div className="flex items-center justify-center gap-4 whitespace-nowrap">
+                                            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
 
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center gap-1.5 text-khajur-primary hover:text-khajur-gold transition-colors text-xs font-semibold"
+                                                    className="inline-flex items-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors px-2.5 py-1 rounded text-[11px] font-semibold"
                                                     data-testid={`view-order-${order.id}`}
                                                     title="View Order"
                                                 >
-                                                    <Eye className="w-4 h-4 flex-shrink-0" />
+                                                    <Eye className="w-3.5 h-3.5 flex-shrink-0" />
                                                     View
                                                 </button>
 
@@ -706,12 +706,12 @@ const AdminOrders = () => {
                                                     type="button"
                                                     onClick={() => deleteOrder(order.id)}
                                                     disabled={deletingId === order.id}
-                                                    className="inline-flex items-center gap-1.5 text-red-500 hover:text-red-700 transition-colors text-xs font-semibold disabled:opacity-50"
+                                                    className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors px-2 py-1 rounded text-[11px] font-semibold disabled:opacity-50"
                                                     title="Delete Order"
                                                 >
                                                     {deletingId === order.id
-                                                        ? <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                                                        : <Trash2 className="w-4 h-4 flex-shrink-0" />
+                                                        ? <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                                                        : <Trash2 className="w-3.5 h-3.5 flex-shrink-0" />
                                                     }
                                                     Delete
                                                 </button>
