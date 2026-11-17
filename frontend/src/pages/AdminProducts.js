@@ -3,26 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import {
-    Plus,
-    Edit,
-    Trash2,
-    ChevronLeft,
-    ToggleLeft,
-    ToggleRight,
-    Loader2,
-    X,
-    Package,
-    Search,
-    ImageOff,
-    List,
-    LayoutGrid,
+    Plus, Edit, Trash2, ChevronLeft, ToggleLeft, ToggleRight,
+    Loader2, X, Package, Search, ImageOff, List, LayoutGrid
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const PROFIT_MARKUP_RATE = 0.35;
+// 35% profit markup is disabled.
+// const PROFIT_MARKUP_RATE = 0.35;
 const PRICE_UPLIFT_RATE = 0.0236;
 
 const EMPTY_SIZE = {
@@ -43,79 +33,51 @@ const INITIAL_FORM = {
     delivery_charge: '',
 };
 
-// Capitalize product names.
 const capitalizeWords = (value) =>
     value.replace(/\b\w/g, (char) => char.toUpperCase());
 
-// Add Razorpay adjustment to original price preview.
 const previewAdjustedOriginalPrice = (value) => {
-    if (value === '' || value === null || value === undefined) {
-        return '';
-    }
+    if (value === '' || value === null || value === undefined) return '';
 
     const amount = Number(value);
-
-    if (!Number.isFinite(amount) || amount < 0) {
-        return '';
-    }
+    if (!Number.isFinite(amount) || amount < 0) return '';
 
     return (amount * (1 + PRICE_UPLIFT_RATE)).toFixed(2);
 };
 
-// KhajurKart custom rounding rule.
 const roundKhajurKartPrice = (value) => {
     const amount = Math.max(0, Number(value) || 0);
-    const lowerTen = Math.floor(amount / 10) * 10;
+    const wholeRupees = Math.floor(amount);
+    const decimalPart = amount - wholeRupees;
+    const lowerTen = Math.floor(wholeRupees / 10) * 10;
 
-    let finalPrice =
-        amount < lowerTen + 2.50
-            ? lowerTen
-            : lowerTen + 9;
+    const rounded = decimalPart < 0.5 ? lowerTen : lowerTen + 9;
 
-    // Special rule: ₹130 becomes ₹129.
-    if (finalPrice === 130) {
-        finalPrice = 129;
-    }
-
-    return finalPrice;
+    // Existing KhajurKart special rounding rule.
+    return rounded === 130 ? 129 : rounded;
 };
 
-// Calculate preview of final selling price.
 const previewFinalSellingPrice = (value) => {
-    if (value === '' || value === null || value === undefined) {
-        return '';
-    }
+    if (value === '' || value === null || value === undefined) return '';
 
     const costPrice = Number(value);
+    if (!Number.isFinite(costPrice) || costPrice < 0) return '';
 
-    if (!Number.isFinite(costPrice) || costPrice < 0) {
-        return '';
-    }
+    // Profit markup intentionally disabled.
+    // const profitAmount = costPrice * PROFIT_MARKUP_RATE;
+    // const afterProfit = costPrice + profitAmount;
 
-    const profitAmount =
-        Math.round(
-            (costPrice * PROFIT_MARKUP_RATE + Number.EPSILON) * 100
-        ) / 100;
-
-    const afterProfit =
-        Math.round(
-            (costPrice + profitAmount + Number.EPSILON) * 100
-        ) / 100;
+    const afterProfit = costPrice;
 
     const razorpayAdjustment =
-        Math.round(
-            (afterProfit * PRICE_UPLIFT_RATE + Number.EPSILON) * 100
-        ) / 100;
+        Math.round((afterProfit * PRICE_UPLIFT_RATE + Number.EPSILON) * 100) / 100;
 
     const beforeRounding =
-        Math.round(
-            (afterProfit + razorpayAdjustment + Number.EPSILON) * 100
-        ) / 100;
+        Math.round((afterProfit + razorpayAdjustment + Number.EPSILON) * 100) / 100;
 
     return String(roundKhajurKartPrice(beforeRounding));
 };
 
-// Prepare product data for backend.
 const buildProductPayload = (formData) => ({
     ...formData,
 
@@ -155,23 +117,20 @@ const buildProductPayload = (formData) => ({
     delivery_charge: Number.parseFloat(formData.delivery_charge || 0),
 });
 
-// Convert backend product data into editable form data.
 const productToForm = (product) => ({
     name: product.name || '',
     description: product.description || '',
 
     sizes: product.sizes?.length
         ? product.sizes.map((size) => ({
-              weight: size.weight || '',
-              cost_price: size.cost_price ?? '',
-              original_price: size.base_original_price ?? '',
-          }))
+            weight: size.weight || '',
+            cost_price: size.cost_price ?? '',
+            original_price: size.base_original_price ?? '',
+        }))
         : [{ ...EMPTY_SIZE }],
 
     original_price:
-        product.base_original_price ??
-        product.original_price ??
-        '',
+        product.base_original_price ?? product.original_price ?? '',
 
     category: product.category || '',
     image: product.image || '',
@@ -196,9 +155,9 @@ const inputBase = `
     placeholder:text-khajur-dark/30 focus:outline-none transition-colors
 `;
 
-const EmptyState = ({ colSpan = 8 }) => (
+const EmptyState = () => (
     <tr>
-        <td colSpan={colSpan}>
+        <td colSpan={8}>
             <div className="flex flex-col items-center justify-center py-20 text-khajur-dark/30">
                 <Package className="w-12 h-12 mb-3" />
                 <p className="text-sm">No products found</p>
@@ -207,14 +166,7 @@ const EmptyState = ({ colSpan = 8 }) => (
     </tr>
 );
 
-// Individual size and pricing row.
-const SizeRow = ({
-    item,
-    index,
-    onChange,
-    onRemove,
-    canRemove,
-}) => {
+const SizeRow = ({ item, index, onChange, onRemove, canRemove }) => {
     const adjustedPrice = previewFinalSellingPrice(item.cost_price);
 
     const hasOriginalPrice =
@@ -234,9 +186,7 @@ const SizeRow = ({
                     required
                     placeholder="Weight (e.g. 250g)"
                     value={item.weight}
-                    onChange={(e) =>
-                        onChange(index, 'weight', e.target.value)
-                    }
+                    onChange={(e) => onChange(index, 'weight', e.target.value)}
                     className="w-full border border-khajur-border px-3 py-2 text-sm text-khajur-primary focus:outline-none focus:border-khajur-gold bg-white"
                 />
             </div>
@@ -249,15 +199,13 @@ const SizeRow = ({
                     step="0.01"
                     placeholder="Cost price (₹)"
                     value={item.cost_price}
-                    onChange={(e) =>
-                        onChange(index, 'cost_price', e.target.value)
-                    }
+                    onChange={(e) => onChange(index, 'cost_price', e.target.value)}
                     className="w-full border border-khajur-border px-3 py-2 text-sm text-khajur-primary focus:outline-none focus:border-khajur-gold bg-white"
                 />
 
                 {adjustedPrice !== '' && (
                     <p className="mt-1 text-xs text-green-700">
-                        Final selling price (35% profit + 2.36% Razorpay + rounding) : ₹{adjustedPrice}
+                        Final selling price (2.36% Razorpay + rounding): ₹{adjustedPrice}
                     </p>
                 )}
             </div>
@@ -271,11 +219,7 @@ const SizeRow = ({
                         placeholder="Base original price (₹)"
                         value={item.original_price}
                         onChange={(e) =>
-                            onChange(
-                                index,
-                                'original_price',
-                                e.target.value
-                            )
+                            onChange(index, 'original_price', e.target.value)
                         }
                         className="flex-1 min-w-0 border border-khajur-border px-3 py-2 text-sm text-khajur-primary focus:outline-none focus:border-khajur-gold bg-white"
                     />
@@ -302,7 +246,6 @@ const SizeRow = ({
     );
 };
 
-// Add/Edit product modal.
 const ProductModal = ({
     editingProduct,
     formData,
@@ -313,19 +256,13 @@ const ProductModal = ({
     saving,
 }) => {
     const updateField = (field, value) => {
-        setFormData((previous) => ({
-            ...previous,
-            [field]: value,
-        }));
+        setFormData((previous) => ({ ...previous, [field]: value }));
     };
 
     const updateSize = (index, field, value) => {
         const newSizes = formData.sizes.map((size, sizeIndex) =>
-            sizeIndex === index
-                ? { ...size, [field]: value }
-                : size
+            sizeIndex === index ? { ...size, [field]: value } : size
         );
-
         updateField('sizes', newSizes);
     };
 
@@ -337,10 +274,7 @@ const ProductModal = ({
     };
 
     const addSize = () => {
-        updateField('sizes', [
-            ...formData.sizes,
-            { ...EMPTY_SIZE },
-        ]);
+        updateField('sizes', [...formData.sizes, { ...EMPTY_SIZE }]);
     };
 
     const adjustedTopLevelOriginalPrice =
@@ -351,9 +285,7 @@ const ProductModal = ({
             className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
             data-testid="product-modal"
             onClick={(e) => {
-                if (e.target === e.currentTarget) {
-                    onClose();
-                }
+                if (e.target === e.currentTarget) onClose();
             }}
         >
             <div className="bg-white w-full max-w-3xl rounded-sm shadow-2xl max-h-[92vh] flex flex-col">
@@ -362,11 +294,8 @@ const ProductModal = ({
                         <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
                             {editingProduct ? 'Editing' : 'New Product'}
                         </p>
-
                         <h2 className="font-serif text-2xl font-medium text-khajur-primary">
-                            {editingProduct
-                                ? 'Update Product'
-                                : 'Add Product'}
+                            {editingProduct ? 'Update Product' : 'Add Product'}
                         </h2>
                     </div>
 
@@ -380,22 +309,14 @@ const ProductModal = ({
                     </button>
                 </div>
 
-                <form
-                    onSubmit={onSubmit}
-                    className="overflow-y-auto px-6 md:px-8 py-6 space-y-6 flex-1"
-                >
+                <form onSubmit={onSubmit} className="overflow-y-auto px-6 md:px-8 py-6 space-y-6 flex-1">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField label="Product Name" required>
                             <input
                                 type="text"
                                 required
                                 value={formData.name}
-                                onChange={(e) =>
-                                    updateField(
-                                        'name',
-                                        capitalizeWords(e.target.value)
-                                    )
-                                }
+                                onChange={(e) => updateField('name', capitalizeWords(e.target.value))}
                                 placeholder="e.g. Premium Medjool Dates"
                                 className={inputBase}
                                 data-testid="product-name-input"
@@ -406,21 +327,13 @@ const ProductModal = ({
                             <select
                                 required
                                 value={formData.category}
-                                onChange={(e) =>
-                                    updateField('category', e.target.value)
-                                }
+                                onChange={(e) => updateField('category', e.target.value)}
                                 className={`${inputBase} cursor-pointer`}
                                 data-testid="product-category-input"
                             >
-                                <option value="">
-                                    Select a category…
-                                </option>
-
+                                <option value="">Select a category…</option>
                                 {categories.map((category) => (
-                                    <option
-                                        key={category.id}
-                                        value={category.slug}
-                                    >
+                                    <option key={category.id} value={category.slug}>
                                         {category.name}
                                     </option>
                                 ))}
@@ -433,9 +346,7 @@ const ProductModal = ({
                             required
                             rows={5}
                             value={formData.description}
-                            onChange={(e) =>
-                                updateField('description', e.target.value)
-                            }
+                            onChange={(e) => updateField('description', e.target.value)}
                             placeholder="Write a detailed product description…"
                             className="w-full bg-white border border-khajur-primary/20 focus:border-khajur-gold px-4 py-3 text-sm text-khajur-primary placeholder:text-khajur-dark/30 focus:outline-none resize-none"
                             data-testid="product-description-input"
@@ -449,20 +360,13 @@ const ProductModal = ({
                                 min="0"
                                 step="0.01"
                                 value={formData.original_price}
-                                onChange={(e) =>
-                                    updateField(
-                                        'original_price',
-                                        e.target.value
-                                    )
-                                }
+                                onChange={(e) => updateField('original_price', e.target.value)}
                                 placeholder="0.00"
                                 className={inputBase}
                             />
-
                             {adjustedTopLevelOriginalPrice !== '' && (
                                 <p className="mt-1 text-xs text-green-700">
-                                    After 2.36%: ₹
-                                    {adjustedTopLevelOriginalPrice}
+                                    After 2.36%: ₹{adjustedTopLevelOriginalPrice}
                                 </p>
                             )}
                         </FormField>
@@ -474,12 +378,7 @@ const ProductModal = ({
                                 min="0"
                                 step="0.01"
                                 value={formData.delivery_charge}
-                                onChange={(e) =>
-                                    updateField(
-                                        'delivery_charge',
-                                        e.target.value
-                                    )
-                                }
+                                onChange={(e) => updateField('delivery_charge', e.target.value)}
                                 placeholder="0.00"
                                 className={inputBase}
                                 data-testid="product-delivery-input"
@@ -493,9 +392,7 @@ const ProductModal = ({
                                 min="0"
                                 step="1"
                                 value={formData.stock}
-                                onChange={(e) =>
-                                    updateField('stock', e.target.value)
-                                }
+                                onChange={(e) => updateField('stock', e.target.value)}
                                 placeholder="0"
                                 className={inputBase}
                                 data-testid="product-stock-input"
@@ -508,12 +405,9 @@ const ProductModal = ({
                             <p className="text-xs font-medium text-khajur-dark/60 uppercase tracking-wide">
                                 Sizes & Pricing
                             </p>
-
                             <p className="text-xs text-khajur-dark/50">
-                                Enter your total cost price for each size. The system adds 30% profit,
-                                the 2.36% Razorpay adjustment, and applies your custom rounding rule.
+                                Enter your total cost price for each size. The system applies the 2.36% Razorpay adjustment and custom rounding. Profit markup is disabled.
                             </p>
-
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-khajur-dark/40">
                                 <span>Weight</span>
                                 <span>Cost price / final selling price preview</span>
@@ -549,14 +443,11 @@ const ProductModal = ({
                             type="url"
                             required
                             value={formData.image}
-                            onChange={(e) =>
-                                updateField('image', e.target.value)
-                            }
+                            onChange={(e) => updateField('image', e.target.value)}
                             placeholder="https://example.com/image.jpg"
                             className={inputBase}
                             data-testid="product-image-input"
                         />
-
                         {formData.image && (
                             <img
                                 src={formData.image}
@@ -573,18 +464,12 @@ const ProductModal = ({
                         <input
                             type="checkbox"
                             checked={formData.featured}
-                            onChange={(e) =>
-                                updateField('featured', e.target.checked)
-                            }
+                            onChange={(e) => updateField('featured', e.target.checked)}
                             className="w-4 h-4 accent-khajur-gold"
                             data-testid="product-featured-input"
                         />
-
                         <span className="text-sm text-khajur-dark">
-                            Mark as{' '}
-                            <span className="font-medium">
-                                Featured Product
-                            </span>
+                            Mark as <span className="font-medium">Featured Product</span>
                         </span>
                     </label>
 
@@ -595,13 +480,8 @@ const ProductModal = ({
                             className="flex-1 flex items-center justify-center gap-2 bg-khajur-gold text-khajur-primary hover:bg-khajur-gold/90 px-6 py-3 text-xs font-bold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
                             data-testid="save-product-button"
                         >
-                            {saving && (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            )}
-
-                            {editingProduct
-                                ? 'Update Product'
-                                : 'Add Product'}
+                            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                            {editingProduct ? 'Update Product' : 'Add Product'}
                         </button>
 
                         <button
@@ -619,7 +499,6 @@ const ProductModal = ({
     );
 };
 
-// Main Admin Products component.
 const AdminProducts = () => {
     const { token } = useAuth();
     const navigate = useNavigate();
@@ -633,24 +512,18 @@ const AdminProducts = () => {
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState(INITIAL_FORM);
     const [searchQuery, setSearchQuery] = useState('');
-
-    // Switch between List and Category views.
     const [viewMode, setViewMode] = useState('list');
 
     const authHeaders = {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
     };
 
-    // Fetch products and categories.
     const fetchData = useCallback(async () => {
         try {
-            const [productsResponse, categoriesResponse] =
-                await Promise.all([
-                    axios.get(`${API}/admin/products`, authHeaders),
-                    axios.get(`${API}/categories`, authHeaders),
-                ]);
+            const [productsResponse, categoriesResponse] = await Promise.all([
+                axios.get(`${API}/admin/products`, authHeaders),
+                axios.get(`${API}/categories`, authHeaders),
+            ]);
 
             setProducts(productsResponse.data);
             setCategories(categoriesResponse.data);
@@ -668,12 +541,7 @@ const AdminProducts = () => {
 
     const openAddModal = () => {
         setEditingProduct(null);
-
-        setFormData({
-            ...INITIAL_FORM,
-            sizes: [{ ...EMPTY_SIZE }],
-        });
-
+        setFormData({ ...INITIAL_FORM, sizes: [{ ...EMPTY_SIZE }] });
         setShowModal(true);
     };
 
@@ -688,7 +556,6 @@ const AdminProducts = () => {
         setEditingProduct(null);
     };
 
-    // Add or update product.
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -697,29 +564,22 @@ const AdminProducts = () => {
             return;
         }
 
-        const invalidSize = formData.sizes.some(
-            (size) =>
-                !String(size.weight).trim() ||
-                size.cost_price === '' ||
-                !Number.isFinite(Number(size.cost_price)) ||
-                Number(size.cost_price) < 0
+        const invalidSize = formData.sizes.some((size) =>
+            !String(size.weight).trim() ||
+            size.cost_price === '' ||
+            !Number.isFinite(Number(size.cost_price)) ||
+            Number(size.cost_price) < 0
         );
 
         if (invalidSize) {
-            toast.error(
-                'Please enter a valid weight and cost price for every size.'
-            );
+            toast.error('Please enter a valid weight and cost price for every size.');
             return;
         }
 
-        if (
-            formData.sizes.some(
-                (size) =>
-                    size.original_price !== '' &&
-                    (!Number.isFinite(Number(size.original_price)) ||
-                        Number(size.original_price) < 0)
-            )
-        ) {
+        if (formData.sizes.some((size) =>
+            size.original_price !== '' &&
+            (!Number.isFinite(Number(size.original_price)) || Number(size.original_price) < 0)
+        )) {
             toast.error('Please enter valid original prices.');
             return;
         }
@@ -735,15 +595,9 @@ const AdminProducts = () => {
                     payload,
                     authHeaders
                 );
-
                 toast.success('Product updated successfully.');
             } else {
-                await axios.post(
-                    `${API}/admin/products`,
-                    payload,
-                    authHeaders
-                );
-
+                await axios.post(`${API}/admin/products`, payload, authHeaders);
                 toast.success('Product added successfully.');
             }
 
@@ -751,33 +605,23 @@ const AdminProducts = () => {
             await fetchData();
         } catch (error) {
             console.error('Failed to save product:', error);
-
-            toast.error(
-                error.response?.data?.detail ||
-                    'Failed to save product.'
-            );
+            toast.error(error.response?.data?.detail || 'Failed to save product.');
         } finally {
             setSaving(false);
         }
     };
 
-    // Delete product.
     const handleDelete = async (productId) => {
         const confirmed = window.confirm(
             'Are you sure you want to delete this product? This cannot be undone.'
         );
 
-        if (!confirmed) {
-            return;
-        }
+        if (!confirmed) return;
 
         setDeletingId(productId);
 
         try {
-            await axios.delete(
-                `${API}/admin/products/${productId}`,
-                authHeaders
-            );
+            await axios.delete(`${API}/admin/products/${productId}`, authHeaders);
 
             setProducts((previous) =>
                 previous.filter((product) => product.id !== productId)
@@ -792,7 +636,6 @@ const AdminProducts = () => {
         }
     };
 
-    // Toggle stock.
     const toggleStock = async (product) => {
         const newStock = product.stock > 0 ? 0 : 10;
 
@@ -805,9 +648,7 @@ const AdminProducts = () => {
 
             setProducts((previous) =>
                 previous.map((item) =>
-                    item.id === product.id
-                        ? { ...item, stock: newStock }
-                        : item
+                    item.id === product.id ? { ...item, stock: newStock } : item
                 )
             );
 
@@ -822,9 +663,8 @@ const AdminProducts = () => {
         }
     };
 
-    // Search across product name and category.
     const filteredProducts = products.filter((product) => {
-        const query = searchQuery.toLowerCase().trim();
+        const query = searchQuery.toLowerCase();
 
         return (
             !query ||
@@ -833,176 +673,146 @@ const AdminProducts = () => {
         );
     });
 
-    // Reusable product table.
-    const renderProductTable = (items, showCategoryColumn = true) => {
-        const columnCount = showCategoryColumn ? 8 : 7;
+    const renderProductTable = (items, showCategoryColumn = true) => (
+        <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+                <thead className="bg-khajur-cream border-b border-khajur-border">
+                    <tr>
+                        {[
+                            'Image',
+                            'Name',
+                            ...(showCategoryColumn ? ['Category'] : []),
+                            'Price',
+                            'Delivery',
+                            'Stock',
+                            'Status',
+                            'Actions',
+                        ].map((column) => (
+                            <th
+                                key={column}
+                                className={`px-5 py-3.5 text-xs font-medium text-khajur-dark/60 uppercase tracking-wide whitespace-nowrap ${
+                                    column === 'Actions' ? 'text-right' : 'text-left'
+                                }`}
+                            >
+                                {column}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
 
-        return (
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-khajur-cream border-b border-khajur-border">
-                        <tr>
-                            {[
-                                'Image',
-                                'Name',
-                                ...(showCategoryColumn ? ['Category'] : []),
-                                'Price',
-                                'Delivery',
-                                'Stock',
-                                'Status',
-                                'Actions',
-                            ].map((column) => (
-                                <th
-                                    key={column}
-                                    className={`px-5 py-3.5 text-xs font-medium text-khajur-dark/60 uppercase tracking-wide whitespace-nowrap ${
-                                        column === 'Actions'
-                                            ? 'text-right'
-                                            : 'text-left'
-                                    }`}
-                                >
-                                    {column}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-khajur-border bg-white">
-                        {items.length === 0 ? (
-                            <EmptyState colSpan={columnCount} />
-                        ) : (
-                            items.map((product) => (
-                                <tr
-                                    key={product.id}
-                                    className="hover:bg-khajur-cream/40 transition-colors"
-                                >
-                                    <td className="px-5 py-4">
-                                        {product.image ? (
-                                            <img
-                                                src={product.image}
-                                                alt={product.name}
-                                                className="w-14 h-14 object-cover border border-khajur-border"
-                                                onError={(event) => {
-                                                    event.currentTarget.style.display =
-                                                        'none';
-                                                }}
-                                            />
-                                        ) : (
-                                            <div className="w-14 h-14 bg-khajur-cream flex items-center justify-center">
-                                                <ImageOff className="w-5 h-5 text-khajur-dark/30" />
-                                            </div>
-                                        )}
-                                    </td>
-
-                                    <td className="px-5 py-4">
-                                        <p className="font-medium text-khajur-primary">
-                                            {product.name}
-                                        </p>
-
-                                        {product.weight && (
-                                            <p className="text-xs text-khajur-dark/50 mt-0.5">
-                                                {product.weight}
-                                            </p>
-                                        )}
-                                    </td>
-
-                                    {showCategoryColumn && (
-                                        <td className="px-5 py-4 text-khajur-dark/70 capitalize">
-                                            {product.category || 'Uncategorized'}
-                                        </td>
+                <tbody className="divide-y divide-khajur-border bg-white">
+                    {items.length === 0 ? (
+                        <EmptyState />
+                    ) : (
+                        items.map((product) => (
+                            <tr key={product.id} className="hover:bg-khajur-cream/40 transition-colors">
+                                <td className="px-5 py-4">
+                                    {product.image ? (
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-14 h-14 object-cover border border-khajur-border"
+                                            onError={(event) => {
+                                                event.currentTarget.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="w-14 h-14 bg-khajur-cream flex items-center justify-center">
+                                            <ImageOff className="w-5 h-5 text-khajur-dark/30" />
+                                        </div>
                                     )}
+                                </td>
 
-                                    <td className="px-5 py-4 font-semibold text-khajur-gold whitespace-nowrap">
-                                        ₹{Number(product.price ?? 0).toFixed(2)}
+                                <td className="px-5 py-4">
+                                    <p className="font-medium text-khajur-primary">{product.name}</p>
+                                    {product.weight && (
+                                        <p className="text-xs text-khajur-dark/50 mt-0.5">{product.weight}</p>
+                                    )}
+                                </td>
+
+                                {showCategoryColumn && (
+                                    <td className="px-5 py-4 text-khajur-dark/70 capitalize">
+                                        {product.category || 'Uncategorized'}
                                     </td>
+                                )}
 
-                                    <td className="px-5 py-4 text-khajur-dark/70 whitespace-nowrap">
-                                        ₹{Number(product.delivery_charge ?? 0).toFixed(2)}
-                                    </td>
+                                <td className="px-5 py-4 font-semibold text-khajur-gold whitespace-nowrap">
+                                    ₹{Number(product.price ?? 0).toFixed(2)}
+                                </td>
 
-                                    <td className="px-5 py-4">
-                                        <span
-                                            className={`text-sm font-medium ${
-                                                product.stock <= 0
-                                                    ? 'text-red-500'
-                                                    : product.stock < 5
-                                                    ? 'text-orange-500'
-                                                    : 'text-khajur-dark/70'
-                                            }`}
-                                        >
-                                            {product.stock}
-                                        </span>
-                                    </td>
+                                <td className="px-5 py-4 text-khajur-dark/70 whitespace-nowrap">
+                                    ₹{Number(product.delivery_charge ?? 0).toFixed(2)}
+                                </td>
 
-                                    <td className="px-5 py-4">
+                                <td className="px-5 py-4">
+                                    <span className={`text-sm font-medium ${
+                                        product.stock <= 0
+                                            ? 'text-red-500'
+                                            : product.stock < 5
+                                                ? 'text-orange-500'
+                                                : 'text-khajur-dark/70'
+                                    }`}>
+                                        {product.stock}
+                                    </span>
+                                </td>
+
+                                <td className="px-5 py-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleStock(product)}
+                                        className="flex items-center gap-1.5 hover:opacity-70"
+                                        data-testid={`toggle-stock-${product.id}`}
+                                        aria-label={`Toggle stock for ${product.name}`}
+                                    >
+                                        {product.stock > 0 ? (
+                                            <>
+                                                <ToggleRight className="w-6 h-6 text-green-500" />
+                                                <span className="text-xs font-medium text-green-600">In Stock</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ToggleLeft className="w-6 h-6 text-red-400" />
+                                                <span className="text-xs font-medium text-red-500">Out of Stock</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </td>
+
+                                <td className="px-5 py-4">
+                                    <div className="flex items-center justify-end gap-3">
                                         <button
                                             type="button"
-                                            onClick={() => toggleStock(product)}
-                                            className="flex items-center gap-1.5 hover:opacity-70"
-                                            data-testid={`toggle-stock-${product.id}`}
-                                            aria-label={`Toggle stock for ${product.name}`}
+                                            onClick={() => openEditModal(product)}
+                                            className="text-khajur-primary hover:text-khajur-gold"
+                                            aria-label={`Edit ${product.name}`}
+                                            data-testid={`edit-product-${product.id}`}
                                         >
-                                            {product.stock > 0 ? (
-                                                <>
-                                                    <ToggleRight className="w-6 h-6 text-green-500" />
-                                                    <span className="text-xs font-medium text-green-600">
-                                                        In Stock
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <ToggleLeft className="w-6 h-6 text-red-400" />
-                                                    <span className="text-xs font-medium text-red-500">
-                                                        Out of Stock
-                                                    </span>
-                                                </>
-                                            )}
+                                            <Edit className="w-4 h-4" />
                                         </button>
-                                    </td>
 
-                                    <td className="px-5 py-4">
-                                        <div className="flex items-center justify-end gap-3">
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    openEditModal(product)
-                                                }
-                                                className="text-khajur-primary hover:text-khajur-gold"
-                                                aria-label={`Edit ${product.name}`}
-                                                data-testid={`edit-product-${product.id}`}
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(product.id)}
+                                            disabled={deletingId === product.id}
+                                            className="text-red-400 hover:text-red-600 disabled:opacity-40"
+                                            aria-label={`Delete ${product.name}`}
+                                            data-testid={`delete-product-${product.id}`}
+                                        >
+                                            {deletingId === product.id
+                                                ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                : <Trash2 className="w-4 h-4" />
+                                            }
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+        </div>
+    );
 
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleDelete(product.id)
-                                                }
-                                                disabled={
-                                                    deletingId === product.id
-                                                }
-                                                className="text-red-400 hover:text-red-600 disabled:opacity-40"
-                                                aria-label={`Delete ${product.name}`}
-                                                data-testid={`delete-product-${product.id}`}
-                                            >
-                                                {deletingId === product.id ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="w-4 h-4" />
-                                                )}
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        );
-    };
-
-    // Create category-wise product groups.
     const categoryGroups = categories
         .map((category) => ({
             key: category.slug,
@@ -1015,18 +825,13 @@ const AdminProducts = () => {
         }))
         .filter((group) => group.items.length > 0);
 
-    // Products without a matching category.
     const knownCategorySlugs = new Set(
-        categories.map((category) =>
-            (category.slug || '').toLowerCase()
-        )
+        categories.map((category) => (category.slug || '').toLowerCase())
     );
 
     const uncategorizedProducts = filteredProducts.filter(
         (product) =>
-            !knownCategorySlugs.has(
-                (product.category || '').toLowerCase()
-            )
+            !knownCategorySlugs.has((product.category || '').toLowerCase())
     );
 
     if (uncategorizedProducts.length > 0) {
@@ -1047,13 +852,8 @@ const AdminProducts = () => {
     }
 
     return (
-        <div
-            className="min-h-screen py-20 bg-white"
-            data-testid="admin-products-page"
-        >
+        <div className="min-h-screen py-20 bg-white" data-testid="admin-products-page">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
-
-                {/* Page heading */}
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-4">
                         <button
@@ -1070,7 +870,6 @@ const AdminProducts = () => {
                             <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
                                 Administration
                             </p>
-
                             <h1 className="font-serif text-4xl font-medium text-khajur-primary">
                                 Manage Products
                             </h1>
@@ -1088,10 +887,8 @@ const AdminProducts = () => {
                     </button>
                 </div>
 
-                {/* Search */}
                 <div className="relative mb-6 max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-khajur-dark/30" />
-
                     <input
                         type="text"
                         placeholder="Search by name or category…"
@@ -1101,7 +898,6 @@ const AdminProducts = () => {
                     />
                 </div>
 
-                {/* List / Category selector */}
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                     <div
                         className="inline-flex rounded-md border border-khajur-border bg-khajur-cream/40 p-1"
@@ -1119,8 +915,7 @@ const AdminProducts = () => {
                             }`}
                             data-testid="products-list-view"
                         >
-                            <List className="w-4 h-4" />
-                            List
+                            <List className="w-4 h-4" /> List
                         </button>
 
                         <button
@@ -1134,8 +929,7 @@ const AdminProducts = () => {
                             }`}
                             data-testid="products-category-view"
                         >
-                            <LayoutGrid className="w-4 h-4" />
-                            Category
+                            <LayoutGrid className="w-4 h-4" /> Category
                         </button>
                     </div>
 
@@ -1152,14 +946,11 @@ const AdminProducts = () => {
                     </p>
                 </div>
 
-                {/* LIST VIEW */}
                 {viewMode === 'list' ? (
                     <div className="border border-khajur-border">
                         {renderProductTable(filteredProducts, true)}
                     </div>
                 ) : (
-
-                    /* CATEGORY VIEW */
                     <div className="space-y-6">
                         {categoryGroups.length === 0 ? (
                             <div className="border border-khajur-border bg-white">
@@ -1176,7 +967,6 @@ const AdminProducts = () => {
                                             <h2 className="font-serif text-xl font-medium text-khajur-primary">
                                                 {group.name}
                                             </h2>
-
                                             <p className="text-xs text-khajur-dark/50 mt-1">
                                                 Products in this category
                                             </p>
@@ -1195,7 +985,6 @@ const AdminProducts = () => {
                 )}
             </div>
 
-            {/* Add/Edit product modal */}
             {showModal && (
                 <ProductModal
                     editingProduct={editingProduct}
