@@ -1877,10 +1877,9 @@ def public_product_data(product):
     return safe_product
 
 # KhajurKart product pricing:
-# 1) Add 30% markup to the admin-entered cost price.
-# 2) Add the existing 2.36% Razorpay price adjustment.
-# 3) Apply the requested custom rupee-price rounding rule.
-PRODUCT_PROFIT_MARKUP_RATE = 0.35
+# Profit markup calculation is temporarily disabled.
+# PRODUCT_PROFIT_MARKUP_RATE = 0.35
+# Keep the existing 2.36% Razorpay price adjustment and custom rounding active.
 PRODUCT_PRICE_UPLIFT_RATE = 0.0236
 
 
@@ -1890,31 +1889,21 @@ def _money(value):
 
 def round_khajurkart_price(value):
     """
-    KhajurKart pricing rules:
-    - Below ₹2.50 above the lower multiple of ₹10: round down.
-    - At or above ₹2.50: use the ₹9 ending.
-    - Never leave a final price ending in ₹0; subtract ₹1.
-
-    Examples:
-    122.40 -> 120
-    122.50 -> 129
-    130.00 -> 129
-    132.50 -> 139
-    142.50 -> 149
+    Custom rounding requested by KhajurKart:
+    - Decimal part below .50: round down to the lower multiple of ₹10.
+    - Decimal part .50 or above: use the same decade's ₹9 ending.
+    Examples: 122.40 -> 120, 122.50 -> 129,
+              142.40 -> 140, 142.50 -> 149.
     """
     amount = max(0.0, float(value or 0))
+    whole_rupees = int(amount)
+    decimal_part = amount - whole_rupees
+    lower_ten = (whole_rupees // 10) * 10
 
-    lower_ten = int(amount // 10) * 10
+    if decimal_part < 0.50:
+        return float(lower_ten)
 
-    if amount < lower_ten + 2.50:
-        final_price = lower_ten
-    else:
-        final_price = lower_ten + 9
-
-    if final_price > 0 and final_price % 10 == 0:
-        final_price -= 1
-
-    return float(final_price)
+    return float(lower_ten + 9)
 
 
 def apply_product_price_uplift(sizes):
@@ -1934,8 +1923,13 @@ def apply_product_price_uplift(sizes):
             size.get("cost_price", size.get("base_cost_price", size.get("base_price", size.get("price", 0))))
         )
 
-        profit_amount = round(cost_price * PRODUCT_PROFIT_MARKUP_RATE + 1e-9, 2)
-        price_after_profit = round(cost_price + profit_amount, 2)
+        # 35% profit markup calculation is intentionally disabled for now.
+        # profit_amount = round(cost_price * PRODUCT_PROFIT_MARKUP_RATE + 1e-9, 2)
+        # price_after_profit = round(cost_price + profit_amount, 2)
+
+        # Apply only the existing 2.36% Razorpay adjustment to cost price.
+        profit_amount = 0.0
+        price_after_profit = cost_price
         razorpay_adjustment = round(
             price_after_profit * PRODUCT_PRICE_UPLIFT_RATE + 1e-9, 2
         )
@@ -1943,7 +1937,7 @@ def apply_product_price_uplift(sizes):
         selling_price = round_khajurkart_price(price_before_rounding)
 
         size["cost_price"] = cost_price
-        size["profit_percentage"] = int(PRODUCT_PROFIT_MARKUP_RATE * 100)
+        size["profit_percentage"] = 0
         size["profit_amount"] = profit_amount
         size["razorpay_adjustment"] = razorpay_adjustment
         size["price_before_rounding"] = price_before_rounding
