@@ -554,9 +554,23 @@ const AdminOrders = () => {
                 </p>
 
                 {/* Orders Table */}
-                <div className="w-full border border-khajur-border rounded-sm overflow-x-auto shadow-sm">
 
-                    <table className="w-full table-auto border-collapse text-[12px] md:text-[13px]">
+                {/* Orders Table */}
+                <div className="w-full border border-khajur-border rounded-sm overflow-hidden shadow-sm">
+
+                    <table className="w-full table-fixed border-collapse text-[11px]">
+
+                        <colgroup>
+                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '9%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '8%' }} />
+                            <col style={{ width: '8%' }} />
+                            <col style={{ width: '13%' }} />
+                            <col style={{ width: '12%' }} />
+                            <col style={{ width: '19%' }} />
+                        </colgroup>
 
                         <thead className="bg-khajur-cream border-b border-khajur-border">
                             <tr>
@@ -574,11 +588,13 @@ const AdminOrders = () => {
                                     <th
                                         key={col}
                                         className={`
-                                            px-2.5 py-3 text-[10px] md:text-xs
-                                            font-semibold text-khajur-dark/70
-                                            uppercase tracking-wide whitespace-nowrap
-                                            ${col === 'Actions' ? 'text-center' : col === 'Items' ? 'text-center' : 'text-left'}
-                                        `}
+                            px-1 py-2.5 text-[10px]
+                            font-semibold text-khajur-dark/70
+                            uppercase tracking-normal whitespace-nowrap
+                            ${col === 'Actions' || col === 'Items'
+                                                ? 'text-center'
+                                                : 'text-left'}
+                        `}
                                     >
                                         {col}
                                     </th>
@@ -598,27 +614,27 @@ const AdminOrders = () => {
                                     >
 
                                         {/* Order ID */}
-                                        <td className="px-2.5 py-3 font-mono text-khajur-primary font-medium text-[11px] md:text-xs whitespace-nowrap">
+                                        <td className="px-1 py-2 font-mono text-khajur-primary font-medium text-[10px] break-all">
                                             #{String(order.id).substring(0, 10)}…
                                         </td>
 
                                         {/* Date */}
-                                        <td className="px-2.5 py-3 text-khajur-dark/70 whitespace-nowrap text-xs">
+                                        <td className="px-1 py-2 text-khajur-dark/70 whitespace-nowrap text-[10px]">
                                             {formatOrderDate(order.created_at)}
                                         </td>
 
                                         {/* Customer */}
-                                        <td className="px-2.5 py-3 whitespace-nowrap">
-                                            <p className="font-semibold text-khajur-dark text-xs">
+                                        <td className="px-1 py-2 min-w-0">
+                                            <p className="font-semibold text-khajur-dark text-[11px] break-words">
                                                 {order.customer_name}
                                             </p>
-                                            <p className="text-[11px] text-khajur-dark/50 mt-0.5">
+                                            <p className="text-[10px] text-khajur-dark/50 break-all mt-0.5">
                                                 {order.customer_email}
                                             </p>
                                         </td>
 
                                         {/* Items */}
-                                        <td className="px-2.5 py-3 text-khajur-dark/70 text-center whitespace-nowrap">
+                                        <td className="px-1 py-2 text-khajur-dark/70 text-center text-[11px]">
                                             {(order.items || []).reduce(
                                                 (sum, item) =>
                                                     sum + Number(item.quantity || 0),
@@ -627,39 +643,39 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Total */}
-                                        <td className="px-2.5 py-3 font-semibold text-khajur-gold whitespace-nowrap text-xs">
+                                        <td className="px-1 py-2 font-semibold text-khajur-gold whitespace-nowrap text-[10px]">
                                             ₹{Number(order.total_amount || 0).toFixed(2)}
                                         </td>
 
                                         {/* Payment */}
-                                        <td className="px-2.5 py-3 whitespace-nowrap">
+                                        <td className="px-1 py-2">
                                             <span className={`
-                                                inline-block px-2 py-0.5 text-[10px]
-                                                font-semibold rounded-full whitespace-nowrap
-                                                ${order.payment_status === 'paid'
+                                inline-block px-1 py-0.5 text-[9px]
+                                font-semibold rounded-full whitespace-nowrap
+                                ${order.payment_status === 'paid'
                                                     ? 'bg-green-100 text-green-800'
                                                     : 'bg-gray-100 text-gray-700'
                                                 }
-                                            `}>
+                            `}>
                                                 {order.payment_method?.toUpperCase() || '—'}
                                             </span>
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-2.5 py-3 whitespace-nowrap">
+                                        <td className="px-1 py-2">
                                             <select
                                                 value={order.status}
                                                 onChange={(e) =>
                                                     updateOrderStatus(order.id, e.target.value)
                                                 }
                                                 className={`
-                                                    text-[11px] font-medium
-                                                    px-2.5 py-1 rounded-full border-0
-                                                    cursor-pointer
-                                                    focus:outline-none focus:ring-1
-                                                    focus:ring-khajur-gold
-                                                    ${getStatusStyle(order.status)}
-                                                `}
+                                    w-full min-w-0 text-[9px]
+                                    px-1 py-1.5 rounded-full border-0
+                                    cursor-pointer
+                                    focus:outline-none focus:ring-1
+                                    focus:ring-khajur-gold
+                                    ${getStatusStyle(order.status)}
+                                `}
                                                 data-testid={`order-status-${order.id}`}
                                             >
                                                 {ORDER_STATUSES.map((s) => (
@@ -671,22 +687,22 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Tracking ID */}
-                                        <td className="px-2.5 py-3 text-xs text-khajur-dark/60 font-mono whitespace-nowrap">
+                                        <td className="px-1 py-2 text-[10px] text-khajur-dark/60 font-mono break-all">
                                             {order.tracking_id || '—'}
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-2.5 py-3 whitespace-nowrap">
-                                            <div className="flex items-center justify-center gap-2">
+                                        <td className="px-1 py-2">
+                                            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
 
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors px-2.5 py-1 rounded text-[11px] font-semibold"
+                                                    className="inline-flex items-center gap-1 bg-khajur-primary text-white hover:bg-khajur-gold transition-colors px-2 py-1 rounded text-[10px] font-semibold"
                                                     data-testid={`view-order-${order.id}`}
                                                     title="View Order"
                                                 >
-                                                    <Eye className="w-3.5 h-3.5 flex-shrink-0" />
+                                                    <Eye className="w-3 h-3 flex-shrink-0" />
                                                     View
                                                 </button>
 
@@ -694,12 +710,12 @@ const AdminOrders = () => {
                                                     type="button"
                                                     onClick={() => deleteOrder(order.id)}
                                                     disabled={deletingId === order.id}
-                                                    className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors px-2.5 py-1 rounded text-[11px] font-semibold disabled:opacity-50"
+                                                    className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors px-2 py-1 rounded text-[10px] font-semibold disabled:opacity-50"
                                                     title="Delete Order"
                                                 >
                                                     {deletingId === order.id
-                                                        ? <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
-                                                        : <Trash2 className="w-3.5 h-3.5 flex-shrink-0" />
+                                                        ? <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
+                                                        : <Trash2 className="w-3 h-3 flex-shrink-0" />
                                                     }
                                                     Delete
                                                 </button>
@@ -714,6 +730,7 @@ const AdminOrders = () => {
                         </tbody>
                     </table>
                 </div>
+
 
             </div>
 
