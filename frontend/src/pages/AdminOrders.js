@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -21,7 +20,7 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
+// ─── Order Statuses ────────────────────────────────────────────────────────────
 
 const ORDER_STATUSES = [
     { value: 'delivery_fee_pending', label: 'Delivery Fee Pending', color: 'bg-amber-100 text-amber-800' },
@@ -38,7 +37,7 @@ const ORDER_STATUSES = [
 const getStatusStyle = (status) =>
     ORDER_STATUSES.find((s) => s.value === status)?.color ?? 'bg-gray-100 text-gray-800';
 
-// ─── Date Formatting ───────────────────────────────────────────────────────────
+// ─── Date Formatting: DD/MM/YYYY ───────────────────────────────────────────────
 
 const formatOrderDate = (date) => {
     if (!date) return '—';
@@ -54,15 +53,13 @@ const formatOrderDate = (date) => {
     });
 };
 
-// ─── Sub-Components ────────────────────────────────────────────────────────────
+// ─── Sub Components ────────────────────────────────────────────────────────────
 
 const StatusBadge = ({ status }) => (
-    <span
-        className={`
-            inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize
-            ${getStatusStyle(status)}
-        `}
-    >
+    <span className={`
+        inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize
+        ${getStatusStyle(status)}
+    `}>
         {status}
     </span>
 );
@@ -114,12 +111,14 @@ const OrderDetailModal = ({
     onStatusChange,
     onDeliveryFeeChange
 }) => {
-    const subtotal = order.product_subtotal ??
+    const subtotal = Number(
+        order.product_subtotal ??
         Math.max(
             0,
             Number(order.total_amount ?? 0) -
             Number(order.delivery_charges ?? 0)
-        );
+        )
+    );
 
     const delivery = Number(order.delivery_charges ?? 0);
 
@@ -131,7 +130,7 @@ const OrderDetailModal = ({
         >
             <div className="bg-white w-full max-w-3xl rounded-sm shadow-2xl max-h-[92vh] flex flex-col">
 
-                {/* Modal Header */}
+                {/* Header */}
                 <div className="flex items-center justify-between px-8 py-5 border-b border-khajur-border flex-shrink-0">
                     <div>
                         <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
@@ -156,7 +155,7 @@ const OrderDetailModal = ({
                 {/* Modal Body */}
                 <div className="overflow-y-auto px-8 py-6 space-y-6 flex-1">
 
-                    {/* Order Meta */}
+                    {/* Order Information */}
                     <div className="bg-khajur-cream p-5">
                         <InfoGrid>
 
@@ -179,7 +178,7 @@ const OrderDetailModal = ({
                             </InfoItem>
 
                             <InfoItem label="Status">
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 flex-wrap">
                                     <StatusBadge status={order.status} />
 
                                     <select
@@ -201,7 +200,7 @@ const OrderDetailModal = ({
                         </InfoGrid>
                     </div>
 
-                    {/* Customer Info */}
+                    {/* Customer Information */}
                     <div>
                         <SectionHeading icon={User} title="Customer Information" />
 
@@ -276,16 +275,12 @@ const OrderDetailModal = ({
                     {/* Order Summary */}
                     <div className="bg-khajur-cream p-5 space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-khajur-dark/70">
-                                Subtotal
-                            </span>
-                            <span>₹{Number(subtotal).toFixed(2)}</span>
+                            <span className="text-khajur-dark/70">Subtotal</span>
+                            <span>₹{subtotal.toFixed(2)}</span>
                         </div>
 
                         <div className="flex justify-between text-sm">
-                            <span className="text-khajur-dark/70">
-                                Delivery Charges
-                            </span>
+                            <span className="text-khajur-dark/70">Delivery Charges</span>
                             <span>₹{delivery.toFixed(2)}</span>
                         </div>
 
@@ -295,9 +290,7 @@ const OrderDetailModal = ({
                             </span>
 
                             <span className="font-serif text-xl font-bold text-khajur-gold">
-                                ₹{(
-                                    Number(subtotal) + delivery
-                                ).toFixed(2)}
+                                ₹{(subtotal + delivery).toFixed(2)}
                             </span>
                         </div>
                     </div>
@@ -323,7 +316,6 @@ const OrderDetailModal = ({
                             >
                                 Enter Rapido Fee / Record Customer Agreement
                             </button>
-
                         </div>
                     )}
 
@@ -333,7 +325,7 @@ const OrderDetailModal = ({
     );
 };
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Main Admin Orders Component ───────────────────────────────────────────────
 
 const AdminOrders = () => {
     const { token } = useAuth();
@@ -352,7 +344,7 @@ const AdminOrders = () => {
         }
     };
 
-    // ─── Data Fetching ─────────────────────────────────────────────────────────
+    // ─── Fetch Orders ──────────────────────────────────────────────────────────
 
     const fetchOrders = useCallback(async (silent = false) => {
         if (!silent) setLoading(true);
@@ -486,7 +478,7 @@ const AdminOrders = () => {
         }
     };
 
-    // ─── Filtering and Sorting ────────────────────────────────────────────────
+    // ─── Search, Filter and Sort ───────────────────────────────────────────────
 
     const filteredOrders = orders
         .filter((order) => {
@@ -510,7 +502,7 @@ const AdminOrders = () => {
                 new Date(b.created_at) - new Date(a.created_at)
         );
 
-    // ─── Loading State ─────────────────────────────────────────────────────────
+    // ─── Loading Screen ────────────────────────────────────────────────────────
 
     if (loading) {
         return (
@@ -528,7 +520,7 @@ const AdminOrders = () => {
             className="min-h-screen py-20 bg-white"
             data-testid="admin-orders-page"
         >
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
 
                 {/* Page Header */}
                 <div className="flex items-center gap-4 mb-10">
@@ -547,17 +539,17 @@ const AdminOrders = () => {
                             Administration
                         </p>
 
-                        <h1 className="font-serif text-4xl font-medium text-khajur-primary">
+                        <h1 className="font-serif text-3xl md:text-4xl font-medium text-khajur-primary">
                             Manage Orders
                         </h1>
                     </div>
                 </div>
 
-                {/* Toolbar */}
+                {/* Search and Filter */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-6">
 
                     {/* Search */}
-                    <div className="relative flex-1">
+                    <div className="relative flex-1 min-w-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-khajur-dark/30" />
 
                         <input
@@ -574,14 +566,14 @@ const AdminOrders = () => {
                     </div>
 
                     {/* Status Filter */}
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-khajur-dark/30" />
 
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="
-                                pl-10 pr-8 py-2.5 text-sm border border-khajur-border bg-white
+                                w-full sm:w-auto pl-10 pr-8 py-2.5 text-sm border border-khajur-border bg-white
                                 text-khajur-primary focus:outline-none focus:ring-1 focus:ring-khajur-gold
                                 appearance-none cursor-pointer
                             "
@@ -597,7 +589,7 @@ const AdminOrders = () => {
                     </div>
                 </div>
 
-                {/* Summary */}
+                {/* Orders Count */}
                 <p className="text-sm text-khajur-dark/50 mb-4">
                     Showing{' '}
                     <span className="font-medium text-khajur-primary">
@@ -610,11 +602,26 @@ const AdminOrders = () => {
                     {' '}orders
                 </p>
 
-                {/* Orders Table */}
-                <div className="border border-khajur-border overflow-x-auto">
-                    <table className="w-full text-sm">
+                {/* ─── Orders Table: Single Box, No Horizontal Scroll ─── */}
 
-                        {/* Table Header */}
+                <div className="border border-khajur-border rounded-sm w-full overflow-hidden">
+
+                    <table className="w-full table-fixed border-collapse text-xs">
+
+                        {/* Column Widths */}
+                        <colgroup>
+                            <col style={{ width: '12%' }} />
+                            <col style={{ width: '11%' }} />
+                            <col style={{ width: '18%' }} />
+                            <col style={{ width: '7%' }} />
+                            <col style={{ width: '11%' }} />
+                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '13%' }} />
+                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '8%' }} />
+                        </colgroup>
+
+                        {/* Header */}
                         <thead className="bg-khajur-cream border-b border-khajur-border">
                             <tr>
                                 {[
@@ -631,9 +638,10 @@ const AdminOrders = () => {
                                     <th
                                         key={col}
                                         className={`
-                                            px-5 py-3.5 text-xs font-medium text-khajur-dark/60
-                                            uppercase tracking-wide whitespace-nowrap
-                                            ${col === 'Actions' ? 'text-right' : 'text-left'}
+                                            px-1 sm:px-2 py-3 text-[9px] sm:text-[10px] md:text-xs
+                                            font-semibold text-khajur-dark/60 uppercase
+                                            tracking-normal break-words
+                                            ${col === 'Actions' ? 'text-center' : 'text-left'}
                                         `}
                                     >
                                         {col}
@@ -642,7 +650,7 @@ const AdminOrders = () => {
                             </tr>
                         </thead>
 
-                        {/* Table Body */}
+                        {/* Body */}
                         <tbody className="divide-y divide-khajur-border bg-white">
 
                             {filteredOrders.length === 0 ? (
@@ -655,45 +663,46 @@ const AdminOrders = () => {
                                     >
 
                                         {/* Order ID */}
-                                        <td className="px-5 py-4 font-mono text-khajur-primary font-medium whitespace-nowrap">
+                                        <td className="px-1 sm:px-2 py-3 text-[10px] sm:text-xs font-mono text-khajur-primary font-medium break-all">
                                             #{order.id.substring(0, 10)}…
                                         </td>
 
-                                        {/* Order Date - DD/MM/YYYY */}
-                                        <td className="px-5 py-4 text-khajur-dark/70 whitespace-nowrap font-medium">
+                                        {/* Date DD/MM/YYYY */}
+                                        <td className="px-1 sm:px-2 py-3 text-[10px] sm:text-xs text-khajur-dark/70 whitespace-nowrap">
                                             {formatOrderDate(order.created_at)}
                                         </td>
 
                                         {/* Customer */}
-                                        <td className="px-5 py-4">
-                                            <p className="font-medium text-khajur-dark">
+                                        <td className="px-1 sm:px-2 py-3 min-w-0">
+                                            <p className="font-medium text-khajur-dark break-words">
                                                 {order.customer_name}
                                             </p>
 
-                                            <p className="text-xs text-khajur-dark/50">
+                                            <p className="text-[9px] sm:text-[10px] text-khajur-dark/50 break-all">
                                                 {order.customer_email}
                                             </p>
                                         </td>
 
                                         {/* Items */}
-                                        <td className="px-5 py-4 text-khajur-dark/70 whitespace-nowrap">
+                                        <td className="px-1 sm:px-2 py-3 text-khajur-dark/70 break-words">
                                             {(order.items || []).reduce(
                                                 (sum, item) =>
                                                     sum + Number(item.quantity || 0),
                                                 0
-                                            )} items
+                                            )}
                                         </td>
 
                                         {/* Total */}
-                                        <td className="px-5 py-4 font-semibold text-khajur-gold whitespace-nowrap">
+                                        <td className="px-1 sm:px-2 py-3 font-semibold text-khajur-gold break-words">
                                             ₹{Number(order.total_amount || 0).toFixed(2)}
                                         </td>
 
                                         {/* Payment */}
-                                        <td className="px-5 py-4">
+                                        <td className="px-1 sm:px-2 py-3">
                                             <span
                                                 className={`
-                                                    inline-block px-2 py-0.5 text-xs font-medium rounded-full
+                                                    inline-block px-1 py-1 text-[9px] sm:text-[10px]
+                                                    font-medium rounded-full break-words max-w-full
                                                     ${order.payment_status === 'paid'
                                                         ? 'bg-green-100 text-green-800'
                                                         : 'bg-gray-100 text-gray-700'
@@ -705,7 +714,7 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-5 py-4">
+                                        <td className="px-1 sm:px-2 py-3">
                                             <select
                                                 value={order.status}
                                                 onChange={(e) =>
@@ -715,8 +724,10 @@ const AdminOrders = () => {
                                                     )
                                                 }
                                                 className={`
-                                                    text-xs px-2.5 py-1 rounded-full border-0 cursor-pointer
-                                                    focus:outline-none focus:ring-1 focus:ring-khajur-gold
+                                                    w-full min-w-0 text-[9px] sm:text-[10px]
+                                                    px-1 py-1 rounded border-0 cursor-pointer
+                                                    focus:outline-none focus:ring-1
+                                                    focus:ring-khajur-gold
                                                     ${getStatusStyle(order.status)}
                                                 `}
                                                 data-testid={`order-status-${order.id}`}
@@ -730,31 +741,33 @@ const AdminOrders = () => {
                                         </td>
 
                                         {/* Tracking ID */}
-                                        <td className="px-5 py-4 text-khajur-dark/60 font-mono text-xs">
+                                        <td className="px-1 sm:px-2 py-3 text-[9px] sm:text-[10px] text-khajur-dark/60 font-mono break-all">
                                             {order.tracking_id || '—'}
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-5 py-4">
-                                            <div className="flex items-center justify-end gap-3">
+                                        <td className="px-1 sm:px-2 py-3">
+                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
 
                                                 <button
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="flex items-center gap-1 text-khajur-primary hover:text-khajur-gold transition-colors text-xs font-medium"
+                                                    className="flex items-center gap-1 text-khajur-primary hover:text-khajur-gold transition-colors text-[10px] font-medium"
                                                     data-testid={`view-order-${order.id}`}
+                                                    title="View Order"
                                                 >
-                                                    <Eye className="w-3.5 h-3.5" />
+                                                    <Eye className="w-3 h-3" />
                                                     View
                                                 </button>
 
                                                 <button
                                                     onClick={() => deleteOrder(order.id)}
                                                     disabled={deletingId === order.id}
-                                                    className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors text-xs font-medium disabled:opacity-40"
+                                                    className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors text-[10px] font-medium disabled:opacity-40"
+                                                    title="Delete Order"
                                                 >
                                                     {deletingId === order.id
-                                                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                        : <Trash2 className="w-3.5 h-3.5" />
+                                                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                                                        : <Trash2 className="w-3 h-3" />
                                                     }
                                                     Delete
                                                 </button>
@@ -769,6 +782,7 @@ const AdminOrders = () => {
                         </tbody>
                     </table>
                 </div>
+
             </div>
 
             {/* Order Detail Modal */}
