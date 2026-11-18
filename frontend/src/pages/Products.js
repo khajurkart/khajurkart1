@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -343,25 +342,47 @@ const Products = () => {
     const sortedProducts = useCallback(() => {
         const items = [...products];
 
+        // Always place in-stock products before out-of-stock products.
+        // Preserve the selected sorting order within each stock group.
+        const compareStock = (a, b) => {
+            const aOutOfStock = Number(a.stock ?? 0) <= 0;
+            const bOutOfStock = Number(b.stock ?? 0) <= 0;
+
+            return Number(aOutOfStock) - Number(bOutOfStock);
+        };
+
         switch (sortBy) {
             case 'price-low':
-                return items.sort((a, b) => Number(a.price) - Number(b.price));
+                return items.sort((a, b) =>
+                    compareStock(a, b) ||
+                    Number(a.price) - Number(b.price)
+                );
 
             case 'price-high':
-                return items.sort((a, b) => Number(b.price) - Number(a.price));
+                return items.sort((a, b) =>
+                    compareStock(a, b) ||
+                    Number(b.price) - Number(a.price)
+                );
 
             case 'price-min':
                 return items
-                    .sort((a, b) => Number(a.price) - Number(b.price))
+                    .sort((a, b) =>
+                        compareStock(a, b) ||
+                        Number(a.price) - Number(b.price)
+                    )
                     .slice(0, 1);
 
             case 'price-max':
                 return items
-                    .sort((a, b) => Number(b.price) - Number(a.price))
+                    .sort((a, b) =>
+                        compareStock(a, b) ||
+                        Number(b.price) - Number(a.price)
+                    )
                     .slice(0, 1);
 
             default:
-                return items;
+                // Featured/default order stays unchanged within each group.
+                return items.sort(compareStock);
         }
     }, [products, sortBy]);
 
