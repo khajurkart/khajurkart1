@@ -411,7 +411,7 @@ const Products = () => {
             className="min-h-screen bg-white py-16 md:py-24"
             data-testid="products-page"
         >
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
 
                 {/* ── Page Header ── */}
 
@@ -485,7 +485,7 @@ const Products = () => {
                     />
                 ) : (
                     <div
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+                        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 lg:gap-8"
                         data-testid="products-grid"
                     >
                         {displayProducts.map((product) => (
