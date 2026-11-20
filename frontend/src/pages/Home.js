@@ -231,8 +231,14 @@ const Divider = () => (
 // ─── Product Skeleton ─────────────────────────────────────────────────────────
 
 const ProductSkeleton = () => (
-    <div className="bg-white border border-khajur-border animate-pulse">
-        <div className="aspect-square bg-khajur-cream" />
+    <div
+        className="bg-white border border-khajur-border animate-pulse rounded-2xl overflow-hidden"
+        style={{ borderRadius: '16px' }}
+    >
+        <div
+            className="aspect-square bg-khajur-cream rounded-t-2xl"
+            style={{ borderRadius: '16px 16px 0 0' }}
+        />
 
         <div className="p-3 sm:p-5 space-y-2 sm:space-y-3">
             <div className="h-3 bg-khajur-cream rounded w-1/3" />
@@ -312,18 +318,24 @@ const HeroSlide = ({ slide, index }) => (
 const CategoryCard = ({ category }) => (
     <Link
         to={`/products?category=${category.slug}`}
-        className="group relative overflow-hidden block"
+        className="group relative overflow-hidden block rounded-2xl"
+        style={{ borderRadius: '16px' }}
         data-testid={`category-card-${category.slug}`}
     >
-        <div className="aspect-square overflow-hidden">
+        <div
+            className="aspect-square overflow-hidden rounded-2xl"
+            style={{ borderRadius: '16px' }}
+        >
             <img
                 src={category.image}
                 alt={category.name}
                 loading="lazy"
+                style={{ borderRadius: '16px' }}
                 className="
                     w-full
                     h-full
                     object-cover
+                    rounded-2xl
                     group-hover:scale-110
                     transition-transform
                     duration-700
@@ -331,10 +343,16 @@ const CategoryCard = ({ category }) => (
             />
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-khajur-primary/90 via-khajur-primary/30 to-transparent" />
+        <div
+            className="absolute inset-0 bg-gradient-to-t from-khajur-primary/90 via-khajur-primary/30 to-transparent"
+            style={{ borderRadius: '16px' }}
+        />
 
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6">
-            <h3 className="font-serif text-sm sm:text-2xl font-medium text-khajur-cream mb-0.5 sm:mb-1 leading-snug break-words">
+            <h3
+                className="font-serif text-sm sm:text-2xl font-medium text-khajur-cream mb-0.5 sm:mb-1 leading-snug break-words"
+                style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}
+            >
                 {category.name}
             </h3>
 
