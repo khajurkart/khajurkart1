@@ -333,13 +333,13 @@ const CategoryCard = ({ category }) => (
 
         <div className="absolute inset-0 bg-gradient-to-t from-khajur-primary/90 via-khajur-primary/30 to-transparent" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-            <h3 className="font-serif text-2xl font-medium text-khajur-cream mb-1">
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6">
+            <h3 className="font-serif text-base sm:text-2xl font-medium text-khajur-cream mb-1">
                 {category.name}
             </h3>
 
             {category.description && (
-                <p className="text-sm text-khajur-cream/70 line-clamp-1">
+                <p className="hidden sm:block text-sm text-khajur-cream/70 line-clamp-1">
                     {category.description}
                 </p>
             )}
@@ -590,7 +590,7 @@ const Home = () => {
                             No categories available at the moment.
                         </p>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                             {[
                                 "dates",
                                 "nuts",
@@ -635,7 +635,7 @@ const Home = () => {
                         subtitle="Our most loved premium selection — curated for discerning customers"
                     />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                         {loading
                             ? Array.from({ length: 4 }, (_, i) => (
                                 <ProductSkeleton key={i} />
