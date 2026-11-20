@@ -121,12 +121,13 @@ const ProductCard = ({ product }) => {
     return (
         <div
             className={`
-        group relative bg-white border transition-all duration-500 overflow-hidden
+        group relative bg-white border transition-all duration-500 overflow-hidden rounded-2xl
         ${isOutOfStock
                     ? 'border-khajur-border opacity-70'
                     : 'border-khajur-border hover:border-khajur-gold hover:shadow-xl'
                 }
       `}
+            style={{ borderRadius: '16px' }}
             data-testid={`product-card-${product.id}`}
         >
 
@@ -136,7 +137,10 @@ const ProductCard = ({ product }) => {
 
             {/* ── Product Image ───────────────────────────────────────────────────── */}
             <Link to={productUrl} aria-label={`View ${product.name}`}>
-                <div className="aspect-square overflow-hidden bg-white">
+                <div
+                    className="aspect-square overflow-hidden bg-white rounded-t-2xl"
+                    style={{ borderRadius: '16px 16px 0 0' }}
+                >
                     {imgError ? (
                         <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-khajur-dark/20">
                             <ImageOff className="w-10 h-10" />
@@ -151,8 +155,9 @@ const ProductCard = ({ product }) => {
                             width={400}
                             height={400}
                             onError={() => setImgError(true)}
+                            style={{ borderRadius: '16px 16px 0 0' }}
                             className={`
-                w-full h-full object-cover transition-transform duration-700
+                w-full h-full object-cover transition-transform duration-700 rounded-t-2xl
                 ${!isOutOfStock ? 'group-hover:scale-105' : ''}
               `}
                         />
@@ -161,7 +166,7 @@ const ProductCard = ({ product }) => {
             </Link>
 
             {/* ── Product Info ─────────────────────────────────────────────────────── */}
-            <div className="p-5 flex flex-col gap-2 bg-[#F8F4EC]">
+            <div className="p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2 bg-[#F8F4EC]">
 
                 {/* Category */}
                 {product.category && (
@@ -174,9 +179,10 @@ const ProductCard = ({ product }) => {
                 <Link to={productUrl}>
                     <h3
                         className="
-              font-serif text-lg font-medium text-khajur-primary leading-snug
-              group-hover:text-khajur-gold transition-colors line-clamp-1
+              font-serif text-sm sm:text-lg font-medium text-khajur-primary leading-snug
+              group-hover:text-khajur-gold transition-colors break-words
             "
+                        style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}
                         data-testid={`product-name-${product.id}`}
                     >
                         {product.name}
@@ -189,7 +195,7 @@ const ProductCard = ({ product }) => {
                 </p>
 
                 {/* ── Price + Cart ──────────────────────────────────────────────────── */}
-                <div className="flex items-end justify-between mt-3 gap-2">
+                <div className="flex items-end justify-between mt-2 sm:mt-3 gap-1.5 sm:gap-2">
 
                     {/* Price Block */}
                     <div className="flex flex-col gap-0.5">
@@ -200,9 +206,9 @@ const ProductCard = ({ product }) => {
                             </p>
                         )}
 
-                        <div className="flex items-baseline gap-2">
+                        <div className="flex items-baseline gap-1.5 sm:gap-2">
                             <span
-                                className="font-serif text-xl font-bold" style={{ color: '#B8922A' }}
+                                className="font-serif text-base sm:text-xl font-bold" style={{ color: '#B8922A' }}
                                 data-testid={`product-price-${product.id}`}
                             >
                                 ₹{displayPrice}
@@ -210,7 +216,7 @@ const ProductCard = ({ product }) => {
 
                             {hasDiscount &&
                                 (product.original_price || product.sizes?.[0]?.original_price) && (
-                                    <span className="text-xs text-khajur-dark/35 line-through">
+                                    <span className="text-[10px] sm:text-xs text-khajur-dark/35 line-through">
                                         ₹{product.original_price ?? product.sizes[0].original_price}
                                     </span>
                                 )}
@@ -228,7 +234,7 @@ const ProductCard = ({ product }) => {
                         }
                         className={`
               flex-shrink-0 flex items-center justify-center
-              w-11 h-11 transition-all duration-300
+              w-9 h-9 sm:w-11 sm:h-11 transition-all duration-300
               ${isOutOfStock
                                 ? 'bg-khajur-border text-khajur-dark/30 cursor-not-allowed'
                                 : adding
@@ -239,8 +245,8 @@ const ProductCard = ({ product }) => {
                         data-testid={`add-to-cart-${product.id}`}
                     >
                         {adding
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                            : <ShoppingCart className="w-4 h-4" />
+                            ? <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                            : <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         }
                     </button>
                 </div>
