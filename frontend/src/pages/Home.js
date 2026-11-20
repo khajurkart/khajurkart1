@@ -357,7 +357,7 @@ const CategoryCard = ({ category }) => (
             </h3>
 
             {category.description && (
-                <p className="text-xs sm:text-sm text-khajur-cream/70 line-clamp-1 hidden sm:block">
+                <p className="text-[11px] sm:text-sm text-khajur-cream/75 line-clamp-2 sm:line-clamp-1 leading-tight sm:leading-normal">
                     {category.description}
                 </p>
             )}
