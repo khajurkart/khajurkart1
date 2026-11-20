@@ -234,14 +234,14 @@ const ProductSkeleton = () => (
     <div className="bg-white border border-khajur-border animate-pulse">
         <div className="aspect-square bg-khajur-cream" />
 
-        <div className="p-5 space-y-3">
+        <div className="p-3 sm:p-5 space-y-2 sm:space-y-3">
             <div className="h-3 bg-khajur-cream rounded w-1/3" />
             <div className="h-4 bg-khajur-cream rounded w-3/4" />
             <div className="h-3 bg-khajur-cream rounded w-full" />
 
             <div className="flex items-center justify-between mt-2">
-                <div className="h-6 bg-khajur-cream rounded w-1/3" />
-                <div className="w-11 h-11 bg-khajur-cream rounded" />
+                <div className="h-5 sm:h-6 bg-khajur-cream rounded w-1/3" />
+                <div className="w-8 h-8 sm:w-11 sm:h-11 bg-khajur-cream rounded" />
             </div>
         </div>
     </div>
@@ -334,23 +334,25 @@ const CategoryCard = ({ category }) => (
         <div className="absolute inset-0 bg-gradient-to-t from-khajur-primary/90 via-khajur-primary/30 to-transparent" />
 
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6">
-            <h3 className="font-serif text-base sm:text-2xl font-medium text-khajur-cream mb-1">
+            <h3 className="font-serif text-sm sm:text-2xl font-medium text-khajur-cream mb-0.5 sm:mb-1 leading-snug break-words">
                 {category.name}
             </h3>
 
             {category.description && (
-                <p className="hidden sm:block text-sm text-khajur-cream/70 line-clamp-1">
+                <p className="text-xs sm:text-sm text-khajur-cream/70 line-clamp-1 hidden sm:block">
                     {category.description}
                 </p>
             )}
 
             <div className="
-                mt-3
+                mt-1.5
+                sm:mt-3
                 flex
                 items-center
                 gap-1.5
                 text-khajur-gold
-                text-xs
+                text-[10px]
+                sm:text-xs
                 font-semibold
                 uppercase
                 tracking-wider
@@ -360,7 +362,7 @@ const CategoryCard = ({ category }) => (
                 duration-300
             ">
                 Explore
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
             </div>
         </div>
     </Link>
@@ -578,7 +580,7 @@ const Home = () => {
                 className="py-16 md:py-20 bg-white"
                 data-testid="categories-section"
             >
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
                     <SectionHeader
                         eyebrow="Browse by Category"
                         title="Explore Our Collections"
@@ -628,7 +630,7 @@ const Home = () => {
                 className="py-16 md:py-20 bg-white"
                 data-testid="featured-products-section"
             >
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
                     <SectionHeader
                         eyebrow="Handpicked For You"
                         title="Featured Products"
