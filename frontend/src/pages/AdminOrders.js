@@ -124,27 +124,27 @@ const OrderDetailModal = ({
 
     return (
         <div
-            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-3 sm:p-4"
             data-testid="order-details-modal"
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
-            <div className="bg-white w-full max-w-3xl rounded-sm shadow-2xl max-h-[92vh] flex flex-col">
+            <div className="bg-white w-full max-w-3xl rounded-xl sm:rounded-sm shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 py-5 border-b border-khajur-border flex-shrink-0">
+                <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5 border-b border-khajur-border flex-shrink-0">
                     <div>
                         <p className="text-xs uppercase tracking-widest text-khajur-gold mb-0.5">
                             Order #{order.id.substring(0, 12)}…
                         </p>
 
-                        <h2 className="font-serif text-2xl font-medium text-khajur-primary">
+                        <h2 className="font-serif text-xl sm:text-2xl font-medium text-khajur-primary">
                             Order Details
                         </h2>
                     </div>
 
                     <button
                         onClick={onClose}
-                        className="text-khajur-dark/40 hover:text-khajur-primary transition-colors"
+                        className="text-khajur-dark/40 hover:text-khajur-primary transition-colors p-1"
                         aria-label="Close modal"
                         data-testid="close-order-modal"
                     >
@@ -153,7 +153,7 @@ const OrderDetailModal = ({
                 </div>
 
                 {/* Modal Body */}
-                <div className="overflow-y-auto px-8 py-6 space-y-6 flex-1">
+                <div className="overflow-y-auto px-5 sm:px-8 py-5 sm:py-6 space-y-6 flex-1">
 
                     {/* Order Information */}
                     <div className="bg-khajur-cream p-5">
@@ -602,9 +602,185 @@ const AdminOrders = () => {
                     {' '}orders
                 </p>
 
-                {/* ─── Orders Table: Perfectly Aligned Spacing & Padding ─── */}
+                {/* ─── Mobile Order Cards (< md) ─── */}
+                <div className="md:hidden space-y-3.5">
+                    {filteredOrders.length === 0 ? (
+                        <div className="border border-khajur-border bg-white rounded-xl py-14 text-center shadow-sm">
+                            <div className="flex flex-col items-center justify-center text-khajur-dark/40">
+                                <ShoppingBag className="w-12 h-12 mb-3" />
+                                <p className="text-sm font-medium">No orders found</p>
+                            </div>
+                        </div>
+                    ) : (
+                        filteredOrders.map((order) => {
+                            const totalItems = (order.items || []).reduce(
+                                (sum, item) => sum + Number(item.quantity || 0),
+                                0
+                            );
 
-                <div className="border border-khajur-border rounded-sm w-full overflow-x-auto shadow-sm">
+                            return (
+                                <div
+                                    key={order.id}
+                                    className="border border-khajur-border bg-white rounded-xl p-4 shadow-sm space-y-3.5 transition-all"
+                                    style={{ borderRadius: '14px' }}
+                                    data-testid={`mobile-order-card-${order.id}`}
+                                >
+                                    {/* 1. Header: Order ID & Date */}
+                                    <div className="flex items-center justify-between pb-2.5 border-b border-khajur-border/60">
+                                        <div className="min-w-0 flex-1 mr-2">
+                                            <p className="text-[10px] uppercase tracking-wider font-semibold text-khajur-gold">
+                                                Order ID
+                                            </p>
+                                            <p className="font-mono text-xs font-bold text-khajur-primary truncate">
+                                                #{order.id.substring(0, 14)}…
+                                            </p>
+                                        </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-[10px] uppercase tracking-wider text-khajur-dark/50">
+                                                Date
+                                            </p>
+                                            <p className="text-xs font-medium text-khajur-dark/80">
+                                                {formatOrderDate(order.created_at)}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* 2. Customer */}
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-wider text-khajur-dark/50 mb-0.5">
+                                            Customer
+                                        </p>
+                                        <p className="text-sm font-semibold text-khajur-dark leading-tight">
+                                            {order.customer_name || 'Guest Customer'}
+                                        </p>
+                                        {order.customer_email && (
+                                            <p className="text-xs text-khajur-dark/60 truncate mt-0.5">
+                                                {order.customer_email}
+                                            </p>
+                                        )}
+                                        {order.shipping_address?.phone && (
+                                            <p className="text-xs text-khajur-dark/60 mt-0.5">
+                                                Tel: {order.shipping_address.phone}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* 3. Key Details Grid: Items, Total, Payment, Tracking ID */}
+                                    <div className="grid grid-cols-2 gap-2.5 bg-khajur-cream/60 p-3 rounded-lg border border-khajur-border/50">
+                                        {/* Items */}
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider text-khajur-dark/50">
+                                                Items
+                                            </p>
+                                            <p className="text-xs font-bold text-khajur-dark mt-0.5">
+                                                {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                                            </p>
+                                        </div>
+
+                                        {/* Total */}
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider text-khajur-dark/50">
+                                                Total
+                                            </p>
+                                            <p className="text-sm font-bold text-khajur-gold mt-0.5">
+                                                ₹{Number(order.total_amount || 0).toFixed(2)}
+                                            </p>
+                                        </div>
+
+                                        {/* Payment */}
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider text-khajur-dark/50 mb-0.5">
+                                                Payment
+                                            </p>
+                                            <span
+                                                className={`
+                                                    inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full uppercase
+                                                    ${order.payment_status === 'paid'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-gray-100 text-gray-700'
+                                                    }
+                                                `}
+                                            >
+                                                {order.payment_method || '—'}
+                                            </span>
+                                        </div>
+
+                                        {/* Tracking ID */}
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider text-khajur-dark/50">
+                                                Tracking ID
+                                            </p>
+                                            <p className="text-xs font-mono text-khajur-dark/70 truncate mt-0.5">
+                                                {order.tracking_id || '—'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* 4. Status Dropdown */}
+                                    <div>
+                                        <label
+                                            htmlFor={`mobile-status-${order.id}`}
+                                            className="block text-[10px] uppercase tracking-wider font-medium text-khajur-dark/60 mb-1"
+                                        >
+                                            Status
+                                        </label>
+                                        <select
+                                            id={`mobile-status-${order.id}`}
+                                            value={order.status}
+                                            onChange={(e) =>
+                                                updateOrderStatus(
+                                                    order.id,
+                                                    e.target.value
+                                                )
+                                            }
+                                            className={`
+                                                w-full text-xs px-3 py-2 rounded-lg border border-khajur-border cursor-pointer
+                                                focus:outline-none focus:ring-1 focus:ring-khajur-gold font-semibold shadow-sm
+                                                ${getStatusStyle(order.status)}
+                                            `}
+                                            data-testid={`mobile-order-status-${order.id}`}
+                                        >
+                                            {ORDER_STATUSES.map((s) => (
+                                                <option key={s.value} value={s.value}>
+                                                    {s.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* 5. Actions */}
+                                    <div className="pt-2 border-t border-khajur-border/60 flex items-center justify-between gap-2.5">
+                                        <button
+                                            onClick={() => setSelectedOrder(order)}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-khajur-primary text-khajur-cream rounded-lg text-xs font-semibold hover:bg-khajur-primary/90 transition-colors shadow-sm"
+                                            data-testid={`mobile-view-order-${order.id}`}
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            View Details
+                                        </button>
+
+                                        <button
+                                            onClick={() => deleteOrder(order.id)}
+                                            disabled={deletingId === order.id}
+                                            className="flex items-center justify-center gap-1.5 py-2 px-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-40"
+                                            data-testid={`mobile-delete-order-${order.id}`}
+                                        >
+                                            {deletingId === order.id
+                                                ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                : <Trash2 className="w-4 h-4" />
+                                            }
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+
+                {/* ─── Desktop Orders Table (>= md) ─── */}
+
+                <div className="hidden md:block border border-khajur-border rounded-sm w-full overflow-x-auto shadow-sm">
 
                     <table className="w-full text-left border-collapse text-xs whitespace-nowrap">
 
